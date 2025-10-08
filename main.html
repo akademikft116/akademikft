@@ -40,11 +40,20 @@
         <input id="jam_mulai" type="time" placeholder="Jam Mulai" class="border p-2 rounded">
         <input id="jam_akhir" type="time" placeholder="Jam Akhir" class="border p-2 rounded">
         
-        <input id="mata_kuliah" placeholder="Mata Kuliah" class="border p-2 rounded">
+        <select id="mata_kuliah" class="border p-2 rounded">
+            <option value="" disabled selected>Pilih Mata Kuliah</option>
+        </select>
+
         <input id="sks" type="number" placeholder="SKS" class="border p-2 rounded">
-        <input id="dosen" placeholder="Dosen" class="border p-2 rounded">
-        <input id="asisten" placeholder="Asisten" class="border p-2 rounded">
-        
+
+        <select id="dosen" class="border p-2 rounded">
+            <option value="" disabled selected>Pilih Dosen</option>
+        </select>
+
+        <select id="asisten" class="border p-2 rounded">
+            <option value="" disabled selected>Pilih Asisten</option>
+        </select>
+
         <select id="semester" class="border p-2 rounded">
           <option value="" disabled selected>Pilih Semester</option>
           <option value="1">1</option>
@@ -56,9 +65,14 @@
           <option value="7">7</option>
           <option value="8">8</option>
         </select>
-        
-        <input id="kelas" placeholder="Kelas" class="border p-2 rounded">
-        <input id="ruangan" placeholder="Ruangan" class="border p-2 rounded">
+
+        <select id="kelas" class="border p-2 rounded">
+            <option value="" disabled selected>Pilih Kelas</option>
+        </select>
+
+        <select id="ruangan" class="border p-2 rounded">
+            <option value="" disabled selected>Pilih Ruangan</option>
+        </select>
       </div>
       <button onclick="simpanJadwal()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded">Tambah</button>
     </div>
@@ -108,6 +122,42 @@
     const tabelBody = document.querySelector("#tabelJadwal tbody");
     let semuaData = [];
 
+    // --- Fungsi untuk memuat opsi pilihan dari Supabase ---
+    async function loadReferences() {
+      const references = [
+          { table: 'matakuliah', elementId: 'mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
+          { table: 'dosen', elementId: 'dosen', column: 'nama', defaultText: 'Pilih Dosen' },
+          { table: 'asisten', elementId: 'asisten', column: 'nama', defaultText: 'Pilih Asisten' },
+          { table: 'kelas', elementId: 'kelas', column: 'nama', defaultText: 'Pilih Kelas' },
+          { table: 'ruangan', elementId: 'ruangan', column: 'nama', defaultText: 'Pilih Ruangan' },
+      ];
+
+      for (const ref of references) {
+          const { data, error } = await supabaseClient
+              .from(ref.table)
+              .select(ref.column)
+              .order(ref.column, { ascending: true });
+
+          if (error) {
+              console.error(`Gagal memuat data ${ref.table}. Pastikan tabel ada dan RLS disetel.`, error);
+              continue;
+          }
+
+          const selectElement = document.getElementById(ref.elementId);
+          // Kosongkan dan tambahkan opsi default
+          selectElement.innerHTML = `<option value="" disabled selected>${ref.defaultText}</option>`;
+          
+          data.forEach(item => {
+              const value = item[ref.column];
+              const option = document.createElement('option');
+              option.value = value;
+              option.textContent = value;
+              selectElement.appendChild(option);
+          });
+      }
+    }
+
+
     // --- Cek login user ---
     window.onload = async () => {
       const { data: userData } = await supabaseClient.auth.getUser();
@@ -117,6 +167,7 @@
         window.location.href = "index.html";
         return;
       }
+      await loadReferences(); // Panggil fungsi baru untuk memuat opsi pilihan
       loadData();
     };
 
@@ -183,12 +234,18 @@
         return;
       }
 
-      // Validasi sederhana untuk Select/Dropdown
+      // Ambil nilai dari elemen <select> yang baru
       const prodi = document.getElementById("prodi").value;
       const hari = document.getElementById("hari").value;
+      const mata_kuliah = document.getElementById("mata_kuliah").value;
+      const dosen = document.getElementById("dosen").value;
+      const asisten = document.getElementById("asisten").value;
       const semester = document.getElementById("semester").value;
+      const kelas = document.getElementById("kelas").value;
+      const ruangan = document.getElementById("ruangan").value;
+      const sks = document.getElementById("sks").value;
 
-      if (!prodi || !hari || !semester || !document.getElementById("mata_kuliah").value.trim()) {
+      if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks) {
         alert("Semua kolom wajib diisi!");
         return;
       }
@@ -200,13 +257,13 @@
         hari: hari,
         jam_mulai: document.getElementById("jam_mulai").value,
         jam_akhir: document.getElementById("jam_akhir").value,
-        mata_kuliah: document.getElementById("mata_kuliah").value,
-        sks: parseInt(document.getElementById("sks").value),
-        dosen: document.getElementById("dosen").value,
-        asisten: document.getElementById("asisten").value,
+        mata_kuliah: mata_kuliah,
+        sks: parseInt(sks),
+        dosen: dosen,
+        asisten: asisten,
         semester: semester,
-        kelas: document.getElementById("kelas").value,
-        ruangan: document.getElementById("ruangan").value,
+        kelas: kelas,
+        ruangan: ruangan,
       };
 
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
