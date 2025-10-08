@@ -1,0 +1,28 @@
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9eef2; margin: 0; padding: 20px; }
+.container { max-width: 1300px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+h1, h2 { color: #2c3e50; text-align: center; }
+hr { border: 0; height: 1px; background-color: #ddd; margin: 25px 0; }
+
+/* Form */
+#jadwal-form { padding: 20px; border: 1px solid #cce; border-radius: 8px; background-color: #f8faff; }
+.form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+input[type="text"], input[type="number"], input[type="time"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+
+/* Buttons */
+button { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; transition: background-color 0.2s; }
+#submit-btn { background-color: #2ecc71; color: white; }
+.secondary-btn { background-color: #95a5a6; color: white; }
+.export-btn { color: white; font-weight: bold; }
+.pdf-btn { background-color: #e74c3c; }
+.excel-btn { background-color: #27ae60; }
+
+/* Table */
+#jadwal-tabel { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
+#jadwal-tabel th, #jadwal-tabel td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+#jadwal-tabel th { background-color: #34495e; color: white; }
+#jadwal-tabel tr:nth-child(even) { background-color: #f2f2f2; }
+.controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
+.table-actions { margin-bottom: 15px; }
+@media (max-width: 900px) {
+    .form-grid { grid-template-columns: repeat(2, 1fr); }
+}
