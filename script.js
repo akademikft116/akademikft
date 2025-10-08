@@ -1,8 +1,8 @@
 // =================================================================
 // 🚨 GANTI DENGAN KUNCI SUPABASE ANDA!
 // =================================================================
-const SUPABASE_URL = 'https://bnslruddgegoeexbjwgr.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o';
+const SUPABASE_URL = 'GANTI_DENGAN_PROJECT_URL_ANDA'; 
+const SUPABASE_ANON_KEY = 'GANTI_DENGAN_ANON_KEY_ANDA';
 
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const JADWAL_TABLE_NAME = 'jadwal_kuliah'; 
@@ -19,12 +19,14 @@ const submitButton = document.getElementById('submit-btn');
 
 // --- Helper Functions ---
 const getInputValues = () => ({
+    // Pastikan semua nama key di sini sama persis dengan nama kolom di Supabase
     kode_matkul: document.getElementById('kode_matkul').value,
     prodi: document.getElementById('prodi').value,
     mata_kuliah: document.getElementById('mata_kuliah').value,
     dosen: document.getElementById('dosen').value,
     asisten: document.getElementById('asisten').value || null,
-    sks: parseInt(document.getElementById('sks').value),
+    // Menggunakan parseFloat agar nilai default 0 jika input kosong, bukan NaN
+    sks: parseFloat(document.getElementById('sks').value) || 0, 
     hari: document.getElementById('hari').value,
     jam_mulai: document.getElementById('jam_mulai').value,
     jam_akhir: document.getElementById('jam_akhir').value,
@@ -64,6 +66,12 @@ form.addEventListener('submit', async (e) => {
     const data = getInputValues();
     const id = document.getElementById('jadwal-id').value;
     
+    // Validasi sederhana untuk SKS (mencegah Supabase error jika 0)
+    if (data.sks < 1) {
+        alert("SKS harus diisi dengan angka minimal 1.");
+        return;
+    }
+
     let error = null;
 
     if (id) {
@@ -83,7 +91,10 @@ form.addEventListener('submit', async (e) => {
         if (!error) alert('Jadwal berhasil ditambahkan!');
     }
     
-    if (error) console.error(`Operation Failed: ${error.message}`);
+    if (error) {
+        console.error(`Operation Failed: ${error.message}`);
+        alert(`Gagal menyimpan jadwal. Cek console browser untuk detail error. Error: ${error.message.substring(0, 50)}...`);
+    }
     
     resetForm();
     await fetchJadwal(); 
@@ -115,13 +126,14 @@ const renderJadwal = (dataToRender = dataJadwal) => {
     dataToRender.forEach((jadwal, index) => {
         const row = jadwalBody.insertRow();
         
-        // Data Cell Population (sesuaikan dengan urutan di index.html)
+        // Data Cell Population 
         row.insertCell(0).textContent = index + 1;
         row.insertCell(1).textContent = jadwal.kode_matkul;
         row.insertCell(2).textContent = jadwal.prodi;
         row.insertCell(3).textContent = jadwal.mata_kuliah;
         row.insertCell(4).textContent = jadwal.hari;
-        row.insertCell(5).textContent = `${jadwal.jam_mulai.substring(0, 5)} - ${jadwal.jam_akhir.substring(0, 5)}`;
+        // Hanya ambil jam:menit (5 karakter pertama)
+        row.insertCell(5).textContent = `${jadwal.jam_mulai.substring(0, 5)} - ${jadwal.jam_akhir.substring(0, 5)}`; 
         row.insertCell(6).textContent = jadwal.sks;
         row.insertCell(7).textContent = jadwal.dosen;
         row.insertCell(8).textContent = jadwal.asisten || '-';
