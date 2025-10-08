@@ -37,8 +37,8 @@
 
   <script>
     // --- Konfigurasi Supabase ---
-    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; // ← ganti
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";                 // ← ganti
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- Tampilkan form login / register ---
@@ -46,6 +46,7 @@
       document.getElementById("loginForm").classList.add("hidden");
       document.getElementById("registerForm").classList.remove("hidden");
     }
+
     function showLogin() {
       document.getElementById("registerForm").classList.add("hidden");
       document.getElementById("loginForm").classList.remove("hidden");
@@ -53,8 +54,14 @@
 
     // --- Login user ---
     async function login() {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (!email || !password) {
+        alert("Email dan password wajib diisi!");
+        return;
+      }
+
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (error) {
@@ -67,8 +74,8 @@
 
     // --- Register user baru ---
     async function registerUser() {
-      const email = document.getElementById("regEmail").value;
-      const password = document.getElementById("regPassword").value;
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
 
       if (!email || !password) {
         alert("Email dan password wajib diisi!");
@@ -80,10 +87,7 @@
         return;
       }
 
-      const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-      });
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
 
       if (error) {
         alert("❌ Gagal membuat akun: " + error.message);
@@ -91,14 +95,14 @@
         return;
       }
 
-      alert("✅ Akun berhasil dibuat! Silakan cek email untuk verifikasi (jika diperlukan) lalu login.");
+      alert("✅ Akun berhasil dibuat! Silakan cek email untuk verifikasi (jika diaktifkan) lalu login.");
       showLogin();
     }
 
-    // --- Cek jika user sudah login ---
+    // --- Cek user login ---
     window.onload = async () => {
-      const { data } = await supabaseClient.auth.getUser();
-      if (data.user) {
+      const { data, error } = await supabaseClient.auth.getUser();
+      if (data && data.user) {
         window.location.href = "main.html";
       }
     };
