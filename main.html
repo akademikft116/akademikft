@@ -86,8 +86,9 @@
 
     // --- Cek login user ---
     window.onload = async () => {
-      const { data: user } = await supabaseClient.auth.getUser();
-      if (!user.user) {
+      const { data: userData } = await supabaseClient.auth.getUser();
+      const user = userData.user;
+      if (!user) {
         alert("Silakan login dulu!");
         window.location.href = "index.html";
         return;
@@ -100,9 +101,16 @@
       window.location.href = "index.html";
     }
 
-    // --- Ambil data jadwal ---
+    // --- Ambil data jadwal milik user ---
     async function loadData() {
-      const { data, error } = await supabaseClient.from("jadwal").select("*").order("id", { ascending: true });
+      const { data: userData } = await supabaseClient.auth.getUser();
+      const user = userData.user;
+      const { data, error } = await supabaseClient
+        .from("jadwal")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("id", { ascending: true });
+
       if (error) {
         console.error(error);
         alert("Gagal memuat data");
@@ -142,7 +150,17 @@
 
     // --- Tambah Jadwal ---
     async function simpanJadwal() {
+      const { data: userData } = await supabaseClient.auth.getUser();
+      const user = userData.user;
+
+      if (!user) {
+        alert("Kamu belum login!");
+        window.location.href = "index.html";
+        return;
+      }
+
       const jadwal = {
+        user_id: user.id, // penting!
         kode_matkul: document.getElementById("kode").value,
         prodi: document.getElementById("prodi").value,
         hari: document.getElementById("hari").value,
@@ -156,10 +174,13 @@
         kelas: document.getElementById("kelas").value,
         ruangan: document.getElementById("ruangan").value,
       };
+
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
-      if (error) alert("Gagal menambah jadwal");
-      else {
-        alert("Berhasil ditambahkan");
+      if (error) {
+        console.error(error);
+        alert("❌ Gagal menambah jadwal: " + error.message);
+      } else {
+        alert("✅ Berhasil ditambahkan");
         loadData();
       }
     }
