@@ -1,31 +1,226 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Jadwal Kuliah</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-100">
 
-<div class="p-6">
-  <h1 class="text-2xl font-bold mb-4">Manajemen Jadwal Kuliah</h1>
+  <div class="max-w-6xl mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">📚 Manajemen Jadwal Kuliah</h1>
+      <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+    </div>
 
-  <div class="flex mb-3">
-    <select id="filterProdi" class="border p-2">
-      <option value="">Semua Prodi</option>
-      <option value="Informatika">Informatika</option>
-      <option value="Sistem Informasi">Sistem Informasi</option>
-    </select>
-    <button onclick="filterData()" class="ml-2 bg-blue-500 text-white px-4 py-2 rounded">Filter</button>
-    <button onclick="exportExcel()" class="ml-2 bg-green-500 text-white px-4 py-2 rounded">Excel</button>
-    <button onclick="exportPDF()" class="ml-2 bg-red-500 text-white px-4 py-2 rounded">PDF</button>
+    <!-- Form Tambah Jadwal -->
+    <div class="mb-6 border p-4 rounded bg-gray-50">
+      <h2 class="font-semibold mb-2">Tambah Jadwal</h2>
+      <div class="grid grid-cols-3 gap-2">
+        <input id="kode" placeholder="Kode Matkul" class="border p-2 rounded">
+        <input id="prodi" placeholder="Prodi" class="border p-2 rounded">
+        <input id="hari" placeholder="Hari" class="border p-2 rounded">
+        <input id="jam_mulai" placeholder="Jam Mulai (08:00)" class="border p-2 rounded">
+        <input id="jam_akhir" placeholder="Jam Akhir (09:40)" class="border p-2 rounded">
+        <input id="mata_kuliah" placeholder="Mata Kuliah" class="border p-2 rounded">
+        <input id="sks" type="number" placeholder="SKS" class="border p-2 rounded">
+        <input id="dosen" placeholder="Dosen" class="border p-2 rounded">
+        <input id="asisten" placeholder="Asisten" class="border p-2 rounded">
+        <input id="semester" placeholder="Semester" class="border p-2 rounded">
+        <input id="kelas" placeholder="Kelas" class="border p-2 rounded">
+        <input id="ruangan" placeholder="Ruangan" class="border p-2 rounded">
+      </div>
+      <button onclick="simpanJadwal()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded">Tambah</button>
+    </div>
+
+    <!-- Filter + Ekspor -->
+    <div class="flex items-center mb-3 space-x-2">
+      <select id="filterProdi" class="border p-2 rounded">
+        <option value="">Semua Prodi</option>
+        <option value="Informatika">Informatika</option>
+        <option value="Sistem Informasi">Sistem Informasi</option>
+      </select>
+      <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
+      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Excel</button>
+      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">PDF</button>
+    </div>
+
+    <!-- Tabel Jadwal -->
+    <div class="overflow-x-auto">
+      <table id="tabelJadwal" class="min-w-full border border-gray-400 text-sm">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="border px-2 py-1">No</th>
+            <th class="border px-2 py-1">Kode</th>
+            <th class="border px-2 py-1">Prodi</th>
+            <th class="border px-2 py-1">Hari</th>
+            <th class="border px-2 py-1">Jam Mulai</th>
+            <th class="border px-2 py-1">Jam Akhir</th>
+            <th class="border px-2 py-1">Mata Kuliah</th>
+            <th class="border px-2 py-1">SKS</th>
+            <th class="border px-2 py-1">Dosen</th>
+            <th class="border px-2 py-1">Asisten</th>
+            <th class="border px-2 py-1">Semester</th>
+            <th class="border px-2 py-1">Kelas</th>
+            <th class="border px-2 py-1">Ruangan</th>
+            <th class="border px-2 py-1">Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
-  <table id="tabelJadwal" class="min-w-full border border-gray-400">
-    <thead class="bg-gray-200">
-      <tr>
-        <th>No</th><th>Kode</th><th>Prodi</th><th>Hari</th><th>Jam Mulai</th><th>Jam Akhir</th>
-        <th>Mata Kuliah</th><th>SKS</th><th>Dosen</th><th>Asisten</th><th>Semester</th>
-        <th>Kelas</th><th>Ruangan</th><th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-<script src="jadwal.js"></script>
+  <script>
+    // --- Supabase setup ---
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const tabelBody = document.querySelector("#tabelJadwal tbody");
+    let semuaData = [];
+
+    // --- Cek login user ---
+    window.onload = async () => {
+      const { data: user } = await supabaseClient.auth.getUser();
+      if (!user.user) {
+        alert("Silakan login dulu!");
+        window.location.href = "index.html";
+        return;
+      }
+      loadData();
+    };
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = "index.html";
+    }
+
+    // --- Ambil data jadwal ---
+    async function loadData() {
+      const { data, error } = await supabaseClient.from("jadwal").select("*").order("id", { ascending: true });
+      if (error) {
+        console.error(error);
+        alert("Gagal memuat data");
+        return;
+      }
+      semuaData = data;
+      tampilkanData(semuaData);
+    }
+
+    function tampilkanData(data) {
+      tabelBody.innerHTML = "";
+      data.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.classList.add("border-b");
+        tr.innerHTML = `
+          <td class="border px-2 py-1">${index + 1}</td>
+          <td class="border px-2 py-1">${row.kode_matkul || "-"}</td>
+          <td class="border px-2 py-1">${row.prodi || "-"}</td>
+          <td class="border px-2 py-1">${row.hari || "-"}</td>
+          <td class="border px-2 py-1">${row.jam_mulai || "-"}</td>
+          <td class="border px-2 py-1">${row.jam_akhir || "-"}</td>
+          <td class="border px-2 py-1">${row.mata_kuliah || "-"}</td>
+          <td class="border px-2 py-1">${row.sks || "-"}</td>
+          <td class="border px-2 py-1">${row.dosen || "-"}</td>
+          <td class="border px-2 py-1">${row.asisten || "-"}</td>
+          <td class="border px-2 py-1">${row.semester || "-"}</td>
+          <td class="border px-2 py-1">${row.kelas || "-"}</td>
+          <td class="border px-2 py-1">${row.ruangan || "-"}</td>
+          <td class="border px-2 py-1">
+            <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+            <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1">Hapus</button>
+          </td>
+        `;
+        tabelBody.appendChild(tr);
+      });
+    }
+
+    // --- Tambah Jadwal ---
+    async function simpanJadwal() {
+      const jadwal = {
+        kode_matkul: document.getElementById("kode").value,
+        prodi: document.getElementById("prodi").value,
+        hari: document.getElementById("hari").value,
+        jam_mulai: document.getElementById("jam_mulai").value,
+        jam_akhir: document.getElementById("jam_akhir").value,
+        mata_kuliah: document.getElementById("mata_kuliah").value,
+        sks: parseInt(document.getElementById("sks").value),
+        dosen: document.getElementById("dosen").value,
+        asisten: document.getElementById("asisten").value,
+        semester: document.getElementById("semester").value,
+        kelas: document.getElementById("kelas").value,
+        ruangan: document.getElementById("ruangan").value,
+      };
+      const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
+      if (error) alert("Gagal menambah jadwal");
+      else {
+        alert("Berhasil ditambahkan");
+        loadData();
+      }
+    }
+
+    // --- Edit Jadwal ---
+    async function editJadwal(id) {
+      const row = semuaData.find(r => r.id === id);
+      if (!row) return;
+      const mata_kuliah = prompt("Ubah nama mata kuliah:", row.mata_kuliah);
+      if (!mata_kuliah) return;
+
+      const { error } = await supabaseClient.from("jadwal").update({ mata_kuliah }).eq("id", id);
+      if (error) alert("Gagal memperbarui jadwal");
+      else {
+        alert("Berhasil diperbarui");
+        loadData();
+      }
+    }
+
+    // --- Hapus Jadwal ---
+    async function hapusJadwal(id) {
+      if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
+      const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
+      if (error) alert("Gagal menghapus");
+      else {
+        alert("Berhasil dihapus");
+        loadData();
+      }
+    }
+
+    // --- Filter ---
+    function filterData() {
+      const filter = document.getElementById("filterProdi").value;
+      const hasil = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
+      tampilkanData(hasil);
+    }
+
+    // --- Export Excel ---
+    function exportExcel() {
+      const ws = XLSX.utils.json_to_sheet(semuaData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Jadwal");
+      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
+    }
+
+    // --- Export PDF ---
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("Jadwal Kuliah", 14, 15);
+      let y = 25;
+      semuaData.forEach((r, i) => {
+        doc.text(`${i + 1}. ${r.mata_kuliah || "-"} (${r.prodi || "-"})`, 14, y);
+        y += 8;
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+      doc.save("jadwal_kuliah.pdf");
+    }
+  </script>
+</body>
+</html>
