@@ -1,0 +1,31 @@
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Manajemen Jadwal Kuliah</h1>
+
+  <div class="flex mb-3">
+    <select id="filterProdi" class="border p-2">
+      <option value="">Semua Prodi</option>
+      <option value="Informatika">Informatika</option>
+      <option value="Sistem Informasi">Sistem Informasi</option>
+    </select>
+    <button onclick="filterData()" class="ml-2 bg-blue-500 text-white px-4 py-2 rounded">Filter</button>
+    <button onclick="exportExcel()" class="ml-2 bg-green-500 text-white px-4 py-2 rounded">Excel</button>
+    <button onclick="exportPDF()" class="ml-2 bg-red-500 text-white px-4 py-2 rounded">PDF</button>
+  </div>
+
+  <table id="tabelJadwal" class="min-w-full border border-gray-400">
+    <thead class="bg-gray-200">
+      <tr>
+        <th>No</th><th>Kode</th><th>Prodi</th><th>Hari</th><th>Jam Mulai</th><th>Jam Akhir</th>
+        <th>Mata Kuliah</th><th>SKS</th><th>Dosen</th><th>Asisten</th><th>Semester</th>
+        <th>Kelas</th><th>Ruangan</th><th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script src="jadwal.js"></script>
