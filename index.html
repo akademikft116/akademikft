@@ -1,88 +1,90 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Jadwal Kuliah Supabase</title>
-    <link rel="stylesheet" href="style.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Manajemen Jadwal Kuliah</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Manajemen Jadwal Kuliah 🎓</h1>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
 
-        <form id="jadwal-form">
-            <h2>Tambah/Edit Jadwal</h2>
-            <input type="hidden" id="jadwal-id">
-            
-            <div class="form-grid">
-                <input type="text" id="kode_matkul" placeholder="Kode Matkul" required>
-                <input type="text" id="prodi" placeholder="Prodi (e.g. INF)" required>
-                <input type="text" id="mata_kuliah" placeholder="Mata Kuliah" required>
-                <input type="text" id="dosen" placeholder="Dosen Pengampu" required>
-                <input type="text" id="asisten" placeholder="Asisten (Opsional)">
-                <input type="number" id="sks" placeholder="SKS" min="1" required> 
-                <select id="hari" required>
-                    <option value="">Pilih Hari</option>
-                    <option value="Senin">Senin</option>
-                    <option value="Selasa">Selasa</option>
-                    <option value="Rabu">Rabu</option>
-                    <option value="Kamis">Kamis</option>
-                    <option value="Jumat">Jumat</option>
-                </select>
-                <input type="time" id="jam_mulai" placeholder="Jam Mulai" required>
-                <input type="time" id="jam_akhir" placeholder="Jam Akhir" required>
-                <input type="text" id="semester" placeholder="Semester (e.g. Genap 2024)" required>
-                <input type="text" id="kelas" placeholder="Kelas (e.g. A/B)" required>
-                <input type="text" id="ruangan" placeholder="Ruangan (e.g. LAB 1)" required>
-            </div>
-            
-            <button type="submit" id="submit-btn">Simpan Jadwal</button>
-            <button type="button" id="batal-edit" class="secondary-btn" style="display:none;">Batal Edit</button>
-        </form>
-        
-        <hr>
+  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-6">📚 Manajemen Jadwal Kuliah</h1>
 
-        <div class="controls">
-            <h2>Filter Jadwal</h2>
-            <select id="filter-prodi">
-                <option value="">-- Semua Prodi --</option>
-            </select>
-            <button onclick="filterJadwal()">Terapkan Filter</button>
-            <button onclick="fetchJadwal()" class="secondary-btn">Reset Filter</button>
-        </div>
-
-        <div class="table-actions">
-            <button onclick="exportToPdf()" class="export-btn pdf-btn">📥 Download PDF</button>
-            <button onclick="exportToExcel()" class="export-btn excel-btn">📥 Download Excel</button>
-        </div>
-
-        <h2>Daftar Jadwal</h2>
-        <table id="jadwal-tabel">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Kode</th>
-                    <th>Prodi</th>
-                    <th>Matkul</th>
-                    <th>Hari</th>
-                    <th>Jam</th>
-                    <th>SKS</th>
-                    <th>Dosen</th>
-                    <th>Asisten</th>
-                    <th>Ruangan</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="jadwal-body">
-            </tbody>
-        </table>
+    <div id="loginForm">
+      <h2 class="text-lg font-semibold mb-2">Masuk</h2>
+      <input id="loginEmail" type="email" placeholder="Email" class="w-full border p-2 rounded mb-2">
+      <input id="loginPassword" type="password" placeholder="Password" class="w-full border p-2 rounded mb-4">
+      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
+      <p class="text-sm mt-3 text-center">
+        Belum punya akun? <a href="#" onclick="showRegister()" class="text-blue-600 font-semibold">Daftar</a>
+      </p>
     </div>
 
-    <script src="script.js"></script>
+    <div id="registerForm" class="hidden">
+      <h2 class="text-lg font-semibold mb-2">Daftar Akun Baru</h2>
+      <input id="regEmail" type="email" placeholder="Email" class="w-full border p-2 rounded mb-2">
+      <input id="regPassword" type="password" placeholder="Password" class="w-full border p-2 rounded mb-4">
+      <button onclick="register()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Daftar</button>
+      <p class="text-sm mt-3 text-center">
+        Sudah punya akun? <a href="#" onclick="showLogin()" class="text-blue-600 font-semibold">Login</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // --- Setup Supabase ---
+    const SUPABASE_URL = "https://YOUR_PROJECT_URL.supabase.co";
+    const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // --- Navigasi form ---
+    function showRegister() {
+      document.getElementById("loginForm").classList.add("hidden");
+      document.getElementById("registerForm").classList.remove("hidden");
+    }
+
+    function showLogin() {
+      document.getElementById("registerForm").classList.add("hidden");
+      document.getElementById("loginForm").classList.remove("hidden");
+    }
+
+    // --- Login user ---
+    async function login() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert("❌ Login gagal: " + error.message);
+      } else {
+        alert("✅ Login berhasil!");
+        window.location.href = "main.html";
+      }
+    }
+
+    // --- Daftar user baru ---
+    async function register() {
+      const email = document.getElementById("regEmail").value;
+      const password = document.getElementById("regPassword").value;
+      const { error } = await supabaseClient.auth.signUp({ email, password });
+
+      if (error) {
+        alert("❌ Gagal daftar: " + error.message);
+      } else {
+        alert("✅ Akun berhasil dibuat! Silakan login.");
+        showLogin();
+      }
+    }
+
+    // --- Jika user sudah login, langsung masuk ---
+    window.onload = async () => {
+      const { data: user } = await supabaseClient.auth.getUser();
+      if (user.user) {
+        window.location.href = "main.html";
+      }
+    };
+  </script>
 </body>
 </html>
