@@ -1,8 +1,8 @@
 // =================================================================
 // 🚨 GANTI DENGAN KUNCI SUPABASE ANDA!
 // =================================================================
-const SUPABASE_URL = 'GANTI_DENGAN_PROJECT_URL_ANDA'; 
-const SUPABASE_ANON_KEY = 'GANTI_DENGAN_ANON_KEY_ANDA';
+const SUPABASE_URL = 'https://bnslruddgegoeexbjwgr.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o';
 
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const JADWAL_TABLE_NAME = 'jadwal_kuliah'; 
