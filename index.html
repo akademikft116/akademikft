@@ -12,6 +12,7 @@
   <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
     <h1 class="text-2xl font-bold text-center mb-6">📚 Manajemen Jadwal Kuliah</h1>
 
+    <!-- Form Login -->
     <div id="loginForm">
       <h2 class="text-lg font-semibold mb-2">Masuk</h2>
       <input id="loginEmail" type="email" placeholder="Email" class="w-full border p-2 rounded mb-2">
@@ -22,11 +23,12 @@
       </p>
     </div>
 
+    <!-- Form Register -->
     <div id="registerForm" class="hidden">
       <h2 class="text-lg font-semibold mb-2">Daftar Akun Baru</h2>
       <input id="regEmail" type="email" placeholder="Email" class="w-full border p-2 rounded mb-2">
-      <input id="regPassword" type="password" placeholder="Password" class="w-full border p-2 rounded mb-4">
-      <button onclick="register()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Daftar</button>
+      <input id="regPassword" type="password" placeholder="Password (min 6 karakter)" class="w-full border p-2 rounded mb-4">
+      <button onclick="registerUser()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Daftar</button>
       <p class="text-sm mt-3 text-center">
         Sudah punya akun? <a href="#" onclick="showLogin()" class="text-blue-600 font-semibold">Login</a>
       </p>
@@ -34,17 +36,16 @@
   </div>
 
   <script>
-    // --- Setup Supabase ---
-    const SUPABASE_URL = "https://YOUR_PROJECT_URL.supabase.co";
-    const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY";
+    // --- Konfigurasi Supabase ---
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; // ← ganti
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";                 // ← ganti
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- Navigasi form ---
+    // --- Tampilkan form login / register ---
     function showRegister() {
       document.getElementById("loginForm").classList.add("hidden");
       document.getElementById("registerForm").classList.remove("hidden");
     }
-
     function showLogin() {
       document.getElementById("registerForm").classList.add("hidden");
       document.getElementById("loginForm").classList.remove("hidden");
@@ -54,7 +55,7 @@
     async function login() {
       const email = document.getElementById("loginEmail").value;
       const password = document.getElementById("loginPassword").value;
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (error) {
         alert("❌ Login gagal: " + error.message);
@@ -64,24 +65,40 @@
       }
     }
 
-    // --- Daftar user baru ---
-    async function register() {
+    // --- Register user baru ---
+    async function registerUser() {
       const email = document.getElementById("regEmail").value;
       const password = document.getElementById("regPassword").value;
-      const { error } = await supabaseClient.auth.signUp({ email, password });
+
+      if (!email || !password) {
+        alert("Email dan password wajib diisi!");
+        return;
+      }
+
+      if (password.length < 6) {
+        alert("Password minimal 6 karakter!");
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+      });
 
       if (error) {
-        alert("❌ Gagal daftar: " + error.message);
-      } else {
-        alert("✅ Akun berhasil dibuat! Silakan login.");
-        showLogin();
+        alert("❌ Gagal membuat akun: " + error.message);
+        console.error(error);
+        return;
       }
+
+      alert("✅ Akun berhasil dibuat! Silakan cek email untuk verifikasi (jika diperlukan) lalu login.");
+      showLogin();
     }
 
-    // --- Jika user sudah login, langsung masuk ---
+    // --- Cek jika user sudah login ---
     window.onload = async () => {
-      const { data: user } = await supabaseClient.auth.getUser();
-      if (user.user) {
+      const { data } = await supabaseClient.auth.getUser();
+      if (data.user) {
         window.location.href = "main.html";
       }
     };
