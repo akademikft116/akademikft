@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manajemen Jadwal Kuliah</title>
+  <title>Jadwal Kuliah</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -45,7 +45,7 @@
 
   <div class="max-w-6xl mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">📚 Manajemen Jadwal Kuliah</h1>
+      <h1 class="text-2xl font-bold">Manajemen Jadwal Kuliah</h1>
       <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
     </div>
 
@@ -124,8 +124,8 @@
           <option value="Informatika">Informatika</option>
       </select>
       <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
-      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel (Terfilter)</button>
-      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF (Terfilter)</button>
+      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel</button>
+      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF</button>
     </div>
 
     <div class="overflow-x-auto">
@@ -576,7 +576,7 @@
       const ws = XLSX.utils.json_to_sheet(dataBersih); 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
-      XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
+      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
@@ -603,7 +603,7 @@
       ];
 
       doc.setFontSize(14);
-      doc.text("Jadwal Kuliah (Data Terfilter)", 14, 15);
+      doc.text("Jadwal Kuliah)", 14, 15);
       
       doc.autoTable({
         head: [headers],
@@ -624,7 +624,7 @@
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
       });
       
-      doc.save("jadwal_kuliah_terfilter.pdf");
+      doc.save("jadwal_kuliah.pdf");
       showToast("File PDF berhasil dibuat!", 'success'); 
     }
   </script>
