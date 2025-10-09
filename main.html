@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
 </head>
 <body class="bg-gray-100">
 
@@ -212,8 +213,8 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const tabelBody = document.querySelector("#tabelJadwal tbody");
-    let semuaData = []; // Data mentah dari Supabase
-    let dataYangDitampilkan = []; // Data yang saat ini tampil di tabel dan akan diekspor
+    let semuaData = []; 
+    let dataYangDitampilkan = []; 
 
     // --- FUNGSI Memuat opsi pilihan dari Supabase (untuk Tambah dan Edit) ---
     async function loadReferences() {
@@ -293,13 +294,13 @@
         return;
       }
       semuaData = data;
-      dataYangDitampilkan = data; // Saat load awal, semua data adalah yang ditampilkan
+      dataYangDitampilkan = data; 
       tampilkanData(dataYangDitampilkan);
     }
 
     // --- Tampilkan Data & set dataYangDitampilkan ---
     function tampilkanData(data) {
-      dataYangDitampilkan = data; // Update data yang sedang ditampilkan/diekspor
+      dataYangDitampilkan = data; 
       
       tabelBody.innerHTML = "";
       data.forEach((row, index) => {
@@ -462,13 +463,11 @@
     // --- FUNGSI Filter Data ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
-      // Memfilter dari data mentah (semuaData)
       const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
-      // Memanggil tampilkanData untuk merender tabel dan set dataYangDitampilkan
       tampilkanData(hasilFilter);
     }
 
-    // --- FUNGSI DIUBAH: Export Excel (tanpa ID, user_id, created_at) ---
+    // --- FUNGSI Export Excel (tanpa ID, user_id, created_at) ---
     function exportExcel() {
       // 1. Proses data untuk menghilangkan kolom yang tidak diinginkan dan mengganti nama header
       const dataBersih = dataYangDitampilkan.map(row => ({
@@ -494,22 +493,78 @@
       XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
     }
 
-    // --- FUNGSI Export PDF (Tidak Berubah) ---
+    // --- FUNGSI DIUBAH: Export PDF (Format Tabel) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Jadwal Kuliah (Terfilter)", 14, 15);
-      let y = 25;
+      // Inisialisasi jsPDF dengan format Landscape (l) A4
+      const doc = new jsPDF('l', 'mm', 'a4'); 
+
+      if (dataYangDitampilkan.length === 0) {
+          alert("Tidak ada data terfilter untuk diekspor!");
+          return;
+      }
       
-      // Mengekspor data yang ada di tabel saat ini (dataYangDitampilkan)
-      dataYangDitampilkan.forEach((r, i) => { 
-        doc.text(`${i + 1}. ${r.mata_kuliah || "-"} (${r.prodi || "-"})`, 14, y);
-        y += 8;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
+      // 1. Proses data untuk format tabel
+      const dataPDF = dataYangDitampilkan.map((row, index) => [
+        index + 1, // No
+        row.kode_matkul || '-',
+        row.prodi || '-',
+        row.hari || '-',
+        row.jam_mulai || '-',
+        row.jam_akhir || '-',
+        row.mata_kuliah || '-',
+        row.sks || 0,
+        row.dosen || '-',
+        row.asisten || '-',
+        row.semester || '-',
+        row.kelas || '-',
+        row.ruangan || '-',
+      ]);
+      
+      // 2. Definisikan Header Kolom
+      const headers = [
+          "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
+          "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
+      ];
+
+      // 3. Tambahkan Judul
+      doc.setFontSize(14);
+      doc.text("Jadwal Kuliah (Data Terfilter)", 14, 15);
+      
+      // 4. Buat Tabel menggunakan autoTable
+      doc.autoTable({
+        head: [headers],
+        body: dataPDF,
+        startY: 20, // Mulai di bawah judul
+        theme: 'grid',
+        styles: {
+            fontSize: 7, // Perkecil ukuran font agar muat
+            cellPadding: 1.5,
+        },
+        headStyles: {
+            fillColor: [200, 200, 200],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold',
+        },
+        margin: { top: 18, left: 5, right: 5, bottom: 5 },
+        // Atur lebar kolom agar sesuai di A4 Landscape (~287mm area)
+        columnStyles: {
+            0: { cellWidth: 8 }, 
+            1: { cellWidth: 15 }, 
+            2: { cellWidth: 25 }, 
+            3: { cellWidth: 15 }, 
+            4: { cellWidth: 15 }, 
+            5: { cellWidth: 15 }, 
+            6: { cellWidth: 45 }, 
+            7: { cellWidth: 10 }, 
+            8: { cellWidth: 35 }, 
+            9: { cellWidth: 35 }, 
+            10: { cellWidth: 15 }, 
+            11: { cellWidth: 15 }, 
+            12: { cellWidth: 15 }, 
         }
       });
+      
       doc.save("jadwal_kuliah_terfilter.pdf");
     }
   </script>
