@@ -541,7 +541,7 @@
       
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
-      XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
+      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
       // Peringatan di sini telah dihapus sebelumnya, sesuai permintaan
     }
 
@@ -570,7 +570,7 @@
       ];
 
       doc.setFontSize(14);
-      doc.text("Jadwal Kuliah (Data Terfilter)", 14, 15);
+      doc.text("Jadwal Kuliah)", 14, 15);
       
       // 3. Buat Tabel menggunakan autoTable
       doc.autoTable({
@@ -592,7 +592,7 @@
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
       });
       
-      doc.save("jadwal_kuliah_terfilter.pdf");
+      doc.save("jadwal_kuliah.pdf");
       showToast("File PDF berhasil dibuat!", 'success'); // Notifikasi Toast untuk export PDF
     }
   </script>
