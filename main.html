@@ -9,12 +9,43 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
-</head>
+
+  <style>
+    /* Mengatur body agar menggunakan gambar sebagai background */
+    body {
+        /* Ganti 'image.png' jika nama filenya berbeda */
+        background-image: url('image.png'); 
+        
+        /* Gambar akan menutupi seluruh area body */
+        background-size: cover; 
+        
+        /* Gambar tidak akan diulang (repeat) */
+        background-repeat: no-repeat; 
+        
+        /* Gambar akan tetap di tempat saat halaman discroll */
+        background-attachment: fixed; 
+        
+        /* Warna fallback jika gambar gagal dimuat */
+        background-color: #f3f4f6; 
+    }
+
+    /* Mengatur kontainer utama (bg-white) agar semi-transparan */
+    .bg-white {
+        background-color: rgba(255, 255, 255, 0.9); /* Transparansi 90% */
+        backdrop-filter: blur(5px); /* Efek blur pada background di belakang kontainer */
+    }
+    
+    /* Mengatur form tambah jadwal (bg-gray-50) agar semi-transparan */
+    .bg-gray-50 {
+        background-color: rgba(249, 250, 251, 0.9); /* Transparansi 90% */
+    }
+  </style>
+  </head>
 <body class="bg-gray-100">
 
   <div class="max-w-6xl mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Manajemen Jadwal Kuliah</h1>
+      <h1 class="text-2xl font-bold">📚 Manajemen Jadwal Kuliah</h1>
       <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
     </div>
 
@@ -85,8 +116,8 @@
         <option value="Sistem Informasi">Sistem Informasi</option>
       </select>
       <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
-      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel</button>
-      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF</button>
+      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel (Terfilter)</button>
+      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF (Terfilter)</button>
     </div>
 
     <div class="overflow-x-auto">
@@ -211,7 +242,7 @@
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         
-        let baseClasses = "p-4 rounded-lg shadow-xl text-white transition-all duration-500 transform";
+        let baseClasses = "p-4 rounded-lg shadow-xl text-white transition-all duration-500 transform min-w-min";
         let icon = '';
 
         if (type === 'success') {
@@ -264,7 +295,7 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- FUNGSI Memuat opsi pilihan dari Supabase (Tidak Berubah) ---
+    // --- FUNGSI Memuat opsi pilihan dari Supabase ---
     async function loadReferences() {
         const references = [
             { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
@@ -313,8 +344,8 @@
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
       if (!user) {
-        // ALERT LAMA (DIJAGA KARENA ANDA INGIN INDEX.HTML TETAP BERFUNGSI)
-        alert("Silakan login dulu!");
+        // ALERT LAMA DIJAGA: Diinginkan user agar index.html (login/register) tidak error
+        alert("Silakan login dulu!"); 
         window.location.href = "index.html";
         return;
       }
@@ -339,7 +370,7 @@
 
       if (error) {
         console.error(error);
-        showToast("Gagal memuat data jadwal", 'error'); // Ganti alert
+        showToast("Gagal memuat data jadwal", 'error'); 
         return;
       }
       semuaData = data;
@@ -347,7 +378,7 @@
       tampilkanData(dataYangDitampilkan);
     }
 
-    // --- Tampilkan Data (Tidak Berubah) ---
+    // --- Tampilkan Data ---
     function tampilkanData(data) {
       dataYangDitampilkan = data; 
       
@@ -355,7 +386,6 @@
       data.forEach((row, index) => {
         const tr = document.createElement("tr");
         tr.classList.add("border-b");
-        // Penyesuaian Alignment untuk data sel (td)
         tr.innerHTML = `
           <td class="border px-2 py-1 text-center">${index + 1}</td>
           <td class="border px-2 py-1 text-center">${row.kode_matkul || "-"}</td>
@@ -371,7 +401,7 @@
           <td class="border px-2 py-1 text-center">${row.kelas || "-"}</td>
           <td class="border px-2 py-1 text-center">${row.ruangan || "-"}</td>
           <td class="border px-2 py-1 text-center">
-            <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+            <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded text-gray-800">Edit</button>
             <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1">Hapus</button>
           </td>
         `;
@@ -385,7 +415,7 @@
       const user = userData.user;
 
       if (!user) {
-        showToast("Kamu belum login!", 'error'); // Ganti alert
+        showToast("Kamu belum login!", 'error'); 
         window.location.href = "index.html";
         return;
       }
@@ -401,7 +431,7 @@
       const sks = document.getElementById("sks").value;
 
       if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks) {
-        showToast("Semua kolom wajib diisi!", 'warning'); // Ganti alert
+        showToast("Semua kolom wajib diisi!", 'warning'); 
         return;
       }
 
@@ -424,9 +454,9 @@
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
       if (error) {
         console.error(error);
-        showToast("Gagal menambah jadwal: " + error.message, 'error'); // Ganti alert
+        showToast("Gagal menambah jadwal: " + error.message, 'error'); 
       } else {
-        showToast("Jadwal berhasil ditambahkan!", 'success'); // Ganti alert
+        showToast("Jadwal berhasil ditambahkan!", 'success'); 
         loadData();
       }
     }
@@ -434,7 +464,7 @@
     // --- FUNGSI Edit Jadwal (Modal - Menggunakan showToast) ---
     function editJadwal(id) {
         const row = semuaData.find(r => r.id === id);
-        if (!row) return showToast("Data tidak ditemukan.", 'error'); // Ganti alert
+        if (!row) return showToast("Data tidak ditemukan.", 'error'); 
 
         // Mengisi form modal dengan data lama
         document.getElementById('edit_id').value = row.id;
@@ -476,7 +506,7 @@
         };
         
         if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah) {
-            showToast("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!", 'warning'); // Ganti alert
+            showToast("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!", 'warning'); 
             return;
         }
 
@@ -488,9 +518,9 @@
             
         if (error) {
             console.error("Error update:", error);
-            showToast("Gagal memperbarui jadwal: " + error.message, 'error'); // Ganti alert
+            showToast("Gagal memperbarui jadwal: " + error.message, 'error'); 
         } else {
-            showToast("Jadwal berhasil diperbarui!", 'success'); // Ganti alert
+            showToast("Jadwal berhasil diperbarui!", 'success'); 
             
             document.getElementById('editModal').classList.add('hidden');
             document.getElementById('editModal').classList.remove('flex');
@@ -500,27 +530,26 @@
 
     // --- Hapus Jadwal (Menggunakan showToast) ---
     async function hapusJadwal(id) {
-      // Konfirmasi tetap penting untuk aksi hapus
+      // Konfirmasi tetap dipertahankan
       if (!confirm("Yakin ingin menghapus jadwal ini?")) return; 
       
       const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
-      if (error) showToast("Gagal menghapus jadwal", 'error'); // Ganti alert
+      if (error) showToast("Gagal menghapus jadwal", 'error'); 
       else {
-        showToast("Jadwal berhasil dihapus!", 'success'); // Ganti alert
+        showToast("Jadwal berhasil dihapus!", 'success'); 
         loadData();
       }
     }
 
-    // --- FUNGSI Filter Data (Tidak Berubah) ---
+    // --- FUNGSI Filter Data ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
       const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
       tampilkanData(hasilFilter);
     }
 
-    // --- FUNGSI Export Excel (Tidak Berubah) ---
+    // --- FUNGSI Export Excel ---
     function exportExcel() {
-      // 1. Proses data untuk menghilangkan kolom yang tidak diinginkan dan mengganti nama header
       const dataBersih = dataYangDitampilkan.map(row => ({
         "Kode Matkul": row.kode_matkul || '-',
         "Prodi": row.prodi || '-',
@@ -536,13 +565,11 @@
         "Ruangan": row.ruangan || '-',
       }));
       
-      // 2. Export ke Excel
       const ws = XLSX.utils.json_to_sheet(dataBersih); 
-      
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
-      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
-      // Peringatan di sini telah dihapus sebelumnya, sesuai permintaan
+      XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
+      showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
     // --- FUNGSI Export PDF (Menggunakan showToast) ---
@@ -551,11 +578,10 @@
       const doc = new jsPDF('l', 'mm', 'a4'); 
 
       if (dataYangDitampilkan.length === 0) {
-          showToast("Tidak ada data terfilter untuk diekspor!", 'info'); // Ganti alert
+          showToast("Tidak ada data terfilter untuk diekspor!", 'info'); 
           return;
       }
       
-      // 1. Proses data untuk format tabel
       const dataPDF = dataYangDitampilkan.map((row, index) => [
         index + 1, 
         row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
@@ -563,16 +589,14 @@
         row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
       ]);
       
-      // 2. Definisikan Header Kolom
       const headers = [
           "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
           "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
       ];
 
       doc.setFontSize(14);
-      doc.text("Jadwal Kuliah)", 14, 15);
+      doc.text("Jadwal Kuliah (Data Terfilter)", 14, 15);
       
-      // 3. Buat Tabel menggunakan autoTable
       doc.autoTable({
         head: [headers],
         body: dataPDF,
@@ -592,8 +616,8 @@
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
       });
       
-      doc.save("jadwal_kuliah.pdf");
-      showToast("File PDF berhasil dibuat!", 'success'); // Notifikasi Toast untuk export PDF
+      doc.save("jadwal_kuliah_terfilter.pdf");
+      showToast("File PDF berhasil dibuat!", 'success'); 
     }
   </script>
 </body>
