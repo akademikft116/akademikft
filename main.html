@@ -277,7 +277,7 @@
       window.location.href = "index.html";
     }
 
-    // --- FUNGSI DIUBAH: Ambil data jadwal & inisialisasi dataYangDitampilkan ---
+    // --- Ambil data jadwal & inisialisasi dataYangDitampilkan ---
     async function loadData() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
@@ -297,7 +297,7 @@
       tampilkanData(dataYangDitampilkan);
     }
 
-    // --- FUNGSI DIUBAH: Tampilkan Data & set dataYangDitampilkan ---
+    // --- Tampilkan Data & set dataYangDitampilkan ---
     function tampilkanData(data) {
       dataYangDitampilkan = data; // Update data yang sedang ditampilkan/diekspor
       
@@ -459,7 +459,7 @@
       }
     }
 
-    // --- FUNGSI DIUBAH: Filter Data ---
+    // --- FUNGSI Filter Data ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
       // Memfilter dari data mentah (semuaData)
@@ -468,16 +468,33 @@
       tampilkanData(hasilFilter);
     }
 
-    // --- FUNGSI DIUBAH: Export Excel ---
+    // --- FUNGSI DIUBAH: Export Excel (tanpa ID, user_id, created_at) ---
     function exportExcel() {
-      // Mengekspor data yang ada di tabel saat ini (dataYangDitampilkan)
-      const ws = XLSX.utils.json_to_sheet(dataYangDitampilkan); 
+      // 1. Proses data untuk menghilangkan kolom yang tidak diinginkan dan mengganti nama header
+      const dataBersih = dataYangDitampilkan.map(row => ({
+        "Kode Matkul": row.kode_matkul || '-',
+        "Prodi": row.prodi || '-',
+        "Hari": row.hari || '-',
+        "Jam Mulai": row.jam_mulai || '-',
+        "Jam Akhir": row.jam_akhir || '-',
+        "Mata Kuliah": row.mata_kuliah || '-',
+        "SKS": row.sks || 0,
+        "Dosen": row.dosen || '-',
+        "Asisten": row.asisten || '-',
+        "Semester": row.semester || '-',
+        "Kelas": row.kelas || '-',
+        "Ruangan": row.ruangan || '-',
+      }));
+      
+      // 2. Gunakan dataBersih untuk membuat sheet Excel
+      const ws = XLSX.utils.json_to_sheet(dataBersih); 
+      
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
       XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
     }
 
-    // --- FUNGSI DIUBAH: Export PDF ---
+    // --- FUNGSI Export PDF (Tidak Berubah) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
