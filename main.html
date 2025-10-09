@@ -121,7 +121,6 @@
               <h2 class="text-xl font-bold mb-4">Edit Detail Jadwal</h2>
               <form id="editForm" onsubmit="return false;">
                   <input type="hidden" id="edit_id">
-
                   <div class="grid grid-cols-3 gap-3 mb-4">
                       <div>
                           <label class="block text-sm font-medium text-gray-700">Kode Matkul</label>
@@ -213,7 +212,7 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- FUNGSI Memuat opsi pilihan dari Supabase (tidak berubah) ---
+    // --- FUNGSI Memuat opsi pilihan dari Supabase ---
     async function loadReferences() {
         const references = [
             { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
@@ -257,7 +256,7 @@
     }
 
 
-    // --- Cek login user & Load Data (tidak berubah) ---
+    // --- Cek login user ---
     window.onload = async () => {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
@@ -275,6 +274,7 @@
       window.location.href = "index.html";
     }
 
+    // --- Ambil data jadwal & inisialisasi dataYangDitampilkan ---
     async function loadData() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
@@ -294,7 +294,7 @@
       tampilkanData(dataYangDitampilkan);
     }
 
-    // --- FUNGSI DIUBAH: Tampilkan Data (Tambahkan kelas 'text-center' atau 'text-left') ---
+    // --- Tampilkan Data (dengan Alignment Rata Tengah/Kiri) ---
     function tampilkanData(data) {
       dataYangDitampilkan = data; 
       
@@ -326,20 +326,146 @@
       });
     }
 
-    // --- Simpan, Edit, Update, Hapus, Filter (tidak ada perubahan signifikan) ---
-    async function simpanJadwal() { /* ... kode simpanJadwal ... */ }
-    function editJadwal(id) { /* ... kode editJadwal ... */ }
-    async function updateJadwal() { /* ... kode updateJadwal ... */ }
-    async function hapusJadwal(id) { /* ... kode hapusJadwal ... */ }
+    // --- Tambah Jadwal (Tidak Berubah) ---
+    async function simpanJadwal() {
+      const { data: userData } = await supabaseClient.auth.getUser();
+      const user = userData.user;
+
+      if (!user) {
+        alert("Kamu belum login!");
+        window.location.href = "index.html";
+        return;
+      }
+
+      const prodi = document.getElementById("prodi").value;
+      const hari = document.getElementById("hari").value;
+      const mata_kuliah = document.getElementById("mata_kuliah").value;
+      const dosen = document.getElementById("dosen").value;
+      const asisten = document.getElementById("asisten").value;
+      const semester = document.getElementById("semester").value;
+      const kelas = document.getElementById("kelas").value;
+      const ruangan = document.getElementById("ruangan").value;
+      const sks = document.getElementById("sks").value;
+
+      if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks) {
+        alert("Semua kolom wajib diisi!");
+        return;
+      }
+
+      const jadwal = {
+        user_id: user.id, 
+        kode_matkul: document.getElementById("kode").value,
+        prodi: prodi,
+        hari: hari,
+        jam_mulai: document.getElementById("jam_mulai").value,
+        jam_akhir: document.getElementById("jam_akhir").value,
+        mata_kuliah: mata_kuliah,
+        sks: parseInt(sks),
+        dosen: dosen,
+        asisten: asisten,
+        semester: semester,
+        kelas: kelas,
+        ruangan: ruangan,
+      };
+
+      const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
+      if (error) {
+        console.error(error);
+        alert("❌ Gagal menambah jadwal: " + error.message);
+      } else {
+        alert("✅ Berhasil ditambahkan");
+        loadData();
+      }
+    }
+
+    // --- FUNGSI Edit Jadwal (Modal) ---
+    function editJadwal(id) {
+        const row = semuaData.find(r => r.id === id);
+        if (!row) return alert("Data tidak ditemukan.");
+
+        // Mengisi form modal dengan data lama
+        document.getElementById('edit_id').value = row.id;
+        document.getElementById('edit_kode').value = row.kode_matkul || '';
+        document.getElementById('edit_prodi').value = row.prodi || '';
+        document.getElementById('edit_hari').value = row.hari || '';
+        document.getElementById('edit_jam_mulai').value = row.jam_mulai || '';
+        document.getElementById('edit_jam_akhir').value = row.jam_akhir || '';
+        document.getElementById('edit_mata_kuliah').value = row.mata_kuliah || '';
+        document.getElementById('edit_sks').value = row.sks || '';
+        document.getElementById('edit_dosen').value = row.dosen || '';
+        document.getElementById('edit_asisten').value = row.asisten || '';
+        document.getElementById('edit_semester').value = row.semester || '';
+        document.getElementById('edit_kelas').value = row.kelas || '';
+        document.getElementById('edit_ruangan').value = row.ruangan || '';
+
+        // Menampilkan Modal
+        document.getElementById('editModal').classList.remove('hidden');
+        document.getElementById('editModal').classList.add('flex'); 
+    }
+    
+    // --- FUNGSI Update Jadwal ---
+    async function updateJadwal() {
+        const id = document.getElementById('edit_id').value;
+
+        const updatedJadwal = {
+            kode_matkul: document.getElementById('edit_kode').value,
+            prodi: document.getElementById('edit_prodi').value,
+            hari: document.getElementById('edit_hari').value,
+            jam_mulai: document.getElementById('edit_jam_mulai').value,
+            jam_akhir: document.getElementById('edit_jam_akhir').value,
+            mata_kuliah: document.getElementById('edit_mata_kuliah').value,
+            sks: parseInt(document.getElementById('edit_sks').value) || 0,
+            dosen: document.getElementById('edit_dosen').value,
+            asisten: document.getElementById('edit_asisten').value,
+            semester: document.getElementById('edit_semester').value,
+            kelas: document.getElementById('edit_kelas').value,
+            ruangan: document.getElementById('edit_ruangan').value,
+        };
+        
+        if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah) {
+            alert("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!");
+            return;
+        }
+
+
+        const { error } = await supabaseClient
+            .from("jadwal")
+            .update(updatedJadwal)
+            .eq("id", id);
+            
+        if (error) {
+            console.error("Error update:", error);
+            alert("❌ Gagal memperbarui jadwal: " + error.message);
+        } else {
+            alert("✅ Berhasil diperbarui");
+            
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').classList.remove('flex');
+            loadData();
+        }
+    }
+
+    // --- Hapus Jadwal (Tidak Berubah) ---
+    async function hapusJadwal(id) {
+      if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
+      const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
+      if (error) alert("Gagal menghapus");
+      else {
+        alert("Berhasil dihapus");
+        loadData();
+      }
+    }
+
+    // --- FUNGSI Filter Data ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
       const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
       tampilkanData(hasilFilter);
     }
-    
-    // --- Export Excel (tanpa ID, user_id, created_at) ---
+
+    // --- FUNGSI DIUBAH: Export Excel (Peringatan dihapus) ---
     function exportExcel() {
-      // Catatan: Alignment harus diatur manual di Excel, tidak didukung mudah oleh library XLSX.
+      // 1. Proses data untuk menghilangkan kolom yang tidak diinginkan dan mengganti nama header
       const dataBersih = dataYangDitampilkan.map(row => ({
         "Kode Matkul": row.kode_matkul || '-',
         "Prodi": row.prodi || '-',
@@ -355,14 +481,16 @@
         "Ruangan": row.ruangan || '-',
       }));
       
+      // 2. Export ke Excel
       const ws = XLSX.utils.json_to_sheet(dataBersih); 
+      
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
       XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
-      alert("Catatan: Alignment Rata Tengah di Excel harus dilakukan secara manual setelah file dibuka.");
+      // Peringatan telah dihapus
     }
 
-    // --- FUNGSI DIUBAH: Export PDF (Format Tabel dengan Alignment yang Seragam) ---
+    // --- FUNGSI Export PDF (Alignment Seragam) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
@@ -416,7 +544,7 @@
             halign: 'center' // Header: Rata Tengah
         },
         columnStyles: {
-            // Kolom Rata Tengah
+            // Kolom Rata Tengah (sesuai tampilan website)
             0: { halign: 'center', cellWidth: 8 }, 
             1: { halign: 'center', cellWidth: 15 }, 
             3: { halign: 'center', cellWidth: 15 }, 
@@ -426,7 +554,7 @@
             10: { halign: 'center', cellWidth: 15 }, 
             11: { halign: 'center', cellWidth: 15 }, 
             12: { halign: 'center', cellWidth: 15 }, 
-            // Kolom Rata Kiri
+            // Kolom Rata Kiri (sesuai tampilan website)
             2: { halign: 'left', cellWidth: 25 }, 
             6: { halign: 'left', cellWidth: 45 }, 
             8: { halign: 'left', cellWidth: 35 }, 
