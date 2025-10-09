@@ -56,8 +56,13 @@
         
         <select id="prodi" class="border p-2 rounded">
           <option value="" disabled selected>Pilih Prodi</option>
+          <option value="Industri">Industri</option>
+          <option value="Sipil">Sipil</option>
+          <option value="Arsitektur">Arsitektur</option>
+          <option value="Elektro">Elektro</option>
           <option value="Informatika">Informatika</option>
-          <option value="Sistem Informasi">Sistem Informasi</option>
+
+
         </select>
         
         <select id="hari" class="border p-2 rounded">
@@ -112,8 +117,11 @@
     <div class="flex items-center mb-3 space-x-2">
       <select id="filterProdi" class="border p-2 rounded">
         <option value="">Semua Prodi</option>
-        <option value="Informatika">Informatika</option>
-        <option value="Sistem Informasi">Sistem Informasi</option>
+         <option value="Industri">Industri</option>
+          <option value="Sipil">Sipil</option>
+          <option value="Arsitektur">Arsitektur</option>
+          <option value="Elektro">Elektro</option>
+          <option value="Informatika">Informatika</option>
       </select>
       <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
       <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel (Terfilter)</button>
