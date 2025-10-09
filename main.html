@@ -95,14 +95,14 @@
           <tr>
             <th class="border px-2 py-1 text-center">No</th>
             <th class="border px-2 py-1 text-center">Kode</th>
-            <th class="border px-2 py-1 text-left">Prodi</th>
+            <th class="border px-2 py-1 text-center">Prodi</th>
             <th class="border px-2 py-1 text-center">Hari</th>
             <th class="border px-2 py-1 text-center">Jam Mulai</th>
             <th class="border px-2 py-1 text-center">Jam Akhir</th>
-            <th class="border px-2 py-1 text-left">Mata Kuliah</th>
+            <th class="border px-2 py-1 text-center">Mata Kuliah</th>
             <th class="border px-2 py-1 text-center">SKS</th>
-            <th class="border px-2 py-1 text-left">Dosen</th>
-            <th class="border px-2 py-1 text-left">Asisten</th>
+            <th class="border px-2 py-1 text-center">Dosen</th>
+            <th class="border px-2 py-1 text-center">Asisten</th>
             <th class="border px-2 py-1 text-center">Semester</th>
             <th class="border px-2 py-1 text-center">Kelas</th>
             <th class="border px-2 py-1 text-center">Ruangan</th>
@@ -200,59 +200,10 @@
           </div>
       </div>
   </div>
-  
-  <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-50">
-      </div>
 
 
   <script>
-    // --- FUNGSI TOAST BARU ---
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        
-        let baseClasses = "p-4 rounded-lg shadow-xl text-white transition-all duration-500 transform";
-        let icon = '';
-
-        if (type === 'success') {
-            baseClasses += " bg-green-500";
-            icon = '✅';
-        } else if (type === 'error') {
-            baseClasses += " bg-red-600";
-            icon = '❌';
-        } else if (type === 'info') {
-            baseClasses += " bg-blue-500";
-            icon = 'ℹ️';
-        }
-
-        toast.className = baseClasses + " opacity-0 translate-y-2";
-        toast.innerHTML = `${icon} ${message}`;
-        
-        container.appendChild(toast);
-
-        // Show animation
-        setTimeout(() => {
-            toast.classList.remove('opacity-0', 'translate-y-2');
-            toast.classList.add('opacity-100', 'translate-y-0');
-        }, 10);
-
-        // Auto-hide and remove after 3 seconds
-        setTimeout(() => {
-            // Hide animation
-            toast.classList.remove('opacity-100', 'translate-y-0');
-            toast.classList.add('opacity-0', 'translate-y-2');
-            
-            // Remove element after transition
-            setTimeout(() => {
-                if(container.contains(toast)) {
-                    container.removeChild(toast);
-                }
-            }, 500); 
-        }, 3000); 
-    }
-
-
-    // --- Supabase setup (Tidak Berubah) ---
+    // --- Supabase setup ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -261,15 +212,56 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- Load References (Tidak Berubah) ---
-    async function loadReferences() { /* ... kode loadReferences ... */ }
+    // --- FUNGSI Memuat opsi pilihan dari Supabase ---
+    async function loadReferences() {
+        const references = [
+            { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
+            { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen' },
+            { table: 'asisten', elementId: 'asisten', editElementId: 'edit_asisten', column: 'nama', defaultText: 'Pilih Asisten' },
+            { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas' },
+            { table: 'ruangan', elementId: 'ruangan', editElementId: 'edit_ruangan', column: 'nama', defaultText: 'Pilih Ruangan' },
+        ];
 
-    // --- Cek login user & Load Data ---
+        for (const ref of references) {
+            const { data, error } = await supabaseClient
+                .from(ref.table)
+                .select(ref.column)
+                .order(ref.column, { ascending: true });
+
+            if (error) {
+                console.error(`Gagal memuat data ${ref.table}. Pastikan tabel ada dan RLS disetel.`, error);
+                continue;
+            }
+
+            const createOptions = (elementId) => {
+                const selectElement = document.getElementById(elementId);
+                if (!selectElement) return; 
+                
+                selectElement.innerHTML = `<option value="" disabled selected>${ref.defaultText}</option>`;
+                
+                data.forEach(item => {
+                    const value = item[ref.column];
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    selectElement.appendChild(option);
+                });
+            };
+
+            createOptions(ref.elementId); 
+            if (ref.editElementId) {
+                createOptions(ref.editElementId);
+            }
+        }
+    }
+
+
+    // --- Cek login user ---
     window.onload = async () => {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
       if (!user) {
-        // Notifikasi dihapus karena langsung redirect
+        alert("Silakan login dulu!");
         window.location.href = "index.html";
         return;
       }
@@ -282,6 +274,7 @@
       window.location.href = "index.html";
     }
 
+    // --- Ambil data jadwal & inisialisasi dataYangDitampilkan ---
     async function loadData() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
@@ -293,7 +286,7 @@
 
       if (error) {
         console.error(error);
-        showToast("Gagal memuat data!", 'error'); // Ganti alert
+        alert("Gagal memuat data");
         return;
       }
       semuaData = data;
@@ -301,20 +294,49 @@
       tampilkanData(dataYangDitampilkan);
     }
 
-    // --- Tampilkan Data (Tidak Berubah) ---
-    function tampilkanData(data) { /* ... kode tampilkanData ... */ }
+    // --- Tampilkan Data (dengan Alignment Rata Tengah/Kiri) ---
+    function tampilkanData(data) {
+      dataYangDitampilkan = data; 
+      
+      tabelBody.innerHTML = "";
+      data.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.classList.add("border-b");
+        // Penyesuaian Alignment untuk data sel (td)
+        tr.innerHTML = `
+          <td class="border px-2 py-1 text-center">${index + 1}</td>
+          <td class="border px-2 py-1 text-center">${row.kode_matkul || "-"}</td>
+          <td class="border px-2 py-1 text-left">${row.prodi || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.hari || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.jam_mulai || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.jam_akhir || "-"}</td>
+          <td class="border px-2 py-1 text-left">${row.mata_kuliah || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.sks || "-"}</td>
+          <td class="border px-2 py-1 text-left">${row.dosen || "-"}</td>
+          <td class="border px-2 py-1 text-left">${row.asisten || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.semester || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.kelas || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.ruangan || "-"}</td>
+          <td class="border px-2 py-1 text-center">
+            <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+            <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1">Hapus</button>
+          </td>
+        `;
+        tabelBody.appendChild(tr);
+      });
+    }
 
-    // --- Simpan Jadwal (Menggunakan showToast) ---
+    // --- Tambah Jadwal (Tidak Berubah) ---
     async function simpanJadwal() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
 
       if (!user) {
-        showToast("Kamu belum login!", 'error'); // Ganti alert
+        alert("Kamu belum login!");
         window.location.href = "index.html";
         return;
       }
-      
+
       const prodi = document.getElementById("prodi").value;
       const hari = document.getElementById("hari").value;
       const mata_kuliah = document.getElementById("mata_kuliah").value;
@@ -326,7 +348,7 @@
       const sks = document.getElementById("sks").value;
 
       if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks) {
-        showToast("Semua kolom wajib diisi!", 'error'); // Ganti alert
+        alert("Semua kolom wajib diisi!");
         return;
       }
 
@@ -349,17 +371,17 @@
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
       if (error) {
         console.error(error);
-        showToast("Gagal menambah jadwal: " + error.message, 'error'); // Ganti alert
+        alert("❌ Gagal menambah jadwal: " + error.message);
       } else {
-        showToast("Jadwal berhasil ditambahkan!", 'success'); // Ganti alert
+        alert("✅ Berhasil ditambahkan");
         loadData();
       }
     }
 
-    // --- Edit Jadwal (Modal - Tidak ada perubahan di sini) ---
+    // --- FUNGSI Edit Jadwal (Modal) ---
     function editJadwal(id) {
         const row = semuaData.find(r => r.id === id);
-        if (!row) return showToast("Data tidak ditemukan.", 'error'); // Ganti alert
+        if (!row) return alert("Data tidak ditemukan.");
 
         // Mengisi form modal dengan data lama
         document.getElementById('edit_id').value = row.id;
@@ -381,7 +403,7 @@
         document.getElementById('editModal').classList.add('flex'); 
     }
     
-    // --- Update Jadwal (Menggunakan showToast) ---
+    // --- FUNGSI Update Jadwal ---
     async function updateJadwal() {
         const id = document.getElementById('edit_id').value;
 
@@ -401,7 +423,7 @@
         };
         
         if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah) {
-            showToast("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!", 'error'); // Ganti alert
+            alert("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!");
             return;
         }
 
@@ -413,9 +435,9 @@
             
         if (error) {
             console.error("Error update:", error);
-            showToast("Gagal memperbarui jadwal: " + error.message, 'error'); // Ganti alert
+            alert("❌ Gagal memperbarui jadwal: " + error.message);
         } else {
-            showToast("Jadwal berhasil diperbarui!", 'success'); // Ganti alert
+            alert("✅ Berhasil diperbarui");
             
             document.getElementById('editModal').classList.add('hidden');
             document.getElementById('editModal').classList.remove('flex');
@@ -423,64 +445,120 @@
         }
     }
 
-    // --- Hapus Jadwal (Menggunakan showToast) ---
+    // --- Hapus Jadwal (Tidak Berubah) ---
     async function hapusJadwal(id) {
-      if (!confirm("Yakin ingin menghapus jadwal ini?")) return; // Konfirmasi tetap penting untuk aksi hapus
+      if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
       const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
-      if (error) showToast("Gagal menghapus jadwal", 'error'); // Ganti alert
+      if (error) alert("Gagal menghapus");
       else {
-        showToast("Jadwal berhasil dihapus!", 'success'); // Ganti alert
+        alert("Berhasil dihapus");
         loadData();
       }
     }
 
-    // --- Filter Data (Tidak Berubah) ---
+    // --- FUNGSI Filter Data ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
       const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
       tampilkanData(hasilFilter);
     }
 
-    // --- Export Excel (Tidak Berubah) ---
-    function exportExcel() { /* ... kode exportExcel ... */ }
+    // --- FUNGSI DIUBAH: Export Excel (Peringatan dihapus) ---
+    function exportExcel() {
+      // 1. Proses data untuk menghilangkan kolom yang tidak diinginkan dan mengganti nama header
+      const dataBersih = dataYangDitampilkan.map(row => ({
+        "Kode Matkul": row.kode_matkul || '-',
+        "Prodi": row.prodi || '-',
+        "Hari": row.hari || '-',
+        "Jam Mulai": row.jam_mulai || '-',
+        "Jam Akhir": row.jam_akhir || '-',
+        "Mata Kuliah": row.mata_kuliah || '-',
+        "SKS": row.sks || 0,
+        "Dosen": row.dosen || '-',
+        "Asisten": row.asisten || '-',
+        "Semester": row.semester || '-',
+        "Kelas": row.kelas || '-',
+        "Ruangan": row.ruangan || '-',
+      }));
+      
+      // 2. Export ke Excel
+      const ws = XLSX.utils.json_to_sheet(dataBersih); 
+      
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
+      XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
+      // Peringatan telah dihapus
+    }
 
-    // --- Export PDF (Menggunakan showToast) ---
+    // --- FUNGSI Export PDF (Alignment Seragam) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4'); 
+      const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
 
       if (dataYangDitampilkan.length === 0) {
-          showToast("Tidak ada data terfilter untuk diekspor!", 'info'); // Ganti alert
+          alert("Tidak ada data terfilter untuk diekspor!");
           return;
       }
       
+      // 1. Proses data untuk format tabel
       const dataPDF = dataYangDitampilkan.map((row, index) => [
         index + 1, 
-        row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
-        row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
-        row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
+        row.kode_matkul || '-',
+        row.prodi || '-',
+        row.hari || '-',
+        row.jam_mulai || '-',
+        row.jam_akhir || '-',
+        row.mata_kuliah || '-',
+        row.sks || 0,
+        row.dosen || '-',
+        row.asisten || '-',
+        row.semester || '-',
+        row.kelas || '-',
+        row.ruangan || '-',
       ]);
       
-      const headers = ["No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"];
+      // 2. Definisikan Header Kolom
+      const headers = [
+          "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
+          "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
+      ];
 
       doc.setFontSize(14);
       doc.text("Jadwal Kuliah (Data Terfilter)", 14, 15);
       
+      // 3. Buat Tabel menggunakan autoTable dengan alignment yang seragam
       doc.autoTable({
         head: [headers],
         body: dataPDF,
         startY: 20, 
         theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
-        headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+        styles: {
+            fontSize: 7, 
+            cellPadding: 1.5,
+            halign: 'left' // Default: Rata Kiri
+        },
+        headStyles: {
+            fillColor: [200, 200, 200],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold',
+            halign: 'center' // Header: Rata Tengah
+        },
         columnStyles: {
-            0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
-            3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
-            5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
-            10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 }, 
+            // Kolom Rata Tengah (sesuai tampilan website)
+            0: { halign: 'center', cellWidth: 8 }, 
+            1: { halign: 'center', cellWidth: 15 }, 
+            3: { halign: 'center', cellWidth: 15 }, 
+            4: { halign: 'center', cellWidth: 15 }, 
+            5: { halign: 'center', cellWidth: 15 }, 
+            7: { halign: 'center', cellWidth: 10 }, 
+            10: { halign: 'center', cellWidth: 15 }, 
+            11: { halign: 'center', cellWidth: 15 }, 
             12: { halign: 'center', cellWidth: 15 }, 
-            2: { halign: 'left', cellWidth: 25 }, 6: { halign: 'left', cellWidth: 45 }, 
-            8: { halign: 'left', cellWidth: 35 }, 9: { halign: 'left', cellWidth: 35 }, 
+            // Kolom Rata Kiri (sesuai tampilan website)
+            2: { halign: 'left', cellWidth: 25 }, 
+            6: { halign: 'left', cellWidth: 45 }, 
+            8: { halign: 'left', cellWidth: 35 }, 
+            9: { halign: 'left', cellWidth: 35 }, 
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
       });
