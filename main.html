@@ -95,14 +95,14 @@
           <tr>
             <th class="border px-2 py-1 text-center">No</th>
             <th class="border px-2 py-1 text-center">Kode</th>
-            <th class="border px-2 py-1 text-center">Prodi</th>
+            <th class="border px-2 py-1 text-left">Prodi</th>
             <th class="border px-2 py-1 text-center">Hari</th>
             <th class="border px-2 py-1 text-center">Jam Mulai</th>
             <th class="border px-2 py-1 text-center">Jam Akhir</th>
-            <th class="border px-2 py-1 text-center">Mata Kuliah</th>
+            <th class="border px-2 py-1 text-left">Mata Kuliah</th>
             <th class="border px-2 py-1 text-center">SKS</th>
-            <th class="border px-2 py-1 text-center">Dosen</th>
-            <th class="border px-2 py-1 text-center">Asisten</th>
+            <th class="border px-2 py-1 text-left">Dosen</th>
+            <th class="border px-2 py-1 text-left">Asisten</th>
             <th class="border px-2 py-1 text-center">Semester</th>
             <th class="border px-2 py-1 text-center">Kelas</th>
             <th class="border px-2 py-1 text-center">Ruangan</th>
@@ -201,8 +201,60 @@
       </div>
   </div>
 
+  <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-50">
+      </div>
+
 
   <script>
+    // --- FUNGSI TOAST BARU (Otomatis Hilang) ---
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        let baseClasses = "p-4 rounded-lg shadow-xl text-white transition-all duration-500 transform";
+        let icon = '';
+
+        if (type === 'success') {
+            baseClasses += " bg-green-500";
+            icon = '✅';
+        } else if (type === 'error') {
+            baseClasses += " bg-red-600";
+            icon = '❌';
+        } else if (type === 'info') {
+            baseClasses += " bg-blue-500";
+            icon = 'ℹ️';
+        } else if (type === 'warning') {
+            baseClasses += " bg-yellow-500 text-gray-800";
+            icon = '⚠️';
+        }
+
+        toast.className = baseClasses + " opacity-0 translate-y-2";
+        toast.innerHTML = `${icon} <span class="font-semibold">${message}</span>`;
+        
+        container.appendChild(toast);
+
+        // Show animation
+        setTimeout(() => {
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+        }, 10);
+
+        // Auto-hide and remove after 3 seconds
+        setTimeout(() => {
+            // Hide animation
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', 'translate-y-2');
+            
+            // Remove element after transition
+            setTimeout(() => {
+                if(container.contains(toast)) {
+                    container.removeChild(toast);
+                }
+            }, 500); 
+        }, 3000); // Notifikasi muncul selama 3 detik
+    }
+
+
     // --- Supabase setup ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
@@ -212,7 +264,7 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- FUNGSI Memuat opsi pilihan dari Supabase ---
+    // --- FUNGSI Memuat opsi pilihan dari Supabase (Tidak Berubah) ---
     async function loadReferences() {
         const references = [
             { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
@@ -261,6 +313,7 @@
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
       if (!user) {
+        // ALERT LAMA (DIJAGA KARENA ANDA INGIN INDEX.HTML TETAP BERFUNGSI)
         alert("Silakan login dulu!");
         window.location.href = "index.html";
         return;
@@ -286,7 +339,7 @@
 
       if (error) {
         console.error(error);
-        alert("Gagal memuat data");
+        showToast("Gagal memuat data jadwal", 'error'); // Ganti alert
         return;
       }
       semuaData = data;
@@ -294,7 +347,7 @@
       tampilkanData(dataYangDitampilkan);
     }
 
-    // --- Tampilkan Data (dengan Alignment Rata Tengah/Kiri) ---
+    // --- Tampilkan Data (Tidak Berubah) ---
     function tampilkanData(data) {
       dataYangDitampilkan = data; 
       
@@ -326,13 +379,13 @@
       });
     }
 
-    // --- Tambah Jadwal (Tidak Berubah) ---
+    // --- Tambah Jadwal (Menggunakan showToast) ---
     async function simpanJadwal() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
 
       if (!user) {
-        alert("Kamu belum login!");
+        showToast("Kamu belum login!", 'error'); // Ganti alert
         window.location.href = "index.html";
         return;
       }
@@ -348,7 +401,7 @@
       const sks = document.getElementById("sks").value;
 
       if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks) {
-        alert("Semua kolom wajib diisi!");
+        showToast("Semua kolom wajib diisi!", 'warning'); // Ganti alert
         return;
       }
 
@@ -371,17 +424,17 @@
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
       if (error) {
         console.error(error);
-        alert("❌ Gagal menambah jadwal: " + error.message);
+        showToast("Gagal menambah jadwal: " + error.message, 'error'); // Ganti alert
       } else {
-        alert("✅ Berhasil ditambahkan");
+        showToast("Jadwal berhasil ditambahkan!", 'success'); // Ganti alert
         loadData();
       }
     }
 
-    // --- FUNGSI Edit Jadwal (Modal) ---
+    // --- FUNGSI Edit Jadwal (Modal - Menggunakan showToast) ---
     function editJadwal(id) {
         const row = semuaData.find(r => r.id === id);
-        if (!row) return alert("Data tidak ditemukan.");
+        if (!row) return showToast("Data tidak ditemukan.", 'error'); // Ganti alert
 
         // Mengisi form modal dengan data lama
         document.getElementById('edit_id').value = row.id;
@@ -403,7 +456,7 @@
         document.getElementById('editModal').classList.add('flex'); 
     }
     
-    // --- FUNGSI Update Jadwal ---
+    // --- FUNGSI Update Jadwal (Menggunakan showToast) ---
     async function updateJadwal() {
         const id = document.getElementById('edit_id').value;
 
@@ -423,7 +476,7 @@
         };
         
         if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah) {
-            alert("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!");
+            showToast("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!", 'warning'); // Ganti alert
             return;
         }
 
@@ -435,9 +488,9 @@
             
         if (error) {
             console.error("Error update:", error);
-            alert("❌ Gagal memperbarui jadwal: " + error.message);
+            showToast("Gagal memperbarui jadwal: " + error.message, 'error'); // Ganti alert
         } else {
-            alert("✅ Berhasil diperbarui");
+            showToast("Jadwal berhasil diperbarui!", 'success'); // Ganti alert
             
             document.getElementById('editModal').classList.add('hidden');
             document.getElementById('editModal').classList.remove('flex');
@@ -445,25 +498,27 @@
         }
     }
 
-    // --- Hapus Jadwal (Tidak Berubah) ---
+    // --- Hapus Jadwal (Menggunakan showToast) ---
     async function hapusJadwal(id) {
-      if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
+      // Konfirmasi tetap penting untuk aksi hapus
+      if (!confirm("Yakin ingin menghapus jadwal ini?")) return; 
+      
       const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
-      if (error) alert("Gagal menghapus");
+      if (error) showToast("Gagal menghapus jadwal", 'error'); // Ganti alert
       else {
-        alert("Berhasil dihapus");
+        showToast("Jadwal berhasil dihapus!", 'success'); // Ganti alert
         loadData();
       }
     }
 
-    // --- FUNGSI Filter Data ---
+    // --- FUNGSI Filter Data (Tidak Berubah) ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
       const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
       tampilkanData(hasilFilter);
     }
 
-    // --- FUNGSI DIUBAH: Export Excel (Peringatan dihapus) ---
+    // --- FUNGSI Export Excel (Tidak Berubah) ---
     function exportExcel() {
       // 1. Proses data untuk menghilangkan kolom yang tidak diinginkan dan mengganti nama header
       const dataBersih = dataYangDitampilkan.map(row => ({
@@ -487,34 +542,25 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
       XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
-      // Peringatan telah dihapus
+      // Peringatan di sini telah dihapus sebelumnya, sesuai permintaan
     }
 
-    // --- FUNGSI Export PDF (Alignment Seragam) ---
+    // --- FUNGSI Export PDF (Menggunakan showToast) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
+      const doc = new jsPDF('l', 'mm', 'a4'); 
 
       if (dataYangDitampilkan.length === 0) {
-          alert("Tidak ada data terfilter untuk diekspor!");
+          showToast("Tidak ada data terfilter untuk diekspor!", 'info'); // Ganti alert
           return;
       }
       
       // 1. Proses data untuk format tabel
       const dataPDF = dataYangDitampilkan.map((row, index) => [
         index + 1, 
-        row.kode_matkul || '-',
-        row.prodi || '-',
-        row.hari || '-',
-        row.jam_mulai || '-',
-        row.jam_akhir || '-',
-        row.mata_kuliah || '-',
-        row.sks || 0,
-        row.dosen || '-',
-        row.asisten || '-',
-        row.semester || '-',
-        row.kelas || '-',
-        row.ruangan || '-',
+        row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
+        row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
+        row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
       ]);
       
       // 2. Definisikan Header Kolom
@@ -526,44 +572,28 @@
       doc.setFontSize(14);
       doc.text("Jadwal Kuliah (Data Terfilter)", 14, 15);
       
-      // 3. Buat Tabel menggunakan autoTable dengan alignment yang seragam
+      // 3. Buat Tabel menggunakan autoTable
       doc.autoTable({
         head: [headers],
         body: dataPDF,
         startY: 20, 
         theme: 'grid',
-        styles: {
-            fontSize: 7, 
-            cellPadding: 1.5,
-            halign: 'left' // Default: Rata Kiri
-        },
-        headStyles: {
-            fillColor: [200, 200, 200],
-            textColor: [0, 0, 0],
-            fontStyle: 'bold',
-            halign: 'center' // Header: Rata Tengah
-        },
+        styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
+        headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
         columnStyles: {
-            // Kolom Rata Tengah (sesuai tampilan website)
-            0: { halign: 'center', cellWidth: 8 }, 
-            1: { halign: 'center', cellWidth: 15 }, 
-            3: { halign: 'center', cellWidth: 15 }, 
-            4: { halign: 'center', cellWidth: 15 }, 
-            5: { halign: 'center', cellWidth: 15 }, 
-            7: { halign: 'center', cellWidth: 10 }, 
-            10: { halign: 'center', cellWidth: 15 }, 
-            11: { halign: 'center', cellWidth: 15 }, 
+            0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
+            3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
+            5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
+            10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 }, 
             12: { halign: 'center', cellWidth: 15 }, 
-            // Kolom Rata Kiri (sesuai tampilan website)
-            2: { halign: 'left', cellWidth: 25 }, 
-            6: { halign: 'left', cellWidth: 45 }, 
-            8: { halign: 'left', cellWidth: 35 }, 
-            9: { halign: 'left', cellWidth: 35 }, 
+            2: { halign: 'left', cellWidth: 25 }, 6: { halign: 'left', cellWidth: 45 }, 
+            8: { halign: 'left', cellWidth: 35 }, 9: { halign: 'left', cellWidth: 35 }, 
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
       });
       
       doc.save("jadwal_kuliah_terfilter.pdf");
+      showToast("File PDF berhasil dibuat!", 'success'); // Notifikasi Toast untuk export PDF
     }
   </script>
 </body>
