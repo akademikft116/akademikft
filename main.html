@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jadwal Perkuliahan</title>
+  <title>Manajemen Jadwal Kuliah</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -84,8 +84,8 @@
         <option value="Sistem Informasi">Sistem Informasi</option>
       </select>
       <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
-      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Excel</button>
-      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">PDF</button>
+      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel (Terfilter)</button>
+      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF (Terfilter)</button>
     </div>
 
     <div class="overflow-x-auto">
@@ -212,9 +212,10 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const tabelBody = document.querySelector("#tabelJadwal tbody");
-    let semuaData = [];
+    let semuaData = []; // Data mentah dari Supabase
+    let dataYangDitampilkan = []; // Data yang saat ini tampil di tabel dan akan diekspor
 
-    // --- FUNGSI BARU/DIUBAH: Memuat opsi pilihan dari Supabase (untuk Tambah dan Edit) ---
+    // --- FUNGSI Memuat opsi pilihan dari Supabase (untuk Tambah dan Edit) ---
     async function loadReferences() {
         const references = [
             { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
@@ -237,10 +238,8 @@
 
             const createOptions = (elementId) => {
                 const selectElement = document.getElementById(elementId);
-                // Menghindari error jika elemen modal belum ada (walaupun seharusnya sudah ada)
                 if (!selectElement) return; 
                 
-                // Kosongkan dan tambahkan opsi default
                 selectElement.innerHTML = `<option value="" disabled selected>${ref.defaultText}</option>`;
                 
                 data.forEach(item => {
@@ -252,9 +251,7 @@
                 });
             };
 
-            // Mengisi dropdown Tambah Jadwal
             createOptions(ref.elementId); 
-            // Mengisi dropdown Modal Edit
             if (ref.editElementId) {
                 createOptions(ref.editElementId);
             }
@@ -271,7 +268,7 @@
         window.location.href = "index.html";
         return;
       }
-      await loadReferences(); // Panggil fungsi baru untuk memuat opsi pilihan
+      await loadReferences();
       loadData();
     };
 
@@ -280,7 +277,7 @@
       window.location.href = "index.html";
     }
 
-    // --- Ambil data jadwal milik user (Tidak Berubah) ---
+    // --- FUNGSI DIUBAH: Ambil data jadwal & inisialisasi dataYangDitampilkan ---
     async function loadData() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
@@ -296,11 +293,14 @@
         return;
       }
       semuaData = data;
-      tampilkanData(semuaData);
+      dataYangDitampilkan = data; // Saat load awal, semua data adalah yang ditampilkan
+      tampilkanData(dataYangDitampilkan);
     }
 
-    // --- Tampilkan Data (Tidak Berubah) ---
+    // --- FUNGSI DIUBAH: Tampilkan Data & set dataYangDitampilkan ---
     function tampilkanData(data) {
+      dataYangDitampilkan = data; // Update data yang sedang ditampilkan/diekspor
+      
       tabelBody.innerHTML = "";
       data.forEach((row, index) => {
         const tr = document.createElement("tr");
@@ -380,7 +380,7 @@
       }
     }
 
-    // --- FUNGSI BARU/DIUBAH: Menampilkan Modal Edit ---
+    // --- FUNGSI Edit Jadwal (Modal) ---
     function editJadwal(id) {
         const row = semuaData.find(r => r.id === id);
         if (!row) return alert("Data tidak ditemukan.");
@@ -400,12 +400,12 @@
         document.getElementById('edit_kelas').value = row.kelas || '';
         document.getElementById('edit_ruangan').value = row.ruangan || '';
 
-        // Menampilkan Modal (mengganti hidden dengan flex)
+        // Menampilkan Modal
         document.getElementById('editModal').classList.remove('hidden');
         document.getElementById('editModal').classList.add('flex'); 
     }
     
-    // --- FUNGSI BARU: Menyimpan Perubahan dari Modal ---
+    // --- FUNGSI Update Jadwal ---
     async function updateJadwal() {
         const id = document.getElementById('edit_id').value;
 
@@ -424,7 +424,6 @@
             ruangan: document.getElementById('edit_ruangan').value,
         };
         
-        // Validasi
         if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah) {
             alert("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!");
             return;
@@ -442,7 +441,6 @@
         } else {
             alert("✅ Berhasil diperbarui");
             
-            // Sembunyikan Modal dan muat ulang data tabel
             document.getElementById('editModal').classList.add('hidden');
             document.getElementById('editModal').classList.remove('flex');
             loadData();
@@ -461,28 +459,33 @@
       }
     }
 
-    // --- Filter (Tidak Berubah) ---
+    // --- FUNGSI DIUBAH: Filter Data ---
     function filterData() {
       const filter = document.getElementById("filterProdi").value;
-      const hasil = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
-      tampilkanData(hasil);
+      // Memfilter dari data mentah (semuaData)
+      const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
+      // Memanggil tampilkanData untuk merender tabel dan set dataYangDitampilkan
+      tampilkanData(hasilFilter);
     }
 
-    // --- Export Excel (Tidak Berubah) ---
+    // --- FUNGSI DIUBAH: Export Excel ---
     function exportExcel() {
-      const ws = XLSX.utils.json_to_sheet(semuaData);
+      // Mengekspor data yang ada di tabel saat ini (dataYangDitampilkan)
+      const ws = XLSX.utils.json_to_sheet(dataYangDitampilkan); 
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Jadwal");
-      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
+      XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
+      XLSX.writeFile(wb, "jadwal_kuliah_terfilter.xlsx");
     }
 
-    // --- Export PDF (Tidak Berubah) ---
+    // --- FUNGSI DIUBAH: Export PDF ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      doc.text("Jadwal Kuliah", 14, 15);
+      doc.text("Jadwal Kuliah (Terfilter)", 14, 15);
       let y = 25;
-      semuaData.forEach((r, i) => {
+      
+      // Mengekspor data yang ada di tabel saat ini (dataYangDitampilkan)
+      dataYangDitampilkan.forEach((r, i) => { 
         doc.text(`${i + 1}. ${r.mata_kuliah || "-"} (${r.prodi || "-"})`, 14, y);
         y += 8;
         if (y > 270) {
@@ -490,7 +493,7 @@
           y = 20;
         }
       });
-      doc.save("jadwal_kuliah.pdf");
+      doc.save("jadwal_kuliah_terfilter.pdf");
     }
   </script>
 </body>
