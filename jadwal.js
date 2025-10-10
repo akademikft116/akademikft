@@ -6,6 +6,34 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const tabelBody = document.querySelector("#tabelJadwal tbody");
 let semuaData = [];
 
+// --- Tambahan: Fungsi untuk mendapatkan kelas warna berdasarkan Prodi ---
+// Kelas yang digunakan adalah kelas utilitas dari Tailwind CSS (seperti bg-blue-200, text-blue-800)
+function getColorClass(prodi) {
+  if (!prodi) return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block';
+  
+  // Normalisasi string prodi untuk perbandingan yang lebih baik
+  const normalizedProdi = prodi.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  switch (normalizedProdi) {
+    case 'teknikkomputerjaringan':
+    case 'tkj':
+      return 'bg-blue-200 text-blue-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Biru
+    case 'teknikpemesinan':
+    case 'tpm':
+      return 'bg-green-200 text-green-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Hijau
+    case 'teknikbangunan':
+    case 'tb':
+      return 'bg-yellow-200 text-yellow-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Kuning
+    case 'rekayasaperangkatlunak':
+    case 'rpl':
+      return 'bg-purple-200 text-purple-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Ungu
+    default:
+      // Warna default jika prodi tidak dikenali
+      return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block'; 
+  }
+}
+// --- Akhir fungsigetColorClass ---
+
 // --- Load data saat halaman dibuka ---
 window.onload = async () => {
   const { data: user } = await supabase.auth.getUser();
@@ -33,25 +61,28 @@ async function loadData() {
 function tampilkanData(data) {
   tabelBody.innerHTML = "";
   data.forEach((row, index) => {
+    // Tambahan: Ambil kelas warna untuk prodi
+    const prodiClass = getColorClass(row.prodi);
+
     const tr = document.createElement("tr");
-    tr.classList.add("border-b");
     tr.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${row.kode_matkul || "-"}</td>
-      <td>${row.prodi || "-"}</td>
-      <td>${row.hari || "-"}</td>
-      <td>${row.jam_mulai || "-"}</td>
-      <td>${row.jam_akhir || "-"}</td>
-      <td>${row.mata_kuliah || "-"}</td>
-      <td>${row.sks || "-"}</td>
-      <td>${row.dosen || "-"}</td>
-      <td>${row.asisten || "-"}</td>
-      <td>${row.semester || "-"}</td>
-      <td>${row.kelas || "-"}</td>
-      <td>${row.ruangan || "-"}</td>
-      <td>
-        <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded">Edit</button>
-        <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1">Hapus</button>
+      <td class="py-2 px-4 border-b text-center">${index + 1}</td>
+      <td class="py-2 px-4 border-b text-center">${row.kode || '-'}</td>
+      <td class="py-2 px-4 border-b">
+        <span class="${prodiClass}">${row.prodi || '-'}</span> </td>
+      <td class="py-2 px-4 border-b text-center">${row.hari || '-'}</td>
+      <td class="py-2 px-4 border-b text-center">${row.mulai || '-'}</td>
+      <td class="py-2 px-4 border-b text-center">${row.akhir || '-'}</td>
+      <td class="py-2 px-4 border-b">${row.mata_kuliah || '-'}</td>
+      <td class="py-2 px-4 border-b text-center">${row.sks || '-'}</td>
+      <td class="py-2 px-4 border-b">${row.dosen || '-'}</td>
+      <td class="py-2 px-4 border-b">${row.asisten || '-'}</td>
+      <td class="py-2 px-4 border-b text-center">${row.semester || '-'}</td>
+      <td class="py-2 px-4 border-b">${row.kelas || '-'}</td>
+      <td class="py-2 px-4 border-b">${row.ruangan || '-'}</td>
+      <td class="py-2 px-4 border-b text-center">
+        <button onclick="ubahJadwal(${row.id})" class="text-blue-600 hover:text-blue-900 font-semibold mx-1">Ubah</button>
+        <button onclick="hapusJadwal(${row.id})" class="text-red-600 hover:text-red-900 font-semibold mx-1">Hapus</button>
       </td>
     `;
     tabelBody.appendChild(tr);
@@ -59,19 +90,41 @@ function tampilkanData(data) {
 }
 
 // --- Tambah jadwal baru ---
-async function tambahJadwal(jadwal) {
-  const { data, error } = await supabase.from("jadwal").insert([jadwal]);
+async function tambahJadwal() {
+  // ... (Kode fungsi tambahJadwal tetap sama)
+  const prodi = document.getElementById("prodi").value;
+  const kode = document.getElementById("kode").value;
+  const hari = document.getElementById("hari").value;
+  const mulai = document.getElementById("mulai").value;
+  const akhir = document.getElementById("akhir").value;
+  const mata_kuliah = document.getElementById("mata_kuliah").value;
+  const sks = document.getElementById("sks").value;
+  const dosen = document.getElementById("dosen").value;
+  const asisten = document.getElementById("asisten").value;
+  const semester = document.getElementById("semester").value;
+  const kelas = document.getElementById("kelas").value;
+  const ruangan = document.getElementById("ruangan").value;
+
+  if (!prodi || !kode || !hari || !mulai || !akhir || !mata_kuliah || !sks) {
+    alert("Pastikan Prodi, Kode, Hari, Waktu Mulai & Akhir, Mata Kuliah, dan SKS terisi.");
+    return;
+  }
+
+  const { error } = await supabase.from("jadwal").insert([
+    { prodi, kode, hari, mulai, akhir, mata_kuliah, sks, dosen, asisten, semester, kelas, ruangan },
+  ]);
+
   if (error) {
-    alert("Gagal menambah jadwal");
-    console.error(error);
+    alert("Gagal menambahkan jadwal: " + error.message);
   } else {
-    alert("Jadwal berhasil ditambahkan");
+    alert("Jadwal berhasil ditambahkan!");
+    document.getElementById("jadwal-form").reset();
     loadData();
   }
 }
 
-// --- Edit jadwal (popup sederhana) ---
-async function editJadwal(id) {
+// --- Ubah jadwal (prompt) ---
+async function ubahJadwal(id) {
   const row = semuaData.find(r => r.id === id);
   if (!row) return;
   const mata_kuliah = prompt("Ubah nama mata kuliah:", row.mata_kuliah);
@@ -115,15 +168,49 @@ function exportExcel() {
 function exportPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+
+  const dataPDF = semuaData.map((row, index) => [
+    index + 1,
+    row.kode || '-',
+    row.prodi || '-', // Pastikan data prodi ada
+    row.hari || '-',
+    row.mulai || '-',
+    row.akhir || '-',
+    row.mata_kuliah || '-',
+    row.sks || '-',
+    row.dosen || '-',
+    row.asisten || '-',
+    row.semester || '-',
+    row.kelas || '-',
+    row.ruangan || '-',
+  ]);
+  
+  const headers = [
+      "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
+      "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
+  ];
+
+  doc.setFontSize(14);
   doc.text("Jadwal Kuliah", 14, 15);
-  let y = 25;
-  semuaData.forEach((r, i) => {
-    doc.text(`${i + 1}. ${r.mata_kuliah || "-"} (${r.prodi || "-"})`, 14, y);
-    y += 8;
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
+  
+  doc.autoTable({
+    head: [headers],
+    body: dataPDF,
+    startY: 20, 
+    theme: 'grid',
+    styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
+    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+    columnStyles: {
+        0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
+        3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
+        5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
+        10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 },
+        12: { halign: 'center', cellWidth: 15 }
+    },
+    didDrawCell: (data) => {
+        // Logika pewarnaan di PDF harus dilakukan secara terpisah karena ini library berbeda
     }
   });
+
   doc.save("jadwal_kuliah.pdf");
 }
