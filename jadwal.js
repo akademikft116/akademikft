@@ -6,36 +6,35 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const tabelBody = document.querySelector("#tabelJadwal tbody");
 let semuaData = [];
 
-// --- FUNGSI BARU untuk mendapatkan kelas warna berdasarkan Prodi (Pencocokan Fleksibel) ---
+// --- FUNGSI PENTING (getColorClass) ---
 function getColorClass(prodi) {
   // Kelas default jika Prodi kosong atau null
   if (!prodi) return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block';
   
-  // Normalisasi string prodi: hapus karakter non-alfanumerik, ubah ke huruf kecil.
-  // Ini memastikan 'Teknik Industri 2A' atau 'Arsitektur S1' tetap bisa dicocokkan.
+  // Normalisasi string prodi
+  // Menghapus spasi, tanda baca, dan mengubah ke huruf kecil untuk pencocokan maksimal.
   const normalizedProdi = prodi.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 
-  // Menggunakan .includes() untuk pencocokan yang lebih fleksibel
-  if (normalizedProdi.includes('industri')) {
+  // Logika Pencocokan Fleksibel
+  if (normalizedProdi.includes('industri') || normalizedProdi.includes('ti')) {
     return 'bg-red-200 text-red-800 font-medium rounded-md px-2 py-1 inline-block'; // Merah (Industri)
   }
-  if (normalizedProdi.includes('sipil')) {
+  if (normalizedProdi.includes('sipil') || normalizedProdi.includes('ts')) {
     return 'bg-blue-200 text-blue-800 font-medium rounded-md px-2 py-1 inline-block'; // Biru (Sipil)
   }
-  if (normalizedProdi.includes('arsitektur')) {
+  if (normalizedProdi.includes('arsitektur') || normalizedProdi.includes('ta')) {
     return 'bg-green-200 text-green-800 font-medium rounded-md px-2 py-1 inline-block'; // Hijau (Arsitektur)
   }
-  if (normalizedProdi.includes('elektro')) {
+  if (normalizedProdi.includes('elektro') || normalizedProdi.includes('te')) {
     return 'bg-yellow-200 text-yellow-800 font-medium rounded-md px-2 py-1 inline-block'; // Kuning (Elektro)
   }
   if (normalizedProdi.includes('informatika') || normalizedProdi.includes('if')) {
     return 'bg-purple-200 text-purple-800 font-medium rounded-md px-2 py-1 inline-block'; // Ungu (Informatika)
   }
     
-  // Warna default jika prodi tidak dikenali
+  // Warna default (Abu-abu)
   return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block'; 
 }
-// --- Akhir FUNGSI BARU getColorClass ---
 
 // --- Load data saat halaman dibuka ---
 window.onload = async () => {
@@ -64,7 +63,7 @@ async function loadData() {
 function tampilkanData(data) {
   tabelBody.innerHTML = "";
   data.forEach((row, index) => {
-    // Tambahan: Ambil kelas warna untuk prodi menggunakan fungsi yang baru
+    // BARIS PENTING: Panggil fungsi warna
     const prodiClass = getColorClass(row.prodi);
 
     const tr = document.createElement("tr");
