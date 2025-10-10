@@ -6,33 +6,36 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const tabelBody = document.querySelector("#tabelJadwal tbody");
 let semuaData = [];
 
-// --- Tambahan: Fungsi untuk mendapatkan kelas warna berdasarkan Prodi ---
-// Kelas yang digunakan adalah kelas utilitas dari Tailwind CSS (seperti bg-blue-200, text-blue-800)
+// --- FUNGSI BARU untuk mendapatkan kelas warna berdasarkan Prodi (Pencocokan Fleksibel) ---
 function getColorClass(prodi) {
+  // Kelas default jika Prodi kosong atau null
   if (!prodi) return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block';
   
-  // Normalisasi string prodi untuk perbandingan yang lebih baik
-  const normalizedProdi = prodi.toLowerCase().replace(/[^a-z0-9]/g, '');
+  // Normalisasi string prodi: hapus karakter non-alfanumerik, ubah ke huruf kecil.
+  // Ini memastikan 'Teknik Industri 2A' atau 'Arsitektur S1' tetap bisa dicocokkan.
+  const normalizedProdi = prodi.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 
-  switch (normalizedProdi) {
-    case 'teknikkomputerjaringan':
-    case 'tkj':
-      return 'bg-blue-200 text-blue-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Biru
-    case 'teknikpemesinan':
-    case 'tpm':
-      return 'bg-green-200 text-green-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Hijau
-    case 'teknikbangunan':
-    case 'tb':
-      return 'bg-yellow-200 text-yellow-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Kuning
-    case 'rekayasaperangkatlunak':
-    case 'rpl':
-      return 'bg-purple-200 text-purple-800 font-medium rounded-md px-2 py-1 inline-block'; // Warna Ungu
-    default:
-      // Warna default jika prodi tidak dikenali
-      return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block'; 
+  // Menggunakan .includes() untuk pencocokan yang lebih fleksibel
+  if (normalizedProdi.includes('industri')) {
+    return 'bg-red-200 text-red-800 font-medium rounded-md px-2 py-1 inline-block'; // Merah (Industri)
   }
+  if (normalizedProdi.includes('sipil')) {
+    return 'bg-blue-200 text-blue-800 font-medium rounded-md px-2 py-1 inline-block'; // Biru (Sipil)
+  }
+  if (normalizedProdi.includes('arsitektur')) {
+    return 'bg-green-200 text-green-800 font-medium rounded-md px-2 py-1 inline-block'; // Hijau (Arsitektur)
+  }
+  if (normalizedProdi.includes('elektro')) {
+    return 'bg-yellow-200 text-yellow-800 font-medium rounded-md px-2 py-1 inline-block'; // Kuning (Elektro)
+  }
+  if (normalizedProdi.includes('informatika') || normalizedProdi.includes('if')) {
+    return 'bg-purple-200 text-purple-800 font-medium rounded-md px-2 py-1 inline-block'; // Ungu (Informatika)
+  }
+    
+  // Warna default jika prodi tidak dikenali
+  return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block'; 
 }
-// --- Akhir fungsigetColorClass ---
+// --- Akhir FUNGSI BARU getColorClass ---
 
 // --- Load data saat halaman dibuka ---
 window.onload = async () => {
@@ -61,7 +64,7 @@ async function loadData() {
 function tampilkanData(data) {
   tabelBody.innerHTML = "";
   data.forEach((row, index) => {
-    // Tambahan: Ambil kelas warna untuk prodi
+    // Tambahan: Ambil kelas warna untuk prodi menggunakan fungsi yang baru
     const prodiClass = getColorClass(row.prodi);
 
     const tr = document.createElement("tr");
@@ -91,7 +94,6 @@ function tampilkanData(data) {
 
 // --- Tambah jadwal baru ---
 async function tambahJadwal() {
-  // ... (Kode fungsi tambahJadwal tetap sama)
   const prodi = document.getElementById("prodi").value;
   const kode = document.getElementById("kode").value;
   const hari = document.getElementById("hari").value;
@@ -172,7 +174,7 @@ function exportPDF() {
   const dataPDF = semuaData.map((row, index) => [
     index + 1,
     row.kode || '-',
-    row.prodi || '-', // Pastikan data prodi ada
+    row.prodi || '-', 
     row.hari || '-',
     row.mulai || '-',
     row.akhir || '-',
@@ -208,7 +210,7 @@ function exportPDF() {
         12: { halign: 'center', cellWidth: 15 }
     },
     didDrawCell: (data) => {
-        // Logika pewarnaan di PDF harus dilakukan secara terpisah karena ini library berbeda
+        // Logika pewarnaan di PDF harus dilakukan secara terpisah
     }
   });
 
