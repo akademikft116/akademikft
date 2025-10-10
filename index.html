@@ -97,12 +97,12 @@
       
       let emailToLogin = credential;
       
-      // Cek apakah kredensial bukan email
+      // Jika kredensial terlihat seperti username (tidak ada '@')
       if (!credential.includes('@')) {
-          // Cari user_id dan email di tabel metadata berdasarkan username
+          // 1. Cari email di tabel metadata berdasarkan username
           const { data: userData, error: metadataError } = await supabaseClient
               .from('users_metadata')
-              .select('email, user_id')
+              .select('email')
               .eq('username', credential)
               .single();
               
@@ -112,30 +112,21 @@
               return;
           }
           
-          // Jika kolom email di users_metadata kosong (didaftar tanpa email)
-          if (!userData.email) {
-            // Kita harus ambil email (dummy) dari tabel auth.users
-            const { data: authData, error: authError } = await supabaseClient.auth.admin.getUserById(userData.user_id);
+          // 2. Gunakan email yang tersimpan (asli atau dummy)
+          emailToLogin = userData.email;
 
-            if (authError || !authData) {
-                alert("❌ Login gagal: Data autentikasi pengguna tidak ditemukan.");
-                console.error(authError);
-                return;
-            }
-            // Gunakan email (dummy) dari Supabase Auth untuk proses login
-            emailToLogin = authData.user.email;
-          } else {
-            // Jika ada email di users_metadata, gunakan email asli tersebut
-            emailToLogin = userData.email;
+          // Pengecekan keamanan untuk akun lama:
+          if (!emailToLogin) {
+              alert("❌ Login gagal: Data akun Anda tidak lengkap (email kosong). Silakan daftar ulang menggunakan username yang sama atau hubungi admin.");
+              return;
           }
       }
 
-
-      // Lakukan proses login menggunakan email yang sudah ditentukan (asli, atau dummy)
+      // Lakukan proses login menggunakan email yang sudah ditentukan (asli, atau email dari users_metadata)
       const { error } = await supabaseClient.auth.signInWithPassword({ email: emailToLogin, password });
 
       if (error) {
-        alert("❌ Login gagal: " + error.message);
+        alert("❌ Login gagal: Password atau kredensial salah.");
         console.error(error);
       } else {
         alert("✅ Login berhasil!");
@@ -158,7 +149,7 @@
         return;
       }
       
-      // 1. Tentukan email yang akan digunakan untuk Supabase Auth
+      // 1. Tentukan email yang akan digunakan untuk Supabase Auth (wajib ada)
       let authEmail = originalEmail;
       
       if (!originalEmail) {
@@ -196,9 +187,9 @@
           return;
         }
         
-        // 4. Simpan username ke tabel 'users_metadata'
+        // 4. Simpan username ke tabel 'users_metadata' (SEKARANG SELALU SIMPAN EMAIL AUTH)
         if (data.user) {
-            const emailToSave = originalEmail || null; // Simpan NULL jika user tidak memasukkan email
+            const emailToSave = authEmail; // Simpan email AUTH (asli atau dummy)
 
             const { error: metadataError } = await supabaseClient
                 .from('users_metadata')
