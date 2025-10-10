@@ -9,31 +9,23 @@ let semuaData = [];
 // --- FUNGSI PENTING (getColorClass) ---
 function getColorClass(prodi) {
   // Kelas default jika Prodi kosong atau null
-  if (!prodi) return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block';
+  if (!prodi) return 'badge bg-gray-200 text-gray-800';
   
   // Normalisasi string prodi
-  // Menghapus spasi, tanda baca, dan mengubah ke huruf kecil untuk pencocokan maksimal.
   const normalizedProdi = prodi.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 
   // Logika Pencocokan Fleksibel
-  if (normalizedProdi.includes('Industri') || normalizedProdi.includes('ti')) {
-    return 'bg-red-200 text-red-800 font-medium rounded-md px-2 py-1 inline-block'; // Merah (Industri)
+  if (normalizedProdi.includes('industri')) {
+    return 'badge bg-green-100'; // Hijau
+  } else if (normalizedProdi.includes('sipil')) {
+    return 'badge bg-blue-100'; // Biru
+  } else if (normalizedProdi.includes('elektro')) {
+    return 'badge bg-yellow-100'; // Kuning
+  } else if (normalizedProdi.includes('mesin')) {
+    return 'badge bg-red-100'; // Merah
+  } else {
+    return 'badge bg-purple-100'; // Ungu (Lainnya)
   }
-  if (normalizedProdi.includes('Sipil') || normalizedProdi.includes('ts')) {
-    return 'bg-blue-200 text-blue-800 font-medium rounded-md px-2 py-1 inline-block'; // Biru (Sipil)
-  }
-  if (normalizedProdi.includes('Arsitektur') || normalizedProdi.includes('ta')) {
-    return 'bg-green-200 text-green-800 font-medium rounded-md px-2 py-1 inline-block'; // Hijau (Arsitektur)
-  }
-  if (normalizedProdi.includes('Elektro') || normalizedProdi.includes('te')) {
-    return 'bg-yellow-200 text-yellow-800 font-medium rounded-md px-2 py-1 inline-block'; // Kuning (Elektro)
-  }
-  if (normalizedProdi.includes('Informatika') || normalizedProdi.includes('if')) {
-    return 'bg-purple-200 text-purple-800 font-medium rounded-md px-2 py-1 inline-block'; // Ungu (Informatika)
-  }
-    
-  // Warna default (Abu-abu)
-  return 'bg-gray-200 text-gray-800 font-medium rounded-md px-2 py-1 inline-block'; 
 }
 
 // --- Load data saat halaman dibuka ---
@@ -47,6 +39,17 @@ window.onload = async () => {
   loadData();
 };
 
+// --- Logout ---
+async function logout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error(error);
+    alert("Gagal logout");
+  } else {
+    window.location.href = "index.html";
+  }
+}
+
 // --- Ambil data jadwal dari Supabase ---
 async function loadData() {
   const { data, error } = await supabase.from("jadwal").select("*").order("id", { ascending: true });
@@ -56,81 +59,84 @@ async function loadData() {
     return;
   }
   semuaData = data;
-  tampilkanData(semuaData);
+  tampilkanData(data);
 }
 
-// --- Tampilkan data ke tabel ---
+// --- Menampilkan data ke tabel ---
 function tampilkanData(data) {
-  tabelBody.innerHTML = "";
-  data.forEach((row, index) => {
-    // BARIS PENTING: Panggil fungsi warna
-    const prodiClass = getColorClass(row.prodi);
+  tabelBody.innerHTML = ''; // Kosongkan tabel
+  if (data.length === 0) {
+    tabelBody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-gray-500">Tidak ada data jadwal yang ditemukan.</td></tr>';
+    return;
+  }
 
-    const tr = document.createElement("tr");
+  data.forEach((row, index) => {
+    const tr = document.createElement('tr');
+    
+    // Tentukan kelas warna untuk badge prodi
+    const prodiClass = getColorClass(row.prodi);
+    
     tr.innerHTML = `
-      <td class="py-2 px-4 border-b text-center">${index + 1}</td>
-      <td class="py-2 px-4 border-b text-center">${row.kode || '-'}</td>
-      <td class="py-2 px-4 border-b">
-        <span class="${prodiClass}">${row.prodi || '-'}</span> </td>
-      <td class="py-2 px-4 border-b text-center">${row.hari || '-'}</td>
-      <td class="py-2 px-4 border-b text-center">${row.mulai || '-'}</td>
-      <td class="py-2 px-4 border-b text-center">${row.akhir || '-'}</td>
-      <td class="py-2 px-4 border-b">${row.mata_kuliah || '-'}</td>
-      <td class="py-2 px-4 border-b text-center">${row.sks || '-'}</td>
-      <td class="py-2 px-4 border-b">${row.dosen || '-'}</td>
-      <td class="py-2 px-4 border-b">${row.asisten || '-'}</td>
-      <td class="py-2 px-4 border-b text-center">${row.semester || '-'}</td>
-      <td class="py-2 px-4 border-b">${row.kelas || '-'}</td>
-      <td class="py-2 px-4 border-b">${row.ruangan || '-'}</td>
-      <td class="py-2 px-4 border-b text-center">
-        <button onclick="ubahJadwal(${row.id})" class="text-blue-600 hover:text-blue-900 font-semibold mx-1">Ubah</button>
-        <button onclick="hapusJadwal(${row.id})" class="text-red-600 hover:text-red-900 font-semibold mx-1">Hapus</button>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.kode || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm">
+        <span class="${prodiClass}">${row.prodi || 'TIDAK ADA'}</span>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.hari || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.mulai || '-'} - ${row.akhir || '-'}</td>
+      <td class="px-6 py-4 whitespace-wrap text-sm text-gray-900 font-medium">${row.mata_kuliah || '-'} <span class="text-xs text-gray-500">(${row.sks || 0} SKS)</span></td>
+      <td class="px-6 py-4 whitespace-wrap text-sm text-gray-500">${row.dosen || '-'}<br><span class="text-xs italic">${row.asisten ? `Asisten: ${row.asisten}` : ''}</span></td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.semester || '-'}<br>${row.kelas || '-'}<br>${row.ruangan || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <button onclick="ubahJadwal(${row.id})" class="text-indigo-600 hover:text-indigo-900 mx-1">Ubah</button>
+        <button onclick="hapusJadwal(${row.id})" class="text-red-600 hover:text-red-900 mx-1">Hapus</button>
       </td>
     `;
     tabelBody.appendChild(tr);
   });
 }
 
-// --- Tambah jadwal baru ---
+// --- Tambah Jadwal ---\
 async function tambahJadwal() {
-  const prodi = document.getElementById("prodi").value;
-  const kode = document.getElementById("kode").value;
-  const hari = document.getElementById("hari").value;
-  const mulai = document.getElementById("mulai").value;
-  const akhir = document.getElementById("akhir").value;
-  const mata_kuliah = document.getElementById("mata_kuliah").value;
-  const sks = document.getElementById("sks").value;
-  const dosen = document.getElementById("dosen").value;
-  const asisten = document.getElementById("asisten").value;
-  const semester = document.getElementById("semester").value;
-  const kelas = document.getElementById("kelas").value;
-  const ruangan = document.getElementById("ruangan").value;
+  const jadwal = {
+    kode: document.getElementById("inputKode").value,
+    prodi: document.getElementById("inputProdi").value,
+    hari: document.getElementById("inputHari").value,
+    mulai: document.getElementById("inputMulai").value,
+    akhir: document.getElementById("inputAkhir").value,
+    mata_kuliah: document.getElementById("inputMataKuliah").value,
+    sks: parseInt(document.getElementById("inputSks").value),
+    dosen: document.getElementById("inputDosen").value,
+    asisten: document.getElementById("inputAsisten").value || null,
+    semester: document.getElementById("inputSemester").value,
+    kelas: document.getElementById("inputKelas").value,
+    ruangan: document.getElementById("inputRuangan").value,
+  };
 
-  if (!prodi || !kode || !hari || !mulai || !akhir || !mata_kuliah || !sks) {
-    alert("Pastikan Prodi, Kode, Hari, Waktu Mulai & Akhir, Mata Kuliah, dan SKS terisi.");
+  if (!jadwal.prodi || !jadwal.hari || !jadwal.mulai || !jadwal.akhir || !jadwal.mata_kuliah) {
+    alert("Pastikan kolom Prodi, Hari, Waktu, dan Mata Kuliah terisi.");
     return;
   }
-
-  const { error } = await supabase.from("jadwal").insert([
-    { prodi, kode, hari, mulai, akhir, mata_kuliah, sks, dosen, asisten, semester, kelas, ruangan },
-  ]);
-
-  if (error) {
-    alert("Gagal menambahkan jadwal: " + error.message);
-  } else {
+  
+  const { error } = await supabase.from("jadwal").insert([jadwal]);
+  if (error) alert("Gagal menambah jadwal: " + error.message);
+  else {
     alert("Jadwal berhasil ditambahkan!");
     document.getElementById("jadwal-form").reset();
     loadData();
   }
 }
 
-// --- Ubah jadwal (prompt) ---
+// --- Ubah Jadwal (Contoh Sederhana) ---
 async function ubahJadwal(id) {
   const row = semuaData.find(r => r.id === id);
   if (!row) return;
+  
   const mata_kuliah = prompt("Ubah nama mata kuliah:", row.mata_kuliah);
   if (!mata_kuliah) return;
 
+  // Anda bisa menambahkan prompt/modal untuk mengubah kolom lainnya
+  
   const { error } = await supabase.from("jadwal").update({ mata_kuliah }).eq("id", id);
   if (error) alert("Gagal memperbarui jadwal");
   else {
@@ -153,13 +159,30 @@ async function hapusJadwal(id) {
 // --- Filter data berdasarkan prodi ---
 function filterData() {
   const filter = document.getElementById("filterProdi").value;
+  // Jika filter kosong, tampilkan semua data (semuaData)
   const hasil = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
   tampilkanData(hasil);
 }
 
 // --- Export ke Excel ---
 function exportExcel() {
-  const ws = XLSX.utils.json_to_sheet(semuaData);
+  const dataExport = semuaData.map((row, index) => ({
+    No: index + 1,
+    Kode: row.kode || '-',
+    Prodi: row.prodi || '-', 
+    Hari: row.hari || '-',
+    Mulai: row.mulai || '-',
+    Akhir: row.akhir || '-',
+    'Mata Kuliah': row.mata_kuliah || '-',
+    SKS: row.sks || 0,
+    Dosen: row.dosen || '-',
+    Asisten: row.asisten || '-',
+    Semester: row.semester || '-',
+    Kelas: row.kelas || '-',
+    Ruangan: row.ruangan || '-',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(dataExport);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Jadwal");
   XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
@@ -205,13 +228,19 @@ function exportPDF() {
         0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
         3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
         5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
-        10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 },
+        10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 }, 
         12: { halign: 'center', cellWidth: 15 }
-    },
-    didDrawCell: (data) => {
-        // Logika pewarnaan di PDF harus dilakukan secara terpisah
     }
   });
 
-  doc.save("jadwal_kuliah.pdf");
+  doc.save('jadwal_kuliah.pdf');
 }
+
+// Daftarkan fungsi ke window agar bisa dipanggil dari HTML
+window.logout = logout;
+window.tambahJadwal = tambahJadwal;
+window.ubahJadwal = ubahJadwal;
+window.hapusJadwal = hapusJadwal;
+window.filterData = filterData;
+window.exportExcel = exportExcel;
+window.exportPDF = exportPDF;
