@@ -619,10 +619,13 @@
         const ws = XLSX.utils.json_to_sheet(dataExcel);
         
         // --- LOGIC PEWARNAAN SEL EXCEL (XLSX.js) ---
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        const prodiColumnIndex = EXCEL_HEADERS.indexOf("Prodi") + 1; // +1 karena ada kolom 'No' tambahan
+        // Mencari index kolom Prodi (indeks 2 karena ada kolom No dan Kode Matkul)
+        const prodiColumnIndex = 2; // Index kolom Prodi dalam dataExcel
 
-        // Style untuk Header (Kolom Prodi)
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        // Kolom di XLSX dihitung A=0, B=1, C=2... -> Col C adalah Prodi
+
+        // Style untuk Header (Kolom Prodi - baris 0)
         const headerCell = XLSX.utils.encode_cell({ c: prodiColumnIndex, r: 0 });
         if (ws[headerCell]) {
             ws[headerCell].s = {
@@ -633,7 +636,7 @@
             };
         }
 
-        // Style untuk Data Baris
+        // Style untuk Data Baris (Mulai dari baris 1)
         for (let R = 1; R <= range.e.r; ++R) {
             const cellAddress = XLSX.utils.encode_cell({ c: prodiColumnIndex, r: R });
             const cell = ws[cellAddress];
@@ -662,9 +665,16 @@
     }
 
 
-    // --- FUNGSI Export PDF (DIPERBAIKI dan dengan pewarnaan) ---
+    // --- FUNGSI Export PDF (FIXED dan dengan pewarnaan) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
+      // Periksa apakah jsPDF dan autoTable tersedia
+      if (!jsPDF || !jsPDF.autoTable) {
+           showToast("Error: Library PDF (jspdf/autotable) gagal dimuat.", 'error');
+           console.error("jsPDF atau autoTable tidak ditemukan. Pastikan library dimuat.");
+           return;
+      }
+
       const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape (horizontal)
 
       if (dataYangDitampilkan.length === 0) {
@@ -680,7 +690,7 @@
         row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
       ]);
 
-      // Buat data bersih yang tidak menyertakan kolom prodi pertama
+      // Buat data bersih yang tidak menyertakan kolom prodi pertama (prodi hanya untuk hook)
       const dataPDFClean = dataPDF.map(row => row.slice(1));
       
       const headers = [
@@ -689,6 +699,7 @@
       ];
 
       doc.setFontSize(14);
+      // Perbaikan: Hapus tanda kurung yang berlebihan
       doc.text("Jadwal Kuliah", 14, 15);
       
       doc.autoTable({
@@ -709,29 +720,33 @@
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
         
-        // --- PEWARNAAN BARIS PDF ---
-        didDrawCell: (data) => {
-            if (data.section === 'body') {
-                // Ambil prodi dari data mentah (indeks 0 sebelum dibersihkan)
+        // --- PEWARNAAN BARIS PDF: Pisahkan pewarnaan font dan background agar lebih stabil ---
+        willDrawCell: (data) => {
+             if (data.section === 'body') {
                 const prodi = dataPDF[data.row.index][0];
                 const colorData = prodiColors[prodi];
-                
-                if (colorData && data.column.index === 0) { 
-                    // Set warna latar belakang untuk seluruh baris
-                    doc.setFillColor(colorData.rgb[0], colorData.rgb[1], colorData.rgb[2]);
-                    doc.rect(data.settings.margin.left, data.cell.y, data.table.width, data.cell.height, 'F');
-                    
-                    // Set warna font agar terbaca
-                    const fontColor = colorData.font === "FF000000" ? [0, 0, 0] : [255, 255, 255]; // Hitam/Putih
+
+                // Set warna font untuk seluruh baris sebelum ditarik
+                if (colorData) {
+                    const fontColor = colorData.font === "FF000000" ? [0, 0, 0] : [255, 255, 255]; 
                     doc.setTextColor(fontColor[0], fontColor[1], fontColor[2]);
+                } else {
+                    // Warna default font (abu-abu gelap)
+                    doc.setTextColor(51, 51, 51); 
                 }
             }
         },
-        // Pastikan baris ganjil/genap tidak menimpa warna prodi, dan reset warna font
-        willDrawCell: (data) => {
-             if (data.section === 'body') {
-                // Reset warna font sebelum menggambar sel
-                doc.setTextColor(51, 51, 51); // Warna default font (abu-abu gelap)
+        didDrawCell: (data) => {
+            // Hanya jalankan logic saat menggambar sel pertama (indeks 0) untuk seluruh baris
+            if (data.section === 'body' && data.column.index === 0) {
+                const prodi = dataPDF[data.row.index][0];
+                const colorData = prodiColors[prodi];
+                
+                if (colorData) { 
+                    // Set warna latar belakang untuk seluruh baris
+                    doc.setFillColor(colorData.rgb[0], colorData.rgb[1], colorData.rgb[2]);
+                    doc.rect(data.settings.margin.left, data.cell.y, data.table.width, data.cell.height, 'F');
+                }
             }
         },
         alternateRowStyles: { fillColor: [255, 255, 255] }, 
