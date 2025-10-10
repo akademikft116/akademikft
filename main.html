@@ -665,95 +665,102 @@
     }
 
 
-    // --- FUNGSI Export PDF (FIXED dan dengan pewarnaan) ---
+    // --- FUNGSI Export PDF (FIXED v3: Try/Catch & Initialization Check) ---
     function exportPDF() {
-      const { jsPDF } = window.jspdf;
-      // Periksa apakah jsPDF dan autoTable tersedia
-      if (!jsPDF || !jsPDF.autoTable) {
-           showToast("Error: Library PDF (jspdf/autotable) gagal dimuat.", 'error');
-           console.error("jsPDF atau autoTable tidak ditemukan. Pastikan library dimuat.");
-           return;
-      }
+      try {
+        const { jsPDF } = window.jspdf;
+        // Periksa apakah jsPDF dan autoTable tersedia
+        if (!jsPDF || !jsPDF.autoTable) {
+             showToast("Error: Library PDF (jspdf/autotable) gagal dimuat.", 'error');
+             console.error("jsPDF atau autoTable tidak ditemukan. Pastikan library dimuat di <head>.");
+             return;
+        }
 
-      const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape (horizontal)
+        const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape (horizontal)
 
-      if (dataYangDitampilkan.length === 0) {
-          showToast("Tidak ada data terfilter untuk diekspor ke PDF!", 'info'); 
-          return;
-      }
-      
-      const dataPDF = dataYangDitampilkan.map((row, index) => [
-        row.prodi, // [0] -> Prodi (untuk pewarnaan, akan dihapus nanti)
-        index + 1, // [1] -> No
-        row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
-        row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
-        row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
-      ]);
-
-      // Buat data bersih yang tidak menyertakan kolom prodi pertama (prodi hanya untuk hook)
-      const dataPDFClean = dataPDF.map(row => row.slice(1));
-      
-      const headers = [
-          "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
-          "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
-      ];
-
-      doc.setFontSize(14);
-      // Perbaikan: Hapus tanda kurung yang berlebihan
-      doc.text("Jadwal Kuliah", 14, 15);
-      
-      doc.autoTable({
-        head: [headers],
-        body: dataPDFClean,
-        startY: 20, 
-        theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
-        headStyles: { fillColor: [52, 73, 94], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' }, 
-        columnStyles: {
-            0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
-            3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
-            5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
-            10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 }, 
-            12: { halign: 'center', cellWidth: 15 }, 
-            2: { halign: 'left', cellWidth: 25 }, 6: { halign: 'left', cellWidth: 45 }, 
-            8: { halign: 'left', cellWidth: 35 }, 9: { halign: 'left', cellWidth: 35 }, 
-        },
-        margin: { top: 18, left: 5, right: 5, bottom: 5 },
+        if (dataYangDitampilkan.length === 0) {
+            showToast("Tidak ada data terfilter untuk diekspor ke PDF!", 'info'); 
+            return;
+        }
         
-        // --- PEWARNAAN BARIS PDF: Pisahkan pewarnaan font dan background agar lebih stabil ---
-        willDrawCell: (data) => {
-             if (data.section === 'body') {
-                const prodi = dataPDF[data.row.index][0];
-                const colorData = prodiColors[prodi];
+        // Buat data mentah untuk PDF, termasuk prodi di indeks 0 (untuk hook)
+        const dataPDFMentah = dataYangDitampilkan.map((row, index) => [
+          row.prodi, // [0] -> Prodi (Data mentah untuk hook)
+          index + 1, // [1] -> No
+          row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
+          row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
+          row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
+        ]);
 
-                // Set warna font untuk seluruh baris sebelum ditarik
-                if (colorData) {
-                    const fontColor = colorData.font === "FF000000" ? [0, 0, 0] : [255, 255, 255]; 
-                    doc.setTextColor(fontColor[0], fontColor[1], fontColor[2]);
-                } else {
-                    // Warna default font (abu-abu gelap)
-                    doc.setTextColor(51, 51, 51); 
-                }
-            }
-        },
-        didDrawCell: (data) => {
-            // Hanya jalankan logic saat menggambar sel pertama (indeks 0) untuk seluruh baris
-            if (data.section === 'body' && data.column.index === 0) {
-                const prodi = dataPDF[data.row.index][0];
-                const colorData = prodiColors[prodi];
-                
-                if (colorData) { 
-                    // Set warna latar belakang untuk seluruh baris
-                    doc.setFillColor(colorData.rgb[0], colorData.rgb[1], colorData.rgb[2]);
-                    doc.rect(data.settings.margin.left, data.cell.y, data.table.width, data.cell.height, 'F');
-                }
-            }
-        },
-        alternateRowStyles: { fillColor: [255, 255, 255] }, 
-      });
-      
-      doc.save("jadwal_kuliah.pdf");
-      showToast("File PDF berhasil dibuat!", 'success'); 
+        // Buat data bersih untuk body tabel (menghilangkan kolom prodi di indeks 0)
+        const dataPDFClean = dataPDFMentah.map(row => row.slice(1));
+        
+        const headers = [
+            "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
+            "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
+        ];
+
+        doc.setFontSize(14);
+        doc.text("Jadwal Kuliah", 14, 15);
+        
+        doc.autoTable({
+          head: [headers],
+          body: dataPDFClean,
+          startY: 20, 
+          theme: 'grid',
+          styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
+          headStyles: { fillColor: [52, 73, 94], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' }, 
+          columnStyles: {
+              0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
+              3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
+              5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
+              10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 }, 
+              12: { halign: 'center', cellWidth: 15 }, 
+              2: { halign: 'left', cellWidth: 25 }, 6: { halign: 'left', cellWidth: 45 }, 
+              8: { halign: 'left', cellWidth: 35 }, 9: { halign: 'left', cellWidth: 35 }, 
+          },
+          margin: { top: 18, left: 5, right: 5, bottom: 5 },
+          
+          // --- PEWARNAAN BARIS PDF: Tetap dengan logic terpisah yang stabil ---
+          willDrawCell: (data) => {
+               if (data.section === 'body') {
+                  const prodi = dataPDFMentah[data.row.index][0]; // Ambil dari data mentah
+                  const colorData = prodiColors[prodi];
+
+                  // Set warna font untuk seluruh baris
+                  if (colorData) {
+                      const fontColor = colorData.font === "FF000000" ? [0, 0, 0] : [255, 255, 255]; 
+                      doc.setTextColor(fontColor[0], fontColor[1], fontColor[2]);
+                  } else {
+                      // Warna default font (abu-abu gelap)
+                      doc.setTextColor(51, 51, 51); 
+                  }
+              }
+          },
+          didDrawCell: (data) => {
+              // Hanya jalankan logic saat menggambar sel pertama (indeks 0) untuk seluruh baris
+              if (data.section === 'body' && data.column.index === 0) {
+                  const prodi = dataPDFMentah[data.row.index][0]; // Ambil dari data mentah
+                  const colorData = prodiColors[prodi];
+                  
+                  if (colorData) { 
+                      // Set warna latar belakang untuk seluruh baris
+                      doc.setFillColor(colorData.rgb[0], colorData.rgb[1], colorData.rgb[2]);
+                      doc.rect(data.settings.margin.left, data.cell.y, data.table.width, data.cell.height, 'F');
+                  }
+              }
+          },
+          alternateRowStyles: { fillColor: [255, 255, 255] }, 
+        });
+        
+        doc.save("jadwal_kuliah.pdf");
+        showToast("File PDF berhasil dibuat!", 'success'); 
+
+      } catch (e) {
+          console.error("CRITICAL PDF EXPORT ERROR:", e);
+          // Notifikasi visual jika terjadi error
+          showToast("Export PDF gagal total! Silakan cek Console Log (F12) untuk detail error.", 'error');
+      }
     }
   </script>
 </body>
