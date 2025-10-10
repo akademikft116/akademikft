@@ -16,19 +16,19 @@ function getColorClass(prodi) {
   const normalizedProdi = prodi.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
 
   // Logika Pencocokan Fleksibel
-  if (normalizedProdi.includes('industri') || normalizedProdi.includes('ti')) {
+  if (normalizedProdi.includes('Industri') || normalizedProdi.includes('ti')) {
     return 'bg-red-200 text-red-800 font-medium rounded-md px-2 py-1 inline-block'; // Merah (Industri)
   }
-  if (normalizedProdi.includes('sipil') || normalizedProdi.includes('ts')) {
+  if (normalizedProdi.includes('Sipil') || normalizedProdi.includes('ts')) {
     return 'bg-blue-200 text-blue-800 font-medium rounded-md px-2 py-1 inline-block'; // Biru (Sipil)
   }
-  if (normalizedProdi.includes('arsitektur') || normalizedProdi.includes('ta')) {
+  if (normalizedProdi.includes('Arsitektur') || normalizedProdi.includes('ta')) {
     return 'bg-green-200 text-green-800 font-medium rounded-md px-2 py-1 inline-block'; // Hijau (Arsitektur)
   }
-  if (normalizedProdi.includes('elektro') || normalizedProdi.includes('te')) {
+  if (normalizedProdi.includes('Elektro') || normalizedProdi.includes('te')) {
     return 'bg-yellow-200 text-yellow-800 font-medium rounded-md px-2 py-1 inline-block'; // Kuning (Elektro)
   }
-  if (normalizedProdi.includes('informatika') || normalizedProdi.includes('if')) {
+  if (normalizedProdi.includes('Informatika') || normalizedProdi.includes('if')) {
     return 'bg-purple-200 text-purple-800 font-medium rounded-md px-2 py-1 inline-block'; // Ungu (Informatika)
   }
     
