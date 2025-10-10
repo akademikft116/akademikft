@@ -34,11 +34,11 @@
     <div id="registerForm" class="hidden">
       <h2 class="text-lg font-semibold mb-2">Daftar Akun Baru</h2>
       
-      <input id="regEmail" type="email" placeholder="Email (Wajib Diisi)" class="w-full border p-2 rounded mb-2">
-      <input id="regUsername" type="text" placeholder="Username (Untuk Login)" class="w-full border p-2 rounded mb-2">
+      <input id="regEmail" type="email" placeholder="Email (Opsional)" class="w-full border p-2 rounded mb-2">
+      <input id="regUsername" type="text" placeholder="Username (Wajib Diisi)" class="w-full border p-2 rounded mb-2">
       
       <div class="relative mb-4">
-        <input id="regPassword" type="password" placeholder="Password (min 6 karakter)" class="w-full border p-2 rounded pr-10">
+        <input id="regPassword" type="password" placeholder="Password (min 6 karakter, Wajib Diisi)" class="w-full border p-2 rounded pr-10">
         <button type="button" onclick="togglePasswordVisibility('regPassword')" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
           <svg id="eyeIconRegister" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.879 16.121A4.965 4.965 0 0112 15c1.482 0 2.903.486 4.075 1.325m-6.198 2.504A12.062 12.062 0 0112 21c-5.523 0-10-4.477-10-10S6.477 1 12 1s10 4.477 10 10c0 .385-.027.765-.08 1.14"></path>
@@ -76,11 +76,11 @@
 
         if (passwordInput.type === "password") {
             passwordInput.type = "text";
-            // Ganti ikon menjadi mata terbuka (representasi dari "hide")
+            // Ganti ikon menjadi mata terbuka
             eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
         } else {
             passwordInput.type = "password";
-            // Ganti ikon menjadi mata tertutup (representasi dari "show")
+            // Ganti ikon menjadi mata tertutup
             eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.879 16.121A4.965 4.965 0 0112 15c1.482 0 2.903.486 4.075 1.325m-6.198 2.504A12.062 12.062 0 0112 21c-5.523 0-10-4.477-10-10S6.477 1 12 1s10 4.477 10 10c0 .385-.027.765-.08 1.14"></path>';
         }
     }
@@ -97,11 +97,11 @@
       
       let emailToLogin = credential;
       
-      // Jika kredensial terlihat seperti username (tidak ada '@'), kita coba cari emailnya dari Supabase
+      // Jika kredensial terlihat seperti username (tidak ada '@'), kita cari emailnya dari Supabase
       if (!credential.includes('@')) {
           const { data, error } = await supabaseClient
-              .from('users_metadata') // Asumsi Anda membuat tabel metadata ini
-              .select('email')
+              .from('users_metadata')
+              .select('email, user_id')
               .eq('username', credential)
               .single();
               
@@ -110,11 +110,28 @@
               console.error(error);
               return;
           }
-          emailToLogin = data.email;
+          
+          // Jika email di users_metadata kosong (karena pakai email dummy saat daftar), kita ambil email dari auth.users
+          if (!data.email) {
+            const { data: authData, error: authError } = await supabaseClient
+                .from('auth.users')
+                .select('email')
+                .eq('id', data.user_id)
+                .single();
+
+            if (authError || !authData) {
+                alert("❌ Login gagal: Data pengguna tidak lengkap.");
+                return;
+            }
+            emailToLogin = authData.email;
+          } else {
+            // Jika ada email di users_metadata, gunakan itu
+            emailToLogin = data.email;
+          }
       }
 
 
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email: emailToLogin, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({ email: emailToLogin, password });
 
       if (error) {
         alert("❌ Login gagal: " + error.message);
@@ -125,14 +142,14 @@
       }
     }
 
-    // --- REGISTER (Menyimpan Username ke Tabel Metadata) ---
+    // --- REGISTER (Email Tidak Wajib Diisi) ---
     async function registerUser() {
-      const email = document.getElementById("regEmail").value.trim();
+      const originalEmail = document.getElementById("regEmail").value.trim();
       const username = document.getElementById("regUsername").value.trim();
       const password = document.getElementById("regPassword").value.trim();
 
-      if (!email || !username || !password) {
-        alert("Email, Username, dan password wajib diisi!");
+      if (!username || !password) {
+        alert("Username dan password wajib diisi!");
         return;
       }
       if (password.length < 6) {
@@ -140,9 +157,18 @@
         return;
       }
       
-      // 1. Cek apakah username sudah ada
+      // 1. Tentukan email yang akan digunakan untuk Supabase Auth
+      let authEmail = originalEmail;
+      
+      if (!originalEmail) {
+          // Jika email kosong, buat email dummy yang unik untuk Supabase Auth
+          const cleanUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+          authEmail = `${cleanUsername}-${Date.now()}@tempuser.id`; // Tambah timestamp agar lebih unik
+      }
+      
+      // 2. Cek apakah username sudah ada di tabel metadata
       const { data: existingUser, error: checkError } = await supabaseClient
-          .from('users_metadata') // Asumsi Anda membuat tabel metadata ini
+          .from('users_metadata')
           .select('id')
           .eq('username', username);
           
@@ -158,9 +184,9 @@
 
 
       try {
-        // 2. Daftar di Supabase Auth
+        // 3. Daftar di Supabase Auth menggunakan email (asli atau dummy)
         const { data, error } = await supabaseClient.auth.signUp(
-          { email, password }
+          { email: authEmail, password }
         );
 
         if (error) {
@@ -169,15 +195,16 @@
           return;
         }
         
-        // 3. Simpan username ke tabel 'users_metadata'
+        // 4. Simpan username ke tabel 'users_metadata'
         if (data.user) {
+            const emailToSave = originalEmail || null; // Simpan NULL jika user tidak memasukkan email
+
             const { error: metadataError } = await supabaseClient
-                .from('users_metadata') // Perlu dibuat: tabel 'users_metadata' dengan kolom id, user_id, email, username
-                .insert([{ user_id: data.user.id, email: email, username: username }]);
+                .from('users_metadata')
+                .insert([{ user_id: data.user.id, email: emailToSave, username: username }]);
             
             if (metadataError) {
                 console.error("Gagal menyimpan metadata:", metadataError);
-                // Walaupun gagal simpan metadata, akun auth sudah terbuat
             }
         }
 
