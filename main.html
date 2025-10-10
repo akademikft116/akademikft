@@ -320,13 +320,21 @@
     let dataYangDitampilkan = []; 
     
     // --- MAPPING WARNA PRODI ---
+    // Hex dan RGB untuk HTML/PDF, FFill untuk Excel (dalam format AARRGGBB, AA=Alpha)
     const prodiColors = {
-        "Industri": { hex: "#FF4136", rgb: [255, 65, 54], class: "row-Industri" }, // Merah
-        "Sipil": { hex: "#0074D9", rgb: [0, 116, 217], class: "row-Sipil" },       // Biru
-        "Arsitektur": { hex: "#2ECC40", rgb: [46, 204, 64], class: "row-Arsitektur" }, // Hijau
-        "Elektro": { hex: "#A0522D", rgb: [160, 82, 45], class: "row-Elektro" },   // Coklat (Sienna)
-        "Informatika": { hex: "#FFDC00", rgb: [255, 220, 0], class: "row-Informatika" }, // Kuning
+        "Industri": { hex: "#FF4136", rgb: [255, 65, 54], class: "row-Industri", ffill: "FFFF4136", font: "FFFFFFFF" },       // Merah
+        "Sipil": { hex: "#0074D9", rgb: [0, 116, 217], class: "row-Sipil", ffill: "FF0074D9", font: "FFFFFFFF" },             // Biru
+        "Arsitektur": { hex: "#2ECC40", rgb: [46, 204, 64], class: "row-Arsitektur", ffill: "FF2ECC40", font: "FFFFFFFF" },   // Hijau
+        "Elektro": { hex: "#A0522D", rgb: [160, 82, 45], class: "row-Elektro", ffill: "FFA0522D", font: "FFFFFFFF" },         // Coklat (Sienna)
+        "Informatika": { hex: "#FFDC00", rgb: [255, 220, 0], class: "row-Informatika", ffill: "FFFFDC00", font: "FF000000" }, // Kuning (font hitam)
     };
+    
+    // Konfigurasi Header Excel (penting untuk mengetahui indeks kolom Prodi)
+    const EXCEL_HEADERS = [
+        "Kode Matkul", "Prodi", "Hari", "Jam Mulai", "Jam Akhir", 
+        "Mata Kuliah", "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
+    ];
+
 
     // --- FUNGSI Memuat opsi pilihan dari Supabase ---
     async function loadReferences() {
@@ -419,6 +427,7 @@
       data.forEach((row, index) => {
         const tr = document.createElement("tr");
         const prodi = row.prodi || "";
+        // Gunakan kelas CSS yang sudah didefinisikan di <style>
         const prodiClass = prodiColors[prodi] ? prodiColors[prodi].class : '';
 
         tr.classList.add("border-b", prodiClass);
@@ -584,50 +593,94 @@
       tampilkanData(hasilFilter);
     }
 
-    // --- FUNGSI Export Excel (TIDAK ADA PEWARNAAN BARIS) ---
+    // --- FUNGSI Export Excel (UPDATED dengan pewarnaan sel Prodi) ---
     function exportExcel() {
-      const dataBersih = dataYangDitampilkan.map(row => ({
-        "Kode Matkul": row.kode_matkul || '-',
-        "Prodi": row.prodi || '-',
-        "Hari": row.hari || '-',
-        "Jam Mulai": row.jam_mulai || '-',
-        "Jam Akhir": row.jam_akhir || '-',
-        "Mata Kuliah": row.mata_kuliah || '-',
-        "SKS": row.sks || 0,
-        "Dosen": row.dosen || '-',
-        "Asisten": row.asisten || '-',
-        "Semester": row.semester || '-',
-        "Kelas": row.kelas || '-',
-        "Ruangan": row.ruangan || '-',
-      }));
-      
-      const ws = XLSX.utils.json_to_sheet(dataBersih); 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
-      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
-      showToast("Data berhasil diexport ke Excel!", 'info');
+        if (dataYangDitampilkan.length === 0) {
+            showToast("Tidak ada data terfilter untuk diekspor ke Excel!", 'info');
+            return;
+        }
+
+        const dataExcel = dataYangDitampilkan.map((row, index) => ({
+            "No": index + 1,
+            "Kode Matkul": row.kode_matkul || '-',
+            "Prodi": row.prodi || '-',
+            "Hari": row.hari || '-',
+            "Jam Mulai": row.jam_mulai || '-',
+            "Jam Akhir": row.jam_akhir || '-',
+            "Mata Kuliah": row.mata_kuliah || '-',
+            "SKS": row.sks || 0,
+            "Dosen": row.dosen || '-',
+            "Asisten": row.asisten || '-',
+            "Semester": row.semester || '-',
+            "Kelas": row.kelas || '-',
+            "Ruangan": row.ruangan || '-',
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(dataExcel);
+        
+        // --- LOGIC PEWARNAAN SEL EXCEL (XLSX.js) ---
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        const prodiColumnIndex = EXCEL_HEADERS.indexOf("Prodi") + 1; // +1 karena ada kolom 'No' tambahan
+
+        // Style untuk Header (Kolom Prodi)
+        const headerCell = XLSX.utils.encode_cell({ c: prodiColumnIndex, r: 0 });
+        if (ws[headerCell]) {
+            ws[headerCell].s = {
+                fill: { fgColor: { rgb: "FF34495E" } }, // Warna header gelap
+                font: { bold: true, color: { rgb: "FFFFFFFF" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } }
+            };
+        }
+
+        // Style untuk Data Baris
+        for (let R = 1; R <= range.e.r; ++R) {
+            const cellAddress = XLSX.utils.encode_cell({ c: prodiColumnIndex, r: R });
+            const cell = ws[cellAddress];
+
+            if (cell && cell.v) {
+                const prodi = cell.v;
+                const color = prodiColors[prodi];
+
+                if (color) {
+                    // Menerapkan style ke sel Prodi
+                    cell.s = {
+                        fill: { fgColor: { rgb: color.ffill } }, // Latar Belakang Sel
+                        font: { color: { rgb: color.font }, bold: true }, // Warna Font
+                        alignment: { horizontal: "left", vertical: "center" },
+                        border: { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } }
+                    };
+                }
+            }
+        }
+        // --- END LOGIC PEWARNAAN EXCEL ---
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
+        XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
+        showToast("Data berhasil diexport ke Excel dengan pewarnaan Prodi!", 'success');
     }
 
-    // --- FUNGSI Export PDF (UPDATED dengan pewarnaan) ---
+
+    // --- FUNGSI Export PDF (DIPERBAIKI dan dengan pewarnaan) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4'); 
+      const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape (horizontal)
 
       if (dataYangDitampilkan.length === 0) {
-          showToast("Tidak ada data terfilter untuk diekspor!", 'info'); 
+          showToast("Tidak ada data terfilter untuk diekspor ke PDF!", 'info'); 
           return;
       }
       
       const dataPDF = dataYangDitampilkan.map((row, index) => [
-        row.prodi, // Simpan prodi di indeks 0 untuk keperluan pewarnaan
-        index + 1, 
+        row.prodi, // [0] -> Prodi (untuk pewarnaan, akan dihapus nanti)
+        index + 1, // [1] -> No
         row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
         row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
         row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
       ]);
 
-      // Hapus kolom prodi yang pertama (prodi untuk pewarnaan) dari array dataPDF
-      // Setelah menghapus, dataPDF[i][0] adalah No.
+      // Buat data bersih yang tidak menyertakan kolom prodi pertama
       const dataPDFClean = dataPDF.map(row => row.slice(1));
       
       const headers = [
@@ -640,11 +693,11 @@
       
       doc.autoTable({
         head: [headers],
-        body: dataPDFClean, // Gunakan data yang sudah dibersihkan
+        body: dataPDFClean,
         startY: 20, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
-        headStyles: { fillColor: [52, 73, 94], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' }, // Ubah headStyles menjadi lebih gelap agar pewarnaan baris lebih jelas
+        headStyles: { fillColor: [52, 73, 94], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' }, 
         columnStyles: {
             0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
             3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
@@ -659,17 +712,28 @@
         // --- PEWARNAAN BARIS PDF ---
         didDrawCell: (data) => {
             if (data.section === 'body') {
-                // Ambil prodi dari data mentah yang kita simpan di indeks 0
+                // Ambil prodi dari data mentah (indeks 0 sebelum dibersihkan)
                 const prodi = dataPDF[data.row.index][0];
                 const colorData = prodiColors[prodi];
                 
-                if (colorData && data.column.index === 0) { // Hanya perlu mewarnai satu sel untuk memicu warna latar belakang baris
+                if (colorData && data.column.index === 0) { 
+                    // Set warna latar belakang untuk seluruh baris
                     doc.setFillColor(colorData.rgb[0], colorData.rgb[1], colorData.rgb[2]);
                     doc.rect(data.settings.margin.left, data.cell.y, data.table.width, data.cell.height, 'F');
+                    
+                    // Set warna font agar terbaca
+                    const fontColor = colorData.font === "FF000000" ? [0, 0, 0] : [255, 255, 255]; // Hitam/Putih
+                    doc.setTextColor(fontColor[0], fontColor[1], fontColor[2]);
                 }
             }
         },
-        // Pastikan baris ganjil/genap tidak menimpa warna prodi
+        // Pastikan baris ganjil/genap tidak menimpa warna prodi, dan reset warna font
+        willDrawCell: (data) => {
+             if (data.section === 'body') {
+                // Reset warna font sebelum menggambar sel
+                doc.setTextColor(51, 51, 51); // Warna default font (abu-abu gelap)
+            }
+        },
         alternateRowStyles: { fillColor: [255, 255, 255] }, 
       });
       
