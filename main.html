@@ -665,13 +665,15 @@
     }
 
 
-    // --- FUNGSI Export PDF (FIXED v3: Try/Catch & Initialization Check) ---
+    // --- FUNGSI Export PDF (FIXED v4: Menggunakan window.jsPDF langsung) ---
     function exportPDF() {
       try {
-        const { jsPDF } = window.jspdf;
+        // PERBAIKAN: Mengakses jsPDF secara langsung dari window, bukan destructuring dari window.jspdf
+        const jsPDF = window.jsPDF; 
+
         // Periksa apakah jsPDF dan autoTable tersedia
         if (!jsPDF || !jsPDF.autoTable) {
-             showToast("Error: Library PDF (jspdf/autotable) gagal dimuat.", 'error');
+             showToast("Error: Library PDF (jspdf/autotable) gagal dimuat. Cek CDN links di <head>.", 'error');
              console.error("jsPDF atau autoTable tidak ditemukan. Pastikan library dimuat di <head>.");
              return;
         }
