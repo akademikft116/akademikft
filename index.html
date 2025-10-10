@@ -97,40 +97,41 @@
       
       let emailToLogin = credential;
       
-      // Jika kredensial terlihat seperti username (tidak ada '@'), kita cari emailnya dari Supabase
+      // Cek apakah kredensial bukan email
       if (!credential.includes('@')) {
-          const { data, error } = await supabaseClient
+          // Cari user_id dan email di tabel metadata berdasarkan username
+          const { data: userData, error: metadataError } = await supabaseClient
               .from('users_metadata')
               .select('email, user_id')
               .eq('username', credential)
               .single();
               
-          if (error || !data) {
+          if (metadataError || !userData) {
               alert("❌ Login gagal: Username tidak ditemukan atau terjadi kesalahan.");
-              console.error(error);
+              console.error(metadataError);
               return;
           }
           
-          // Jika email di users_metadata kosong (karena pakai email dummy saat daftar), kita ambil email dari auth.users
-          if (!data.email) {
-            const { data: authData, error: authError } = await supabaseClient
-                .from('auth.users')
-                .select('email')
-                .eq('id', data.user_id)
-                .single();
+          // Jika kolom email di users_metadata kosong (didaftar tanpa email)
+          if (!userData.email) {
+            // Kita harus ambil email (dummy) dari tabel auth.users
+            const { data: authData, error: authError } = await supabaseClient.auth.admin.getUserById(userData.user_id);
 
             if (authError || !authData) {
-                alert("❌ Login gagal: Data pengguna tidak lengkap.");
+                alert("❌ Login gagal: Data autentikasi pengguna tidak ditemukan.");
+                console.error(authError);
                 return;
             }
-            emailToLogin = authData.email;
+            // Gunakan email (dummy) dari Supabase Auth untuk proses login
+            emailToLogin = authData.user.email;
           } else {
-            // Jika ada email di users_metadata, gunakan itu
-            emailToLogin = data.email;
+            // Jika ada email di users_metadata, gunakan email asli tersebut
+            emailToLogin = userData.email;
           }
       }
 
 
+      // Lakukan proses login menggunakan email yang sudah ditentukan (asli, atau dummy)
       const { error } = await supabaseClient.auth.signInWithPassword({ email: emailToLogin, password });
 
       if (error) {
@@ -163,7 +164,7 @@
       if (!originalEmail) {
           // Jika email kosong, buat email dummy yang unik untuk Supabase Auth
           const cleanUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
-          authEmail = `${cleanUsername}-${Date.now()}@tempuser.id`; // Tambah timestamp agar lebih unik
+          authEmail = `${cleanUsername}-${Date.now()}@tempuser.id`; 
       }
       
       // 2. Cek apakah username sudah ada di tabel metadata
