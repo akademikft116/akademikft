@@ -199,11 +199,10 @@
                           <label class="block text-sm font-medium text-gray-700">Prodi</label>
                           <select id="edit_prodi" class="mt-1 block w-full border p-2 rounded">
                              <option value="Industri">Industri</option>
-          <option value="Sipil">Sipil</option>
-          <option value="Arsitektur">Arsitektur</option>
-          <option value="Elektro">Elektro</option>
-          <option value="Informatika">Informatika</option>
-
+                             <option value="Sipil">Sipil</option>
+                             <option value="Arsitektur">Arsitektur</option>
+                             <option value="Elektro">Elektro</option>
+                             <option value="Informatika">Informatika</option>
                           </select>
                       </div>
                       <div>
@@ -343,70 +342,78 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- FUNGSI Memuat opsi pilihan dari Supabase (DIPERBARUI UNTUK TAHUN AKADEMIK) ---
+    // --- FUNGSI Memuat opsi pilihan (Daftar Tahun Akademik di Hardcoded di sini) ---
     async function loadReferences() {
         const references = [
+            // Daftar referensi yang masih diambil dari Supabase (Asumsi: matakuliah, dosen, asisten, kelas, ruangan sudah ada)
             { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
             { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen' },
             { table: 'asisten', elementId: 'asisten', editElementId: 'edit_asisten', column: 'nama', defaultText: 'Pilih Asisten' },
-            { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas' },
+            { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas', isFilter: true, filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
             { table: 'ruangan', elementId: 'ruangan', editElementId: 'edit_ruangan', column: 'nama', defaultText: 'Pilih Ruangan' },
-            // TABEL REFERENSI BARU UNTUK TAHUN AKADEMIK
-            { table: 'tahun_akademik', elementId: 'tahun_akademik', editElementId: 'edit_tahun_akademik', column: 'nama', defaultText: 'Pilih Tahun Akademik' }, 
         ];
+        
+        // Data Tahun Akademik (HARDCODED)
+        const tahunAkademikOptions = [
+            '2025/2026 Ganjil', 
+            '2024/2025 Genap', 
+            '2024/2025 Ganjil', 
+            '2023/2024 Genap',
+            '2023/2024 Ganjil',
+            '2022/2023 Genap',
+            '2022/2023 Ganjil'
+        ].sort((a, b) => b.localeCompare(a)); // Urutkan dari yang terbaru (Tahun Tertinggi ke Terendah)
 
+        // Fungsi Helper untuk mengisi SELECT
+        const populateSelect = (elementId, dataArray, defaultText, isFilter = false) => {
+            const selectElement = document.getElementById(elementId);
+            if (!selectElement) return; 
+            
+            selectElement.innerHTML = `<option value="" ${isFilter ? '' : 'disabled selected'}>${defaultText}</option>`;
+            
+            dataArray.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                selectElement.appendChild(option);
+            });
+        };
+
+        // 1. Ambil data dari Supabase (selain Tahun Akademik)
         for (const ref of references) {
-            // Ambil data dari tabel referensi
             const { data, error } = await supabaseClient
                 .from(ref.table)
                 .select(ref.column)
-                .order(ref.column, { ascending: false }); // Urutkan menurun untuk tahun akademik terbaru
+                .order(ref.column, { ascending: true }); 
 
             if (error) {
                 console.error(`Gagal memuat data ${ref.table}. Pastikan tabel ada dan RLS disetel.`, error);
                 continue;
             }
 
-            const createOptions = (elementId) => {
-                const selectElement = document.getElementById(elementId);
-                if (!selectElement) return; 
-                
-                selectElement.innerHTML = `<option value="" disabled selected>${ref.defaultText}</option>`;
-                
-                data.forEach(item => {
-                    const value = item[ref.column];
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = value;
-                    selectElement.appendChild(option);
-                });
-            };
+            const dataValues = data.map(item => item[ref.column]);
 
-            // Isi form tambah
-            createOptions(ref.elementId); 
-            
-            // Isi form edit
+            // Isi form tambah/edit
+            populateSelect(ref.elementId, dataValues, ref.defaultText); 
             if (ref.editElementId) {
-                createOptions(ref.editElementId);
+                populateSelect(ref.editElementId, dataValues, ref.defaultText);
             }
-
-            // Isi elemen filter kelas dan tahun akademik secara terpisah
-            if (ref.table === 'kelas' || ref.table === 'tahun_akademik') {
-                let filterElementId = ref.table === 'kelas' ? 'filterKelas' : 'filterTahunAkademik';
-                const filterElement = document.getElementById(filterElementId);
-                if(filterElement) {
-                    let defaultText = ref.table === 'kelas' ? 'Semua Kelas' : 'Semua Tahun Akademik';
-                    filterElement.innerHTML = `<option value="">${defaultText}</option>`;
-                    data.forEach(item => {
-                        const value = item[ref.column];
-                        const option = document.createElement('option');
-                        option.value = value;
-                        option.textContent = value;
-                        filterElement.appendChild(option);
-                    });
-                }
+            // Isi filter (hanya untuk Kelas)
+            if (ref.isFilter) {
+                populateSelect(ref.filterElementId, dataValues, ref.filterDefaultText, true);
             }
         }
+        
+        // 2. Isi Tahun Akademik dari Hardcoded List
+        const taDefaultText = 'Pilih Tahun Akademik';
+        const taFilterDefaultText = 'Semua Tahun Akademik';
+
+        // Form Tambah
+        populateSelect('tahun_akademik', tahunAkademikOptions, taDefaultText); 
+        // Form Edit
+        populateSelect('edit_tahun_akademik', tahunAkademikOptions, taDefaultText);
+        // Filter
+        populateSelect('filterTahunAkademik', tahunAkademikOptions, taFilterDefaultText, true);
     }
 
 
@@ -521,7 +528,7 @@
         semester: semester,
         kelas: kelas,
         ruangan: ruangan,
-        tahun_akademik: tahun_akademik,
+        tahun_akademik: tahun_akademik, // Data masuk ke kolom tahun_akademik di tabel JADWAL
       };
 
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
@@ -594,7 +601,7 @@
             semester: document.getElementById('edit_semester').value,
             kelas: document.getElementById('edit_kelas').value,
             ruangan: document.getElementById('edit_ruangan').value,
-            tahun_akademik: document.getElementById('edit_tahun_akademik').value,
+            tahun_akademik: document.getElementById('edit_tahun_akademik').value, // Data diupdate di kolom tahun_akademik di tabel JADWAL
         };
         
         if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah || !updatedJadwal.tahun_akademik) {
