@@ -39,6 +39,14 @@
     .bg-gray-50 {
         background-color: rgba(249, 250, 251, 0.9); /* Transparansi 90% */
     }
+
+    /* --- SKEMA WARNA UNTUK ROW TABLE HTML BERDASARKAN PRODI --- */
+    .row-Industri { background-color: #fcebeb; } /* Merah sangat muda */
+    .row-Sipil { background-color: #ebf5fb; }     /* Biru sangat muda */
+    .row-Arsitektur { background-color: #eaf7ee; } /* Hijau sangat muda */
+    .row-Elektro { background-color: #faebd7; }    /* Coklat sangat muda */
+    .row-Informatika { background-color: #fffbe6; } /* Kuning sangat muda */
+    /* --- AKHIR SKEMA WARNA --- */
   </style>
   </head>
 <body class="bg-gray-100">
@@ -61,8 +69,6 @@
           <option value="Arsitektur">Arsitektur</option>
           <option value="Elektro">Elektro</option>
           <option value="Informatika">Informatika</option>
-
-
         </select>
         
         <select id="hari" class="border p-2 rounded">
@@ -390,14 +396,16 @@
       tampilkanData(dataYangDitampilkan);
     }
 
-    // --- Tampilkan Data ---
+    // --- Tampilkan Data (DIPERBARUI untuk pewarnaan baris HTML) ---
     function tampilkanData(data) {
       dataYangDitampilkan = data; 
       
       tabelBody.innerHTML = "";
       data.forEach((row, index) => {
+        // Hati-hati: Jika prodi kosong, tidak ada kelas warna yang ditambahkan
+        const prodiClass = row.prodi ? `row-${row.prodi.replace(/\s/g, '')}` : ''; 
         const tr = document.createElement("tr");
-        tr.classList.add("border-b");
+        tr.classList.add("border-b", prodiClass); // Tambahkan kelas warna
         tr.innerHTML = `
           <td class="border px-2 py-1 text-center">${index + 1}</td>
           <td class="border px-2 py-1 text-center">${row.kode_matkul || "-"}</td>
@@ -584,10 +592,9 @@
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
-    // --- FUNGSI Export PDF (DIUPDATE DENGAN PEWARNAAN BERDASARKAN PRODI) ---
+    // --- FUNGSI Export PDF (DIUPDATE DENGAN KELAS DOMINAN) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
-      // Orientation 'l' for Landscape, 'mm' for unit, 'a4' for paper size
       const doc = new jsPDF('l', 'mm', 'a4'); 
 
       if (dataYangDitampilkan.length === 0) {
@@ -595,6 +602,58 @@
           return;
       }
       
+      // Ambil Prodi dari filter
+      let prodiFilter = document.getElementById("filterProdi").value;
+      if (!prodiFilter && dataYangDitampilkan.length > 0) {
+          const firstProdi = dataYangDitampilkan[0].prodi;
+          const allSame = dataYangDitampilkan.every(row => row.prodi === firstProdi);
+          prodiFilter = allSame ? firstProdi : "SEMUA PRODI";
+      } else if (!prodiFilter) {
+          prodiFilter = "SEMUA PRODI";
+      }
+
+      // --- LOGIKA MENCARI KELAS YANG PALING DOMINAN ---
+      let kelasDominan = "";
+      if (prodiFilter !== "SEMUA PRODI") {
+          const classCounts = {};
+          let maxCount = 0;
+          let mostFrequentClass = "TIDAK DITEMUKAN";
+
+          dataYangDitampilkan.forEach(row => {
+              const kelas = row.kelas || 'N/A';
+              classCounts[kelas] = (classCounts[kelas] || 0) + 1;
+              if (classCounts[kelas] > maxCount) {
+                  maxCount = classCounts[kelas];
+                  mostFrequentClass = kelas;
+              }
+          });
+          // Gunakan kelas yang paling sering muncul
+          kelasDominan = mostFrequentClass !== 'N/A' ? mostFrequentClass : "TIDAK ADA DATA KELAS";
+      } else {
+          // Jika filter "Semua Prodi", kelas juga perlu disesuaikan
+          kelasDominan = "MULTIPLE KELAS"; 
+      }
+
+      // Tentukan warna header dan warna latar baris (terang)
+      function getProdiColors(prodi) {
+          switch (prodi) {
+              case 'Industri': 
+                  return { header: [231, 76, 60], text: [255, 255, 255], background: [252, 235, 235] }; 
+              case 'Sipil': 
+                  return { header: [52, 152, 219], text: [255, 255, 255], background: [235, 245, 251] }; 
+              case 'Arsitektur': 
+                  return { header: [39, 174, 96], text: [255, 255, 255], background: [234, 247, 238] }; 
+              case 'Elektro': 
+                  return { header: [180, 100, 50], text: [255, 255, 255], background: [250, 235, 215] }; 
+              case 'Informatika': 
+                  return { header: [241, 196, 15], text: [0, 0, 0], background: [255, 251, 230] }; 
+              default: // SEMUA PRODI
+                  return { header: [52, 73, 94], text: [255, 255, 255], background: [240, 240, 240] };
+          }
+      }
+      
+      const prodiColor = getProdiColors(prodiFilter === "SEMUA PRODI" ? null : prodiFilter);
+
       // Siapkan data untuk PDF
       const dataPDF = dataYangDitampilkan.map((row, index) => [
         index + 1, 
@@ -608,17 +667,29 @@
           "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
       ];
 
-      doc.setFontSize(14);
-      // Perbaikan typo pada judul PDF: doc.text("Jadwal Kuliah", 14, 15);
-      doc.text("Jadwal Kuliah", 14, 15); 
-      
+      // 1. Judul Halaman DINAMIS (PRODI dan KELAS)
+      doc.setFontSize(10);
+      doc.text("JADWAL PERKULIAHAN SEMESTER GANJIL TAHUN AKADEMIK 2023/2024", 14, 10);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      // Judul menggunakan Kelas Dominan yang sudah ditemukan
+      doc.text(`PROGRAM STUDI : ${prodiFilter.toUpperCase()} (${kelasDominan.toUpperCase()})`, 14, 15);
+      doc.setFont('helvetica', 'normal');
+
+
       doc.autoTable({
         head: [headers],
         body: dataPDF,
         startY: 20, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
-        headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+        // 2. Pewarnaan Kepala Tabel
+        headStyles: { 
+            fillColor: prodiColor.header, 
+            textColor: prodiColor.text, 
+            fontStyle: 'bold', 
+            halign: 'center' 
+        },
         columnStyles: {
             0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
             3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
@@ -630,57 +701,19 @@
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
         
-        // --- LOGIKA PEWARNAAN BARIS BARU ---
+        // 3. Pewarnaan Baris Data Sesuai Prodi (Latar Belakang Sangat Terang)
         didParseCell: function (data) {
-            // Kolom "Prodi" berada pada index ke-2 dari dataPDF (indeks 0=No, 1=Kode, 2=Prodi)
-            const PRODI_COLUMN_INDEX = 2; 
-
-            // Pewarnaan dilakukan pada bagian body, dan hanya pada kolom Prodi
-            if (data.section === 'body' && data.column.index === PRODI_COLUMN_INDEX) { 
-                const prodi = data.cell.text[0]; // Ambil nilai Prodi dari sel
-                let fillColor = null;
-                let textColor = [0, 0, 0]; // Default: Hitam
-
-                // Tentukan warna berdasarkan Prodi (RGB)
-                switch (prodi) {
-                    case 'Industri':
-                        // Merah
-                        fillColor = [231, 76, 60]; 
-                        textColor = [255, 255, 255]; // Putih
-                        break;
-                    case 'Sipil':
-                        // Biru
-                        fillColor = [52, 152, 219]; 
-                        textColor = [255, 255, 255]; // Putih
-                        break;
-                    case 'Arsitektur':
-                        // Hijau
-                        fillColor = [39, 174, 96]; 
-                        textColor = [255, 255, 255]; // Putih
-                        break;
-                    case 'Elektro':
-                        // Coklat/Oranye Tua
-                        fillColor = [180, 100, 50]; 
-                        textColor = [255, 255, 255]; // Putih
-                        break;
-                    case 'Informatika':
-                        // Kuning
-                        fillColor = [241, 196, 15]; 
-                        textColor = [0, 0, 0]; // Hitam (Kuning terang)
-                        break;
-                }
+            if (data.section === 'body') { 
+                const prodi = data.row.raw[2]; // Prodi berada di indeks kolom 2
+                const rowColors = getProdiColors(prodi);
                 
-                // Terapkan warna latar dan teks
-                if (fillColor) {
-                    data.cell.styles.fillColor = fillColor;
-                    data.cell.styles.textColor = textColor;
-                }
+                // Terapkan warna latar belakang ke seluruh baris
+                data.cell.styles.fillColor = rowColors.background;
             }
         },
-        // --- AKHIR LOGIKA PEWARNAAN BARU ---
       });
       
-      doc.save("jadwal_kuliah.pdf");
+      doc.save(`jadwal_kuliah_${prodiFilter.replace(/\s/g, '_')}.pdf`);
       showToast("File PDF berhasil dibuat!", 'success'); 
     }
   </script>
