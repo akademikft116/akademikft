@@ -59,7 +59,7 @@
 
     <div class="mb-6 border p-4 rounded bg-gray-50">
       <h2 class="font-semibold mb-2">Tambah Jadwal</h2>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-3 gap-2"> 
         <input id="kode" placeholder="Kode Matkul" class="border p-2 rounded">
         
         <select id="prodi" class="border p-2 rounded">
@@ -116,12 +116,14 @@
         <select id="ruangan" class="border p-2 rounded">
             <option value="" disabled selected>Pilih Ruangan</option>
         </select>
+        
+        <input id="tahun_akademik" placeholder="Tahun Akademik (Contoh: 2024/2025)" class="border p-2 rounded col-span-1">
       </div>
       <button onclick="simpanJadwal()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded">Tambah</button>
     </div>
 
-    <div class="flex items-center mb-3 space-x-2">
-      <select id="filterProdi" class="border p-2 rounded">
+    <div class="flex items-center mb-3 space-x-2 flex-wrap">
+      <select id="filterProdi" class="border p-2 rounded min-w-min">
         <option value="">Semua Prodi</option>
          <option value="Industri">Industri</option>
           <option value="Sipil">Sipil</option>
@@ -129,7 +131,7 @@
           <option value="Elektro">Elektro</option>
           <option value="Informatika">Informatika</option>
       </select>
-       <select id="filterSemester" class="border p-2 rounded">
+       <select id="filterSemester" class="border p-2 rounded min-w-min">
         <option value="">Semua Semester</option>
         <option value="1">1</option>
         <option value="2">2</option>
@@ -141,9 +143,13 @@
         <option value="8">8</option>
       </select>
       
-      <select id="filterKelas" class="border p-2 rounded">
+      <select id="filterKelas" class="border p-2 rounded min-w-min">
         <option value="">Semua Kelas</option>
       </select>
+      
+       <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
+        <option value="">Semua Tahun Akademik</option>
+        </select>
       
       <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
       <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel</button>
@@ -155,7 +161,7 @@
         <thead class="bg-gray-200">
           <tr>
             <th class="border px-2 py-1 text-center">No</th>
-            <th class="border px-2 py-1 text-center">Kode</th>
+            <th class="border px-2 py-1 text-center">Tahun Akademik</th> <th class="border px-2 py-1 text-center">Kode</th>
             <th class="border px-2 py-1 text-left">Prodi</th>
             <th class="border px-2 py-1 text-center">Hari</th>
             <th class="border px-2 py-1 text-center">Jam Mulai</th>
@@ -254,6 +260,9 @@
                           <select id="edit_ruangan" class="mt-1 block w-full border p-2 rounded">
                               <option value="" disabled selected>Memuat...</option>
                           </select>
+                      </div>
+                       <div>
+                          <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label> <input id="edit_tahun_akademik" type="text" class="mt-1 block w-full border p-2 rounded">
                       </div>
                   </div>
 
@@ -374,7 +383,6 @@
             if (ref.table === 'kelas') {
                 const filterKelasElement = document.getElementById('filterKelas');
                 if(filterKelasElement) {
-                    // Hanya reset, opsi "Semua Kelas" sudah ada di HTML
                     filterKelasElement.innerHTML = `<option value="">Semua Kelas</option>`;
                     data.forEach(item => {
                         const value = item[ref.column];
@@ -424,23 +432,50 @@
         return;
       }
       semuaData = data;
+      
       // Setelah data dimuat, tampilkan data mentah tanpa filter awal
       tampilkanData(semuaData);
+      
+      // PENTING: Isi filter Tahun Akademik setelah semuaData terisi
+      populateTahunAkademikFilter(semuaData); 
+    }
+    
+    // FUNGSI BARU: Mengisi opsi Tahun Akademik secara dinamis
+    function populateTahunAkademikFilter(data) {
+        const filterElement = document.getElementById('filterTahunAkademik');
+        const tahunAkademikSet = new Set();
+        
+        data.forEach(row => {
+            if (row.tahun_akademik) {
+                tahunAkademikSet.add(row.tahun_akademik);
+            }
+        });
+        
+        const sortedYears = Array.from(tahunAkademikSet).sort().reverse();
+
+        // Reset dan isi filter
+        filterElement.innerHTML = `<option value="">Semua Tahun Akademik</option>`;
+        sortedYears.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            filterElement.appendChild(option);
+        });
     }
 
-    // --- Tampilkan Data (DIPERBARUI untuk pewarnaan baris HTML) ---
+
+    // --- Tampilkan Data (DITAMBAH KOLOM TAHUN AKADEMIK) ---
     function tampilkanData(data) {
       dataYangDitampilkan = data; 
       
       tabelBody.innerHTML = "";
       data.forEach((row, index) => {
-        // Hati-hati: Jika prodi kosong, tidak ada kelas warna yang ditambahkan
         const prodiClass = row.prodi ? `row-${row.prodi.replace(/\s/g, '')}` : ''; 
         const tr = document.createElement("tr");
-        tr.classList.add("border-b", prodiClass); // Tambahkan kelas warna
+        tr.classList.add("border-b", prodiClass);
         tr.innerHTML = `
           <td class="border px-2 py-1 text-center">${index + 1}</td>
-          <td class="border px-2 py-1 text-center">${row.kode_matkul || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.tahun_akademik || "-"}</td> <td class="border px-2 py-1 text-center">${row.kode_matkul || "-"}</td>
           <td class="border px-2 py-1 text-left">${row.prodi || "-"}</td>
           <td class="border px-2 py-1 text-center">${row.hari || "-"}</td>
           <td class="border px-2 py-1 text-center">${row.jam_mulai || "-"}</td>
@@ -461,7 +496,7 @@
       });
     }
 
-    // --- Tambah Jadwal (Menggunakan showToast) ---
+    // --- Tambah Jadwal (DITAMBAH TAHUN AKADEMIK) ---
     async function simpanJadwal() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
@@ -481,9 +516,10 @@
       const kelas = document.getElementById("kelas").value;
       const ruangan = document.getElementById("ruangan").value;
       const sks = document.getElementById("sks").value;
+      const tahun_akademik = document.getElementById("tahun_akademik").value; // BARU
 
-      if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks) {
-        showToast("Semua kolom wajib diisi!", 'warning'); 
+      if (!prodi || !hari || !semester || !mata_kuliah || !dosen || !kelas || !ruangan || !sks || !tahun_akademik) {
+        showToast("Semua kolom (termasuk Tahun Akademik) wajib diisi!", 'warning'); 
         return;
       }
 
@@ -501,6 +537,7 @@
         semester: semester,
         kelas: kelas,
         ruangan: ruangan,
+        tahun_akademik: tahun_akademik, // BARU
       };
 
       const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
@@ -513,7 +550,7 @@
       }
     }
 
-    // --- FUNGSI Edit Jadwal (Modal - Menggunakan showToast) ---
+    // --- FUNGSI Edit Jadwal (Modal - DITAMBAH TAHUN AKADEMIK) ---
     function editJadwal(id) {
         const row = semuaData.find(r => r.id === id);
         if (!row) return showToast("Data tidak ditemukan.", 'error'); 
@@ -532,13 +569,14 @@
         document.getElementById('edit_semester').value = row.semester || '';
         document.getElementById('edit_kelas').value = row.kelas || '';
         document.getElementById('edit_ruangan').value = row.ruangan || '';
+        document.getElementById('edit_tahun_akademik').value = row.tahun_akademik || ''; // BARU
 
         // Menampilkan Modal
         document.getElementById('editModal').classList.remove('hidden');
         document.getElementById('editModal').classList.add('flex'); 
     }
     
-    // --- FUNGSI Update Jadwal (Menggunakan showToast) ---
+    // --- FUNGSI Update Jadwal (DITAMBAH TAHUN AKADEMIK) ---
     async function updateJadwal() {
         const id = document.getElementById('edit_id').value;
 
@@ -555,10 +593,11 @@
             semester: document.getElementById('edit_semester').value,
             kelas: document.getElementById('edit_kelas').value,
             ruangan: document.getElementById('edit_ruangan').value,
+            tahun_akademik: document.getElementById('edit_tahun_akademik').value, // BARU
         };
         
-        if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah) {
-            showToast("Kolom Prodi, Hari, dan Mata Kuliah wajib diisi!", 'warning'); 
+        if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah || !updatedJadwal.tahun_akademik) {
+            showToast("Kolom Prodi, Hari, Mata Kuliah, dan Tahun Akademik wajib diisi!", 'warning'); 
             return;
         }
 
@@ -593,31 +632,35 @@
       }
     }
 
-    // --- FUNGSI Filter Data (DIPERKUAT) ---
+    // --- FUNGSI Filter Data (DITAMBAH TAHUN AKADEMIK) ---
     function filterData() {
         const filterProdi = document.getElementById("filterProdi").value;
         const filterSemester = document.getElementById("filterSemester").value;
         const filterKelas = document.getElementById("filterKelas").value;
+        const filterTahunAkademik = document.getElementById("filterTahunAkademik").value; // BARU
 
         let hasilFilter = semuaData.filter(row => {
-            // PERBAIKAN: Menggunakan String() dan || '' untuk memastikan konsistensi perbandingan
+            // Menggunakan String() dan || '' untuk memastikan konsistensi perbandingan dan menangani nilai null
             const rowProdi = String(row.prodi || '');
             const rowSemester = String(row.semester || '');
             const rowKelas = String(row.kelas || '');
+            const rowTahunAkademik = String(row.tahun_akademik || ''); // BARU
 
             const matchProdi = !filterProdi || rowProdi === filterProdi;
             const matchSemester = !filterSemester || rowSemester === filterSemester; 
             const matchKelas = !filterKelas || rowKelas === filterKelas; 
+            const matchTahunAkademik = !filterTahunAkademik || rowTahunAkademik === filterTahunAkademik; // BARU
 
-            return matchProdi && matchSemester && matchKelas;
+            return matchProdi && matchSemester && matchKelas && matchTahunAkademik;
         });
         
         tampilkanData(hasilFilter);
     }
 
-    // --- FUNGSI Export Excel ---
+    // --- FUNGSI Export Excel (DITAMBAH TAHUN AKADEMIK) ---
     function exportExcel() {
       const dataBersih = dataYangDitampilkan.map(row => ({
+        "Tahun Akademik": row.tahun_akademik || '-', // BARU
         "Kode Matkul": row.kode_matkul || '-',
         "Prodi": row.prodi || '-',
         "Hari": row.hari || '-',
@@ -639,7 +682,7 @@
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
-    // --- FUNGSI Export PDF (DENGAN KELAS DOMINAN DINAMIS) ---
+    // --- FUNGSI Export PDF (DITAMBAH TAHUN AKADEMIK) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('l', 'mm', 'a4'); 
@@ -652,19 +695,18 @@
       // Ambil Filter yang Aktif
       const filterProdi = document.getElementById("filterProdi").value;
       const filterKelas = document.getElementById("filterKelas").value;
+      const filterTahunAkademik = document.getElementById("filterTahunAkademik").value; // BARU
       
-      // 1. Tentukan Judul Prodi dan Kelas untuk PDF
+      // 1. Tentukan Judul
       let prodiJudul = filterProdi || "SEMUA PRODI";
-      let kelasJudul = "";
+      let kelasJudul = filterKelas || "MULTIPLE KELAS";
+      let tahunAkademikJudul = filterTahunAkademik || "SEMUA TAHUN AKADEMIK"; // BARU
 
-      if (filterKelas) {
-          // Jika Kelas sudah difilter, gunakan nilai filter tersebut
-          kelasJudul = filterKelas;
-      } else if (filterProdi) {
-          // Jika hanya Prodi yang difilter, cari Kelas yang paling dominan di Prodi tersebut
+      // Jika Kelas tidak difilter, cari Kelas yang paling dominan
+      if (!filterKelas) {
           const classCounts = {};
           let maxCount = 0;
-          let mostFrequentClass = "TIDAK DITEMUKAN";
+          let mostFrequentClass = "MULTIPLE KELAS";
 
           dataYangDitampilkan.forEach(row => {
               const kelas = row.kelas || 'N/A';
@@ -675,11 +717,9 @@
               }
           });
           kelasJudul = mostFrequentClass !== 'N/A' ? mostFrequentClass : "TIDAK ADA DATA KELAS";
-      } else {
-          // Jika tidak ada filter Prodi/Kelas yang spesifik
-          kelasJudul = "MULTIPLE KELAS"; 
       }
-      
+
+
       // Tentukan warna header dan warna latar baris (terang)
       function getProdiColors(prodi) {
           switch (prodi) {
@@ -703,22 +743,22 @@
       // Siapkan data untuk PDF
       const dataPDF = dataYangDitampilkan.map((row, index) => [
         index + 1, 
+        row.tahun_akademik || '-', // KOLOM BARU
         row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
         row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
         row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
       ]);
       
       const headers = [
-          "No", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
+          "No", "Tahun Akademik", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
           "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
       ];
 
-      // Judul Halaman DINAMIS (PRODI dan KELAS)
+      // Judul Halaman DINAMIS (PRODI, KELAS, TAHUN AKADEMIK)
       doc.setFontSize(10);
-      doc.text("JADWAL PERKULIAHAN SEMESTER GANJIL TAHUN AKADEMIK 2023/2024", 14, 10);
+      doc.text(`JADWAL PERKULIAHAN TAHUN AKADEMIK: ${tahunAkademikJudul.toUpperCase()}`, 14, 10);
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      // Tampilkan Judul Kelas yang sudah ditentukan (baik dari filter maupun yang dominan)
       doc.text(`PROGRAM STUDI : ${prodiJudul.toUpperCase()} (${kelasJudul.toUpperCase()})`, 14, 15);
       doc.setFont('helvetica', 'normal');
 
@@ -737,20 +777,22 @@
             halign: 'center' 
         },
         columnStyles: {
-            0: { halign: 'center', cellWidth: 8 }, 1: { halign: 'center', cellWidth: 15 }, 
-            3: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
-            5: { halign: 'center', cellWidth: 15 }, 7: { halign: 'center', cellWidth: 10 }, 
-            10: { halign: 'center', cellWidth: 15 }, 11: { halign: 'center', cellWidth: 15 }, 
-            12: { halign: 'center', cellWidth: 15 }, 
-            2: { halign: 'left', cellWidth: 25 }, 6: { halign: 'left', cellWidth: 45 }, 
-            8: { halign: 'left', cellWidth: 35 }, 9: { halign: 'left', cellWidth: 35 }, 
+            0: { halign: 'center', cellWidth: 7 }, 
+            1: { halign: 'center', cellWidth: 20 }, // Tahun Akademik
+            2: { halign: 'center', cellWidth: 15 }, 
+            4: { halign: 'center', cellWidth: 15 }, 5: { halign: 'center', cellWidth: 15 }, 
+            6: { halign: 'center', cellWidth: 15 }, 8: { halign: 'center', cellWidth: 10 }, 
+            11: { halign: 'center', cellWidth: 15 }, 12: { halign: 'center', cellWidth: 15 }, 
+            13: { halign: 'center', cellWidth: 15 }, 
+            3: { halign: 'left', cellWidth: 25 }, 7: { halign: 'left', cellWidth: 40 }, 
+            9: { halign: 'left', cellWidth: 30 }, 10: { halign: 'left', cellWidth: 30 }, 
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
         
         // Pewarnaan Baris Data Sesuai Prodi (Latar Belakang Sangat Terang)
         didParseCell: function (data) {
             if (data.section === 'body') { 
-                const prodi = data.row.raw[2]; // Prodi berada di indeks kolom 2
+                const prodi = data.row.raw[3]; // Prodi sekarang berada di indeks kolom 3
                 const rowColors = getProdiColors(prodi);
                 
                 // Terapkan warna latar belakang ke seluruh baris
@@ -759,7 +801,7 @@
         },
       });
       
-      doc.save(`jadwal_kuliah_${prodiJudul.replace(/\s/g, '_')}_${kelasJudul.replace(/\s/g, '_')}.pdf`);
+      doc.save(`jadwal_kuliah_${prodiJudul.replace(/\s/g, '_')}_${tahunAkademikJudul.replace(/\s/g, '_')}.pdf`);
       showToast("File PDF berhasil dibuat!", 'success'); 
     }
   </script>
