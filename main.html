@@ -587,6 +587,7 @@
     // --- FUNGSI Export PDF (DIUPDATE DENGAN PEWARNAAN BERDASARKAN PRODI) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
+      // Orientation 'l' for Landscape, 'mm' for unit, 'a4' for paper size
       const doc = new jsPDF('l', 'mm', 'a4'); 
 
       if (dataYangDitampilkan.length === 0) {
@@ -594,6 +595,7 @@
           return;
       }
       
+      // Siapkan data untuk PDF
       const dataPDF = dataYangDitampilkan.map((row, index) => [
         index + 1, 
         row.kode_matkul || '-', row.prodi || '-', row.hari || '-', row.jam_mulai || '-', 
@@ -607,7 +609,8 @@
       ];
 
       doc.setFontSize(14);
-      doc.text("Jadwal Kuliah", 14, 15);
+      // Perbaikan typo pada judul PDF: doc.text("Jadwal Kuliah", 14, 15);
+      doc.text("Jadwal Kuliah", 14, 15); 
       
       doc.autoTable({
         head: [headers],
@@ -632,8 +635,9 @@
             // Kolom "Prodi" berada pada index ke-2 dari dataPDF (indeks 0=No, 1=Kode, 2=Prodi)
             const PRODI_COLUMN_INDEX = 2; 
 
+            // Pewarnaan dilakukan pada bagian body, dan hanya pada kolom Prodi
             if (data.section === 'body' && data.column.index === PRODI_COLUMN_INDEX) { 
-                const prodi = data.cell.text[0]; 
+                const prodi = data.cell.text[0]; // Ambil nilai Prodi dari sel
                 let fillColor = null;
                 let textColor = [0, 0, 0]; // Default: Hitam
 
@@ -655,7 +659,7 @@
                         textColor = [255, 255, 255]; // Putih
                         break;
                     case 'Elektro':
-                        // Coklat
+                        // Coklat/Oranye Tua
                         fillColor = [180, 100, 50]; 
                         textColor = [255, 255, 255]; // Putih
                         break;
