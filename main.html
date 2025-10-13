@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jadwal Kuliah</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5c6gB5f1l5g8A5gB5f1l5g8A5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5CM41vzapQJoB1MvJkPQE03o" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -50,7 +50,7 @@
     .row-Informatika { background-color: #fffbe6; } /* Kuning sangat muda */
     /* --- AKHIR SKEMA WARNA --- */
     
-    /* Style untuk tombol ikon yang lebih rapi (menambahkan padding agar ikon tidak terlalu mepet) */
+    /* Style untuk tombol ikon yang lebih rapi */
     .icon-btn {
         padding: 0.5rem 0.75rem; /* Padding yang lebih baik */
     }
@@ -168,9 +168,8 @@
         <option value="">Semua Tahun Akademik</option>
       </select>
       
-      <button onclick="filterData()" class="bg-blue-500 text-white rounded icon-btn" title="Terapkan Filter">
-        <i class="fas fa-filter"></i>
-      </button>
+      <button onclick="filterData()" class="bg-blue-500 text-white rounded icon-btn" title="Terapkan Filter (Pencarian)">
+        <i class="fas fa-magnifying-glass"></i> </button>
       <button onclick="exportExcel()" class="bg-green-500 text-white rounded icon-btn" title="Export ke Excel">
         <i class="fas fa-file-excel"></i>
       </button>
