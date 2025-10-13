@@ -129,6 +129,25 @@
           <option value="Elektro">Elektro</option>
           <option value="Informatika">Informatika</option>
       </select>
+       <select id="filterSemester" class="border p-2 rounded">
+        <option value="">Semua Semester</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+      </select>
+      <select id="filterKelas" class="border p-2 rounded">
+        <option value="">Semua Kelas</option>
+        <option value="A">A</option> 
+        <option value="B">B</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
+      </select>
+      
       <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
       <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel</button>
       <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF</button>
@@ -392,8 +411,8 @@
         return;
       }
       semuaData = data;
-      dataYangDitampilkan = data; 
-      tampilkanData(dataYangDitampilkan);
+      // Setelah data dimuat, tampilkan data mentah tanpa filter awal
+      tampilkanData(semuaData);
     }
 
     // --- Tampilkan Data (DIPERBARUI untuk pewarnaan baris HTML) ---
@@ -561,11 +580,22 @@
       }
     }
 
-    // --- FUNGSI Filter Data ---
+    // --- FUNGSI Filter Data (DIPERBARUI) ---
     function filterData() {
-      const filter = document.getElementById("filterProdi").value;
-      const hasilFilter = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
-      tampilkanData(hasilFilter);
+        const filterProdi = document.getElementById("filterProdi").value;
+        const filterSemester = document.getElementById("filterSemester").value;
+        const filterKelas = document.getElementById("filterKelas").value;
+
+        let hasilFilter = semuaData.filter(row => {
+            const matchProdi = !filterProdi || row.prodi === filterProdi;
+            // Konversi nilai integer ke string untuk perbandingan
+            const matchSemester = !filterSemester || String(row.semester) === filterSemester; 
+            const matchKelas = !filterKelas || row.kelas === filterKelas;
+
+            return matchProdi && matchSemester && matchKelas;
+        });
+        
+        tampilkanData(hasilFilter);
     }
 
     // --- FUNGSI Export Excel ---
@@ -592,7 +622,7 @@
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
-    // --- FUNGSI Export PDF (DIUPDATE DENGAN KELAS DOMINAN) ---
+    // --- FUNGSI Export PDF (DENGAN KELAS DOMINAN DINAMIS) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('l', 'mm', 'a4'); 
@@ -602,19 +632,19 @@
           return;
       }
       
-      // Ambil Prodi dari filter
-      let prodiFilter = document.getElementById("filterProdi").value;
-      if (!prodiFilter && dataYangDitampilkan.length > 0) {
-          const firstProdi = dataYangDitampilkan[0].prodi;
-          const allSame = dataYangDitampilkan.every(row => row.prodi === firstProdi);
-          prodiFilter = allSame ? firstProdi : "SEMUA PRODI";
-      } else if (!prodiFilter) {
-          prodiFilter = "SEMUA PRODI";
-      }
+      // Ambil Filter yang Aktif
+      const filterProdi = document.getElementById("filterProdi").value;
+      const filterKelas = document.getElementById("filterKelas").value;
+      
+      // 1. Tentukan Judul Prodi dan Kelas untuk PDF
+      let prodiJudul = filterProdi || "SEMUA PRODI";
+      let kelasJudul = "";
 
-      // --- LOGIKA MENCARI KELAS YANG PALING DOMINAN ---
-      let kelasDominan = "";
-      if (prodiFilter !== "SEMUA PRODI") {
+      if (filterKelas) {
+          // Jika Kelas sudah difilter, gunakan nilai filter tersebut
+          kelasJudul = filterKelas;
+      } else if (filterProdi) {
+          // Jika hanya Prodi yang difilter, cari Kelas yang paling dominan di Prodi tersebut
           const classCounts = {};
           let maxCount = 0;
           let mostFrequentClass = "TIDAK DITEMUKAN";
@@ -627,13 +657,12 @@
                   mostFrequentClass = kelas;
               }
           });
-          // Gunakan kelas yang paling sering muncul
-          kelasDominan = mostFrequentClass !== 'N/A' ? mostFrequentClass : "TIDAK ADA DATA KELAS";
+          kelasJudul = mostFrequentClass !== 'N/A' ? mostFrequentClass : "TIDAK ADA DATA KELAS";
       } else {
-          // Jika filter "Semua Prodi", kelas juga perlu disesuaikan
-          kelasDominan = "MULTIPLE KELAS"; 
+          // Jika tidak ada filter Prodi/Kelas yang spesifik
+          kelasJudul = "MULTIPLE KELAS"; 
       }
-
+      
       // Tentukan warna header dan warna latar baris (terang)
       function getProdiColors(prodi) {
           switch (prodi) {
@@ -652,7 +681,7 @@
           }
       }
       
-      const prodiColor = getProdiColors(prodiFilter === "SEMUA PRODI" ? null : prodiFilter);
+      const prodiColor = getProdiColors(filterProdi || null);
 
       // Siapkan data untuk PDF
       const dataPDF = dataYangDitampilkan.map((row, index) => [
@@ -667,13 +696,13 @@
           "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
       ];
 
-      // 1. Judul Halaman DINAMIS (PRODI dan KELAS)
+      // Judul Halaman DINAMIS (PRODI dan KELAS)
       doc.setFontSize(10);
       doc.text("JADWAL PERKULIAHAN SEMESTER GANJIL TAHUN AKADEMIK 2023/2024", 14, 10);
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      // Judul menggunakan Kelas Dominan yang sudah ditemukan
-      doc.text(`PROGRAM STUDI : ${prodiFilter.toUpperCase()} (${kelasDominan.toUpperCase()})`, 14, 15);
+      // Tampilkan Judul Kelas yang sudah ditentukan (baik dari filter maupun yang dominan)
+      doc.text(`PROGRAM STUDI : ${prodiJudul.toUpperCase()} (${kelasJudul.toUpperCase()})`, 14, 15);
       doc.setFont('helvetica', 'normal');
 
 
@@ -683,7 +712,7 @@
         startY: 20, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
-        // 2. Pewarnaan Kepala Tabel
+        // Pewarnaan Kepala Tabel
         headStyles: { 
             fillColor: prodiColor.header, 
             textColor: prodiColor.text, 
@@ -701,7 +730,7 @@
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
         
-        // 3. Pewarnaan Baris Data Sesuai Prodi (Latar Belakang Sangat Terang)
+        // Pewarnaan Baris Data Sesuai Prodi (Latar Belakang Sangat Terang)
         didParseCell: function (data) {
             if (data.section === 'body') { 
                 const prodi = data.row.raw[2]; // Prodi berada di indeks kolom 2
@@ -713,7 +742,7 @@
         },
       });
       
-      doc.save(`jadwal_kuliah_${prodiFilter.replace(/\s/g, '_')}.pdf`);
+      doc.save(`jadwal_kuliah_${prodiJudul.replace(/\s/g, '_')}_${kelasJudul.replace(/\s/g, '_')}.pdf`);
       showToast("File PDF berhasil dibuat!", 'success'); 
     }
   </script>
