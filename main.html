@@ -688,10 +688,11 @@
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
-    // --- FUNGSI Export PDF ---
+    // --- FUNGSI Export PDF (DIRAPIHKAN) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4'); 
+      const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape
+      const docWidth = doc.internal.pageSize.getWidth(); // Lebar halaman A4 landscape (sekitar 297mm)
 
       if (dataYangDitampilkan.length === 0) {
           showToast("Tidak ada data terfilter untuk diekspor!", 'info'); 
@@ -708,25 +709,8 @@
       let kelasJudul = filterKelas || "MULTIPLE KELAS";
       let tahunAkademikJudul = filterTahunAkademik || "SEMUA TAHUN AKADEMIK"; 
 
-      // Jika Kelas tidak difilter, cari Kelas yang paling dominan
-      if (!filterKelas) {
-          const classCounts = {};
-          let maxCount = 0;
-          let mostFrequentClass = "MULTIPLE KELAS";
 
-          dataYangDitampilkan.forEach(row => {
-              const kelas = row.kelas || 'N/A';
-              classCounts[kelas] = (classCounts[kelas] || 0) + 1;
-              if (classCounts[kelas] > maxCount) {
-                  maxCount = classCounts[kelas];
-                  mostFrequentClass = kelas;
-              }
-          });
-          kelasJudul = mostFrequentClass !== 'N/A' ? mostFrequentClass : "TIDAK ADA DATA KELAS";
-      }
-
-
-      // Tentukan warna header dan warna latar baris (terang)
+      // Tentukan warna header
       function getProdiColors(prodi) {
           switch (prodi) {
               case 'Industri': 
@@ -739,7 +723,7 @@
                   return { header: [180, 100, 50], text: [255, 255, 255], background: [250, 235, 215] }; 
               case 'Informatika': 
                   return { header: [241, 196, 15], text: [0, 0, 0], background: [255, 251, 230] }; 
-              default: // SEMUA PRODI
+              default: 
                   return { header: [52, 73, 94], text: [255, 255, 255], background: [240, 240, 240] };
           }
       }
@@ -760,21 +744,47 @@
           "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
       ];
 
-      // Judul Halaman DINAMIS (PRODI, KELAS, TAHUN AKADEMIK)
+      // --- Perubahan untuk Meratakan Judul dan Tabel ---
+      const lineHeight = 5; // Jarak antar baris teks
+      let currentY = 15; // Posisi Y awal
+      
+      // 2. Judul Utama (Center)
+      const mainTitle = "JADWAL PERKULIAHAN";
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      const mainTitleWidth = doc.getStringUnitWidth(mainTitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      const mainTitleX = (docWidth - mainTitleWidth) / 2; // Hitung posisi X agar di tengah
+      doc.text(mainTitle, mainTitleX, currentY, { align: 'center' });
+      currentY += lineHeight;
+
+      // 3. Subjudul 1 (Center)
+      const subTitle1 = `TAHUN AKADEMIK: ${tahunAkademikJudul.toUpperCase()}`;
       doc.setFontSize(10);
-      doc.text(`JADWAL PERKULIAHAN TAHUN AKADEMIK: ${tahunAkademikJudul.toUpperCase()}`, 14, 10);
+      doc.setFont('helvetica', 'normal');
+      const subTitle1Width = doc.getStringUnitWidth(subTitle1) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      const subTitle1X = (docWidth - subTitle1Width) / 2; 
+      doc.text(subTitle1, subTitle1X, currentY, { align: 'center' });
+      currentY += lineHeight;
+
+      // 4. Subjudul 2 (Center)
+      const subTitle2 = `PROGRAM STUDI : ${prodiJudul.toUpperCase()} (${kelasJudul.toUpperCase()})`;
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text(`PROGRAM STUDI : ${prodiJudul.toUpperCase()} (${kelasJudul.toUpperCase()})`, 14, 15);
-      doc.setFont('helvetica', 'normal');
+      const subTitle2Width = doc.getStringUnitWidth(subTitle2) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      const subTitle2X = (docWidth - subTitle2Width) / 2;
+      doc.text(subTitle2, subTitle2X, currentY, { align: 'center' });
+      currentY += lineHeight + 3; // Tambahkan jarak sebelum tabel
 
-
+      // 5. Tabel (Otomatis ditengah jika startY dihitung dengan margin)
       doc.autoTable({
         head: [headers],
         body: dataPDF,
-        startY: 20, 
+        startY: currentY, 
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
+        // Hitung margin kiri agar tabel di tengah
+        margin: { left: 5, right: 5 }, // Margins diatur agar tabel mencakup sebagian besar lebar A4 landscape
+
         // Pewarnaan Kepala Tabel
         headStyles: { 
             fillColor: prodiColor.header, 
@@ -793,12 +803,11 @@
             3: { halign: 'left', cellWidth: 25 }, 7: { halign: 'left', cellWidth: 40 }, 
             9: { halign: 'left', cellWidth: 30 }, 10: { halign: 'left', cellWidth: 30 }, 
         },
-        margin: { top: 18, left: 5, right: 5, bottom: 5 },
         
         // Pewarnaan Baris Data Sesuai Prodi (Latar Belakang Sangat Terang)
         didParseCell: function (data) {
             if (data.section === 'body') { 
-                const prodi = data.row.raw[3]; // Prodi sekarang berada di indeks kolom 3
+                const prodi = data.row.raw[3]; 
                 const rowColors = getProdiColors(prodi);
                 
                 // Terapkan warna latar belakang ke seluruh baris
