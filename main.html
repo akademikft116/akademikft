@@ -149,6 +149,14 @@
         <option value="">Semua Kelas</option>
       </select>
       
+      <select id="filterMataKuliah" class="border p-2 rounded min-w-min">
+        <option value="">Semua Mata Kuliah</option>
+      </select>
+      
+      <select id="filterDosen" class="border p-2 rounded min-w-min">
+        <option value="">Semua Dosen</option>
+      </select>
+      
        <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
         <option value="">Semua Tahun Akademik</option>
       </select>
@@ -157,7 +165,6 @@
       <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel</button>
       <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF</button>
     </div>
-
     <div class="overflow-x-auto">
       <table id="tabelJadwal" class="min-w-full border border-gray-400 text-sm">
         <thead class="bg-gray-200">
@@ -342,12 +349,12 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- FUNGSI Memuat opsi pilihan (Daftar Tahun Akademik di Hardcoded di sini) ---
+    // --- FUNGSI Memuat opsi pilihan (DIUBAH UNTUK FILTER BARU) ---
     async function loadReferences() {
         const references = [
-            // Daftar referensi yang masih diambil dari Supabase (Asumsi: matakuliah, dosen, asisten, kelas, ruangan sudah ada)
-            { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah' },
-            { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen' },
+            // Daftar untuk form Tambah/Edit
+            { table: 'matakuliah', elementId: 'mata_kuliah', editElementId: 'edit_mata_kuliah', column: 'nama', defaultText: 'Pilih Mata Kuliah', isFilter: true, filterElementId: 'filterMataKuliah', filterDefaultText: 'Semua Mata Kuliah' },
+            { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen', isFilter: true, filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen' },
             { table: 'asisten', elementId: 'asisten', editElementId: 'edit_asisten', column: 'nama', defaultText: 'Pilih Asisten' },
             { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas', isFilter: true, filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
             { table: 'ruangan', elementId: 'ruangan', editElementId: 'edit_ruangan', column: 'nama', defaultText: 'Pilih Ruangan' },
@@ -398,7 +405,7 @@
             if (ref.editElementId) {
                 populateSelect(ref.editElementId, dataValues, ref.defaultText);
             }
-            // Isi filter (hanya untuk Kelas)
+            // Isi filter (untuk Kelas, Mata Kuliah, dan Dosen)
             if (ref.isFilter) {
                 populateSelect(ref.filterElementId, dataValues, ref.filterDefaultText, true);
             }
@@ -639,25 +646,31 @@
       }
     }
 
-    // --- FUNGSI Filter Data ---
+    // --- FUNGSI Filter Data (DIUBAH UNTUK FILTER BARU) ---
     function filterData() {
         const filterProdi = document.getElementById("filterProdi").value;
         const filterSemester = document.getElementById("filterSemester").value;
         const filterKelas = document.getElementById("filterKelas").value;
+        const filterMataKuliah = document.getElementById("filterMataKuliah").value; // FILTER BARU
+        const filterDosen = document.getElementById("filterDosen").value;           // FILTER BARU
         const filterTahunAkademik = document.getElementById("filterTahunAkademik").value;
 
         let hasilFilter = semuaData.filter(row => {
             const rowProdi = String(row.prodi || '');
             const rowSemester = String(row.semester || '');
             const rowKelas = String(row.kelas || '');
+            const rowMataKuliah = String(row.mata_kuliah || ''); // Data row Mata Kuliah
+            const rowDosen = String(row.dosen || '');             // Data row Dosen
             const rowTahunAkademik = String(row.tahun_akademik || '');
 
             const matchProdi = !filterProdi || rowProdi === filterProdi;
             const matchSemester = !filterSemester || rowSemester === filterSemester; 
             const matchKelas = !filterKelas || rowKelas === filterKelas; 
+            const matchMataKuliah = !filterMataKuliah || rowMataKuliah === filterMataKuliah; // Logika Filter
+            const matchDosen = !filterDosen || rowDosen === filterDosen;                     // Logika Filter
             const matchTahunAkademik = !filterTahunAkademik || rowTahunAkademik === filterTahunAkademik;
 
-            return matchProdi && matchSemester && matchKelas && matchTahunAkademik;
+            return matchProdi && matchSemester && matchKelas && matchTahunAkademik && matchMataKuliah && matchDosen;
         });
         
         tampilkanData(hasilFilter);
@@ -688,7 +701,7 @@
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
-    // --- FUNGSI Export PDF (DIRAPIHKAN: Judul dan Tabel Rata Tengah) ---
+    // --- FUNGSI Export PDF (Judul dan Tabel Rata Tengah) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape
