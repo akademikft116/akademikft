@@ -584,7 +584,7 @@
       showToast("Data berhasil diexport ke Excel!", 'info');
     }
 
-    // --- FUNGSI Export PDF (Menggunakan showToast) ---
+    // --- FUNGSI Export PDF (DIUPDATE DENGAN PEWARNAAN BERDASARKAN PRODI) ---
     function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('l', 'mm', 'a4'); 
@@ -607,7 +607,7 @@
       ];
 
       doc.setFontSize(14);
-      doc.text("Jadwal Kuliah)", 14, 15);
+      doc.text("Jadwal Kuliah", 14, 15);
       
       doc.autoTable({
         head: [headers],
@@ -626,6 +626,54 @@
             8: { halign: 'left', cellWidth: 35 }, 9: { halign: 'left', cellWidth: 35 }, 
         },
         margin: { top: 18, left: 5, right: 5, bottom: 5 },
+        
+        // --- LOGIKA PEWARNAAN BARIS BARU ---
+        didParseCell: function (data) {
+            // Kolom "Prodi" berada pada index ke-2 dari dataPDF (indeks 0=No, 1=Kode, 2=Prodi)
+            const PRODI_COLUMN_INDEX = 2; 
+
+            if (data.section === 'body' && data.column.index === PRODI_COLUMN_INDEX) { 
+                const prodi = data.cell.text[0]; 
+                let fillColor = null;
+                let textColor = [0, 0, 0]; // Default: Hitam
+
+                // Tentukan warna berdasarkan Prodi (RGB)
+                switch (prodi) {
+                    case 'Industri':
+                        // Merah
+                        fillColor = [231, 76, 60]; 
+                        textColor = [255, 255, 255]; // Putih
+                        break;
+                    case 'Sipil':
+                        // Biru
+                        fillColor = [52, 152, 219]; 
+                        textColor = [255, 255, 255]; // Putih
+                        break;
+                    case 'Arsitektur':
+                        // Hijau
+                        fillColor = [39, 174, 96]; 
+                        textColor = [255, 255, 255]; // Putih
+                        break;
+                    case 'Elektro':
+                        // Coklat
+                        fillColor = [180, 100, 50]; 
+                        textColor = [255, 255, 255]; // Putih
+                        break;
+                    case 'Informatika':
+                        // Kuning
+                        fillColor = [241, 196, 15]; 
+                        textColor = [0, 0, 0]; // Hitam (Kuning terang)
+                        break;
+                }
+                
+                // Terapkan warna latar dan teks
+                if (fillColor) {
+                    data.cell.styles.fillColor = fillColor;
+                    data.cell.styles.textColor = textColor;
+                }
+            }
+        },
+        // --- AKHIR LOGIKA PEWARNAAN BARU ---
       });
       
       doc.save("jadwal_kuliah.pdf");
