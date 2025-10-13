@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jadwal Kuliah</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5c6gB5f1l5g8A5gB5f1l5g8A5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -47,6 +49,11 @@
     .row-Elektro { background-color: #faebd7; }    /* Coklat sangat muda */
     .row-Informatika { background-color: #fffbe6; } /* Kuning sangat muda */
     /* --- AKHIR SKEMA WARNA --- */
+    
+    /* Style untuk tombol ikon yang lebih rapi (menambahkan padding agar ikon tidak terlalu mepet) */
+    .icon-btn {
+        padding: 0.5rem 0.75rem; /* Padding yang lebih baik */
+    }
   </style>
   </head>
 <body class="bg-gray-100">
@@ -161,10 +168,16 @@
         <option value="">Semua Tahun Akademik</option>
       </select>
       
-      <button onclick="filterData()" class="bg-blue-500 text-white px-3 py-2 rounded">Filter</button>
-      <button onclick="exportExcel()" class="bg-green-500 text-white px-3 py-2 rounded">Export Excel</button>
-      <button onclick="exportPDF()" class="bg-red-500 text-white px-3 py-2 rounded">Export PDF</button>
-    </div>
+      <button onclick="filterData()" class="bg-blue-500 text-white rounded icon-btn" title="Terapkan Filter">
+        <i class="fas fa-filter"></i>
+      </button>
+      <button onclick="exportExcel()" class="bg-green-500 text-white rounded icon-btn" title="Export ke Excel">
+        <i class="fas fa-file-excel"></i>
+      </button>
+      <button onclick="exportPDF()" class="bg-red-500 text-white rounded icon-btn" title="Export ke PDF">
+        <i class="fas fa-file-pdf"></i>
+      </button>
+      </div>
     <div class="overflow-x-auto">
       <table id="tabelJadwal" class="min-w-full border border-gray-400 text-sm">
         <thead class="bg-gray-200">
@@ -349,7 +362,7 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
 
-    // --- FUNGSI Memuat opsi pilihan (DIUBAH UNTUK FILTER BARU) ---
+    // --- FUNGSI Memuat opsi pilihan ---
     async function loadReferences() {
         const references = [
             // Daftar untuk form Tambah/Edit
@@ -646,28 +659,28 @@
       }
     }
 
-    // --- FUNGSI Filter Data (DIUBAH UNTUK FILTER BARU) ---
+    // --- FUNGSI Filter Data ---
     function filterData() {
         const filterProdi = document.getElementById("filterProdi").value;
         const filterSemester = document.getElementById("filterSemester").value;
         const filterKelas = document.getElementById("filterKelas").value;
-        const filterMataKuliah = document.getElementById("filterMataKuliah").value; // FILTER BARU
-        const filterDosen = document.getElementById("filterDosen").value;           // FILTER BARU
+        const filterMataKuliah = document.getElementById("filterMataKuliah").value; 
+        const filterDosen = document.getElementById("filterDosen").value;           
         const filterTahunAkademik = document.getElementById("filterTahunAkademik").value;
 
         let hasilFilter = semuaData.filter(row => {
             const rowProdi = String(row.prodi || '');
             const rowSemester = String(row.semester || '');
             const rowKelas = String(row.kelas || '');
-            const rowMataKuliah = String(row.mata_kuliah || ''); // Data row Mata Kuliah
-            const rowDosen = String(row.dosen || '');             // Data row Dosen
+            const rowMataKuliah = String(row.mata_kuliah || ''); 
+            const rowDosen = String(row.dosen || '');             
             const rowTahunAkademik = String(row.tahun_akademik || '');
 
             const matchProdi = !filterProdi || rowProdi === filterProdi;
             const matchSemester = !filterSemester || rowSemester === filterSemester; 
             const matchKelas = !filterKelas || rowKelas === filterKelas; 
-            const matchMataKuliah = !filterMataKuliah || rowMataKuliah === filterMataKuliah; // Logika Filter
-            const matchDosen = !filterDosen || rowDosen === filterDosen;                     // Logika Filter
+            const matchMataKuliah = !filterMataKuliah || rowMataKuliah === filterMataKuliah; 
+            const matchDosen = !filterDosen || rowDosen === filterDosen;                     
             const matchTahunAkademik = !filterTahunAkademik || rowTahunAkademik === filterTahunAkademik;
 
             return matchProdi && matchSemester && matchKelas && matchTahunAkademik && matchMataKuliah && matchDosen;
