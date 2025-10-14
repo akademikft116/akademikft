@@ -154,7 +154,7 @@
             alert("❌ Login gagal: Email/Username atau Password salah.");
             console.error(loginError);
         } else {
-            window.location.href = "dashboard.html";
+            window.location.href = "main.html";
         }
     }
 
@@ -222,7 +222,7 @@
 
 
             alert("✅ Akun berhasil dibuat! Anda akan langsung masuk ke sistem.");
-            window.location.href = "dashboard.html";
+            window.location.href = "main.html";
         } catch (err) {
             console.error(err);
             alert("Terjadi kesalahan koneksi ke Supabase.");
@@ -233,7 +233,7 @@
     window.onload = async () => {
       const { data } = await supabaseClient.auth.getUser();
       if (data?.user) {
-        window.location.href = "dashboard.html";
+        window.location.href = "main.html";
       }
     };
 
