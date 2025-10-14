@@ -1,35 +1,21 @@
 <!DOCTYPE html>
 <html lang="id" class="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Admin - Akademik FT</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5CM41vzapQJoB1MvJkPQE03o" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <style>
-    /* Styling Dasar untuk Mode Gelap/Terang */
-    .dark .bg-white { background-color: #1f2937; } /* dark:bg-gray-800 */
-    .dark .text-gray-900 { color: #f9fafb; } /* dark:text-gray-50 */
-    .dark .bg-gray-100 { background-color: #111827; } /* dark:bg-gray-900 */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Akademik FT</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    /* Warna Sidebar dan Card (dapat disesuaikan lebih lanjut) */
-    .sidebar { transition: width 0.3s; }
-    .dark .sidebar { background-color: #1f2937; }
-    
-    /* Pastikan gambar bendera tidak mengganggu di mode gelap/terang */
-    body {
-        background-color: var(--body-bg, #f3f4f6);
-        background-image: url('bendera.jpeg');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-    .dark body {
-        background-color: #111827;
-    }
-  </style>
+    <style>
+        /* Styling Dasar untuk Mode Gelap/Terang */
+        .dark .bg-white { background-color: #1f2937; } 
+        .dark .text-gray-900 { color: #f9fafb; } 
+        .dark .bg-gray-100 { background-color: #111827; } 
+        .sidebar { transition: width 0.3s; }
+        .dark .sidebar { background-color: #1f2937; }
+    </style>
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-50">
@@ -42,26 +28,25 @@
         </div>
         
         <nav class="flex-grow p-4 space-y-2">
-            <a href="dashbord.html" class="flex items-center p-3 rounded-lg bg-blue-100 dark:bg-blue-600 text-blue-700 dark:text-white font-semibold transition duration-150">
+            <a href="dashboard.html" class="flex items-center p-3 rounded-lg bg-blue-100 dark:bg-blue-600 text-blue-700 dark:text-white font-semibold transition duration-150">
                 <i class="fas fa-home w-5 h-5 mr-3"></i>
                 Dashboard
             </a>
             <a href="main.html" class="flex items-center p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-150">
                 <i class="fas fa-calendar-alt w-5 h-5 mr-3"></i>
-                Manajemen Jadwal
+                Penjadwalan
             </a>
-            </nav>
+        </nav>
 
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
             <div class="flex items-center justify-between">
                 <label for="theme-switcher" class="text-sm font-medium">Tema Tampilan:</label>
-                <select id="theme-switcher" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                <select id="theme-switcher" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <option value="system">Sistem</option>
                     <option value="light">Terang</option>
                     <option value="dark">Gelap</option>
                 </select>
             </div>
-
             <button onclick="logout()" class="w-full bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition duration-150">
                 <i class="fas fa-sign-out-alt mr-2"></i>
                 Logout
@@ -72,15 +57,14 @@
     <div class="ml-64 p-6 transition-all duration-300">
         
         <header class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Selamat Datang di Dashboard!</h2>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Dashboard Statistik</h2>
             <div class="flex items-center space-x-4">
-                <span id="username-display" class="font-medium">User Admin</span>
+                <span id="username-display" class="font-medium">Memuat...</span>
                 <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">A</div>
             </div>
         </header>
 
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center justify-between border-l-4 border-blue-500">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Mata Kuliah</p>
@@ -88,7 +72,6 @@
                 </div>
                 <i class="fas fa-book-open text-4xl text-blue-500 opacity-50"></i>
             </div>
-
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center justify-between border-l-4 border-green-500">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Dosen</p>
@@ -96,7 +79,6 @@
                 </div>
                 <i class="fas fa-users text-4xl text-green-500 opacity-50"></i>
             </div>
-            
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center justify-between border-l-4 border-yellow-500">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Ruangan</p>
@@ -104,7 +86,6 @@
                 </div>
                 <i class="fas fa-building text-4xl text-yellow-500 opacity-50"></i>
             </div>
-            
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex items-center justify-between border-l-4 border-red-500">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Prodi</p>
@@ -115,9 +96,7 @@
         </section>
 
         <section class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
-            <h3 class="text-xl font-semibold border-b pb-3 mb-4 text-gray-800 dark:text-gray-100 border-gray-200 dark:border-gray-700">Ringkasan Sistem</h3>
-            <p class="text-gray-700 dark:text-gray-300">Area ini dapat digunakan untuk menampilkan grafik, jadwal yang akan datang, atau log aktivitas terbaru. (Contoh implementasi: Daftar 5 Jadwal Terbaru).</p>
-            
+            <h3 class="text-xl font-semibold border-b pb-3 mb-4 text-gray-800 dark:text-gray-100 border-gray-200 dark:border-gray-700">Ringkasan Jadwal Terbaru</h3>
             <div class="mt-6 overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead>
@@ -133,29 +112,29 @@
                     </tbody>
                 </table>
             </div>
-
+            <div class="text-center mt-6">
+                 <a href="main.html" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-150">
+                    Lihat Semua Jadwal
+                </a>
+            </div>
         </section>
 
     </div>
 
     <script>
-        // --- Inisialisasi Supabase (Harap JANGAN ganti dengan key dari file jadwal.js jika itu Service Role Key) ---
-        // Anda harus menggunakan key yang sama dengan yang ada di `jadwal.js` dan `index.html`
         const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- FUNGSI THEME SWITCHER (Dari kode dashbord.html lama Anda) ---
+        // --- FUNGSI THEME SWITCHER & LOGOUT ---
         function setTheme(theme) {
             const html = document.documentElement;
             const switcher = document.getElementById('theme-switcher');
-
             if (switcher && switcher.value !== theme) { switcher.value = theme; }
             html.classList.remove('light', 'dark');
-
             if (theme === 'dark') { html.classList.add('dark'); } 
             else if (theme === 'light') { html.classList.add('light'); } 
-            else { // 'system'
+            else { 
                 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     html.classList.add('dark');
                 } else {
@@ -163,18 +142,13 @@
                 }
             }
         }
-
         function applyTheme() {
             const savedTheme = localStorage.getItem('theme') || 'system';
             setTheme(savedTheme);
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                if (localStorage.getItem('theme') === 'system') {
-                    setTheme('system'); 
-                }
+                if (localStorage.getItem('theme') === 'system') { setTheme('system'); }
             });
         }
-        
-        // Listener untuk Theme Switcher
         document.addEventListener('DOMContentLoaded', () => {
             const switcher = document.getElementById('theme-switcher');
             if (switcher) {
@@ -185,8 +159,6 @@
                 });
             }
         });
-
-        // --- FUNGSI LOGOUT ---
         async function logout() {
             await supabaseClient.auth.signOut();
             window.location.href = "index.html";
@@ -194,84 +166,59 @@
 
         // --- FUNGSI AMBIL DATA STATISTIK ---
         async function loadStatistics(user) {
-            const totalMatkulEl = document.getElementById('total-matkul');
-            const totalDosenEl = document.getElementById('total-dosen');
-            const totalRuanganEl = document.getElementById('total-ruangan');
             const usernameDisplayEl = document.getElementById('username-display');
-            const ringkasanTabelBody = document.getElementById('ringkasan-jadwal');
-
-            // 1. Tampilkan Username
-            // Asumsikan username disimpan di tabel users_metadata atau menggunakan email/user_id
-            const { data: userData, error: userError } = await supabaseClient
+            const { data: userData } = await supabaseClient
                 .from('users_metadata')
                 .select('username')
                 .eq('user_id', user.id)
                 .single();
             
-            if (userData) {
-                usernameDisplayEl.textContent = userData.username;
-            } else {
-                usernameDisplayEl.textContent = user.email;
-            }
+            usernameDisplayEl.textContent = userData ? userData.username : user.email;
 
+            // Load statistik dan ringkasan jadwal (sama seperti kode sebelumnya)
+            // ... (Kode untuk loadStatistics harus Anda salin dari respons sebelumnya) ...
+            
+            const totalMatkulEl = document.getElementById('total-matkul');
+            const totalDosenEl = document.getElementById('total-dosen');
+            const totalRuanganEl = document.getElementById('total-ruangan');
+            const ringkasanTabelBody = document.getElementById('ringkasan-jadwal');
 
-            // 2. Total Mata Kuliah (Count Distinct mata_kuliah)
-            const { count: matkulCount, error: matkulError } = await supabaseClient
+            const { count: matkulCount } = await supabaseClient
                 .from('jadwal')
                 .select('mata_kuliah', { count: 'exact', head: true });
-            if (!matkulError) totalMatkulEl.textContent = matkulCount;
-            else console.error("Error Matkul:", matkulError);
-
-
-            // 3. Total Dosen (Count Distinct dosen)
-            // Note: Supabase count distinct memerlukan view/function. Untuk kemudahan, kita ambil semua dan hitung di client.
-            const { data: dosenData, error: dosenError } = await supabaseClient
-                .from('jadwal')
-                .select('dosen');
-            if (!dosenError && dosenData) {
-                const uniqueDosen = new Set(dosenData.map(item => item.dosen));
+            if (matkulCount !== null) totalMatkulEl.textContent = matkulCount;
+            
+            const { data: dosenData } = await supabaseClient.from('jadwal').select('dosen');
+            if (dosenData) {
+                const uniqueDosen = new Set(dosenData.map(item => item.dosen).filter(d => d && d.trim() !== ''));
                 totalDosenEl.textContent = uniqueDosen.size;
-            } else {
-                console.error("Error Dosen:", dosenError);
             }
             
-            
-            // 4. Total Ruangan (Count Distinct ruangan)
-            const { data: ruanganData, error: ruanganError } = await supabaseClient
-                .from('jadwal')
-                .select('ruangan');
-            if (!ruanganError && ruanganData) {
-                const uniqueRuangan = new Set(ruanganData.map(item => item.ruangan));
+            const { data: ruanganData } = await supabaseClient.from('jadwal').select('ruangan');
+            if (ruanganData) {
+                const uniqueRuangan = new Set(ruanganData.map(item => item.ruangan).filter(r => r && r.trim() !== ''));
                 totalRuanganEl.textContent = uniqueRuangan.size;
-            } else {
-                console.error("Error Ruangan:", ruanganError);
             }
 
-            
-            // 5. Ringkasan Jadwal Terbaru (5 data terakhir)
-            const { data: ringkasanJadwal, error: ringkasanError } = await supabaseClient
+            const { data: ringkasanJadwal } = await supabaseClient
                 .from('jadwal')
                 .select('mata_kuliah, dosen, prodi, hari, jam_mulai, jam_akhir')
-                .order('id', { ascending: false }) // Ambil yang terbaru
+                .order('id', { ascending: false })
                 .limit(5);
 
-            if (!ringkasanError && ringkasanJadwal.length > 0) {
+            if (ringkasanJadwal && ringkasanJadwal.length > 0) {
                 ringkasanTabelBody.innerHTML = ringkasanJadwal.map(item => `
-                    <tr>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${item.mata_kuliah}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.dosen}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.prodi}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${item.hari}, ${item.jam_mulai} - ${item.jam_akhir}</td>
                     </tr>
                 `).join('');
-            } else if (ringkasanJadwal.length === 0) {
-                ringkasanTabelBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">Belum ada data jadwal.</td></tr>';
             } else {
-                console.error("Error Ringkasan:", ringkasanError);
+                ringkasanTabelBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">Belum ada data jadwal.</td></tr>';
             }
-
-            // Total Prodi (Hardcoded sesuai 4 prodi di form Anda)
-            document.getElementById('total-prodi').textContent = 4;
+            // End of loadStatistics
         }
 
         // --- Cek login user dan Panggil fungsi saat memuat ---
@@ -285,10 +232,7 @@
                 return;
             }
             
-            // Terapkan tema
             applyTheme(); 
-            
-            // Muat data statistik
             loadStatistics(user);
         };
     </script>
