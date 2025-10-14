@@ -21,8 +21,8 @@
 <body class="bg-gray-100 min-h-screen">
     
     <nav class="bg-blue-800 p-4 shadow-lg sticky top-0 z-10">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-white text-2xl font-bold">Akademik Fakultas Teknik</h1>
+        <div class="container mx-auto flex justify-between items-center max-w-7xl">
+            <h1 class="text-white text-2xl font-bold">Dashboard Akademik FT</h1>
             <div class="text-white flex items-center">
                 <span id="welcome-message" class="mr-4 text-lg">Selamat datang!</span>
                 <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition duration-200 flex items-center">
@@ -32,16 +32,16 @@
         </div>
     </nav>
 
-    <div class="container mx-auto mt-10 p-5">
-        <h2 class="text-4xl font-extrabold mb-10 text-gray-800 text-center border-b pb-3">Pusat Informasi Akademik</h2>
+    <div class="container mx-auto mt-10 p-5 max-w-7xl">
+        <h2 class="text-4xl font-extrabold mb-10 text-gray-800 text-center border-b pb-3">Pilih Menu</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
             <a href="main.html" class="menu-card block p-8 bg-white rounded-xl shadow-lg border-t-8 border-blue-500 hover:border-blue-700">
                 <div class="text-center">
                     <i class="fas fa-calendar-alt text-6xl text-blue-500 mb-4"></i>
                     <h3 class="text-2xl font-bold text-gray-800 mb-2">Manajemen Jadwal Kuliah</h3>
-                    <p class="text-gray-600">Tambah, edit, dan kelola semua jadwal perkuliahan.</p>
+                    <p class="text-gray-600">Kelola data jadwal mata kuliah.</p>
                 </div>
             </a>
 
@@ -49,7 +49,7 @@
                 <div class="text-center">
                     <i class="fas fa-user-tie text-6xl text-green-500 mb-4"></i>
                     <h3 class="text-2xl font-bold text-gray-800 mb-2">Daftar Dosen</h3>
-                    <p class="text-gray-600">Lihat daftar lengkap dosen dan NIDN.</p>
+                    <p class="text-gray-600">Lihat data dosen pengajar (Asumsi tabel 'dosen' ada).</p>
                 </div>
             </div>
 
@@ -78,7 +78,8 @@
                             </tr>
                         </thead>
                         <tbody id="dosen-table-body" class="bg-white divide-y divide-gray-200">
-                            </tbody>
+                            <tr><td colspan="2" class="text-center py-6 text-gray-500">Data dosen akan dimuat di sini... (Pastikan tabel 'dosen' ada di Supabase)</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -87,11 +88,9 @@
     </div>
 
     <script>
-        // --- Ambil Kunci Supabase dari index.html atau jadwal.js ---
-        // PASTIKAN NILAI INI SAMA DENGAN NILAI DI FILE LAIN
-        const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; // Ganti dengan URL Supabase Anda
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; // Ganti dengan Kunci Anon Anda
-
+        // --- Inisialisasi Supabase (SESUAI DENGAN KODE LAMA) ---
+        const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- Cek Status Login dan Muat Username ---
@@ -104,10 +103,10 @@
                 return;
             }
 
-            // Muat username untuk pesan sambutan
+            // Muat username dari tabel 'users_metadata' yang Anda gunakan di index.html
             try {
-                const { data: metadata, error } = await supabase
-                    .from('users_metadata') // Tabel metadata yang Anda gunakan di index.html
+                const { data: metadata } = await supabase
+                    .from('users_metadata') 
                     .select('username')
                     .eq('user_id', user.id)
                     .single();
@@ -137,14 +136,13 @@
 
         // --- Fungsi Tampilkan Dosen (Modal) ---
         async function showDosen() {
-            // Tampilkan Modal
             document.getElementById('dosen-modal').classList.remove('hidden');
             document.getElementById('dosen-modal').classList.add('flex');
             
             const tableBody = document.getElementById('dosen-table-body');
             tableBody.innerHTML = '<tr><td colspan="2" class="text-center py-6 text-blue-500 font-semibold"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat data dosen...</td></tr>';
 
-            // Ambil data dari tabel 'dosen' (Asumsi tabel ini ada di Supabase Anda)
+            // Ambil data dari tabel 'dosen' (ASUMSI TABEL INI ADA)
             const { data, error } = await supabase
                 .from('dosen')
                 .select('nama_dosen, nidn')
@@ -156,7 +154,6 @@
                 return;
             }
 
-            // Tampilkan data ke tabel
             if (data && data.length > 0) {
                 tableBody.innerHTML = data.map((d, index) => `
                     <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50">
