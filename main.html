@@ -16,14 +16,29 @@
   <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
 
   <style>
-    /* ... (Style yang sudah ada) ... */
+    /* KEYFRAME BARU: Mendefinisikan pergerakan background */
+    @keyframes moveBackground {
+        from {
+            background-position: 0 0; /* Mulai dari pojok kiri atas */
+        }
+        to {
+            /* Pindahkan background 500px ke kanan dan 500px ke bawah */
+            background-position: 500px 500px; 
+        }
+    }
+    
     body {
-        background-image: url('bendera.jpeg'); 
-        background-size: cover; 
-        background-repeat: no-repeat; 
+        /* PROPERTI BACKGROUND BARU */
+        background-image: url('logo.jpeg'); /* Ganti dengan gambar kecil/pattern Anda */
+        background-size: 150px 150px; /* Ukuran gambar kecil (misal: 150x150 pixel) */
+        background-repeat: repeat; /* Ulangi gambar di seluruh latar belakang */
         background-attachment: fixed; 
         background-color: #f3f4f6; 
+        /* Terapkan animasi */
+        animation: moveBackground 60s linear infinite; /* Animasi bergerak selama 60 detik, linear, berulang */
     }
+    
+    /* ... (Style yang sudah ada untuk komponen lain) ... */
     .bg-white {
         background-color: rgba(255, 255, 255, 0.9); 
         backdrop-filter: blur(5px); 
