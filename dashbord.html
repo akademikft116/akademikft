@@ -15,6 +15,8 @@
         .dark .bg-gray-100 { background-color: #111827; } 
         .sidebar { transition: width 0.3s; }
         .dark .sidebar { background-color: #1f2937; }
+        /* Konten utama harus menggeser agar tidak tertutup sidebar */
+        .main-content { margin-left: 16rem; transition: margin-left 0.3s; }
     </style>
 </head>
 
@@ -36,7 +38,7 @@
                 <i class="fas fa-calendar-alt w-5 h-5 mr-3"></i>
                 Penjadwalan
             </a>
-        </nav>
+            </nav>
 
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
             <div class="flex items-center justify-between">
@@ -54,7 +56,7 @@
         </div>
     </aside>
 
-    <div class="ml-64 p-6 transition-all duration-300">
+    <div class="main-content p-6">
         
         <header class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-6">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Dashboard Statistik</h2>
@@ -114,7 +116,7 @@
             </div>
             <div class="text-center mt-6">
                  <a href="main.html" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-150">
-                    Lihat Semua Jadwal
+                    Pergi ke Halaman Penjadwalan
                 </a>
             </div>
         </section>
@@ -122,6 +124,7 @@
     </div>
 
     <script>
+        // --- Inisialisasi Supabase (PASTIKAN KEY INI SAMA DENGAN FILE LAIN) ---
         const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -166,7 +169,13 @@
 
         // --- FUNGSI AMBIL DATA STATISTIK ---
         async function loadStatistics(user) {
+            const totalMatkulEl = document.getElementById('total-matkul');
+            const totalDosenEl = document.getElementById('total-dosen');
+            const totalRuanganEl = document.getElementById('total-ruangan');
             const usernameDisplayEl = document.getElementById('username-display');
+            const ringkasanTabelBody = document.getElementById('ringkasan-jadwal');
+
+            // 1. Tampilkan Username
             const { data: userData } = await supabaseClient
                 .from('users_metadata')
                 .select('username')
@@ -175,31 +184,27 @@
             
             usernameDisplayEl.textContent = userData ? userData.username : user.email;
 
-            // Load statistik dan ringkasan jadwal (sama seperti kode sebelumnya)
-            // ... (Kode untuk loadStatistics harus Anda salin dari respons sebelumnya) ...
-            
-            const totalMatkulEl = document.getElementById('total-matkul');
-            const totalDosenEl = document.getElementById('total-dosen');
-            const totalRuanganEl = document.getElementById('total-ruangan');
-            const ringkasanTabelBody = document.getElementById('ringkasan-jadwal');
-
-            const { count: matkulCount } = await supabaseClient
+            // 2. Total Mata Kuliah
+            const { count: matkulCount, error: matkulError } = await supabaseClient
                 .from('jadwal')
                 .select('mata_kuliah', { count: 'exact', head: true });
-            if (matkulCount !== null) totalMatkulEl.textContent = matkulCount;
+            if (!matkulError && matkulCount !== null) totalMatkulEl.textContent = matkulCount;
             
+            // 3. Total Dosen (Ambil dan hitung unik di client)
             const { data: dosenData } = await supabaseClient.from('jadwal').select('dosen');
             if (dosenData) {
                 const uniqueDosen = new Set(dosenData.map(item => item.dosen).filter(d => d && d.trim() !== ''));
                 totalDosenEl.textContent = uniqueDosen.size;
             }
             
+            // 4. Total Ruangan (Ambil dan hitung unik di client)
             const { data: ruanganData } = await supabaseClient.from('jadwal').select('ruangan');
             if (ruanganData) {
                 const uniqueRuangan = new Set(ruanganData.map(item => item.ruangan).filter(r => r && r.trim() !== ''));
                 totalRuanganEl.textContent = uniqueRuangan.size;
             }
 
+            // 5. Ringkasan Jadwal Terbaru (5 data terakhir)
             const { data: ringkasanJadwal } = await supabaseClient
                 .from('jadwal')
                 .select('mata_kuliah, dosen, prodi, hari, jam_mulai, jam_akhir')
@@ -218,7 +223,6 @@
             } else {
                 ringkasanTabelBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">Belum ada data jadwal.</td></tr>';
             }
-            // End of loadStatistics
         }
 
         // --- Cek login user dan Panggil fungsi saat memuat ---
