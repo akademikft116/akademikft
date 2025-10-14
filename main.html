@@ -148,11 +148,11 @@
       </select>
       
       <select id="filterMataKuliah" class="border p-2 rounded min-w-min">
-        <option value="">Semua Mata Kuliah</option>
+        <option value="">Memuat Mata Kuliah...</option>
       </select>
       
       <select id="filterDosen" class="border p-2 rounded min-w-min">
-        <option value="">Semua Dosen</option>
+        <option value="">Memuat Dosen...</option>
       </select>
       
        <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
@@ -293,6 +293,8 @@
     // --- Variabel Global TomSelect ---
     let tsMataKuliah;
     let tsEditMataKuliah;
+    let tsFilterMataKuliah; 
+    let tsFilterDosen; 
     
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -362,19 +364,19 @@
             console.error('Gagal memuat data Mata Kuliah:', mkError);
             showToast("Gagal memuat data Mata Kuliah", 'error'); 
         } else {
-            mataKuliahData = mkData; // Simpan data lengkap
+            mataKuliahData = mkData; 
             const tomSelectOptions = mkData.map(item => ({
-                value: item.kode + ' | ' + item.nama, // Value yang disimpan
-                text: item.kode + ' | ' + item.nama, // Teks yang ditampilkan
+                value: item.kode + ' | ' + item.nama, 
+                text: item.kode + ' | ' + item.nama, 
                 kode: item.kode,
                 nama: item.nama
             }));
 
-            // Inisialisasi TomSelect untuk Form Tambah
+            // TomSelect untuk Form Tambah
             tsMataKuliah = new TomSelect('#kode_matkul_search', {
                 valueField: 'value',
                 labelField: 'text',
-                searchField: ['kode', 'nama'], // Cari berdasarkan kode ATAU nama
+                searchField: ['kode', 'nama'], 
                 options: tomSelectOptions,
                 placeholder: 'Cari Kode atau Nama Mata Kuliah',
                 render: {
@@ -383,7 +385,7 @@
                 }
             });
             
-             // Inisialisasi TomSelect untuk Form Edit
+             // TomSelect untuk Form Edit
             tsEditMataKuliah = new TomSelect('#edit_kode_matkul_search', {
                 valueField: 'value',
                 labelField: 'text',
@@ -396,21 +398,29 @@
                 }
             });
             
-            // Isi Filter Mata Kuliah (menggunakan select biasa)
-            const filterMkSelect = document.getElementById('filterMataKuliah');
-            filterMkSelect.innerHTML = '<option value="">Semua Mata Kuliah</option>';
-            mkData.forEach(item => {
-                const option = document.createElement('option');
-                // Menggunakan NAMA MATA KULIAH sebagai value di filter agar konsisten dengan data di tabel
-                option.value = item.nama; 
-                option.textContent = item.nama;
-                filterMkSelect.appendChild(option);
+            // BARU: TomSelect untuk Filter Mata Kuliah
+            const filterOptionsMk = [{ value: '', text: 'Semua Mata Kuliah', kode: '', nama: '' }, ...tomSelectOptions];
+            
+            tsFilterMataKuliah = new TomSelect('#filterMataKuliah', {
+                valueField: 'value',
+                labelField: 'text',
+                searchField: ['kode', 'nama'], 
+                options: filterOptionsMk,
+                placeholder: 'Semua Mata Kuliah',
+                render: {
+                    option: (data, escape) => `<div><span class="font-bold">${escape(data.kode)}</span> | ${escape(data.nama)}</div>`,
+                    item: (data, escape) => `<div>${escape(data.text)}</div>`
+                },
+                onInitialize: function() {
+                    this.setValue(''); 
+                }
             });
         }
         
-        // --- 2. Ambil dan Inisialisasi Dosen, Asisten, Kelas, Ruangan (Select Biasa) ---
+        // --- 2. Ambil dan Inisialisasi Dosen, Asisten, Kelas, Ruangan, dll. ---
         const references = [
-            { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen', isFilter: true, filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen' },
+            // Dosen diubah menjadi TomSelect di Filter
+            { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen', isFilter: true, filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen', isTomSelectFilter: true }, 
             { table: 'asisten', elementId: 'asisten', editElementId: 'edit_asisten', column: 'nama', defaultText: 'Pilih Asisten' },
             { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas', isFilter: true, filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
             { table: 'ruangan', elementId: 'ruangan', editElementId: 'edit_ruangan', column: 'nama', defaultText: 'Pilih Ruangan' },
@@ -442,12 +452,29 @@
             }
 
             const dataValues = data.map(item => item[ref.column]);
-
+            
+            // Populasikan SELECT biasa untuk form tambah/edit
             populateSelect(ref.elementId, dataValues, ref.defaultText); 
             if (ref.editElementId) {
                 populateSelect(ref.editElementId, dataValues, ref.defaultText);
             }
-            if (ref.isFilter) {
+
+            // Populasikan dan inisialisasi TomSelect untuk filter Dosen
+            if (ref.isFilter && ref.isTomSelectFilter) {
+                const filterOptionsDosen = [{ value: '', text: 'Semua Dosen' }, ...dataValues.map(v => ({ value: v, text: v }))];
+                
+                tsFilterDosen = new TomSelect('#filterDosen', {
+                    valueField: 'value',
+                    labelField: 'text',
+                    searchField: ['text'], 
+                    options: filterOptionsDosen,
+                    placeholder: 'Semua Dosen',
+                    onInitialize: function() {
+                        this.setValue(''); 
+                    }
+                });
+            } else if (ref.isFilter) {
+                // Untuk filter yang tetap menggunakan SELECT biasa (Prodi, Kelas, Semester)
                 populateSelect(ref.filterElementId, dataValues, ref.filterDefaultText, true);
             }
         }
@@ -477,6 +504,25 @@
         return;
       }
       await loadReferences(); 
+      
+      // TomSelect untuk Dosen (Form Tambah)
+      new TomSelect("#dosen", {
+          create: true,
+          sortField: {
+              field: "text",
+              direction: "asc"
+          }
+      });
+      
+      // TomSelect untuk Asisten (Form Tambah)
+      new TomSelect("#asisten", {
+          create: true,
+          sortField: {
+              field: "text",
+              direction: "asc"
+          }
+      });
+      
       loadData();
     };
 
@@ -548,7 +594,7 @@
         return;
       }
       
-      // Ambil nilai dari TomSelect. Nilai yang disimpan adalah "KODE | NAMA"
+      // Ambil nilai dari TomSelect Mata Kuliah
       const mkValue = tsMataKuliah.getValue();
       
       if (!mkValue) {
@@ -560,8 +606,11 @@
       
       const prodi = document.getElementById("prodi").value;
       const hari = document.getElementById("hari").value;
-      const dosen = document.getElementById("dosen").value;
+      
+      // AMBIL NILAI DARI TOMSELECT Dosen & Asisten
+      const dosen = document.getElementById("dosen").value; 
       const asisten = document.getElementById("asisten").value;
+      
       const semester = document.getElementById("semester").value;
       const kelas = document.getElementById("kelas").value;
       const ruangan = document.getElementById("ruangan").value;
@@ -576,7 +625,7 @@
       const jadwal = {
         user_id: user.id, 
         kode_matkul: kode, 
-        mata_kuliah: nama, // Simpan Nama Mata Kuliah
+        mata_kuliah: nama, 
         prodi: prodi,
         hari: hari,
         jam_mulai: document.getElementById("jam_mulai").value,
@@ -598,14 +647,15 @@
         showToast("Jadwal berhasil ditambahkan!", 'success'); 
         
         // Reset form
-        tsMataKuliah.setValue(''); // Reset TomSelect
+        tsMataKuliah.setValue(''); 
+        document.getElementById("dosen").tomselect.setValue(''); 
+        document.getElementById("asisten").tomselect.setValue('');
+
         document.getElementById("sks").value = '';
         document.getElementById("jam_mulai").value = '';
         document.getElementById("jam_akhir").value = '';
         document.getElementById("prodi").value = '';
         document.getElementById("hari").value = '';
-        document.getElementById("dosen").value = '';
-        document.getElementById("asisten").value = '';
         document.getElementById("semester").value = '';
         document.getElementById("kelas").value = '';
         document.getElementById("ruangan").value = '';
@@ -619,12 +669,10 @@
         const row = semuaData.find(r => r.id === id);
         if (!row) return showToast("Data tidak ditemukan.", 'error'); 
 
-        // Tentukan nilai yang akan dipilih di TomSelect (KODE | NAMA)
         const mkValueToSelect = (row.kode_matkul && row.mata_kuliah) 
                                 ? `${row.kode_matkul} | ${row.mata_kuliah}` 
                                 : '';
         
-        // Isi TomSelect Edit
         tsEditMataKuliah.setValue(mkValueToSelect);
 
         // Isi form modal dengan data lama
@@ -634,8 +682,10 @@
         document.getElementById('edit_jam_mulai').value = row.jam_mulai || '';
         document.getElementById('edit_jam_akhir').value = row.jam_akhir || '';
         document.getElementById('edit_sks').value = row.sks || '';
-        document.getElementById('edit_dosen').value = row.dosen || '';
+        
+        document.getElementById('edit_dosen').value = row.dosen || ''; 
         document.getElementById('edit_asisten').value = row.asisten || '';
+        
         document.getElementById('edit_semester').value = row.semester || '';
         document.getElementById('edit_kelas').value = row.kelas || '';
         document.getElementById('edit_ruangan').value = row.ruangan || '';
@@ -660,8 +710,8 @@
 
 
         const updatedJadwal = {
-            kode_matkul: kode, // Ambil dari TomSelect
-            mata_kuliah: nama, // Ambil dari TomSelect
+            kode_matkul: kode, 
+            mata_kuliah: nama, 
             prodi: document.getElementById('edit_prodi').value,
             hari: document.getElementById('edit_hari').value,
             jam_mulai: document.getElementById('edit_jam_mulai').value,
@@ -715,8 +765,20 @@
         const filterProdi = document.getElementById("filterProdi").value;
         const filterSemester = document.getElementById("filterSemester").value;
         const filterKelas = document.getElementById("filterKelas").value;
-        const filterMataKuliah = document.getElementById("filterMataKuliah").value; 
-        const filterDosen = document.getElementById("filterDosen").value;           
+        
+        // BARU: Ambil nilai filter dari TomSelect Mata Kuliah & Dosen
+        const filterMataKuliahRaw = tsFilterMataKuliah.getValue();
+        const filterDosenRaw = tsFilterDosen.getValue();
+        
+        let filterMataKuliah = "";
+        // Jika nilai yang dipilih bukan "Semua Mata Kuliah" (yaitu kosong), ambil NAMA mata kuliah (nama ada di indeks 1)
+        if(filterMataKuliahRaw !== "") {
+            // Karena format value adalah "KODE | NAMA", kita ambil NAMAnya untuk filter
+            filterMataKuliah = filterMataKuliahRaw.split(' | ')[1].trim(); 
+        }
+
+        const filterDosen = filterDosenRaw; // TomSelect Dosen sudah menyimpan nama dosen
+        
         const filterTahunAkademik = document.getElementById("filterTahunAkademik").value;
 
         let hasilFilter = semuaData.filter(row => {
@@ -776,6 +838,7 @@
           return;
       }
       
+      // Ambil filter yang tersisa dari SELECT biasa
       const filterProdi = document.getElementById("filterProdi").value;
       const filterKelas = document.getElementById("filterKelas").value;
       const filterTahunAkademik = document.getElementById("filterTahunAkademik").value;
