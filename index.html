@@ -154,7 +154,7 @@
             alert("❌ Login gagal: Email/Username atau Password salah.");
             console.error(loginError);
         } else {
-            window.location.href = "main.html";
+            window.location.href = "dashboard.html";
         }
     }
 
@@ -233,7 +233,7 @@
     window.onload = async () => {
       const { data } = await supabaseClient.auth.getUser();
       if (data?.user) {
-        window.location.href = "main.html";
+        window.location.href = "dashboard.html";
       }
     };
 
