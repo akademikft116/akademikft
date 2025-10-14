@@ -477,6 +477,29 @@
         return;
       }
       await loadReferences(); 
+      
+      // >>> KODE BARU DIMASUKKAN DI SINI: Inisialisasi TomSelect untuk Dosen dan Asisten <<<
+      // Ini akan mengaktifkan fitur pencarian otomatis (autocomplete)
+      
+      // TomSelect untuk Dosen (Form Tambah)
+      new TomSelect("#dosen", {
+          create: true,
+          sortField: {
+              field: "text",
+              direction: "asc"
+          }
+      });
+      
+      // TomSelect untuk Asisten (Form Tambah)
+      new TomSelect("#asisten", {
+          create: true,
+          sortField: {
+              field: "text",
+              direction: "asc"
+          }
+      });
+      // >>> AKHIR KODE BARU <<<
+      
       loadData();
     };
 
@@ -560,8 +583,11 @@
       
       const prodi = document.getElementById("prodi").value;
       const hari = document.getElementById("hari").value;
-      const dosen = document.getElementById("dosen").value;
+      
+      // AMBIL NILAI DARI TOMSELECT (Karena #dosen & #asisten sekarang adalah TomSelect)
+      const dosen = document.getElementById("dosen").value; 
       const asisten = document.getElementById("asisten").value;
+      
       const semester = document.getElementById("semester").value;
       const kelas = document.getElementById("kelas").value;
       const ruangan = document.getElementById("ruangan").value;
@@ -598,14 +624,18 @@
         showToast("Jadwal berhasil ditambahkan!", 'success'); 
         
         // Reset form
-        tsMataKuliah.setValue(''); // Reset TomSelect
+        tsMataKuliah.setValue(''); // Reset TomSelect Mata Kuliah
+        
+        // RESET TOMSELECT Dosen & Asisten
+        // Karena TomSelect tidak memiliki method reset standar, menggunakan setValue('') adalah cara termudah.
+        document.getElementById("dosen").tomselect.setValue(''); 
+        document.getElementById("asisten").tomselect.setValue('');
+
         document.getElementById("sks").value = '';
         document.getElementById("jam_mulai").value = '';
         document.getElementById("jam_akhir").value = '';
         document.getElementById("prodi").value = '';
         document.getElementById("hari").value = '';
-        document.getElementById("dosen").value = '';
-        document.getElementById("asisten").value = '';
         document.getElementById("semester").value = '';
         document.getElementById("kelas").value = '';
         document.getElementById("ruangan").value = '';
@@ -634,8 +664,11 @@
         document.getElementById('edit_jam_mulai').value = row.jam_mulai || '';
         document.getElementById('edit_jam_akhir').value = row.jam_akhir || '';
         document.getElementById('edit_sks').value = row.sks || '';
-        document.getElementById('edit_dosen').value = row.dosen || '';
+        
+        // Perhatian: Ini menggunakan SELECT biasa, bukan TomSelect, tapi akan tetap berfungsi
+        document.getElementById('edit_dosen').value = row.dosen || ''; 
         document.getElementById('edit_asisten').value = row.asisten || '';
+        
         document.getElementById('edit_semester').value = row.semester || '';
         document.getElementById('edit_kelas').value = row.kelas || '';
         document.getElementById('edit_ruangan').value = row.ruangan || '';
