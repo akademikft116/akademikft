@@ -7,14 +7,16 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* Styling tambahan untuk gambar */
+    /* Styling untuk Kolom Kiri */
     #sidebar-image {
-        /* Mengatur gambar agar menutupi seluruh area div */
-        background-image: url('bendera.jpeg'); 
+        /* GANTI bagian ini dengan gambar yang Anda inginkan */
+        /* Contoh: background-image: url('dajal.jpeg'); */
+        background-color: #1e3a8a; /* Default: Warna Biru Tua Solid */
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
     }
+    
     /* Untuk memastikan form container memiliki padding dan background */
     .form-container {
         background-color: white;
@@ -26,7 +28,7 @@
   
   <div class="flex w-full max-w-4xl bg-white shadow-2xl rounded-xl overflow-hidden min-h-[500px]">
     
-    <div id="sidebar-image" class="hidden md:block md:w-8/12 bg-blue-600 p-8 relative">
+    <div id="sidebar-image" class="hidden md:block md:w-8/12 p-8 relative">
         <div class="absolute inset-0 bg-blue-900 bg-opacity-70 flex flex-col justify-center items-center p-8">
             <h1 class="text-4xl font-extrabold text-white text-center mb-4">FAKULTAS TEKNIK</h1>
             <p class="text-xl text-white text-center font-light">Sistem Informasi Jadwal Kuliah</p>
@@ -108,10 +110,10 @@
 
         if (passwordField.type === 'password') {
             passwordField.type = 'text';
-            // Ubah ikon ke 'terbuka' (misalnya, ganti path SVG atau class)
+            // Ubah ikon di sini jika perlu
         } else {
             passwordField.type = 'password';
-            // Ubah ikon ke 'tertutup'
+            // Ubah ikon di sini jika perlu
         }
     }
 
