@@ -38,7 +38,7 @@
         <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
             <nav class="flex-grow p-4 space-y-2">
                 
-                <button onclick="showContent('main', this)" id="mainLink" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 active-link">
+                <button onclick="showContent('main', this)" id="mainLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 active-link">
                     <i class="fas fa-home w-5"></i>
                     <span>Dashboard</span>
                 </button>
@@ -48,7 +48,17 @@
                     <span>Penjadwalan</span>
                 </a>
                 
-                <button onclick="showContent('pengaturan', this)" id="pengaturanLink" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <button onclick="showContent('dosen', this)" id="dosenLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                    <i class="fas fa-chalkboard-teacher w-5"></i>
+                    <span>Dosen</span>
+                </button>
+                
+                <button onclick="showContent('matkul', this)" id="matkulLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                    <i class="fas fa-book-open w-5"></i>
+                    <span>Mata Kuliah</span>
+                </button>
+
+                <button onclick="showContent('pengaturan', this)" id="pengaturanLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-cog w-5"></i>
                     <span>Pengaturan</span>
                 </button>
@@ -72,30 +82,56 @@
                             <p class="text-3xl font-bold text-gray-900 mt-1" id="totalJadwal">0</p>
                         </div>
                         
-                        <button onclick="showDosenList()" class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500 text-left hover:shadow-lg transition duration-150">
+                        <div class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500">
                             <p class="text-sm font-medium text-green-600">Total Dosen</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1" id="totalDosen">0</p>
-                            <span class="text-xs text-green-700 mt-2 block">Klik untuk melihat daftar &rarr;</span>
-                        </button>
+                            <span class="text-xs text-green-700 mt-2 block">Lihat detail di navigasi Dosen.</span>
+                        </div>
                         
                         <div class="bg-yellow-100 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
                             <p class="text-sm font-medium text-yellow-600">Total Mata Kuliah</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1" id="totalMatkul">0</p>
+                            <span class="text-xs text-yellow-700 mt-2 block">Lihat detail di navigasi Mata Kuliah.</span>
                         </div>
                     </div>
                 </div>
                 
-                <div id="dosenList" class="bg-white p-6 rounded-lg shadow-xl hidden">
-                    <button onclick="showContent('main', document.getElementById('mainLink'))" class="text-blue-600 hover:text-blue-800 mb-4 flex items-center">
-                        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Dashboard Utama
-                    </button>
+                <div id="dosen" class="bg-white p-6 rounded-lg shadow-xl hidden">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Dosen</h2>
-                    <div class="overflow-y-auto max-h-96">
-                        <ul id="dosenUl" class="divide-y divide-gray-200">
-                            </ul>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Dosen</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIDN</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dosenTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                        </table>
                     </div>
                 </div>
                 
+                <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode MK</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div id="pengaturan" class="bg-white p-6 rounded-lg shadow-xl hidden max-w-2xl">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Akun</h2>
                     
@@ -159,14 +195,14 @@
 
     let globalUserId = null;
     let globalUserEmail = null;
-    let dosenData = []; // Variabel untuk menyimpan data dosen
 
-    // Fungsi untuk menampilkan konten yang dipilih
+    // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
         // Sembunyikan semua konten utama
         document.getElementById('main').classList.add('hidden');
+        document.getElementById('dosen').classList.add('hidden');
+        document.getElementById('matkul').classList.add('hidden');
         document.getElementById('pengaturan').classList.add('hidden');
-        document.getElementById('dosenList').classList.add('hidden'); // Sembunyikan daftar dosen
         
         // Tampilkan konten yang dipilih
         document.getElementById(tabId).classList.remove('hidden');
@@ -178,39 +214,84 @@
             el.classList.remove('text-white');
         });
         
-        // Hanya tombol navigasi utama yang mendapat kelas aktif
-        if (clickedButton && (tabId === 'main' || tabId === 'pengaturan')) {
+        // Tambahkan kelas aktif ke link yang diklik jika ada
+        if (clickedButton) {
             clickedButton.classList.add('active-link');
             clickedButton.classList.remove('text-gray-300');
-        } else if (tabId === 'dosenList') {
-            // Jika menampilkan daftar dosen, biarkan link Dashboard tetap aktif
-            document.getElementById('mainLink').classList.add('active-link');
-            document.getElementById('mainLink').classList.remove('text-gray-300');
+        }
+
+        // Muat data spesifik jika berpindah ke tab Dosen atau Mata Kuliah
+        if (tabId === 'dosen') {
+            loadDosenData();
+        } else if (tabId === 'matkul') {
+            loadMatkulData();
         }
     }
     
-    // --- FUNGSI BARU: Menampilkan Daftar Dosen ---
-    function showDosenList() {
-        showContent('dosenList'); // Mengganti konten ke daftar dosen
-
-        const dosenUl = document.getElementById('dosenUl');
-        dosenUl.innerHTML = '';
+    // --- FUNGSI MUAT DATA DOSEN ---
+    async function loadDosenData() {
+        const { data: dataDosen, error: dosenError } = await supabaseClient
+            .from('dosen')
+            .select('*') // Ambil semua kolom
+            .order('nama', { ascending: true });
+            
+        const tableBody = document.getElementById('dosenTableBody');
+        tableBody.innerHTML = ''; // Kosongkan tabel
         
-        if (dosenData.length === 0) {
-            dosenUl.innerHTML = '<li class="p-3 text-gray-500">Tidak ada data dosen ditemukan.</li>';
+        if (dosenError || !dataDosen || dataDosen.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                        ${dosenError ? 'Error memuat data: ' + dosenError.message : 'Tidak ada data dosen ditemukan.'}
+                    </td>
+                </tr>`;
             return;
         }
 
-        dosenData.forEach(dosen => {
-            const li = document.createElement('li');
-            li.className = 'p-3 hover:bg-gray-50 flex justify-between items-center';
-            li.innerHTML = `<span class="font-medium text-gray-800">${dosen.nama}</span>`;
-            dosenUl.appendChild(li);
+        dataDosen.forEach((dosen, index) => {
+            const row = tableBody.insertRow();
+            row.className = 'hover:bg-gray-50';
+            
+            row.insertCell().textContent = index + 1;
+            row.insertCell().textContent = dosen.nama || '-';
+            row.insertCell().textContent = dosen.nidn || '-';
+            row.insertCell().textContent = dosen.prodi || '-';
         });
     }
 
-    // Fungsi untuk memuat data statistik dan data dosen
-    async function loadStatisticsAndData() {
+    // --- FUNGSI MUAT DATA MATA KULIAH ---
+    async function loadMatkulData() {
+        const { data: dataMatkul, error: matkulError } = await supabaseClient
+            .from('matakuliah')
+            .select('*') // Ambil semua kolom
+            .order('nama_mk', { ascending: true });
+            
+        const tableBody = document.getElementById('matkulTableBody');
+        tableBody.innerHTML = ''; // Kosongkan tabel
+        
+        if (matkulError || !dataMatkul || dataMatkul.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                        ${matkulError ? 'Error memuat data: ' + matkulError.message : 'Tidak ada data mata kuliah ditemukan.'}
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        dataMatkul.forEach((matkul, index) => {
+            const row = tableBody.insertRow();
+            row.className = 'hover:bg-gray-50';
+            
+            row.insertCell().textContent = index + 1;
+            row.insertCell().textContent = matkul.kode_mk || '-';
+            row.insertCell().textContent = matkul.nama_mk || '-';
+            row.insertCell().textContent = matkul.sks || '-';
+        });
+    }
+    
+    // Fungsi untuk memuat data statistik
+    async function loadStatistics() {
         if (!globalUserId) return;
 
         // 1. Menghitung Total Jadwal (hanya yang dibuat oleh user ini)
@@ -223,17 +304,13 @@
             document.getElementById('totalJadwal').textContent = jadwalCount;
         }
 
-        // 2. Mengambil dan Menghitung Total Dosen
-        const { data: dataDosen, count: dosenCount, error: dosenError } = await supabaseClient
+        // 2. Menghitung Total Dosen
+        const { count: dosenCount } = await supabaseClient
             .from('dosen')
-            .select('nama', { count: 'exact' })
-            .order('nama', { ascending: true });
+            .select('*', { count: 'exact', head: true });
             
-        if (!dosenError && dosenCount !== null) {
+        if (dosenCount !== null) {
             document.getElementById('totalDosen').textContent = dosenCount;
-            dosenData = dataDosen; // Simpan data dosen
-        } else if (dosenError) {
-             console.error("Gagal memuat data dosen:", dosenError);
         }
 
         // 3. Menghitung Total Mata Kuliah
@@ -279,11 +356,11 @@
       // Tampilkan konten dashboard utama secara default
       showContent('main', document.getElementById('mainLink'));
       
-      // Muat statistik dan data dosen
-      loadStatisticsAndData();
+      // Muat statistik (hanya ringkasan di dashboard utama)
+      loadStatistics();
     };
 
-    // --- FUNGSI BARU: Toggle Password Visibility ---
+    // --- FUNGSI TOGGLE PASSWORD ---
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('newPassword');
         const eyeIcon = document.getElementById('eyeIcon');
@@ -304,7 +381,6 @@
 
     // --- FUNGSI UPDATE USERNAME ---
     async function updateUsername() {
-        // ... (Kode updateUsername sama seperti sebelumnya) ...
         const newUsername = document.getElementById('newUsername').value.trim();
         
         if (!newUsername) {
@@ -354,7 +430,6 @@
 
     // --- FUNGSI UPDATE EMAIL ---
     async function updateEmail() {
-        // ... (Kode updateEmail sama seperti sebelumnya) ...
         const newEmail = document.getElementById('newEmail').value.trim();
         
         if (!newEmail || !newEmail.includes('@')) {
@@ -367,7 +442,6 @@
              return;
         }
         
-        // Supabase akan mengirim link konfirmasi ke email baru.
         const { error } = await supabaseClient.auth.updateUser({
             email: newEmail
         });
@@ -382,7 +456,6 @@
 
     // --- FUNGSI UPDATE PASSWORD ---
     async function updatePassword() {
-        // ... (Kode updatePassword sama seperti sebelumnya) ...
         const newPassword = document.getElementById('newPassword').value;
         
         if (newPassword.length < 6) {
