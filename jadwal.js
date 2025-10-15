@@ -1,34 +1,30 @@
-// --- Supabase setup ---
+// --- Inisialisasi Supabase ---
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-// Menggunakan supabaseClient yang sudah diinisialisasi di main.html, 
-// tapi kita inisialisasi lagi di sini untuk memastikan kode tetap berfungsi jika dipisah.
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// --- Variabel Global TomSelect & Data ---
+// --- Variabel Global TomSelect & Data (BARU DITAMBAHKAN) ---
 let tsMataKuliah;
 let tsEditMataKuliah;
 let tsFilterMataKuliah; 
 let tsFilterDosen; 
+let mataKuliahData = []; 
 
 const tabelBody = document.querySelector("#tabelJadwal tbody");
 let semuaData = []; 
-let dataYangDitampilkan = []; 
-let mataKuliahData = []; 
+let dataYangDitampilkan = []; // Digunakan untuk keperluan Export
 
-
-// --- FUNGSI Memuat opsi pilihan (Disesuaikan untuk TomSelect) ---
+// --- FUNGSI Memuat opsi pilihan dan inisialisasi Tom Select (BARU DITAMBAHKAN) ---
 async function loadReferences() {
     // 1. Ambil dan Inisialisasi Mata Kuliah (TomSelect)
-    const { data: mkData, error: mkError } = await supabaseClient
+    const { data: mkData, error: mkError } = await supabase
         .from('matakuliah')
         .select('kode, nama')
         .order('kode', { ascending: true }); 
 
     if (mkError) {
         console.error('Gagal memuat data Mata Kuliah:', mkError);
-        // showToast() didefinisikan di main.html, asumsikan bisa diakses
         if (typeof showToast === 'function') showToast("Gagal memuat data Mata Kuliah", 'error'); 
     } else {
         mataKuliahData = mkData; 
@@ -74,6 +70,7 @@ async function loadReferences() {
             searchField: ['kode', 'nama'], 
             options: filterOptionsMk,
             placeholder: 'Semua Mata Kuliah',
+             plugins: ['dropdown_input'],
             render: {
                 option: (data, escape) => `<div><span class="font-bold">${escape(data.kode)}</span> | ${escape(data.nama)}</div>`,
                 item: (data, escape) => `<div>${escape(data.text)}</div>`
@@ -84,9 +81,8 @@ async function loadReferences() {
         });
     }
     
-    // 2. Ambil dan Inisialisasi Dosen, Asisten, Kelas, Ruangan, dll.
+    // 2. Ambil dan Inisialisasi Dosen, Asisten, Kelas, Ruangan, Tahun Akademik
     const references = [
-        // Dosen diubah menjadi TomSelect di Filter
         { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', column: 'nama', defaultText: 'Pilih Dosen', isFilter: true, filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen', isTomSelectFilter: true }, 
         { table: 'asisten', elementId: 'asisten', editElementId: 'edit_asisten', column: 'nama', defaultText: 'Pilih Asisten' },
         { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas', isFilter: true, filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
@@ -108,7 +104,7 @@ async function loadReferences() {
     };
 
     for (const ref of references) {
-        const { data, error } = await supabaseClient
+        const { data, error } = await supabase
             .from(ref.table)
             .select(ref.column)
             .order(ref.column, { ascending: true }); 
@@ -120,7 +116,6 @@ async function loadReferences() {
 
         const dataValues = data.map(item => item[ref.column]);
         
-        // Populasikan SELECT biasa untuk form tambah/edit
         populateSelect(ref.elementId, dataValues, ref.defaultText); 
         if (ref.editElementId) {
             populateSelect(ref.editElementId, dataValues, ref.defaultText);
@@ -136,12 +131,12 @@ async function loadReferences() {
                 searchField: ['text'], 
                 options: filterOptionsDosen,
                 placeholder: 'Semua Dosen',
+                plugins: ['dropdown_input'],
                 onInitialize: function() {
                     this.setValue(''); 
                 }
             });
         } else if (ref.isFilter) {
-            // Untuk filter yang tetap menggunakan SELECT biasa 
             populateSelect(ref.filterElementId, dataValues, ref.filterDefaultText, true);
         }
     }
@@ -161,45 +156,31 @@ async function loadReferences() {
 }
 
 
-// --- Cek login user dan inisialisasi ---
+// --- GANTI: window.onload lama diganti agar memanggil loadReferences ---
 window.onload = async () => {
-  const { data: userData } = await supabaseClient.auth.getUser();
-  const user = userData.user;
-  if (!user) {
-    // showToast() tidak akan bekerja jika user dialihkan
-    alert("Silakan login dulu!"); 
-    window.location.href = "index.html";
-    return;
-  }
-  await loadReferences(); 
-  
-  // TomSelect untuk Dosen (Form Tambah)
-  new TomSelect("#dosen", {
-      create: true,
-      sortField: {
-          field: "text",
-          direction: "asc"
-      }
-  });
-  
-  // TomSelect untuk Asisten (Form Tambah)
-  new TomSelect("#asisten", {
-      create: true,
-      sortField: {
-          field: "text",
-          direction: "asc"
-      }
-  });
-  
-  loadData();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+    if (!user) {
+        if (typeof showToast === 'function') showToast("Silakan login dulu!", 'error'); 
+        window.location.href = "index.html";
+        return;
+    }
+    
+    await loadReferences(); // MEMUAT OPSI DAN TOM SELECT
+    
+    // Inisialisasi TomSelect untuk Dosen dan Asisten (form tambah)
+    new TomSelect("#dosen", { create: true, sortField: { field: "text", direction: "asc" } });
+    new TomSelect("#asisten", { create: true, sortField: { field: "text", direction: "asc" } });
+    
+    loadData();
 };
 
 
-// --- Ambil data jadwal & inisialisasi dataYangDitampilkan ---
+// --- Ambil data jadwal dari Supabase (TETAP) ---
 async function loadData() {
-  const { data: userData } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from("jadwal")
     .select("*")
     .eq("user_id", user.id)
@@ -207,14 +188,14 @@ async function loadData() {
 
   if (error) {
     console.error(error);
-    if (typeof showToast === 'function') showToast("Gagal memuat data jadwal", 'error'); 
+    if (typeof showToast === 'function') showToast("Gagal memuat data", 'error'); 
     return;
   }
   semuaData = data;
   tampilkanData(semuaData);
 }
 
-// --- Tampilkan Data ---
+// --- Tampilkan data ke tabel HTML (TETAP) ---
 function tampilkanData(data) {
   dataYangDitampilkan = data; 
   
@@ -247,9 +228,9 @@ function tampilkanData(data) {
   });
 }
 
-// --- Tambah Jadwal ---
+// --- Tambah Jadwal (Diperbarui untuk menggunakan Tom Select) ---
 async function simpanJadwal() {
-  const { data: userData } = await supabaseClient.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
   if (!user) {
@@ -303,7 +284,7 @@ async function simpanJadwal() {
     tahun_akademik: tahun_akademik,
   };
 
-  const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
+  const { error } = await supabase.from("jadwal").insert([jadwal]);
   if (error) {
     console.error(error);
     if (typeof showToast === 'function') showToast("Gagal menambah jadwal: " + error.message, 'error'); 
@@ -331,7 +312,7 @@ async function simpanJadwal() {
   }
 }
 
-// --- FUNGSI Edit Jadwal (Modal - Sudah diupdate) ---
+// --- GANTI: Fungsi editJadwal lama diganti dengan fungsi Modal (BARU) ---
 function editJadwal(id) {
     const row = semuaData.find(r => r.id === id);
     if (!row) return if (typeof showToast === 'function') showToast("Data tidak ditemukan.", 'error'); 
@@ -341,23 +322,20 @@ function editJadwal(id) {
                             ? `${row.kode_matkul} | ${row.mata_kuliah}` 
                             : '';
     
-    // Set nilai di TomSelect (TomSelect sudah diinisialisasi di loadReferences)
+    // Set nilai di TomSelect
     if (tsEditMataKuliah) {
-        // Hapus nilai lama, lalu set nilai baru
         tsEditMataKuliah.clear(); 
         
-        // Cek apakah nilai lama ada di opsi TomSelect. Jika tidak, tambahkan sebagai opsi sementara
-        // untuk memastikan nilai lama tetap bisa dipilih dan terlihat.
         if (mkValueToSelect && tsEditMataKuliah.options.hasOwnProperty(mkValueToSelect)) {
              tsEditMataKuliah.setValue(mkValueToSelect);
         } else if (mkValueToSelect) {
-            // Tambahkan sebagai opsi jika tidak ada di list (untuk nilai yang sudah expired)
+            // Tambahkan opsi sementara jika tidak ada di list master
             tsEditMataKuliah.addOption({ value: mkValueToSelect, text: mkValueToSelect, kode: row.kode_matkul, nama: row.mata_kuliah });
             tsEditMataKuliah.setValue(mkValueToSelect);
         }
     }
 
-    // Isi form modal dengan data lama
+    // Isi form modal
     document.getElementById('edit_id').value = row.id;
     document.getElementById('edit_prodi').value = row.prodi || '';
     document.getElementById('edit_hari').value = row.hari || '';
@@ -378,7 +356,7 @@ function editJadwal(id) {
     document.getElementById('editModal').classList.add('flex'); 
 }
 
-// --- FUNGSI Update Jadwal (Mengambil data dari TomSelect Edit) ---
+// --- FUNGSI Update Jadwal (BARU) ---
 async function updateJadwal() {
     const id = document.getElementById('edit_id').value;
     
@@ -408,12 +386,12 @@ async function updateJadwal() {
     };
     
     if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah || !updatedJadwal.tahun_akademik) {
-        if (typeof showToast === 'function') showToast("Kolom Prodi, Hari, Mata Kuliah, dan Tahun Akademik wajib diisi!", 'warning'); 
+        if (typeof showToast === 'function') showToast("Kolom wajib diisi!", 'warning'); 
         return;
     }
 
 
-    const { error } = await supabaseClient
+    const { error } = await supabase
         .from("jadwal")
         .update(updatedJadwal)
         .eq("id", id);
@@ -430,11 +408,12 @@ async function updateJadwal() {
     }
 }
 
-// --- Hapus Jadwal ---
+
+// --- Hapus jadwal (TETAP) ---
 async function hapusJadwal(id) {
   if (!confirm("Yakin ingin menghapus jadwal ini?")) return; 
   
-  const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
+  const { error } = await supabase.from("jadwal").delete().eq("id", id);
   if (error) if (typeof showToast === 'function') showToast("Gagal menghapus jadwal", 'error'); 
   else {
     if (typeof showToast === 'function') showToast("Jadwal berhasil dihapus!", 'success'); 
@@ -442,7 +421,7 @@ async function hapusJadwal(id) {
   }
 }
 
-// --- FUNGSI Filter Data (Mengambil nilai dari TomSelect Filter) ---
+// --- Filter data (Diperbarui untuk menggunakan Tom Select) ---
 function filterData() {
     const filterProdi = document.getElementById("filterProdi").value;
     const filterSemester = document.getElementById("filterSemester").value;
@@ -483,7 +462,7 @@ function filterData() {
     tampilkanData(hasilFilter);
 }
 
-// --- FUNGSI Export Excel ---
+// --- Export ke Excel (TETAP) ---
 function exportExcel() {
   const dataBersih = dataYangDitampilkan.map(row => ({
     "Tahun Akademik": row.tahun_akademik || '-',
@@ -508,7 +487,7 @@ function exportExcel() {
   if (typeof showToast === 'function') showToast("Data berhasil diexport ke Excel!", 'info');
 }
 
-// --- FUNGSI Export PDF (Judul dan Tabel Rata Tengah) ---
+// --- Export ke PDF (TETAP) ---
 function exportPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('l', 'mm', 'a4'); 
