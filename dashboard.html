@@ -6,86 +6,100 @@
     <title>Dashboard - Fakultas Teknik</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
     <style>
-        /* Styling untuk menandai tab aktif */
-        .active-tab {
-            border-bottom: 2px solid #2563EB; /* blue-600 */
-            color: #2563EB; /* blue-600 */
+        /* Styling untuk menandai menu aktif di sidebar */
+        .active-link {
+            background-color: #1d4ed8; /* blue-700 */
+            color: white;
+            border-left: 4px solid #f97316; /* orange-500 */
+        }
+        /* Tinggi layar penuh diatur untuk konten utama */
+        .main-content {
+            height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100">
 
-    <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-            <h1 class="text-xl font-bold text-blue-800">DASHBOARD AKADEMIK FT</h1>
-            <div class="flex items-center space-x-4">
-                <span id="userNameNav" class="text-gray-700 font-semibold">Memuat...</span>
-                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">Logout</button>
-            </div>
+    <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+        <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
+        <div class="flex items-center space-x-4">
+            <span id="userNameNav" class="text-white font-semibold">Memuat...</span>
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
     </nav>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div class="flex pt-16 main-content">
         
-        <div class="border-b border-gray-200 mb-6">
-            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                <button onclick="showContent('main', this)" id="mainTab" class="tab-item whitespace-nowrap py-3 px-1 font-medium text-sm active-tab">
-                    Dashboard
+        <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
+            <nav class="flex-grow p-4 space-y-2">
+                
+                <button onclick="showContent('main', this)" id="mainLink" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 active-link">
+                    <i class="fas fa-home w-5"></i>
+                    <span>Dashboard</span>
                 </button>
                 
-                <a href="main.html" class="tab-item text-gray-500 hover:text-gray-700 whitespace-nowrap py-3 px-1 font-medium text-sm">
-                    Penjadwalan
+                <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Penjadwalan</span>
                 </a>
                 
-                <button onclick="showContent('pengaturan', this)" class="tab-item text-gray-500 hover:text-gray-700 whitespace-nowrap py-3 px-1 font-medium text-sm">
-                    Pengaturan
+                <button onclick="showContent('pengaturan', this)" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Pengaturan</span>
                 </button>
+                
             </nav>
-        </div>
-
-        <div id="contentArea">
+        </aside>
+        
+        <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
             
-            <div id="main" class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
-                <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
-                    Halo, <strong id="displayUsernameMain">...</strong>! Selamat bekerja.
-                </p>
+            <div id="contentArea" class="space-y-8">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                    <div class="bg-blue-100 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                        <p class="text-sm font-medium text-blue-600">Total Jadwal</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1" id="totalJadwal">0</p>
+                <div id="main" class="bg-white p-6 rounded-lg shadow-xl min-h-full">
+                    <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
+                    <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
+                        Halo, <strong id="displayUsernameMain">...</strong>! Selamat bekerja.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                        <div class="bg-blue-100 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                            <p class="text-sm font-medium text-blue-600">Total Jadwal (Anda)</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalJadwal">0</p>
+                        </div>
+                        <div class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                            <p class="text-sm font-medium text-green-600">Total Dosen</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalDosen">0</p>
+                        </div>
+                        <div class="bg-yellow-100 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+                            <p class="text-sm font-medium text-yellow-600">Total Mata Kuliah</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalMatkul">0</p>
+                        </div>
                     </div>
-                    <div class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                        <p class="text-sm font-medium text-green-600">Total Dosen</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1" id="totalDosen">0</p>
-                    </div>
-                    <div class="bg-yellow-100 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
-                        <p class="text-sm font-medium text-yellow-600">Total Mata Kuliah</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1" id="totalMatkul">0</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="pengaturan" class="bg-white p-6 rounded-lg shadow hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Pengaturan Akun</h2>
-                <div id="userInfo" class="space-y-2 mb-6">
-                    <p class="text-gray-600">Username: <strong id="displayUsernamePengaturan">...</strong></p>
-                    <p class="text-gray-600">Email: <strong id="displayEmail">...</strong></p>
                 </div>
                 
-                <h3 class="text-xl font-semibold mb-3">Ubah Password</h3>
-                <div class="space-y-4 max-w-sm">
-                    <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                    <button onclick="updatePassword()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
-                        Simpan Password Baru
-                    </button>
+                <div id="pengaturan" class="bg-white p-6 rounded-lg shadow-xl hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Pengaturan Akun</h2>
+                    <div id="userInfo" class="space-y-2 mb-6">
+                        <p class="text-gray-600">Username: <strong id="displayUsernamePengaturan">...</strong></p>
+                        <p class="text-gray-600">Email: <strong id="displayEmail">...</strong></p>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mb-3">Ubah Password</h3>
+                    <div class="space-y-4 max-w-sm">
+                        <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <button onclick="updatePassword()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
+                            Simpan Password Baru
+                        </button>
+                    </div>
                 </div>
 
             </div>
-
-        </div>
+        </main>
     </div>
 
 <script>
@@ -103,19 +117,17 @@
         // Tampilkan konten yang dipilih
         document.getElementById(tabId).classList.remove('hidden');
         
-        // Update kelas aktif pada tombol navigasi
-        document.querySelectorAll('.tab-item').forEach(el => {
-            el.classList.remove('active-tab');
-            el.classList.add('text-gray-500');
+        // Hapus kelas aktif dari semua link di sidebar
+        document.querySelectorAll('aside button').forEach(el => {
+            el.classList.remove('active-link');
+            el.classList.add('text-gray-300');
+            el.classList.remove('text-white');
         });
         
+        // Tambahkan kelas aktif ke link yang diklik
         if (clickedButton) {
-            clickedButton.classList.add('active-tab');
-            clickedButton.classList.remove('text-gray-500');
-        } else {
-            // Kasus default saat load (agar tab Dashboard aktif)
-            document.getElementById('mainTab').classList.add('active-tab');
-            document.getElementById('mainTab').classList.remove('text-gray-500');
+            clickedButton.classList.add('active-link');
+            clickedButton.classList.remove('text-gray-300');
         }
     }
     
@@ -124,30 +136,30 @@
         // Menghitung Total Jadwal (hanya yang dibuat oleh user ini)
         const { data: userData } = await supabaseClient.auth.getUser();
         
-        const { count: jadwalCount, error: jadwalError } = await supabaseClient
+        const { count: jadwalCount } = await supabaseClient
             .from('jadwal')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', userData.user.id);
             
-        if (!jadwalError) {
+        if (jadwalCount !== null) {
             document.getElementById('totalJadwal').textContent = jadwalCount;
         }
 
         // Menghitung Total Dosen (mengambil dari tabel dosen)
-        const { count: dosenCount, error: dosenError } = await supabaseClient
+        const { count: dosenCount } = await supabaseClient
             .from('dosen')
             .select('*', { count: 'exact', head: true });
             
-        if (!dosenError) {
+        if (dosenCount !== null) {
             document.getElementById('totalDosen').textContent = dosenCount;
         }
 
         // Menghitung Total Mata Kuliah (mengambil dari tabel matakuliah)
-        const { count: matkulCount, error: matkulError } = await supabaseClient
+        const { count: matkulCount } = await supabaseClient
             .from('matakuliah')
             .select('*', { count: 'exact', head: true });
 
-        if (!matkulError) {
+        if (matkulCount !== null) {
             document.getElementById('totalMatkul').textContent = matkulCount;
         }
     }
@@ -164,7 +176,7 @@
       const user = data.user;
       
       // Ambil username dari users_metadata
-      const { data: userData, error: metaError } = await supabaseClient
+      const { data: userData } = await supabaseClient
             .from('users_metadata')
             .select('username')
             .eq('email', user.email)
@@ -178,8 +190,8 @@
       document.getElementById('displayUsernamePengaturan').textContent = username;
       document.getElementById('displayEmail').textContent = user.email;
       
-      // Tampilkan konten dashboard utama secara default
-      showContent('main');
+      // Tampilkan konten dashboard utama secara default (panggil fungsi ini di akhir onload)
+      showContent('main', document.getElementById('mainLink'));
       
       // Muat statistik
       loadStatistics();
