@@ -208,7 +208,7 @@
         document.getElementById(tabId).classList.remove('hidden');
         
         // Atur kelas aktif sidebar
-        document.querySelectorAll('aside button').forEach(el => {
+        document.querySelectorAll('aside button.nav-item').forEach(el => {
             el.classList.remove('active-link');
             el.classList.add('text-gray-300');
             el.classList.remove('text-white');
@@ -236,13 +236,16 @@
             .order('nama', { ascending: true });
             
         const tableBody = document.getElementById('dosenTableBody');
-        tableBody.innerHTML = ''; // Kosongkan tabel
+        tableBody.innerHTML = ''; 
         
         if (dosenError || !dataDosen || dataDosen.length === 0) {
+            if (dosenError) {
+                console.error("❌ ERROR MUAT DATA DOSEN:", dosenError.message, dosenError);
+            }
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
-                        ${dosenError ? 'Error memuat data: ' + dosenError.message : 'Tidak ada data dosen ditemukan.'}
+                    <td colspan="4" class="px-6 py-4 text-sm text-red-600 text-center font-semibold">
+                        ${dosenError ? 'Gagal memuat data. CEK CONSOLE BROWSER (F12) untuk detail error Supabase.' : 'Tidak ada data dosen ditemukan.'}
                     </td>
                 </tr>`;
             return;
@@ -259,21 +262,24 @@
         });
     }
 
-    // --- FUNGSI MUAT DATA MATA KULIAH (TELAH DIPERBAIKI) ---
+    // --- FUNGSI MUAT DATA MATA KULIAH (Diperbaiki untuk Debug) ---
     async function loadMatkulData() {
+        // HANYA SELECT SEMUA DAN HILANGKAN ORDER BY UNTUK DEBUGGING
         const { data: dataMatkul, error: matkulError } = await supabaseClient
             .from('matakuliah')
-            .select('*') // Ambil semua kolom
-            .order('matakuliah', { ascending: true }); // DIUBAH: Mengurutkan berdasarkan kolom 'matakuliah'
+            .select('*'); 
             
         const tableBody = document.getElementById('matkulTableBody');
-        tableBody.innerHTML = ''; // Kosongkan tabel
+        tableBody.innerHTML = ''; 
         
         if (matkulError || !dataMatkul || dataMatkul.length === 0) {
+             if (matkulError) {
+                console.error("❌ ERROR MUAT DATA MATA KULIAH:", matkulError.message, matkulError);
+            }
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
-                        ${matkulError ? 'Error memuat data: ' + matkulError.message : 'Tidak ada data mata kuliah ditemukan.'}
+                    <td colspan="4" class="px-6 py-4 text-sm text-red-600 text-center font-semibold">
+                        ${matkulError ? 'Gagal memuat data. CEK CONSOLE BROWSER (F12) untuk detail error Supabase.' : 'Tidak ada data mata kuliah ditemukan.'}
                     </td>
                 </tr>`;
             return;
@@ -285,7 +291,8 @@
             
             row.insertCell().textContent = index + 1;
             row.insertCell().textContent = matkul.kode_mk || '-';
-            row.insertCell().textContent = matkul.matakuliah || '-'; // DIUBAH: Menggunakan kolom 'matakuliah'
+            // MENGGUNAKAN KOLOM 'matakuliah' SESUAI KONFIRMASI ANDA
+            row.insertCell().textContent = matkul.matakuliah || '-'; 
             row.insertCell().textContent = matkul.sks || '-';
         });
     }
