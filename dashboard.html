@@ -157,7 +157,7 @@
                             <button onclick="updateEmail()" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-150">
                                 Simpan Email Baru
                             </button>
-                            <p class="text-xs text-red-500 italic">⚠️ Setelah diubah, Anda perlu memverifikasi email baru.</p>
+                            <p class="text-xs text-red-500 italic">⚠️ Setelah diubah, Anda perlu memverifikasi email baru. Jika Anda menggunakan email *dummy*, Anda tidak dapat memverifikasinya.</p>
                         </div>
                     </div>
 
@@ -235,7 +235,6 @@
     
     // --- FUNGSI MUAT DATA DOSEN ---
     async function loadDosenData() {
-        // Fungsi ini dimuat saat pindah ke tab Dosen
         const { data: dataDosen, error: dosenError } = await supabaseClient
             .from('dosen')
             .select('*') 
@@ -270,7 +269,6 @@
 
     // --- FUNGSI MUAT DATA MATA KULIAH ---
     async function loadMatkulData() {
-        // Fungsi ini dimuat saat pindah ke tab Mata Kuliah
         const { data: dataMatkul, error: matkulError } = await supabaseClient
             .from('matakuliah')
             .select('*')
@@ -336,27 +334,41 @@
         }
     }
 
-    // --- Fungsi Cek Auth & Load Data Pengguna (UPDATED) ---
+    // --- Fungsi Cek Auth & Load Data Pengguna (PERBAIKAN FOKUS DI SINI) ---
     async function loadUserData(user) {
+        // Reset Global Data
         globalUserId = user.id;
         globalUserEmail = user.email;
-        
+        globalUsername = 'User'; // Default
+
         // Ambil username terbaru dari tabel users_metadata
-        const { data: userData } = await supabaseClient
+        const { data: userData, error: userError } = await supabaseClient
               .from('users_metadata')
-              .select('username')
-              .eq('email', user.email)
+              .select('username, email')
+              .eq('user_id', user.id) // Lebih aman menggunakan user.id karena email Supabase mungkin berubah
               .single();
 
-        globalUsername = userData ? userData.username : 'User';
+        if (userError) {
+             console.error("Gagal memuat metadata pengguna:", userError);
+        }
         
-        // Tampilkan info pengguna di Navigasi dan Dashboard Utama
+        if (userData) {
+             globalUsername = userData.username;
+             // Pastikan globalUserEmail juga ter-update dari metadata
+             globalUserEmail = userData.email; 
+        }
+        
+        // --- Tampilkan info pengguna ---
+        // Header
         document.getElementById('userNameNav').textContent = `Halo, ${globalUsername}`;
+        // Dashboard Utama
         document.getElementById('displayUsernameMain').textContent = globalUsername;
         
-        // Tampilkan di bagian pengaturan (mengikuti user terbaru)
+        // Pengaturan
         document.getElementById('currentUsername').textContent = globalUsername;
-        document.getElementById('currentEmail').textContent = user.email;
+        document.getElementById('currentEmail').textContent = globalUserEmail;
+        
+        // Kosongkan input form (untuk memastikan tidak ada sisa data dari user sebelumnya)
         document.getElementById('newUsername').value = ''; 
         document.getElementById('newEmail').value = '';     
         document.getElementById('newPassword').value = ''; 
@@ -366,7 +378,7 @@
         showContent('main', document.getElementById('mainLink'));
     }
 
-    // --- Cek Auth Saat Halaman Dimuat (UPDATED) ---
+    // --- Cek Auth Saat Halaman Dimuat ---
     window.onload = async () => {
       const { data, error } = await supabaseClient.auth.getUser();
       if (error || !data?.user) {
@@ -375,7 +387,8 @@
         return;
       }
       
-      await loadUserData(data.user); // Panggil fungsi untuk memuat data pengguna terbaru
+      // Panggil fungsi untuk memuat data pengguna terbaru saat halaman dimuat
+      await loadUserData(data.user); 
     };
 
     // --- FUNGSI TOGGLE PASSWORD ---
@@ -397,7 +410,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME ---
+    // --- FUNGSI UPDATE USERNAME (PERBAIKAN: Logout setelah update) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -415,7 +428,7 @@
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
-             .neq('user_id', globalUserId) // PENTING: Kecualikan user saat ini
+             .neq('user_id', globalUserId) 
              .eq('username', newUsername);
         
         if (checkError) {
@@ -429,10 +442,10 @@
         }
         
         // 2. Lakukan update:
-        // A. Update Email di Supabase Auth (untuk mengganti email dummy lama)
         const oldAuthEmail = globalUserEmail;
-        const newAuthEmail = `${newUsername}@akademikft.com`;
+        const newAuthEmail = `${newUsername}@akademikft.com`; // Buat email dummy baru
         
+        // A. Update Email di Supabase Auth
         const { error: authError } = await supabaseClient.auth.updateUser({
             email: newAuthEmail
         });
@@ -449,12 +462,13 @@
             .eq('user_id', globalUserId);
 
         if (metadataError) {
-            // Rollback auth update jika metadata gagal (Opsional, tapi direkomendasikan)
+            // Rollback auth update jika metadata gagal 
             await supabaseClient.auth.updateUser({ email: oldAuthEmail });
             alert("❌ Gagal memperbarui username/metadata. Silakan coba lagi.");
         } else {
-            alert("✅ Username berhasil diperbarui! Anda mungkin perlu login ulang.");
-            logout(); // Log out untuk memastikan sesi baru menggunakan email/username baru
+            alert("✅ Username berhasil diperbarui! Anda **harus** login ulang menggunakan username baru.");
+            // PENTING: Logout agar sesi baru dibuat saat login berikutnya
+            logout(); 
         }
     }
 
@@ -489,7 +503,7 @@
                  console.error("Gagal update email di metadata:", metadataError);
             }
 
-            alert("✅ Link verifikasi email baru telah dikirimkan ke " + newEmail + ". Silakan cek kotak masuk Anda. Anda akan diarahkan ke halaman login.");
+            alert("✅ Link verifikasi email baru telah dikirimkan. Anda akan diarahkan ke halaman login.");
             logout();
         }
     }
