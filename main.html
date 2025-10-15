@@ -17,7 +17,7 @@
   <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
 
   <style>
-    /* ... (Style yang sudah ada dari file lama) ... */
+    /* STYLES LAMA ANDA DITAMBAH FIX TOM SELECT */
     body {
         background-image: url('bendera.jpeg'); 
         background-size: cover; 
@@ -98,14 +98,9 @@
 
         <select id="semester" class="border p-2 rounded">
           <option value="" disabled selected>Pilih Semester</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+          <option value="7">7</option><option value="8">8</option>
         </select>
 
         <select id="kelas" class="border p-2 rounded">
@@ -131,16 +126,12 @@
           <option value="Elektro">Elektro</option>
           <option value="Informatika">Informatika</option>
       </select>
-       <select id="filterSemester" class="border p-2 rounded min-w-min">
+      
+      <select id="filterSemester" class="border p-2 rounded min-w-min">
         <option value="">Semua Semester</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option>
       </select>
       
       <select id="filterKelas" class="border p-2 rounded min-w-min">
@@ -155,7 +146,7 @@
         <option value="">Memuat Dosen...</option>
       </select>
       
-       <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
+      <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
         <option value="">Semua Tahun Akademik</option>
       </select>
       
@@ -291,10 +282,10 @@
   <script>
     // --- Setup Supabase untuk Logout dan Toast ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU56A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- Toast Function ---
+    // --- Toast Function (Digunakan oleh jadwal.js) ---
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -340,13 +331,12 @@
         }, 3000); 
     }
 
-    // --- Logout Function ---
+    // --- Logout Function (Digunakan oleh tombol Logout) ---
     async function logout() {
       await supabaseClient.auth.signOut();
       window.location.href = "index.html";
     }
   </script>
-
   <script src="jadwal.js"></script>
 </body>
 </html>
