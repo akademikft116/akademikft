@@ -166,7 +166,7 @@
                         <div class="space-y-4 max-w-sm">
                             <div class="relative">
                                 <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 top-0 px-3 flex items-center text-gray-500 h-full" title="Tampilkan Password">
                                     <i id="eyeIcon" class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -232,10 +232,8 @@
             loadMatkulData();
         }
         
-        // PENTING: Refresh data pengguna jika pindah ke Pengaturan
+        // Refresh data pengguna jika pindah ke Pengaturan
         if (tabId === 'pengaturan') {
-            // Panggil fungsi untuk memastikan data di form pengaturan adalah yang terbaru
-            // Ini membantu mengatasi masalah data yang tidak update setelah login baru
             refreshPengaturanData();
         }
     }
@@ -341,17 +339,18 @@
         }
     }
 
-    // --- Fungsi Cek Auth & Load Data Pengguna (PERBAIKAN FOKUS DI SINI) ---
+    // --- Fungsi Cek Auth & Load Data Pengguna (DIPERBAIKI) ---
     async function loadUserData(user) {
         // Reset Global Data
         globalUserId = user.id;
-        globalUserEmail = user.email; // Gunakan email dari sesi auth Supabase
+        // Ambil email dari sesi, karena ini adalah data pasti dari Supabase Auth
+        globalUserEmail = user.email; 
         
         // Ambil username terbaru dari tabel users_metadata berdasarkan user ID
         const { data: userData, error: userError } = await supabaseClient
               .from('users_metadata')
               .select('username')
-              .eq('user_id', user.id) // Lebih andal menggunakan user.id
+              .eq('user_id', user.id) 
               .single();
 
         if (userError) {
@@ -373,7 +372,7 @@
         refreshPengaturanData();
     }
     
-    // FUNGSI BARU: Refresh data di tab Pengaturan
+    // FUNGSI UNTUK REFRESH DATA PENGATURAN
     function refreshPengaturanData() {
         document.getElementById('currentUsername').textContent = globalUsername || '...';
         document.getElementById('currentEmail').textContent = globalUserEmail || '...';
@@ -416,7 +415,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME (PERBAIKAN: Logout setelah update) ---
+    // --- FUNGSI UPDATE USERNAME (PERBAIKAN FOKUS DI SINI) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -431,11 +430,12 @@
         }
         
         // 1. Cek apakah username sudah dipakai oleh user lain
+        // PENTING: Menggunakan neq('user_id', globalUserId) untuk mengecualikan diri sendiri.
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
-             .neq('user_id', globalUserId) 
-             .eq('username', newUsername);
+             .eq('username', newUsername)
+             .neq('user_id', globalUserId); 
         
         if (checkError) {
              alert("❌ Error saat cek username: " + checkError.message);
@@ -451,13 +451,13 @@
         const oldAuthEmail = globalUserEmail;
         const newAuthEmail = `${newUsername}@akademikft.com`; // Buat email dummy baru
         
-        // A. Update Email di Supabase Auth (PENTING untuk login berikutnya)
+        // A. Update Email di Supabase Auth 
         const { error: authError } = await supabaseClient.auth.updateUser({
             email: newAuthEmail
         });
         
         if (authError) {
-             alert("❌ Gagal memperbarui email otentikasi (Auth): " + authError.message);
+             alert("❌ Gagal memperbarui email otentikasi (Auth). Error: " + authError.message);
              return;
         }
         
@@ -470,7 +470,7 @@
         if (metadataError) {
             // Rollback auth update jika metadata gagal 
             await supabaseClient.auth.updateUser({ email: oldAuthEmail });
-            alert("❌ Gagal memperbarui username/metadata. Silakan coba lagi.");
+            alert("❌ Gagal memperbarui username/metadata. Silakan coba lagi. Pesan error: " + metadataError.message);
         } else {
             alert("✅ Username berhasil diperbarui! Anda **harus** login ulang menggunakan username baru.");
             // PENTING: Logout agar sesi baru dibuat saat login berikutnya
