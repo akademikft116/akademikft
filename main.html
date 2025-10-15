@@ -305,6 +305,8 @@
     let tsEditMataKuliah;
     let tsFilterMataKuliah; 
     let tsFilterDosen; 
+    let dosenOptions = [];   // Ditambahkan untuk menyimpan opsi Dosen
+    let asistenOptions = []; // Ditambahkan untuk menyimpan opsi Asisten
     
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -463,6 +465,10 @@
 
             const dataValues = data.map(item => item[ref.column]);
             
+            // Simpan data dosen dan asisten secara global
+            if (ref.table === 'dosen') dosenOptions = dataValues;
+            if (ref.table === 'asisten') asistenOptions = dataValues;
+
             // Populasikan SELECT biasa untuk form tambah/edit
             populateSelect(ref.elementId, dataValues, ref.defaultText); 
             if (ref.editElementId) {
@@ -488,6 +494,20 @@
                 populateSelect(ref.filterElementId, dataValues, ref.filterDefaultText, true);
             }
         }
+        
+        // --- INISIALISASI TOM-SELECT UNTUK MODAL EDIT (Dosen & Asisten) ---
+        new TomSelect("#edit_dosen", {
+            create: true,
+            sortField: { field: "text", direction: "asc" },
+            options: dosenOptions.map(v => ({ value: v, text: v }))
+        });
+
+        new TomSelect("#edit_asisten", {
+            create: true,
+            sortField: { field: "text", direction: "asc" },
+            options: asistenOptions.map(v => ({ value: v, text: v }))
+        });
+
         
         // --- 3. Isi Tahun Akademik ---
         const tahunAkademikOptions = [
@@ -515,23 +535,11 @@
       }
       await loadReferences(); 
       
-      // TomSelect untuk Dosen (Form Tambah)
-      new TomSelect("#dosen", {
-          create: true,
-          sortField: {
-              field: "text",
-              direction: "asc"
-          }
-      });
+      // TomSelect untuk Dosen (Form Tambah) - sudah ada di code sebelumnya
+      // new TomSelect("#dosen", { ... });
       
-      // TomSelect untuk Asisten (Form Tambah)
-      new TomSelect("#asisten", {
-          create: true,
-          sortField: {
-              field: "text",
-              direction: "asc"
-          }
-      });
+      // TomSelect untuk Asisten (Form Tambah) - sudah ada di code sebelumnya
+      // new TomSelect("#asisten", { ... });
       
       loadData();
     };
@@ -618,8 +626,9 @@
       const hari = document.getElementById("hari").value;
       
       // AMBIL NILAI DARI TOMSELECT Dosen & Asisten
-      const dosen = document.getElementById("dosen").value; 
-      const asisten = document.getElementById("asisten").value;
+      // Dosen dan Asisten di form Tambah sudah diinisialisasi sebagai Tom-Select
+      const dosen = document.getElementById("dosen").tomselect.getValue(); 
+      const asisten = document.getElementById("asisten").tomselect.getValue();
       
       const semester = document.getElementById("semester").value;
       const kelas = document.getElementById("kelas").value;
@@ -683,7 +692,7 @@
                                 ? `${row.kode_matkul} | ${row.mata_kuliah}` 
                                 : '';
         
-        // PERBAIKAN: Mengatur nilai Mata Kuliah di TomSelect
+        // --- PERBAIKAN UTAMA: Mengatur nilai Mata Kuliah di TomSelect ---
         if (tsEditMataKuliah) {
             // 1. Bersihkan nilai TomSelect yang mungkin sudah ada
             tsEditMataKuliah.clear(true); 
@@ -691,7 +700,32 @@
             tsEditMataKuliah.setValue(mkValueToSelect, true); 
         }
 
-        // Isi form modal dengan data lama
+        // --- TAMBAHAN PERBAIKAN: Mengatur nilai Dosen dan Asisten di TomSelect ---
+        const tsEditDosen = document.getElementById('edit_dosen').tomselect;
+        const tsEditAsisten = document.getElementById('edit_asisten').tomselect;
+        
+        // Dosen
+        if (tsEditDosen) {
+            tsEditDosen.clear(true);
+            // Tambahkan opsi jika dosen lama tidak ada di daftar opsi (misal: data baru)
+            if (row.dosen && !tsEditDosen.options[row.dosen]) {
+                 tsEditDosen.addOption({ value: row.dosen, text: row.dosen });
+            }
+            tsEditDosen.setValue(row.dosen || '', true); 
+        }
+        
+        // Asisten
+        if (tsEditAsisten) {
+            tsEditAsisten.clear(true);
+            // Tambahkan opsi jika asisten lama tidak ada di daftar opsi
+            if (row.asisten && !tsEditAsisten.options[row.asisten]) {
+                 tsEditAsisten.addOption({ value: row.asisten, text: row.asisten });
+            }
+            tsEditAsisten.setValue(row.asisten || '', true); 
+        }
+        // --- AKHIR TAMBAHAN PERBAIKAN ---
+
+        // Isi form modal dengan data lama (Non-TomSelect)
         document.getElementById('edit_id').value = row.id;
         document.getElementById('edit_prodi').value = row.prodi || '';
         document.getElementById('edit_hari').value = row.hari || '';
@@ -699,8 +733,9 @@
         document.getElementById('edit_jam_akhir').value = row.jam_akhir || '';
         document.getElementById('edit_sks').value = row.sks || '';
         
-        document.getElementById('edit_dosen').value = row.dosen || ''; 
-        document.getElementById('edit_asisten').value = row.asisten || '';
+        // Baris ini tidak lagi diperlukan karena sudah ditangani oleh Tom-Select
+        // document.getElementById('edit_dosen').value = row.dosen || ''; 
+        // document.getElementById('edit_asisten').value = row.asisten || '';
         
         document.getElementById('edit_semester').value = row.semester || '';
         document.getElementById('edit_kelas').value = row.kelas || '';
@@ -716,13 +751,17 @@
     async function updateJadwal() {
         const id = document.getElementById('edit_id').value;
         
-        // Ambil nilai dari TomSelect Edit
+        // Ambil nilai dari TomSelect Edit Mata Kuliah
         const mkValue = tsEditMataKuliah.getValue();
         if (!mkValue) {
              showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
              return;
         }
         const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
+        
+        // Ambil nilai dari TomSelect Edit Dosen dan Asisten
+        const dosen_baru = document.getElementById('edit_dosen').tomselect.getValue();
+        const asisten_baru = document.getElementById('edit_asisten').tomselect.getValue();
 
 
         const updatedJadwal = {
@@ -733,8 +772,8 @@
             jam_mulai: document.getElementById('edit_jam_mulai').value,
             jam_akhir: document.getElementById('edit_jam_akhir').value,
             sks: parseInt(document.getElementById('edit_sks').value) || 0,
-            dosen: document.getElementById('edit_dosen').value,
-            asisten: document.getElementById('edit_asisten').value,
+            dosen: dosen_baru,       // Diambil dari TomSelect
+            asisten: asisten_baru,   // Diambil dari TomSelect
             semester: document.getElementById('edit_semester').value,
             kelas: document.getElementById('edit_kelas').value,
             ruangan: document.getElementById('edit_ruangan').value,
