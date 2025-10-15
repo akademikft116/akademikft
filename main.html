@@ -681,7 +681,13 @@
                                 ? `${row.kode_matkul} | ${row.mata_kuliah}` 
                                 : '';
         
-        tsEditMataKuliah.setValue(mkValueToSelect);
+        // PERBAIKAN: Mengatur nilai Mata Kuliah di TomSelect
+        if (tsEditMataKuliah) {
+            // 1. Bersihkan nilai TomSelect yang mungkin sudah ada
+            tsEditMataKuliah.clear(true); 
+            // 2. Tetapkan nilai Mata Kuliah yang baru sesuai data baris
+            tsEditMataKuliah.setValue(mkValueToSelect, true); 
+        }
 
         // Isi form modal dengan data lama
         document.getElementById('edit_id').value = row.id;
