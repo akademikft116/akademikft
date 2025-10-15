@@ -232,7 +232,7 @@
     async function loadDosenData() {
         const { data: dataDosen, error: dosenError } = await supabaseClient
             .from('dosen')
-            .select('*') // Ambil semua kolom
+            .select('*') 
             .order('nama', { ascending: true });
             
         const tableBody = document.getElementById('dosenTableBody');
@@ -259,12 +259,12 @@
         });
     }
 
-    // --- FUNGSI MUAT DATA MATA KULIAH ---
+    // --- FUNGSI MUAT DATA MATA KULIAH (TELAH DIPERBAIKI) ---
     async function loadMatkulData() {
         const { data: dataMatkul, error: matkulError } = await supabaseClient
             .from('matakuliah')
             .select('*') // Ambil semua kolom
-            .order('nama_mk', { ascending: true });
+            .order('matakuliah', { ascending: true }); // DIUBAH: Mengurutkan berdasarkan kolom 'matakuliah'
             
         const tableBody = document.getElementById('matkulTableBody');
         tableBody.innerHTML = ''; // Kosongkan tabel
@@ -285,7 +285,7 @@
             
             row.insertCell().textContent = index + 1;
             row.insertCell().textContent = matkul.kode_mk || '-';
-            row.insertCell().textContent = matkul.nama_mk || '-';
+            row.insertCell().textContent = matkul.matakuliah || '-'; // DIUBAH: Menggunakan kolom 'matakuliah'
             row.insertCell().textContent = matkul.sks || '-';
         });
     }
