@@ -29,7 +29,7 @@
             <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
         </div>
         <div class="flex items-center space-x-4">
-            <span id="userNameNav" class="text-white font-semibold">Memuat...</span>
+            <span id="userNameNav" class="text-white font-semibold">Memuat...</span> 
             <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
                 <i class="fas fa-sign-out-alt"></i> Ganti Akun
             </button>
@@ -231,6 +231,13 @@
         } else if (tabId === 'matkul') {
             loadMatkulData();
         }
+        
+        // PENTING: Refresh data pengguna jika pindah ke Pengaturan
+        if (tabId === 'pengaturan') {
+            // Panggil fungsi untuk memastikan data di form pengaturan adalah yang terbaru
+            // Ini membantu mengatasi masalah data yang tidak update setelah login baru
+            refreshPengaturanData();
+        }
     }
     
     // --- FUNGSI MUAT DATA DOSEN ---
@@ -338,51 +345,50 @@
     async function loadUserData(user) {
         // Reset Global Data
         globalUserId = user.id;
-        globalUserEmail = user.email;
-        globalUsername = 'User'; // Default
-
-        // Ambil username terbaru dari tabel users_metadata
+        globalUserEmail = user.email; // Gunakan email dari sesi auth Supabase
+        
+        // Ambil username terbaru dari tabel users_metadata berdasarkan user ID
         const { data: userData, error: userError } = await supabaseClient
               .from('users_metadata')
-              .select('username, email')
-              .eq('user_id', user.id) // Lebih aman menggunakan user.id karena email Supabase mungkin berubah
+              .select('username')
+              .eq('user_id', user.id) // Lebih andal menggunakan user.id
               .single();
 
         if (userError) {
              console.error("Gagal memuat metadata pengguna:", userError);
         }
         
-        if (userData) {
-             globalUsername = userData.username;
-             // Pastikan globalUserEmail juga ter-update dari metadata
-             globalUserEmail = userData.email; 
-        }
+        // Tentukan globalUsername dari metadata atau default
+        globalUsername = userData ? userData.username : 'User';
         
-        // --- Tampilkan info pengguna ---
-        // Header
+        // --- Tampilkan info pengguna di Header dan Dashboard Utama ---
         document.getElementById('userNameNav').textContent = `Halo, ${globalUsername}`;
-        // Dashboard Utama
         document.getElementById('displayUsernameMain').textContent = globalUsername;
-        
-        // Pengaturan
-        document.getElementById('currentUsername').textContent = globalUsername;
-        document.getElementById('currentEmail').textContent = globalUserEmail;
-        
-        // Kosongkan input form (untuk memastikan tidak ada sisa data dari user sebelumnya)
-        document.getElementById('newUsername').value = ''; 
-        document.getElementById('newEmail').value = '';     
-        document.getElementById('newPassword').value = ''; 
         
         // Muat statistik dan tampilkan konten dashboard utama
         loadStatistics();
         showContent('main', document.getElementById('mainLink'));
+        
+        // Panggil refresh data untuk pengaturan setelah data global dimuat
+        refreshPengaturanData();
+    }
+    
+    // FUNGSI BARU: Refresh data di tab Pengaturan
+    function refreshPengaturanData() {
+        document.getElementById('currentUsername').textContent = globalUsername || '...';
+        document.getElementById('currentEmail').textContent = globalUserEmail || '...';
+        
+        // Kosongkan input form
+        document.getElementById('newUsername').value = ''; 
+        document.getElementById('newEmail').value = '';     
+        document.getElementById('newPassword').value = ''; 
     }
 
     // --- Cek Auth Saat Halaman Dimuat ---
     window.onload = async () => {
       const { data, error } = await supabaseClient.auth.getUser();
       if (error || !data?.user) {
-        alert("Silakan login dulu!");
+        alert("Sesi Anda berakhir atau Anda belum login. Silakan login dulu!");
         window.location.href = "index.html"; // Redirect ke halaman login
         return;
       }
@@ -445,13 +451,13 @@
         const oldAuthEmail = globalUserEmail;
         const newAuthEmail = `${newUsername}@akademikft.com`; // Buat email dummy baru
         
-        // A. Update Email di Supabase Auth
+        // A. Update Email di Supabase Auth (PENTING untuk login berikutnya)
         const { error: authError } = await supabaseClient.auth.updateUser({
             email: newAuthEmail
         });
         
         if (authError) {
-             alert("❌ Gagal memperbarui email otentikasi: " + authError.message);
+             alert("❌ Gagal memperbarui email otentikasi (Auth): " + authError.message);
              return;
         }
         
