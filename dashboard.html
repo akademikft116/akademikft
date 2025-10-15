@@ -116,6 +116,9 @@
                 
                 <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
+                    <p class="text-sm text-red-500 mb-4 font-semibold">
+                        ⚠️ Jika tabel ini kosong, silakan **Tekan F12**, buka tab **Console**, dan lihat objek data yang dicetak untuk mengetahui nama kolom yang benar (Kode MK/Nama Mata Kuliah).
+                    </p>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -262,9 +265,9 @@
         });
     }
 
-    // --- FUNGSI MUAT DATA MATA KULIAH (Diperbaiki untuk Debug) ---
+    // --- FUNGSI MUAT DATA MATA KULIAH (Diperbaiki untuk Debugging Kolom) ---
     async function loadMatkulData() {
-        // HANYA SELECT SEMUA DAN HILANGKAN ORDER BY UNTUK DEBUGGING
+        // HANYA SELECT SEMUA DATA
         const { data: dataMatkul, error: matkulError } = await supabaseClient
             .from('matakuliah')
             .select('*'); 
@@ -286,15 +289,21 @@
         }
 
         dataMatkul.forEach((matkul, index) => {
+            // CETAK SELURUH OBJEK KE CONSOLE UNTUK MELIHAT NAMA KOLOM YANG BENAR
+            console.log(`Data Mata Kuliah Row ${index + 1}:`, matkul); 
+            
             const row = tableBody.insertRow();
             row.className = 'hover:bg-gray-50';
             
             row.insertCell().textContent = index + 1;
-            row.insertCell().textContent = matkul.kode_mk || '-';
-            // MENGGUNAKAN KOLOM 'matakuliah' SESUAI KONFIRMASI ANDA
+            // Saat ini menggunakan 'kode_mk'
+            row.insertCell().textContent = matkul.kode_mk || '-'; 
+            // Saat ini menggunakan 'matakuliah'
             row.insertCell().textContent = matkul.matakuliah || '-'; 
             row.insertCell().textContent = matkul.sks || '-';
         });
+        
+        console.log("✅ Data Mata Kuliah berhasil dimuat. Jika tabel kosong, cek objek di atas dan laporkan nama kolom yang benar."); 
     }
     
     // Fungsi untuk memuat data statistik
