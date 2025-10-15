@@ -116,9 +116,6 @@
                 
                 <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
-                    <p class="text-sm text-red-500 mb-4 font-semibold">
-                        ⚠️ Jika tabel ini kosong, silakan **Tekan F12**, buka tab **Console**, dan lihat objek data yang dicetak untuk mengetahui nama kolom yang benar (Kode MK/Nama Mata Kuliah).
-                    </p>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -265,12 +262,12 @@
         });
     }
 
-    // --- FUNGSI MUAT DATA MATA KULIAH (Diperbaiki untuk Debugging Kolom) ---
+    // --- FUNGSI MUAT DATA MATA KULIAH (FINAL DENGAN KODE DAN NAMA) ---
     async function loadMatkulData() {
-        // HANYA SELECT SEMUA DATA
         const { data: dataMatkul, error: matkulError } = await supabaseClient
             .from('matakuliah')
-            .select('*'); 
+            .select('*')
+            .order('nama', { ascending: true }); // Mengurutkan berdasarkan kolom 'nama'
             
         const tableBody = document.getElementById('matkulTableBody');
         tableBody.innerHTML = ''; 
@@ -282,28 +279,26 @@
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="px-6 py-4 text-sm text-red-600 text-center font-semibold">
-                        ${matkulError ? 'Gagal memuat data. CEK CONSOLE BROWSER (F12) untuk detail error Supabase.' : 'Tidak ada data mata kuliah ditemukan.'}
+                        ${matkulError ? 'Gagal memuat data. CEK CONSOLE BROWSER (F12) untuk detail error Supabase (RLS).' : 'Tidak ada data mata kuliah ditemukan.'}
                     </td>
                 </tr>`;
             return;
         }
 
         dataMatkul.forEach((matkul, index) => {
-            // CETAK SELURUH OBJEK KE CONSOLE UNTUK MELIHAT NAMA KOLOM YANG BENAR
-            console.log(`Data Mata Kuliah Row ${index + 1}:`, matkul); 
-            
             const row = tableBody.insertRow();
             row.className = 'hover:bg-gray-50';
             
             row.insertCell().textContent = index + 1;
-            // Saat ini menggunakan 'kode_mk'
-            row.insertCell().textContent = matkul.kode_mk || '-'; 
-            // Saat ini menggunakan 'matakuliah'
-            row.insertCell().textContent = matkul.matakuliah || '-'; 
+            // MENGGUNAKAN KOLOM 'kode'
+            row.insertCell().textContent = matkul.kode || '-'; 
+            // MENGGUNAKAN KOLOM 'nama'
+            row.insertCell().textContent = matkul.nama || '-'; 
+            // MENGGUNAKAN KOLOM 'sks'
             row.insertCell().textContent = matkul.sks || '-';
         });
         
-        console.log("✅ Data Mata Kuliah berhasil dimuat. Jika tabel kosong, cek objek di atas dan laporkan nama kolom yang benar."); 
+        console.log("✅ Data Mata Kuliah berhasil dimuat."); 
     }
     
     // Fungsi untuk memuat data statistik
