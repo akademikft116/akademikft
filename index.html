@@ -9,14 +9,14 @@
   <style>
     /* Styling untuk Kolom Kiri */
     #sidebar-image {
+        /* Asumsi file 'dajal.jpeg' ada di folder yang sama */
         background-image: url('dajal.jpeg');
-        background-color: #1e3a8a; /* Default: Warna Biru Tua Solid */
+        background-color: #1e3a8a; 
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
     }
     
-    /* Untuk memastikan form container memiliki padding dan background */
     .form-container {
         background-color: white;
     }
@@ -50,8 +50,8 @@
             <p class="text-sm text-gray-600">Masuk untuk melanjutkan ke dashboard.</p>
             
             <div>
-                <label for="loginUsername" class="block text-sm font-medium text-gray-700">Username</label>
-                <input id="loginUsername" type="text" placeholder="Masukkan Username" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <label for="loginUsername" class="block text-sm font-medium text-gray-700">Username atau Email</label>
+                <input id="loginUsername" type="text" placeholder="Masukkan Username atau Email" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
             
             <div>
@@ -111,17 +111,27 @@
     // Set default tab
     showTab('login');
 
-    // --- FUNGSI LOGIN ---
+    // --- FUNGSI LOGIN (UPDATED: Dapat menerima Username atau Email) ---
     async function login() {
-        const username = document.getElementById("loginUsername").value.trim();
+        // Mengambil nilai dari kolom username/email
+        const input = document.getElementById("loginUsername").value.trim();
         const password = document.getElementById("loginPassword").value;
         
-        if (!username || !password) {
-            alert("❌ Username dan Password wajib diisi.");
+        if (!input || !password) {
+            alert("❌ Username/Email dan Password wajib diisi.");
             return;
         }
         
-        const authEmail = `${username}@akademikft.com`;
+        let authEmail;
+        
+        // Cek apakah input mengandung '@' (dianggap Email asli)
+        if (input.includes('@')) {
+            authEmail = input;
+        } else {
+            // Jika tidak mengandung '@', anggap sebagai Username dan buat email dummy
+            authEmail = `${input}@akademikft.com`;
+        }
+
 
         const { error } = await supabaseClient.auth.signInWithPassword({ 
             email: authEmail, 
@@ -129,13 +139,13 @@
         });
 
         if (error) {
-            alert("❌ Login gagal. Pastikan username dan password benar. Pesan error: " + error.message);
+            alert("❌ Login gagal. Pastikan username/email dan password benar. Pesan error: " + error.message);
         } else {
             window.location.href = "dashboard.html";
         }
     }
 
-    // --- FUNGSI REGISTER (UPDATED) ---
+    // --- FUNGSI REGISTER (UPDATED: Tambah otomatis login) ---
     async function register() {
         const username = document.getElementById("regUsername").value.trim();
         const password = document.getElementById("regPassword").value;
@@ -194,15 +204,13 @@
                 }
             }
             
-            // 4. Perbaikan: Panggil fungsi signInWithPassword setelah signUp
-            // Ini akan memastikan sesi login terbuat meskipun email tidak diverifikasi.
+            // 4. Otomatis Login setelah SignUp
             const { error: signInError } = await supabaseClient.auth.signInWithPassword({
                 email: authEmail, 
                 password: password
             });
             
             if (signInError) {
-                 // Jika gagal sign-in otomatis, berikan opsi login manual
                  alert("❌ Registrasi berhasil, namun gagal otomatis login. Silakan login manual.");
                  window.location.href = "index.html"; 
                  return;
