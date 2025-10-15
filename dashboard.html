@@ -157,7 +157,7 @@
                             <button onclick="updateEmail()" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-150">
                                 Simpan Email Baru
                             </button>
-                            <p class="text-xs text-green-600 italic">✅ Email akan langsung diperbarui di sistem. Tidak memerlukan verifikasi.</p>
+                            <p class="text-xs text-green-600 italic">✅ Email akan langsung diperbarui di sistem. Tidak memerlukan verifikasi, dan bisa menggunakan email dummy.</p>
                         </div>
                     </div>
 
@@ -193,6 +193,7 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    // PASTIKAN KEY INI SAMA DENGAN INDEX.HTML
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU596A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -415,7 +416,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME (PERBAIKAN LOGIKA PENGECUALIAN) ---
+    // --- FUNGSI UPDATE USERNAME (PERBAIKAN TOTAL) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -424,17 +425,18 @@
             return;
         }
         
+        // Tidak perlu cek jika username sama, karena akan di-update (dan nanti logout)
         if (newUsername === globalUsername) {
-             alert("❌ Username tidak berubah.");
+             alert("❌ Username tidak berubah. Jika ingin menyimpannya, masukkan username baru.");
              return;
         }
         
-        // 1. Cek apakah username sudah dipakai oleh user lain (PENGECUALIAN DIRI SENDIRI)
+        // 1. Cek apakah username sudah dipakai oleh user lain
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
              .eq('username', newUsername)
-             .neq('user_id', globalUserId); // Filter agar tidak menghitung username milik user ini
+             .neq('user_id', globalUserId); // Mengecualikan user yang sedang login
         
         if (checkError) {
              alert("❌ Error saat cek ketersediaan username: " + checkError.message);
@@ -446,17 +448,17 @@
              return;
         }
         
-        // 2. Lakukan update:
-        const oldAuthEmail = globalUserEmail;
-        const newAuthEmail = `${newUsername}@akademikft.com`; // Buat email dummy baru
-        
-        // A. Update Email di Supabase Auth 
+        // 2. Buat email dummy baru untuk Auth Supabase
+        const newAuthEmail = `${newUsername}@akademikft.com`;
+        const oldAuthEmail = globalUserEmail; // Simpan email lama untuk rollback
+
+        // A. Update Email di Supabase Auth (PENTING: username disimpan di email Auth)
         const { error: authError } = await supabaseClient.auth.updateUser({
             email: newAuthEmail
         });
         
         if (authError) {
-             alert("❌ Gagal memperbarui email otentikasi (Auth). Error: " + authError.message);
+             alert("❌ Gagal memperbarui Auth (coba dengan username yang berbeda). Error: " + authError.message);
              return;
         }
         
@@ -469,10 +471,9 @@
         if (metadataError) {
             // Rollback auth update jika metadata gagal 
             await supabaseClient.auth.updateUser({ email: oldAuthEmail });
-            alert("❌ Gagal memperbarui username/metadata. Silakan coba lagi. Pesan error: " + metadataError.message);
+            alert("❌ Gagal memperbarui username/metadata. Silakan coba lagi.");
         } else {
-            alert("✅ Username berhasil diperbarui! Anda **harus** login ulang menggunakan username baru.");
-            // PENTING: Logout agar sesi baru dibuat saat login berikutnya
+            alert("✅ Username berhasil diperbarui! Anda harus login ulang menggunakan username baru.");
             logout(); 
         }
     }
@@ -497,6 +498,7 @@
         });
 
         if (authError) {
+            // Ini mungkin terjadi jika email sudah digunakan oleh akun lain.
             alert("❌ Gagal memperbarui email di sistem Auth: " + authError.message);
             return;
         } 
