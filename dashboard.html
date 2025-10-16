@@ -29,7 +29,7 @@
             <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
         </div>
         <div class="flex items-center space-x-4">
-            <span id="userNameNav" class="text-white font-semibold">Memuat...</span> 
+            <span id="userNameNav" class="text-white font-semibold">Memuat...</span>
             <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
                 <i class="fas fa-sign-out-alt"></i> Ganti Akun
             </button>
@@ -140,7 +140,7 @@
                     
                     <div class="mb-8 border-b pb-6">
                         <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Ubah Username</h3>
-                        <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">...</strong></p> 
+                        <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">...</strong></p>
                         <div class="space-y-4 max-w-sm">
                             <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
@@ -154,7 +154,7 @@
                         <div class="space-y-4 max-w-sm">
                             <div class="relative">
                                 <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                                <button type="button" onclick="togglePasswordVisibility('newPassword', 'eyeIcon')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
                                     <i id="eyeIcon" class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -181,8 +181,7 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    // Kunci Anda
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
@@ -257,9 +256,9 @@
     }
 
     // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD
-    function togglePasswordVisibility(passwordId, iconId) {
-        const passwordInput = document.getElementById(passwordId);
-        const eyeIcon = document.getElementById(iconId);
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('newPassword');
+        const eyeIcon = document.getElementById('eyeIcon');
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             eyeIcon.classList.remove('fa-eye');
@@ -271,7 +270,7 @@
         }
     }
 
-    // --- FUNGSI Cek Auth & Load Data Pengguna (DIPERBAIKI UNTUK TAMPILAN NAMA) ---
+    // --- FUNGSI Cek Auth & Load Data Pengguna (FIXED: Menggunakan user_id untuk lookup) ---
     window.onload = async () => {
       const { data, error } = await supabaseClient.auth.getUser();
       if (error || !data?.user) {
@@ -282,32 +281,46 @@
       
       const user = data.user;
       globalUserId = user.id;
-      globalUserEmail = user.email; // Email ini adalah email dummy
+      globalUserEmail = user.email;
       
-      // Ambil username dari users_metadata menggunakan user_id (lebih akurat)
-      const { data: userData } = await supabaseClient
+      // FIX: Ambil username dari users_metadata menggunakan user_id, ini lebih akurat
+      const { data: userData, error: metadataError } = await supabaseClient
             .from('users_metadata')
             .select('username')
-            .eq('user_id', globalUserId) 
+            .eq('user_id', globalUserId) // <-- Perbaikan utama: Lookup berdasarkan user_id
             .single();
 
-      // Memastikan nama ditampilkan dengan benar
-      let username = userData ? userData.username : 'User';
+      if (metadataError) {
+          console.error("Gagal memuat metadata pengguna:", metadataError);
+      }
+
+      let username = (userData && userData.username) ? userData.username : 'User';
       
+      // Tampilkan info pengguna
       document.getElementById('userNameNav').textContent = `Halo, ${username}`;
       document.getElementById('displayUsernameMain').textContent = username;
-      document.getElementById('currentUsername').textContent = username;
       
+      // Tampilkan di bagian pengaturan
+      document.getElementById('currentUsername').textContent = username;
+      // Hapus baris 'document.getElementById('currentEmail').textContent = user.email;' karena kolom email sudah dihapus di HTML
+
+      // Tampilkan konten dashboard utama secara default
       showContent('main', document.getElementById('mainLink'));
+      
       loadStatistics();
     };
 
-    // --- FUNGSI UPDATE USERNAME (DIPERBAIKI) ---
+    // --- FUNGSI UPDATE USERNAME (FIXED: HANYA update tabel metadata) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
-        if (!newUsername || newUsername.length < 3) {
-            alert("❌ Username baru minimal 3 karakter.");
+        if (!newUsername) {
+            alert("❌ Username baru tidak boleh kosong.");
+            return;
+        }
+
+        if (newUsername.length < 3) {
+            alert("❌ Username minimal 3 karakter.");
             return;
         }
         
@@ -316,52 +329,39 @@
              return;
         }
         
-        if (!globalUserId) {
-            alert("❌ Sesi Anda habis. Silakan refresh halaman atau login ulang.");
-            window.location.reload(); 
-            return;
-        }
-        
-        // 1. Cek apakah username baru sudah dipakai
+        // 1. Cek apakah username sudah dipakai
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
              .eq('username', newUsername);
         
+        if (checkError) {
+             alert("❌ Error saat cek ketersediaan username: " + checkError.message);
+             return;
+        }
+
         if (existingCount > 0) {
              alert("❌ Username ini sudah digunakan oleh akun lain.");
              return;
         }
 
-        const newAuthEmail = `${newUsername}@akademikft.com`; 
-
-        // 2. Update Auth Email di Supabase Auth (WAJIB agar login dengan username baru berhasil)
-        const { error: authUpdateError } = await supabaseClient.auth.updateUser(
-            { email: newAuthEmail }
-        );
-
-        if (authUpdateError) {
-            alert("❌ Gagal memperbarui Auth Email di Supabase. Pesan: " + authUpdateError.message);
-            return;
-        }
-
-        // 3. Update username dan email dummy di tabel users_metadata
+        // 2. Update di tabel users_metadata menggunakan user_id (paling aman)
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
-            .update({ username: newUsername, email: newAuthEmail })
+            .update({ username: newUsername }) 
             .eq('user_id', globalUserId);
 
         if (metadataError) {
-            alert("❌ Gagal memperbarui username di database: " + metadataError.message);
-            // Coba rollback update Auth jika update metadata gagal (opsional tapi disarankan)
-            await supabaseClient.auth.updateUser({ email: globalUserEmail });
+            alert("❌ Gagal memperbarui username: " + metadataError.message);
         } else {
-            // Berhasil!
-            alert("✅ Username berhasil diperbarui! Anda harus login ulang dengan username baru Anda.");
-            logout(); // WAJIB LOGOUT untuk sesi baru
+            // Setelah berhasil update di database, reload agar data baru ter-fetch di onload
+            alert("✅ Username berhasil diperbarui! Halaman akan dimuat ulang untuk menampilkan perubahan.");
+            window.location.reload(); 
         }
     }
-    
+
+    // FUNGSI updateEmail() DIHAPUS
+
     // --- FUNGSI UPDATE PASSWORD ---
     async function updatePassword() {
         const newPassword = document.getElementById('newPassword').value;
