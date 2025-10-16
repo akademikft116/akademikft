@@ -146,7 +146,7 @@
                             <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
                                 Simpan Username Baru
                             </button>
-                        </div>
+                            </div>
                     </div>
                     
                     <div class="mb-8 border-b pb-6">
@@ -157,7 +157,7 @@
                             <button onclick="updateEmail()" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-150">
                                 Simpan Email Baru
                             </button>
-                            <p class="text-xs text-red-500 italic">⚠️ Setelah diubah, Anda perlu memverifikasi email baru.</p>
+                            <p class="text-xs text-green-600 italic">✅ Perubahan email dilakukan tanpa verifikasi (fitur khusus). Pastikan RLS Supabase sudah aktif!</p>
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
-    let globalUserEmail = null;
+    let globalUserEmail = null; // Ini akan digunakan untuk check apakah email berubah
 
     // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
@@ -348,7 +348,7 @@
       
       const user = data.user;
       globalUserId = user.id;
-      globalUserEmail = user.email;
+      globalUserEmail = user.email; // Simpan email Supabase saat ini
       
       // Ambil username dari users_metadata
       const { data: userData } = await supabaseClient
@@ -393,7 +393,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME ---
+    // --- FUNGSI UPDATE USERNAME (DENGAN SINKRONISASI EMAIL DUMMY TANPA VERIFIKASI) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -407,7 +407,8 @@
             return;
         }
         
-        if (newUsername === document.getElementById('currentUsername').textContent) {
+        const currentUsernameDisplay = document.getElementById('currentUsername').textContent;
+        if (newUsername === currentUsernameDisplay) {
              alert("❌ Username tidak berubah.");
              return;
         }
@@ -427,22 +428,42 @@
              alert("❌ Username ini sudah digunakan oleh akun lain.");
              return;
         }
+        
+        // Buat email dummy baru untuk Supabase Auth
+        const newAuthEmail = `${newUsername}@akademikft.com`; 
 
-        // 2. Update di tabel users_metadata
+        // 2. Update Auth Email di Supabase (TANPA VERIFIKASI)
+        const { error: authUpdateError } = await supabaseClient.auth.updateUser(
+            { email: newAuthEmail },
+            { email_confirm: false } // KUNCI: Menghilangkan verifikasi email
+        );
+
+        if (authUpdateError) {
+            alert("❌ Gagal memperbarui Auth Email di Supabase: " + authUpdateError.message);
+            return;
+        }
+
+        // 3. Update di tabel users_metadata (Username DAN Email dummy)
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
-            .update({ username: newUsername })
+            .update({ username: newUsername, email: newAuthEmail })
             .eq('user_id', globalUserId);
 
         if (metadataError) {
-            alert("❌ Gagal memperbarui username: " + metadataError.message);
+            alert("❌ Gagal memperbarui username di database: " + metadataError.message);
         } else {
-            alert("✅ Username berhasil diperbarui! Halaman akan dimuat ulang.");
-            window.location.reload();
+            // Update Tampilan dan Global State secara real-time
+            globalUserEmail = newAuthEmail; // Update global state
+            document.getElementById('currentEmail').textContent = newAuthEmail;
+            document.getElementById('currentUsername').textContent = newUsername; 
+            document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
+            document.getElementById('displayUsernameMain').textContent = newUsername;
+
+            alert("✅ Username berhasil diperbarui!");
         }
     }
 
-    // --- FUNGSI UPDATE EMAIL ---
+    // --- FUNGSI UPDATE EMAIL (TANPA VERIFIKASI) ---
     async function updateEmail() {
         const newEmail = document.getElementById('newEmail').value.trim();
         
@@ -456,15 +477,32 @@
              return;
         }
         
-        const { error } = await supabaseClient.auth.updateUser({
-            email: newEmail
-        });
+        // Perubahan Kritis: Menambahkan { email_confirm: false }
+        const { error: authError } = await supabaseClient.auth.updateUser(
+            { email: newEmail },
+            { email_confirm: false } 
+        );
 
-        if (error) {
-            alert("❌ Gagal memperbarui email: " + error.message);
+        if (authError) {
+            alert("❌ Gagal memperbarui email: " + authError.message);
+            return;
+        } 
+        
+        // Jika Auth berhasil, perbarui juga email di tabel users_metadata
+        const { error: metadataError } = await supabaseClient
+            .from('users_metadata')
+            .update({ email: newEmail })
+            .eq('user_id', globalUserId);
+
+        if (metadataError) {
+            alert("❌ Email di Auth berhasil, namun gagal sinkronisasi ke database metadata: " + metadataError.message);
         } else {
-            alert("✅ Link verifikasi email baru telah dikirimkan ke " + newEmail + ". Silakan cek kotak masuk Anda. Anda akan diarahkan ke halaman login.");
-            logout();
+            // Update Tampilan dan Global State secara real-time
+            globalUserEmail = newEmail; 
+            document.getElementById('currentEmail').textContent = newEmail;
+            
+            // Tidak perlu logout
+            alert("✅ Email berhasil diperbarui tanpa perlu verifikasi.");
         }
     }
 
@@ -484,7 +522,7 @@
         if (error) {
             alert("❌ Gagal memperbarui password: " + error.message);
         } else {
-            alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login.");
+            alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login untuk sesi baru.");
             logout();
         }
     }
