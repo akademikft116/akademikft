@@ -181,14 +181,14 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; // Ganti dengan KEY Anda yang benar
+    // Menggunakan Key dari file Anda
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
     let globalUserEmail = null;
 
-    // --- FUNGSI UTILITY (Sama seperti sebelumnya) ---
-
+    // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
         document.getElementById('main').classList.add('hidden');
         document.getElementById('dosen').classList.add('hidden');
@@ -215,6 +215,7 @@
         }
     }
     
+    // --- FUNGSI MUAT DATA DOSEN ---
     async function loadDosenData() {
         const { data: dataDosen, error: dosenError } = await supabaseClient
             .from('dosen')
@@ -239,6 +240,7 @@
         });
     }
 
+    // --- FUNGSI MUAT DATA MATA KULIAH ---
     async function loadMatkulData() {
         const { data: dataMatkul, error: matkulError } = await supabaseClient
             .from('matakuliah')
@@ -263,6 +265,7 @@
         });
     }
     
+    // Fungsi untuk memuat data statistik
     async function loadStatistics() {
         if (!globalUserId) return;
 
@@ -292,7 +295,7 @@
         }
     }
 
-    // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD (MENGGUNAKAN ID UNIK)
+    // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD
     function togglePasswordVisibility(passwordId, iconId) {
         const passwordInput = document.getElementById(passwordId);
         const eyeIcon = document.getElementById(iconId);
@@ -319,7 +322,7 @@
       
       const user = data.user;
       globalUserId = user.id;
-      globalUserEmail = user.email;
+      globalUserEmail = user.email; // Email ini adalah email dummy
       
       // Ambil username dari users_metadata
       const { data: userData } = await supabaseClient
@@ -352,14 +355,13 @@
              return;
         }
         
-        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-        if (userError || !userData?.user) {
+        if (!globalUserId) {
             alert("❌ Sesi Anda habis. Silakan refresh halaman atau login ulang.");
             window.location.reload(); 
             return;
         }
-        const currentUserId = userData.user.id; 
         
+        // Cek apakah username sudah dipakai
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
@@ -370,6 +372,7 @@
              return;
         }
 
+        // Buat email dummy baru
         const newAuthEmail = `${newUsername}@akademikft.com`; 
 
         // 1. Update Auth Email (Email dummy baru)
@@ -387,7 +390,7 @@
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ username: newUsername, email: newAuthEmail })
-            .eq('user_id', currentUserId);
+            .eq('user_id', globalUserId);
 
         if (metadataError) {
             alert("❌ Gagal memperbarui username di database: " + metadataError.message);
@@ -397,7 +400,8 @@
             document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
             document.getElementById('displayUsernameMain').textContent = newUsername;
 
-            alert("✅ Username berhasil diperbarui!");
+            alert("✅ Username berhasil diperbarui! Halaman akan dimuat ulang.");
+            window.location.reload();
         }
     }
     
