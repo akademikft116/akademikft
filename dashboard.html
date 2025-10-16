@@ -146,7 +146,7 @@
                             <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
                                 Simpan Username Baru
                             </button>
-                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-8 border-b pb-6">
@@ -157,7 +157,7 @@
                             <button onclick="updateEmail()" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-150">
                                 Simpan Email Baru
                             </button>
-                            <p class="text-xs text-green-600 italic">✅ Perubahan email dilakukan tanpa verifikasi (fitur khusus). Pastikan RLS Supabase sudah aktif!</p>
+                            <p class="text-xs text-red-500 italic">⚠️ Setelah diubah, Anda perlu memverifikasi email baru.</p>
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
-    let globalUserEmail = null; // Ini akan digunakan untuk check apakah email berubah
+    let globalUserEmail = null;
 
     // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
@@ -348,7 +348,7 @@
       
       const user = data.user;
       globalUserId = user.id;
-      globalUserEmail = user.email; // Simpan email Supabase saat ini
+      globalUserEmail = user.email;
       
       // Ambil username dari users_metadata
       const { data: userData } = await supabaseClient
@@ -393,7 +393,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME (DENGAN SINKRONISASI EMAIL DUMMY TANPA VERIFIKASI) ---
+    // --- FUNGSI UPDATE USERNAME (DIPERBAIKI UNTUK SINKRONISASI EMAIL DUMMY) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -407,11 +407,19 @@
             return;
         }
         
-        const currentUsernameDisplay = document.getElementById('currentUsername').textContent;
-        if (newUsername === currentUsernameDisplay) {
+        if (newUsername === document.getElementById('currentUsername').textContent) {
              alert("❌ Username tidak berubah.");
              return;
         }
+        
+        // Cek sesi terbaru untuk memastikan ID valid
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || !userData?.user) {
+            alert("❌ Sesi Anda habis. Silakan refresh halaman atau login ulang.");
+            window.location.reload(); 
+            return;
+        }
+        const currentUserId = userData.user.id; 
         
         // 1. Cek apakah username sudah dipakai
         const { count: existingCount, error: checkError } = await supabaseClient
@@ -428,14 +436,14 @@
              alert("❌ Username ini sudah digunakan oleh akun lain.");
              return;
         }
-        
-        // Buat email dummy baru untuk Supabase Auth
+
+        // --- Perbaikan Logika Sinkronisasi Username ---
         const newAuthEmail = `${newUsername}@akademikft.com`; 
 
-        // 2. Update Auth Email di Supabase (TANPA VERIFIKASI)
+        // 2. Update Auth Email di Supabase (Email dummy baru)
         const { error: authUpdateError } = await supabaseClient.auth.updateUser(
             { email: newAuthEmail },
-            { email_confirm: false } // KUNCI: Menghilangkan verifikasi email
+            { email_confirm: false } 
         );
 
         if (authUpdateError) {
@@ -443,14 +451,15 @@
             return;
         }
 
-        // 3. Update di tabel users_metadata (Username DAN Email dummy)
+        // 3. Update di tabel users_metadata (Username DAN Email dummy baru)
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ username: newUsername, email: newAuthEmail })
-            .eq('user_id', globalUserId);
+            .eq('user_id', currentUserId);
 
         if (metadataError) {
             alert("❌ Gagal memperbarui username di database: " + metadataError.message);
+            console.error(metadataError);
         } else {
             // Update Tampilan dan Global State secara real-time
             globalUserEmail = newAuthEmail; // Update global state
@@ -463,46 +472,55 @@
         }
     }
 
-    // --- FUNGSI UPDATE EMAIL (TANPA VERIFIKASI) ---
+    // --- FUNGSI UPDATE EMAIL (DIPERBAIKI UNTUK MENGATASI ERROR "INVALID") ---
     async function updateEmail() {
         const newEmail = document.getElementById('newEmail').value.trim();
+
+        // Cek sesi terbaru sebelum update untuk menghindari error "Invalid Refresh Token"
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || !userData?.user) {
+            alert("❌ Sesi Anda habis. Silakan refresh halaman atau login ulang.");
+            window.location.reload(); 
+            return;
+        }
+        const currentUserId = userData.user.id; 
         
         if (!newEmail || !newEmail.includes('@')) {
             alert("❌ Masukkan format email yang valid.");
             return;
         }
         
-        if (newEmail === globalUserEmail) {
+        if (newEmail === userData.user.email) {
              alert("❌ Email tidak berubah.");
              return;
         }
         
-        // Perubahan Kritis: Menambahkan { email_confirm: false }
-        const { error: authError } = await supabaseClient.auth.updateUser(
-            { email: newEmail },
-            { email_confirm: false } 
-        );
+        // 1. Update Auth Email di Supabase (Ini yang sering menghasilkan error 'invalid')
+        const { error: authError } = await supabaseClient.auth.updateUser({
+            email: newEmail
+        });
 
         if (authError) {
-            alert("❌ Gagal memperbarui email: " + authError.message);
+            // Memberikan pesan error yang lebih spesifik untuk "invalid token"
+            if (authError.message.includes('Invalid') || authError.message.includes('expired')) {
+                 alert("❌ Gagal memperbarui email. Token sesi kedaluwarsa. Silakan coba refresh halaman dan ulangi lagi, atau logout/login ulang.");
+            } else {
+                 alert("❌ Gagal memperbarui email: " + authError.message);
+            }
             return;
         } 
         
-        // Jika Auth berhasil, perbarui juga email di tabel users_metadata
+        // 2. Update email di tabel users_metadata (SINKRONISASI)
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ email: newEmail })
-            .eq('user_id', globalUserId);
+            .eq('user_id', currentUserId);
 
         if (metadataError) {
             alert("❌ Email di Auth berhasil, namun gagal sinkronisasi ke database metadata: " + metadataError.message);
         } else {
-            // Update Tampilan dan Global State secara real-time
-            globalUserEmail = newEmail; 
-            document.getElementById('currentEmail').textContent = newEmail;
-            
-            // Tidak perlu logout
-            alert("✅ Email berhasil diperbarui tanpa perlu verifikasi.");
+            alert("✅ Link verifikasi email baru telah dikirimkan ke " + newEmail + ". Silakan cek kotak masuk Anda. Anda akan diarahkan ke halaman login.");
+            logout();
         }
     }
 
@@ -522,7 +540,7 @@
         if (error) {
             alert("❌ Gagal memperbarui password: " + error.message);
         } else {
-            alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login untuk sesi baru.");
+            alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login.");
             logout();
         }
     }
