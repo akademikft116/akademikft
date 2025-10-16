@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
+    /* Mengambil style dari main.html agar konsisten */
     .header-style {
         background-color: #1e3a8a; 
     }
@@ -25,11 +26,16 @@
         max-width: 1300px;
         margin: auto;
     }
-    /* Style untuk Tom Select agar sesuai dengan input Tailwind */
     .ts-wrapper.form-control, .ts-control {
         border-radius: 0.375rem; 
         border: 1px solid #d1d5db; 
         padding: 0.4rem 0.5rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    }
+    .form-grid { 
+        display: grid; 
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 1.5rem; /* gap-6 */
     }
   </style>
 </head>
@@ -51,7 +57,7 @@
         
         <form id="mahasiswaForm" class="space-y-6">
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="form-grid">
                 
                 <div>
                     <label for="nim" class="block text-sm font-semibold text-gray-700 mb-1">NIM *</label>
@@ -82,7 +88,7 @@
                 
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="form-grid">
                 
                 <div>
                     <label for="tahunmasuk" class="block text-sm font-semibold text-gray-700 mb-1">Tahun Masuk *</label>
@@ -94,7 +100,7 @@
                     <input type="text" id="nohp" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 0812xxxxxx">
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="col-span-2">
                     <label for="alamat" class="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap</label>
                     <textarea id="alamat" rows="1" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Alamat tinggal saat ini"></textarea>
                 </div>
@@ -137,6 +143,7 @@
   <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    // Menggunakan kunci Supabase yang sudah terverifikasi:
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -146,7 +153,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Inisialisasi Tom Select
         prodiSelect = new TomSelect('#prodi', {
-            create: false, // Tidak bisa menambah Prodi baru
+            create: false,
             sortField: { field: "text", direction: "asc" }
         });
 
@@ -224,7 +231,7 @@
              return;
         }
 
-        // Cek duplikasi NIM (karena NIM harus unik)
+        // Cek duplikasi NIM
         const { count: nimCount, error: checkError } = await supabaseClient
             .from('mahasiswa')
             .select('nim', { count: 'exact', head: true })
@@ -249,8 +256,6 @@
             no_hp: nohp, 
             alamat: alamat,
             tahun_masuk: tahunmasuk,
-            // Jika Anda mengaktifkan RLS berdasarkan user_id, tambahkan ini:
-            // user_id: globalUserId 
         };
 
         const { error: insertError } = await supabaseClient
@@ -262,9 +267,9 @@
             console.error(insertError);
         } else {
             alert(`✅ Data mahasiswa ${nama} (NIM: ${nim}) berhasil ditambahkan!`);
-            document.getElementById('mahasiswaForm').reset(); // Reset form input biasa
-            prodiSelect.clear(); // Reset Tom Select
-            loadMahasiswaData(); // Muat ulang tabel
+            document.getElementById('mahasiswaForm').reset(); 
+            prodiSelect.clear(); 
+            loadMahasiswaData();
         }
     }
 
