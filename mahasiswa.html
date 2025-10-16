@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Mahasiswa - Fakultas Teknik</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    /* Styling agar mirip dengan dashboard/main.html */
+    .header-style {
+        background-color: #1e3a8a; /* blue-900 */
+    }
+    .main-content {
+        padding-top: 5rem; /* Padding untuk menghindari navbar */
+        min-height: 100vh;
+    }
+    .container {
+        max-width: 1200px;
+        margin: auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <nav class="header-style shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+    <div class="flex items-center space-x-3">
+        <h1 class="text-xl font-bold text-white">FORM DATA MAHASISWA</h1>
+    </div>
+    <a href="dashboard.html" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition duration-150">
+        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+  </nav>
+
+  <div class="main-content container p-6">
+    <div class="bg-white p-8 rounded-lg shadow-xl mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-6 border-b pb-2">Tambah Biodata Mahasiswa Baru</h2>
+        
+        <form id="mahasiswaForm" class="space-y-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="nim" class="block text-sm font-medium text-gray-700">NIM (Nomor Induk Mahasiswa)</label>
+                        <input type="text" id="nim" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 2021001">
+                    </div>
+                    <div>
+                        <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <input type="text" id="nama" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Nama Mahasiswa">
+                    </div>
+                    <div>
+                        <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi</label>
+                        <select id="prodi" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- Pilih Prodi --</option>
+                            <option value="Teknik Informatika">Teknik Informatika</option>
+                            <option value="Teknik Sipil">Teknik Sipil</option>
+                            <option value="Teknik Mesin">Teknik Mesin</option>
+                            </select>
+                    </div>
+                    <div>
+                        <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                        <input type="number" id="semester" required min="1" max="14" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 3">
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="nohp" class="block text-sm font-medium text-gray-700">Nomor HP</label>
+                        <input type="text" id="nohp" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 0812xxxxxx">
+                    </div>
+                    <div>
+                        <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
+                        <textarea id="alamat" rows="3" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Alamat tinggal saat ini"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
+                        <input type="number" id="tahunmasuk" required min="1990" max="2099" value="2024" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 2021">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="pt-4 flex justify-end">
+                <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-150 flex items-center">
+                    <i class="fas fa-save mr-2"></i> Simpan Data Mahasiswa
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white p-8 rounded-lg shadow-xl">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-6 border-b pb-2">Daftar Mahasiswa Tersimpan</h2>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mahasiswa</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="mahasiswaTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr><td colspan="7" class="text-center py-4 text-gray-500">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Inisialisasi Supabase ---
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let globalUserId = null; // Akan digunakan untuk RLS jika diperlukan
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkAuthAndLoad();
+        document.getElementById('mahasiswaForm').addEventListener('submit', handleFormSubmit);
+    });
+
+    // 1. Cek Autentikasi dan Muat Data Awal
+    async function checkAuthAndLoad() {
+        const { data, error } = await supabaseClient.auth.getUser();
+        if (error || !data?.user) {
+            alert("Sesi Anda berakhir. Silakan login kembali.");
+            window.location.href = "index.html";
+            return;
+        }
+        globalUserId = data.user.id;
+        loadMahasiswaData();
+    }
+
+    // 2. Mengambil dan Menampilkan Data Mahasiswa
+    async function loadMahasiswaData() {
+        const tableBody = document.getElementById('mahasiswaTableBody');
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Memuat data...</td></tr>';
+
+        const { data: dataMahasiswa, error } = await supabaseClient
+            .from('mahasiswa')
+            .select('*')
+            .order('nim', { ascending: true }); 
+
+        if (error) {
+            console.error("Error loading mahasiswa:", error.message);
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data mahasiswa.</td></tr>';
+            return;
+        }
+
+        tableBody.innerHTML = '';
+        if (dataMahasiswa && dataMahasiswa.length > 0) {
+            dataMahasiswa.forEach((mhs, index) => {
+                const row = tableBody.insertRow();
+                row.className = 'hover:bg-gray-50';
+                row.insertCell().textContent = index + 1;
+                row.insertCell().textContent = mhs.nim;
+                row.insertCell().textContent = mhs.nama;
+                row.insertCell().textContent = mhs.prodi;
+                row.insertCell().textContent = mhs.semester;
+                row.insertCell().textContent = mhs.tahun_masuk;
+
+                // Tombol Aksi (Hapus)
+                const actionCell = row.insertCell();
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i> Hapus';
+                deleteButton.className = 'bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-3 rounded';
+                deleteButton.onclick = () => deleteMahasiswa(mhs.id, mhs.nama);
+                actionCell.appendChild(deleteButton);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Belum ada data mahasiswa yang tersimpan.</td></tr>';
+        }
+    }
+
+    // 3. Menghandle Submit Form (Menyimpan Data)
+    async function handleFormSubmit(event) {
+        event.preventDefault();
+        
+        const nim = document.getElementById('nim').value.trim();
+        const nama = document.getElementById('nama').value.trim();
+        const prodi = document.getElementById('prodi').value;
+        const semester = document.getElementById('semester').value;
+        const nohp = document.getElementById('nohp').value.trim();
+        const alamat = document.getElementById('alamat').value.trim();
+        const tahunmasuk = document.getElementById('tahunmasuk').value;
+
+        if (!nim || !nama || !prodi || !semester || !tahunmasuk) {
+             alert('Semua kolom wajib diisi kecuali No. HP dan Alamat!');
+             return;
+        }
+
+        // Cek duplikasi NIM (karena NIM harus unik)
+        const { count: nimCount, error: checkError } = await supabaseClient
+            .from('mahasiswa')
+            .select('nim', { count: 'exact', head: true })
+            .eq('nim', nim);
+
+        if (checkError) {
+            alert('Gagal cek NIM: ' + checkError.message);
+            return;
+        }
+
+        if (nimCount > 0) {
+            alert(`❌ Gagal! NIM ${nim} sudah terdaftar. Gunakan NIM lain.`);
+            return;
+        }
+
+
+        // Data yang akan disimpan
+        const newMahasiswaData = {
+            nim: nim,
+            nama: nama,
+            prodi: prodi,
+            semester: semester,
+            no_hp: nohp, // sesuaikan dengan nama kolom di database
+            alamat: alamat,
+            tahun_masuk: tahunmasuk, // sesuaikan dengan nama kolom di database
+            // Jika perlu, tambahkan globalUserId untuk RLS
+            // user_id: globalUserId 
+        };
+
+        const { error: insertError } = await supabaseClient
+            .from('mahasiswa')
+            .insert([newMahasiswaData]);
+
+        if (insertError) {
+            alert('❌ Gagal menyimpan data mahasiswa: ' + insertError.message);
+            console.error(insertError);
+        } else {
+            alert(`✅ Data mahasiswa ${nama} (NIM: ${nim}) berhasil ditambahkan!`);
+            document.getElementById('mahasiswaForm').reset(); // Reset form
+            loadMahasiswaData(); // Muat ulang tabel
+        }
+    }
+
+    // 4. Menghapus Data Mahasiswa
+    async function deleteMahasiswa(mahasiswaId, nama) {
+        if (!confirm(`Anda yakin ingin menghapus data mahasiswa ${nama}?`)) {
+            return;
+        }
+
+        const { error } = await supabaseClient
+            .from('mahasiswa')
+            .delete()
+            .eq('id', mahasiswaId); // diasumsikan ada kolom 'id' sebagai primary key
+
+        if (error) {
+            alert('❌ Gagal menghapus data: ' + error.message);
+        } else {
+            alert(`✅ Data mahasiswa ${nama} berhasil dihapus.`);
+            loadMahasiswaData();
+        }
+    }
+  </script>
+</body>
+</html>
