@@ -29,7 +29,7 @@
             <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
         </div>
         <div class="flex items-center space-x-4">
-            <span id="userNameNav" class="text-white font-semibold">Memuat...</span>
+            <span id="userNameNav" class="text-white font-semibold">Memuat...</span> 
             <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
                 <i class="fas fa-sign-out-alt"></i> Ganti Akun
             </button>
@@ -140,7 +140,7 @@
                     
                     <div class="mb-8 border-b pb-6">
                         <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Ubah Username</h3>
-                        <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">...</strong></p>
+                        <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">...</strong></p> 
                         <div class="space-y-4 max-w-sm">
                             <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
@@ -181,12 +181,12 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    // Menggunakan Key dari file Anda
+    // Kunci Anda
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
-    let globalUserEmail = null;
+    let globalUserEmail = null; // Email dummy saat ini
 
     // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
@@ -215,91 +215,51 @@
         }
     }
     
-    // --- FUNGSI MUAT DATA DOSEN ---
+    // Fungsi load data (dihilangkan untuk fokus pada user)
     async function loadDosenData() {
-        const { data: dataDosen, error: dosenError } = await supabaseClient
-            .from('dosen')
-            .select('*') 
-            .order('nama', { ascending: true });
-            
+        const { data: dataDosen } = await supabaseClient.from('dosen').select('*').order('nama', { ascending: true });
         const tableBody = document.getElementById('dosenTableBody');
         tableBody.innerHTML = ''; 
-        
-        if (dosenError || !dataDosen || dataDosen.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-600 text-center font-semibold">Tidak ada data dosen ditemukan.</td></tr>`;
-            return;
+        if (dataDosen) {
+            dataDosen.forEach((dosen, index) => {
+                const row = tableBody.insertRow();
+                row.className = 'hover:bg-gray-50';
+                row.insertCell().textContent = index + 1;
+                row.insertCell().textContent = dosen.nama || '-';
+                row.insertCell().textContent = dosen.nidn || '-';
+                row.insertCell().textContent = dosen.prodi || '-';
+            });
         }
-
-        dataDosen.forEach((dosen, index) => {
-            const row = tableBody.insertRow();
-            row.className = 'hover:bg-gray-50';
-            row.insertCell().textContent = index + 1;
-            row.insertCell().textContent = dosen.nama || '-';
-            row.insertCell().textContent = dosen.nidn || '-';
-            row.insertCell().textContent = dosen.prodi || '-';
-        });
     }
-
-    // --- FUNGSI MUAT DATA MATA KULIAH ---
     async function loadMatkulData() {
-        const { data: dataMatkul, error: matkulError } = await supabaseClient
-            .from('matakuliah')
-            .select('*')
-            .order('nama', { ascending: true }); 
-            
+        const { data: dataMatkul } = await supabaseClient.from('matakuliah').select('*').order('nama', { ascending: true }); 
         const tableBody = document.getElementById('matkulTableBody');
         tableBody.innerHTML = ''; 
-        
-        if (matkulError || !dataMatkul || dataMatkul.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-600 text-center font-semibold">Tidak ada data mata kuliah ditemukan.</td></tr>`;
-            return;
+        if (dataMatkul) {
+            dataMatkul.forEach((matkul, index) => {
+                const row = tableBody.insertRow();
+                row.className = 'hover:bg-gray-50';
+                row.insertCell().textContent = index + 1;
+                row.insertCell().textContent = matkul.kode || '-'; 
+                row.insertCell().textContent = matkul.nama || '-'; 
+                row.insertCell().textContent = matkul.sks || '-';
+            });
         }
-
-        dataMatkul.forEach((matkul, index) => {
-            const row = tableBody.insertRow();
-            row.className = 'hover:bg-gray-50';
-            row.insertCell().textContent = index + 1;
-            row.insertCell().textContent = matkul.kode || '-'; 
-            row.insertCell().textContent = matkul.nama || '-'; 
-            row.insertCell().textContent = matkul.sks || '-';
-        });
     }
-    
-    // Fungsi untuk memuat data statistik
     async function loadStatistics() {
         if (!globalUserId) return;
-
-        const { count: jadwalCount } = await supabaseClient
-            .from('jadwal')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', globalUserId);
-            
-        if (jadwalCount !== null) {
-            document.getElementById('totalJadwal').textContent = jadwalCount;
-        }
-
-        const { count: dosenCount } = await supabaseClient
-            .from('dosen')
-            .select('*', { count: 'exact', head: true });
-            
-        if (dosenCount !== null) {
-            document.getElementById('totalDosen').textContent = dosenCount;
-        }
-
-        const { count: matkulCount } = await supabaseClient
-            .from('matakuliah')
-            .select('*', { count: 'exact', head: true });
-
-        if (matkulCount !== null) {
-            document.getElementById('totalMatkul').textContent = matkulCount;
-        }
+        const { count: jadwalCount } = await supabaseClient.from('jadwal').select('*', { count: 'exact', head: true }).eq('user_id', globalUserId);
+        if (jadwalCount !== null) document.getElementById('totalJadwal').textContent = jadwalCount;
+        const { count: dosenCount } = await supabaseClient.from('dosen').select('*', { count: 'exact', head: true });
+        if (dosenCount !== null) document.getElementById('totalDosen').textContent = dosenCount;
+        const { count: matkulCount } = await supabaseClient.from('matakuliah').select('*', { count: 'exact', head: true });
+        if (matkulCount !== null) document.getElementById('totalMatkul').textContent = matkulCount;
     }
 
     // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD
     function togglePasswordVisibility(passwordId, iconId) {
         const passwordInput = document.getElementById(passwordId);
         const eyeIcon = document.getElementById(iconId);
-        
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             eyeIcon.classList.remove('fa-eye');
@@ -311,7 +271,7 @@
         }
     }
 
-    // --- FUNGSI Cek Auth & Load Data Pengguna ---
+    // --- FUNGSI Cek Auth & Load Data Pengguna (DIPERBAIKI UNTUK TAMPILAN NAMA) ---
     window.onload = async () => {
       const { data, error } = await supabaseClient.auth.getUser();
       if (error || !data?.user) {
@@ -324,13 +284,14 @@
       globalUserId = user.id;
       globalUserEmail = user.email; // Email ini adalah email dummy
       
-      // Ambil username dari users_metadata
+      // Ambil username dari users_metadata menggunakan user_id (lebih akurat)
       const { data: userData } = await supabaseClient
             .from('users_metadata')
             .select('username')
-            .eq('email', user.email)
+            .eq('user_id', globalUserId) 
             .single();
 
+      // Memastikan nama ditampilkan dengan benar
       let username = userData ? userData.username : 'User';
       
       document.getElementById('userNameNav').textContent = `Halo, ${username}`;
@@ -361,7 +322,7 @@
             return;
         }
         
-        // Cek apakah username sudah dipakai
+        // 1. Cek apakah username baru sudah dipakai
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
@@ -372,21 +333,19 @@
              return;
         }
 
-        // Buat email dummy baru
         const newAuthEmail = `${newUsername}@akademikft.com`; 
 
-        // 1. Update Auth Email (Email dummy baru)
+        // 2. Update Auth Email di Supabase Auth (WAJIB agar login dengan username baru berhasil)
         const { error: authUpdateError } = await supabaseClient.auth.updateUser(
-            { email: newAuthEmail },
-            { email_confirm: false } 
+            { email: newAuthEmail }
         );
 
         if (authUpdateError) {
-            alert("❌ Gagal memperbarui Auth Email di Supabase: " + authUpdateError.message);
+            alert("❌ Gagal memperbarui Auth Email di Supabase. Pesan: " + authUpdateError.message);
             return;
         }
 
-        // 2. Update di users_metadata
+        // 3. Update username dan email dummy di tabel users_metadata
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ username: newUsername, email: newAuthEmail })
@@ -394,14 +353,12 @@
 
         if (metadataError) {
             alert("❌ Gagal memperbarui username di database: " + metadataError.message);
+            // Coba rollback update Auth jika update metadata gagal (opsional tapi disarankan)
+            await supabaseClient.auth.updateUser({ email: globalUserEmail });
         } else {
-            globalUserEmail = newAuthEmail; 
-            document.getElementById('currentUsername').textContent = newUsername; 
-            document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
-            document.getElementById('displayUsernameMain').textContent = newUsername;
-
-            alert("✅ Username berhasil diperbarui! Halaman akan dimuat ulang.");
-            window.location.reload();
+            // Berhasil!
+            alert("✅ Username berhasil diperbarui! Anda harus login ulang dengan username baru Anda.");
+            logout(); // WAJIB LOGOUT untuk sesi baru
         }
     }
     
