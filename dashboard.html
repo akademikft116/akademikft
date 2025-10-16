@@ -50,6 +50,11 @@
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Penjadwalan</span>
                 </a>
+
+                <a href="mahasiswa.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                    <i class="fas fa-user-graduate w-5"></i>
+                    <span>Data Mahasiswa</span>
+                </a>
                 
                 <button onclick="showContent('dosen', this)" id="dosenLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-chalkboard-teacher w-5"></i>
@@ -181,7 +186,7 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU596A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
@@ -189,24 +194,29 @@
 
     // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
+        // Sembunyikan semua konten
         document.getElementById('main').classList.add('hidden');
         document.getElementById('dosen').classList.add('hidden');
         document.getElementById('matkul').classList.add('hidden');
         document.getElementById('pengaturan').classList.add('hidden');
         
+        // Tampilkan konten yang dipilih
         document.getElementById(tabId).classList.remove('hidden');
         
+        // Hapus styling aktif dari semua tombol navigasi
         document.querySelectorAll('aside button.nav-item').forEach(el => {
             el.classList.remove('active-link');
             el.classList.add('text-gray-300');
             el.classList.remove('text-white');
         });
         
+        // Tambahkan styling aktif ke tombol yang diklik
         if (clickedButton) {
             clickedButton.classList.add('active-link');
             clickedButton.classList.remove('text-gray-300');
         }
 
+        // Muat data spesifik jika berpindah ke tab Dosen atau Mata Kuliah
         if (tabId === 'dosen') {
             loadDosenData();
         } else if (tabId === 'matkul') {
@@ -214,7 +224,7 @@
         }
     }
     
-    // Fungsi load data (tidak berubah)
+    // Fungsi load data Dosen (tidak berubah)
     async function loadDosenData() {
         const { data: dataDosen } = await supabaseClient.from('dosen').select('*').order('nama', { ascending: true });
         const tableBody = document.getElementById('dosenTableBody');
@@ -230,6 +240,7 @@
             });
         }
     }
+    // Fungsi load data Mata Kuliah (tidak berubah)
     async function loadMatkulData() {
         const { data: dataMatkul } = await supabaseClient.from('matakuliah').select('*').order('nama', { ascending: true }); 
         const tableBody = document.getElementById('matkulTableBody');
@@ -245,6 +256,7 @@
             });
         }
     }
+    // Fungsi load Statistik (tidak berubah)
     async function loadStatistics() {
         if (!globalUserId) return;
         const { count: jadwalCount } = await supabaseClient.from('jadwal').select('*', { count: 'exact', head: true }).eq('user_id', globalUserId);
@@ -283,7 +295,7 @@
       globalUserId = user.id;
       globalUserEmail = user.email;
       
-      // Ambil username dari users_metadata menggunakan user_id
+      // Ambil username dari users_metadata menggunakan user_id (Sumber data yang benar)
       const { data: userData, error: metadataError } = await supabaseClient
             .from('users_metadata')
             .select('username')
@@ -309,7 +321,7 @@
       loadStatistics();
     };
 
-    // --- FUNGSI UPDATE USERNAME (FIXED: Update Metadata dan HANYA UPDATE TAMPILAN) ---
+    // --- FUNGSI UPDATE USERNAME (STABIL: Update Metadata dan HANYA UPDATE TAMPILAN) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -345,7 +357,7 @@
              return;
         }
 
-        // 2. Update di tabel users_metadata menggunakan user_id (paling aman)
+        // 2. Update di tabel users_metadata menggunakan user_id
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ username: newUsername }) 
@@ -364,8 +376,6 @@
 
             // Kosongkan input field
             document.getElementById('newUsername').value = '';
-
-            // TIDAK ADA REFRESH OTOMATIS
         }
     }
     
