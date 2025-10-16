@@ -157,7 +157,7 @@
                             <button onclick="updateEmail()" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-150">
                                 Simpan Email Baru
                             </button>
-                            <p class="text-xs text-red-500 italic">⚠️ Setelah diubah, Anda perlu memverifikasi email baru. Jika Anda menggunakan email *dummy*, Anda tidak dapat memverifikasinya.</p>
+                            <p class="text-xs text-green-600 italic">✅ Email akan langsung diperbarui di sistem. Tidak memerlukan verifikasi.</p>
                         </div>
                     </div>
 
@@ -193,7 +193,7 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU596A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- Variabel Global ---
@@ -339,7 +339,7 @@
         }
     }
 
-    // --- Fungsi Cek Auth & Load Data Pengguna (DIPERBAIKI) ---
+    // --- Fungsi Cek Auth & Load Data Pengguna ---
     async function loadUserData(user) {
         // Reset Global Data
         globalUserId = user.id;
@@ -415,7 +415,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME (PERBAIKAN FOKUS DI SINI) ---
+    // --- FUNGSI UPDATE USERNAME (PERBAIKAN LOGIKA PENGECUALIAN) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -429,16 +429,15 @@
              return;
         }
         
-        // 1. Cek apakah username sudah dipakai oleh user lain
-        // PENTING: Menggunakan neq('user_id', globalUserId) untuk mengecualikan diri sendiri.
+        // 1. Cek apakah username sudah dipakai oleh user lain (PENGECUALIAN DIRI SENDIRI)
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
              .eq('username', newUsername)
-             .neq('user_id', globalUserId); 
+             .neq('user_id', globalUserId); // Filter agar tidak menghitung username milik user ini
         
         if (checkError) {
-             alert("❌ Error saat cek username: " + checkError.message);
+             alert("❌ Error saat cek ketersediaan username: " + checkError.message);
              return;
         }
 
@@ -478,7 +477,7 @@
         }
     }
 
-    // --- FUNGSI UPDATE EMAIL ---
+    // --- FUNGSI UPDATE EMAIL (TIDAK MEMERLUKAN VERIFIKASI) ---
     async function updateEmail() {
         const newEmail = document.getElementById('newEmail').value.trim();
         
@@ -492,26 +491,34 @@
              return;
         }
         
-        const { error } = await supabaseClient.auth.updateUser({
+        // 1. Update Email di Supabase Auth
+        const { error: authError } = await supabaseClient.auth.updateUser({
             email: newEmail
         });
 
-        if (error) {
-            alert("❌ Gagal memperbarui email: " + error.message);
-        } else {
-            // Update juga di users_metadata
-            const { error: metadataError } = await supabaseClient
-                .from('users_metadata')
-                .update({ email: newEmail })
-                .eq('user_id', globalUserId);
-                
-            if (metadataError) {
-                 console.error("Gagal update email di metadata:", metadataError);
-            }
+        if (authError) {
+            alert("❌ Gagal memperbarui email di sistem Auth: " + authError.message);
+            return;
+        } 
 
-            alert("✅ Link verifikasi email baru telah dikirimkan. Anda akan diarahkan ke halaman login.");
-            logout();
+        // 2. Update Email di tabel users_metadata
+        const { error: metadataError } = await supabaseClient
+            .from('users_metadata')
+            .update({ email: newEmail })
+            .eq('user_id', globalUserId);
+            
+        if (metadataError) {
+             console.error("Gagal update email di metadata:", metadataError);
+             alert("❌ Berhasil memperbarui Auth, tetapi gagal menyimpan di metadata. Silakan coba lagi.");
+             return;
         }
+
+        // 3. Perbarui variabel global dan UI tanpa logout
+        globalUserEmail = newEmail;
+        alert("✅ Email berhasil diperbarui!");
+        
+        // Muat ulang data UI Pengaturan
+        refreshPengaturanData();
     }
 
     // --- FUNGSI UPDATE PASSWORD ---
