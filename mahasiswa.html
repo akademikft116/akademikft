@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Mahasiswa - Fakultas Teknik</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Biodata Mahasiswa - Fakultas Teknik</title> <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
@@ -27,280 +26,431 @@
     }
     /* Style untuk Tom Select agar sesuai dengan input Tailwind */
     .ts-wrapper.form-control, .ts-control {
-        border-radius: 0.375rem; 
-        border: 1px solid #d1d5db; 
-        padding: 0.4rem 0.5rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        border-radius: 0.25rem !important;
+        border: 1px solid #d1d5db !important;
     }
-    .form-grid { 
-        display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 1.5rem; /* gap-6 */
+    /* Menandai link aktif di halaman ini */
+    .active-link {
+        background-color: #1d4ed8; /* blue-700 */
+        color: white;
+        border-left: 4px solid #f97316; /* orange-500 */
+    }
+    .modal {
+        transition: opacity 0.3s ease-out;
+    }
+    .modal-active {
+        opacity: 1;
     }
   </style>
 </head>
 <body class="bg-gray-100">
 
-  <nav class="header-style shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
     <div class="flex items-center space-x-3">
-        <h1 class="text-xl font-bold text-white">FORM TAMBAH DATA MAHASISWA</h1>
+        <img src="logo.jpeg" alt="Logo" class="h-10 w-10">
+        <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
     </div>
-    <a href="dashboard.html" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition duration-150">
-        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
-    </a>
-  </nav>
+    <div class="flex items-center space-x-4">
+        <span id="userNameNav" class="text-white text-sm">Halo, Pengguna</span>
+        <button onclick="logout()" class="text-white hover:text-red-300 transition duration-150">
+            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+        </button>
+    </div>
+</nav>
 
-  <div class="main-content container p-6">
-    
-    <div class="bg-white p-8 rounded-lg shadow-xl mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Input Biodata Mahasiswa</h2>
+<aside class="w-64 fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-900 text-white z-20 overflow-y-auto">
+    <nav class="flex flex-col p-4 space-y-2">
+        <a href="dashboard.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-tachometer-alt w-6"></i><span class="ml-3">Dashboard</span>
+        </a>
+        <a href="main.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-calendar-alt w-6"></i><span class="ml-3">Penjadwalan</span>
+        </a>
         
-        <form id="mahasiswaForm" class="space-y-6">
+        <a href="mahasiswa.html" class="active-link flex items-center p-4 text-sm font-medium text-gray-300 transition duration-150">
+            <i class="fas fa-address-card w-6"></i><span class="ml-3">Biodata Mahasiswa</span>
+        </a>
+        
+        <a href="pencarian-mahasiswa.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-search w-6"></i><span class="ml-3">Pencarian Mahasiswa</span>
+        </a>
 
-            <div class="form-grid">
-                
-                <div>
-                    <label for="npm" class="block text-sm font-semibold text-gray-700 mb-1">NIM / NPM *</label>
-                    <input type="text" id="npm" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 2021001">
-                </div>
-                
-                <div>
-                    <label for="nama" class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap *</label>
-                    <input type="text" id="nama" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Nama Mahasiswa">
+        <div onclick="showContent('dosenContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-chalkboard-teacher w-6"></i><span class="ml-3">Data Dosen</span>
+        </div>
+        <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
+        </div>
+        <div onclick="showContent('settingsContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-cog w-6"></i><span class="ml-3">Pengaturan</span>
+        </div>
+    </nav>
+</aside>
+<main class="main-content pt-20 ml-64">
+    <div class="container mx-auto p-4 md:p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata Mahasiswa</h1> <div id="mahasiswa-container" class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="formTitle">Tambah Data Mahasiswa Baru</h2>
+            <form id="mahasiswaForm" onsubmit="event.preventDefault(); saveMahasiswa();">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="npm" class="block text-sm font-medium text-gray-700">NPM</label>
+                        <input type="text" id="npm" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi</label>
+                        <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Pilih Prodi</option>
+                            <option value="Industri">Teknik Industri</option>
+                            <option value="Sipil">Teknik Sipil</option>
+                            <option value="Informatika">Teknik Informatika</option>
+                            <option value="Arsitektur">Arsitektur</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas (A/B/C)</label>
+                        <input type="text" id="kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                        <input type="number" id="semester" required min="1" max="14" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
+                        <select id="tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Pilih Tahun</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
+                        <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="nohp" class="block text-sm font-medium text-gray-700">No. HP</label>
+                        <input type="text" id="nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="ttl" class="block text-sm font-medium text-gray-700">TTL</label>
+                        <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
                 </div>
 
+                <div class="mt-4">
+                    <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
+                    <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                <div class="mt-4">
+                    <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
+                    <textarea id="alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                </div>
+
+                <input type="hidden" id="mahasiswaId" value="">
+                <div class="mt-6 flex space-x-3">
+                    <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-save mr-2"></i> Simpan Data
+                    </button>
+                    <button type="button" onclick="resetForm()" id="reset-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-undo mr-2"></i> Reset Form
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Filter Data Mahasiswa</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label for="prodi" class="block text-sm font-semibold text-gray-700 mb-1">Program Studi *</label>
-                    <select id="prodi" required class="mt-1 block w-full"> 
-                        <option value="">-- Pilih Prodi --</option>
-                        <option value="Teknik Informatika">Teknik Informatika</option>
-                        <option value="Teknik Sipil">Teknik Sipil</option>
-                        <option value="Teknik Mesin">Teknik Mesin</option>
-                        <option value="Teknik Elektro">Teknik Elektro</option>
+                    <label for="filter-prodi" class="block text-sm font-medium text-gray-700">Program Studi</label>
+                    <select id="filter-prodi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <option value="">Semua Prodi</option>
+                        <option value="Industri">Teknik Industri</option>
+                        <option value="Sipil">Teknik Sipil</option>
+                        <option value="Informatika">Teknik Informatika</option>
                         <option value="Arsitektur">Arsitektur</option>
                     </select>
                 </div>
-                
                 <div>
-                    <label for="kelas" class="block text-sm font-semibold text-gray-700 mb-1">Kelas</label>
-                    <input type="text" id="kelas" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Reguler A">
+                    <label for="filter-status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="filter-status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <option value="">Semua Status</option>
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                        <option value="Lulus">Lulus</option>
+                    </select>
                 </div>
-                
-            </div>
-            
-            <div class="form-grid">
-                
                 <div>
-                    <label for="nik" class="block text-sm font-semibold text-gray-700 mb-1">NIK Mahasiswa</label>
-                    <input type="text" id="nik" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Nomor KTP">
+                    <label for="search-text" class="block text-sm font-medium text-gray-700">NPM / Nama</label>
+                    <input type="text" id="search-text" placeholder="Cari NPM atau Nama" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
-
-                <div>
-                    <label for="ttl" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Lahir</label>
-                    <input type="date" id="ttl" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                </div>
-
-                <div>
-                    <label for="nohp" class="block text-sm font-semibold text-gray-700 mb-1">No. Telepon / HP</label>
-                    <input type="text" id="nohp" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 0812xxxxxx">
-                </div>
-                
-                <div>
-                    <label for="semester" class="block text-sm font-semibold text-gray-700 mb-1">Semester *</label>
-                    <input type="number" id="semester" required min="1" max="14" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 3">
-                </div>
-                
-            </div>
-
-            <div class="form-grid">
-                 <div>
-                    <label for="tahunmasuk" class="block text-sm font-semibold text-gray-700 mb-1">Tahun Masuk *</label>
-                    <input type="number" id="tahunmasuk" required min="1990" max="2099" value="2024" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 2021">
-                </div>
-
-                <div class="col-span-3">
-                    <label for="judulskripsi" class="block text-sm font-semibold text-gray-700 mb-1">Judul Skripsi</label>
-                    <input type="text" id="judulskripsi" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Kosongkan jika belum ada">
+                <div class="flex items-end">
+                    <button onclick="loadMahasiswaData()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-filter mr-2"></i> Terapkan Filter
+                    </button>
                 </div>
             </div>
-
-            <div class="pt-4 flex justify-end">
-                <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-150 flex items-center">
-                    <i class="fas fa-save mr-2"></i> Simpan Data Mahasiswa
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <div class="bg-white p-8 rounded-lg shadow-xl">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Daftar Mahasiswa Tersimpan</h2>
-        
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mahasiswa</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="mahasiswaTableBody" class="bg-white divide-y divide-gray-200">
-                    <tr><td colspan="7" class="text-center py-4 text-gray-500">Memuat data...</td></tr>
-                </tbody>
-            </table>
         </div>
-    </div>
-  </div>
 
-  <script>
-    // --- Inisialisasi Supabase ---
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa (CRUD)</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPM</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+
+<div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2">Detail Biodata Mahasiswa</h3>
+        <div id="modalContent" class="text-sm space-y-2">
+            </div>
+        <button onclick="document.getElementById('detailModal').classList.add('hidden')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Tutup</button>
+    </div>
+</div>
+
+
+<script>
+    // Konfigurasi Supabase (Harus sama dengan file lain Anda)
+    // GANTI DENGAN KODE SUPABASE ANDA SENDIRI
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let globalUserId = null; 
-    let prodiSelect;
+    let isEditMode = false;
+    let currentMahasiswaId = null;
+
+    // Inisialisasi Tom Select (jika diperlukan untuk dropdown)
+    let prodiSelect, filterProdiSelect, filterStatusSelect;
+    let tahunMasukSelect;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select untuk Prodi
-        prodiSelect = new TomSelect('#prodi', {
-            create: false,
-            sortField: { field: "text", direction: "asc" }
-        });
+        // Inisialisasi dropdown Tom Select
+        prodiSelect = new TomSelect("#prodi", { create: false });
+        // Hanya perlu menginisialisasi yang digunakan untuk tampilan yang lebih baik, atau biarkan default
+        // filterProdiSelect = new TomSelect("#filter-prodi", { create: false });
+        // filterStatusSelect = new TomSelect("#filter-status", { create: false });
 
-        checkAuthAndLoad();
-        document.getElementById('mahasiswaForm').addEventListener('submit', handleFormSubmit);
+        tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
+        populateYearSelect(tahunMasukSelect);
     });
 
-    // 1. Cek Autentikasi dan Muat Data Awal
-    async function checkAuthAndLoad() {
-        const { data, error } = await supabaseClient.auth.getUser();
-        if (error || !data?.user) {
-            alert("Sesi Anda berakhir. Silakan login kembali.");
-            window.location.href = "index.html";
-            return;
+    // --- FUNGSI BANTUAN ---
+
+    // Mengisi dropdown Tahun Masuk (dari 2018 hingga tahun sekarang)
+    function populateYearSelect(selectInstance) {
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear; i >= 2018; i--) {
+            selectInstance.addOption({ value: i, text: i });
         }
-        globalUserId = data.user.id;
-        loadMahasiswaData();
+        selectInstance.refreshOptions(false);
+    }
+    
+    // Fungsi Logout (disalin dari dashboard.html)
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = "index.html";
+    }
+    
+    // Fungsi showContent untuk sidebar
+    function showContent(contentId) {
+        // Fungsi ini mengarahkan ke dashboard dan menampilkan konten tertentu jika link Dosen/Matkul diklik
+        if (contentId === 'dosenContent' || contentId === 'matakuliahContent' || contentId === 'settingsContent') {
+             window.location.href = `dashboard.html#${contentId}`; 
+        }
     }
 
-    // 2. Mengambil dan Menampilkan Data Mahasiswa
-    async function loadMahasiswaData() {
-        const tableBody = document.getElementById('mahasiswaTableBody');
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Memuat data...</td></tr>';
 
-        // Mengambil semua kolom
-        const { data: dataMahasiswa, error } = await supabaseClient
+    // --- FUNGSI CRUD ---
+
+    // 1. Memuat Data Mahasiswa
+    async function loadMahasiswaData() {
+        const tableBody = document.getElementById('mahasiswa-table-body');
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
+        
+        const filterProdi = document.getElementById('filter-prodi').value;
+        const filterStatus = document.getElementById('filter-status').value;
+        const searchText = document.getElementById('search-text').value.toLowerCase();
+
+        let query = supabaseClient
             .from('mahasiswa')
             .select('*')
-            .order('npm', { ascending: true }); // Mengurutkan berdasarkan NPM
+            .order('npm', { ascending: true });
+
+        if (filterProdi) {
+            query = query.eq('prodi', filterProdi);
+        }
+        if (filterStatus) {
+            query = query.eq('status', filterStatus);
+        }
+        if (searchText) {
+            // Filter berdasarkan NPM atau Nama
+            query = query.or(`npm.ilike.%${searchText}%,nama.ilike.%${searchText}%`);
+        }
+
+        const { data: mahasiswaData, error } = await query;
 
         if (error) {
-            console.error("Error loading mahasiswa:", error.message);
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data mahasiswa.</td></tr>';
+            console.error('Error saat memuat data:', error);
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
             return;
         }
 
         tableBody.innerHTML = '';
-        if (dataMahasiswa && dataMahasiswa.length > 0) {
-            dataMahasiswa.forEach((mhs, index) => {
-                const row = tableBody.insertRow();
-                row.className = 'hover:bg-gray-50';
-                row.insertCell().textContent = index + 1;
-                row.insertCell().textContent = mhs.npm; // Gunakan NPM/NIM
-                row.insertCell().textContent = mhs.nama;
-                row.insertCell().textContent = mhs.prodi;
-                row.insertCell().textContent = mhs.kelas || '-'; // Tampilkan Kelas
-                row.insertCell().textContent = mhs.tahun_masuk;
-
-                // Tombol Aksi (Hapus)
-                const actionCell = row.insertCell();
-                const deleteButton = document.createElement('button');
-                deleteButton.innerHTML = '<i class="fas fa-trash"></i> Hapus';
-                deleteButton.className = 'bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-3 rounded';
-                deleteButton.onclick = () => deleteMahasiswa(mhs.id, mhs.nama);
-                actionCell.appendChild(deleteButton);
-            });
-        } else {
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Belum ada data mahasiswa yang tersimpan.</td></tr>';
+        if (mahasiswaData.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data mahasiswa yang ditemukan.</td></tr>';
+            return;
         }
+
+        mahasiswaData.forEach(mhs => {
+            const statusBadge = mhs.status === 'Aktif' 
+                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>'
+                : mhs.status === 'Lulus' 
+                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Lulus</span>'
+                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Nonaktif</span>';
+
+            const row = `
+                <tr class="hover:bg-gray-100 transition duration-100">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${mhs.npm}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mhs.nama}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mhs.prodi}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${mhs.kelas || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${mhs.tahun_masuk}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">${statusBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                        <button onclick="showDetail(${mhs.id})" class="text-indigo-600 hover:text-indigo-900 transition duration-150"><i class="fas fa-eye"></i> Detail</button>
+                        <button onclick="editMahasiswa(${mhs.id})" class="text-yellow-600 hover:text-yellow-900 transition duration-150"><i class="fas fa-edit"></i> Edit</button>
+                        <button onclick="deleteMahasiswa(${mhs.id}, '${mhs.nama}')" class="text-red-600 hover:text-red-900 transition duration-150"><i class="fas fa-trash"></i> Hapus</button>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
     }
 
-    // 3. Menghandle Submit Form (Menyimpan Data)
-    async function handleFormSubmit(event) {
-        event.preventDefault();
-        
-        // Ambil semua nilai dari input
-        const npm = document.getElementById('npm').value.trim();
-        const nama = document.getElementById('nama').value.trim();
+    // 2. Menyimpan/Memperbarui Data
+    async function saveMahasiswa() {
+        // Ambil nilai dari form
+        const npm = document.getElementById('npm').value;
+        const nama = document.getElementById('nama').value;
         const prodi = prodiSelect.getValue();
-        const kelas = document.getElementById('kelas').value.trim();
-        const nik = document.getElementById('nik').value.trim();
-        const ttl = document.getElementById('ttl').value; // Ambil nilai tanggal
-        const nohp = document.getElementById('nohp').value.trim();
+        const kelas = document.getElementById('kelas').value || null;
+        const nik = document.getElementById('nik').value || null;
+        const ttl = document.getElementById('ttl').value || null;
+        const nohp = document.getElementById('nohp').value || null;
         const semester = document.getElementById('semester').value;
-        const tahunmasuk = document.getElementById('tahunmasuk').value;
-        const judulskripsi = document.getElementById('judulskripsi').value.trim();
-        const alamat = document.getElementById('alamat').value.trim();
+        const tahunmasuk = parseInt(tahunMasukSelect.getValue());
+        const judulskripsi = document.getElementById('judulskripsi').value || null;
+        const alamat = document.getElementById('alamat').value || null;
 
-        if (!npm || !nama || !prodi || !semester || !tahunmasuk) {
-             alert('Semua kolom bertanda * (NIM/NPM, Nama, Prodi, Semester, Tahun Masuk) wajib diisi!');
-             return;
-        }
-
-        // Cek duplikasi NPM
-        const { count: npmCount, error: checkError } = await supabaseClient
-            .from('mahasiswa')
-            .select('npm', { count: 'exact', head: true })
-            .eq('npm', npm);
-
-        if (checkError) {
-            alert('Gagal cek NPM: ' + checkError.message);
-            return;
-        }
-
-        if (npmCount > 0) {
-            alert(`❌ Gagal! NPM ${npm} sudah terdaftar. Gunakan NPM lain.`);
-            return;
-        }
-
-        // Data yang akan disimpan ke Supabase (pastikan nama kolom sesuai)
-        const newMahasiswaData = {
+        const mahasiswaData = {
             npm: npm, 
             nama: nama,
             prodi: prodi,
-            kelas: kelas || null,
-            nik_mahasiswa: nik || null,
-            ttl: ttl || null, 
-            no_hp: nohp || null, 
+            kelas: kelas,
+            nik_mahasiswa: nik,
+            ttl: ttl, 
+            no_hp: nohp, 
             semester: semester,
             tahun_masuk: tahunmasuk,
-            judul_skripsi: judulskripsi || null,
-            alamat: alamat || null,
+            judul_skripsi: judulskripsi,
+            alamat: alamat,
+            // Status defaultnya adalah 'Aktif' jika ini data baru, atau tidak diubah saat edit
+            status: 'Aktif',
         };
 
-        const { error: insertError } = await supabaseClient
-            .from('mahasiswa')
-            .insert([newMahasiswaData]);
+        if (isEditMode && currentMahasiswaId) {
+            // Logika Update
+            const { error: updateError } = await supabaseClient
+                .from('mahasiswa')
+                .update(mahasiswaData)
+                .eq('id', currentMahasiswaId);
 
-        if (insertError) {
-            alert('❌ Gagal menyimpan data mahasiswa: ' + insertError.message);
-            console.error(insertError);
+            if (updateError) {
+                alert('❌ Gagal memperbarui data mahasiswa: ' + updateError.message);
+                console.error(updateError);
+            } else {
+                alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
+                resetForm();
+                loadMahasiswaData();
+            }
         } else {
-            alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
-            document.getElementById('mahasiswaForm').reset(); 
-            prodiSelect.clear(); 
-            loadMahasiswaData(); 
+            // Logika Insert/Tambah
+            const { error: insertError } = await supabaseClient
+                .from('mahasiswa')
+                .insert([mahasiswaData]);
+
+            if (insertError) {
+                alert('❌ Gagal menyimpan data mahasiswa: ' + insertError.message);
+                console.error(insertError);
+            } else {
+                alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
+                resetForm(); 
+                loadMahasiswaData(); 
+            }
         }
+    }
+
+    // 3. Mengisi Form untuk Edit
+    async function editMahasiswa(mahasiswaId) {
+        const { data: mhs, error } = await supabaseClient
+            .from('mahasiswa')
+            .select('*')
+            .eq('id', mahasiswaId)
+            .single();
+
+        if (error || !mhs) {
+            alert('❌ Data tidak ditemukan untuk diedit.');
+            return;
+        }
+
+        // Isi form dengan data yang diambil
+        document.getElementById('mahasiswaId').value = mhs.id;
+        document.getElementById('npm').value = mhs.npm;
+        document.getElementById('nama').value = mhs.nama;
+        prodiSelect.setValue(mhs.prodi);
+        document.getElementById('kelas').value = mhs.kelas || '';
+        document.getElementById('semester').value = mhs.semester;
+        tahunMasukSelect.setValue(mhs.tahun_masuk);
+        document.getElementById('nik').value = mhs.nik_mahasiswa || '';
+        document.getElementById('ttl').value = mhs.ttl || '';
+        document.getElementById('nohp').value = mhs.no_hp || '';
+        document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
+        document.getElementById('alamat').value = mhs.alamat || '';
+        
+        // Atur mode edit
+        isEditMode = true;
+        currentMahasiswaId = mhs.id;
+        document.getElementById('formTitle').textContent = `Edit Data Mahasiswa: ${mhs.nama}`;
+        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update Data';
+        
+        // Scroll ke atas form
+        document.getElementById('mahasiswaForm').scrollIntoView({ behavior: 'smooth' });
     }
 
     // 4. Menghapus Data Mahasiswa
     async function deleteMahasiswa(mahasiswaId, nama) {
-        if (!confirm(`Anda yakin ingin menghapus data mahasiswa ${nama} secara permanen?`)) {
+        if (!confirm(`Anda yakin ingin menghapus data mahasiswa ${nama} (ID: ${mahasiswaId}) secara permanen?`)) {
             return;
         }
 
@@ -316,6 +466,75 @@
             loadMahasiswaData();
         }
     }
-  </script>
+
+    // 5. Reset Form
+    function resetForm() {
+        document.getElementById('mahasiswaForm').reset();
+        prodiSelect.clear();
+        tahunMasukSelect.clear();
+        isEditMode = false;
+        currentMahasiswaId = null;
+        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
+        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
+        document.getElementById('mahasiswaId').value = '';
+    }
+    
+    // 6. Tampilkan Detail Modal
+    async function showDetail(mahasiswaId) {
+        const { data: mhs, error } = await supabaseClient
+            .from('mahasiswa')
+            .select('*')
+            .eq('id', mahasiswaId)
+            .single();
+
+        if (error || !mhs) {
+            alert('❌ Data tidak ditemukan.');
+            return;
+        }
+
+        const modalContent = `
+            <p><span class="font-bold w-32 inline-block">NPM</span>: ${mhs.npm}</p>
+            <p><span class="font-bold w-32 inline-block">Nama Lengkap</span>: ${mhs.nama}</p>
+            <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
+            <p><span class="font-bold w-32 inline-block">Kelas/Semester</span>: ${mhs.kelas || '-'} / ${mhs.semester}</p>
+            <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
+            <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${mhs.status === 'Aktif' ? 'text-green-600' : 'text-red-600'}">${mhs.status}</span></p>
+            <hr class="my-3 border-gray-200">
+            <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">TTL</span>: ${mhs.ttl || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">Alamat</span>: ${mhs.alamat || '-'}</p>
+            <hr class="my-3 border-gray-200">
+            <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
+        `;
+
+        document.getElementById('modalContent').innerHTML = modalContent;
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    // --- CEK AUTHENTIKASI ---
+    async function checkAuthAndLoad() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+            window.location.href = "index.html";
+            return;
+        }
+        
+        // Memuat username ke navbar
+        const { data: userData, error } = await supabaseClient
+            .from('users_metadata')
+            .select('username')
+            .eq('user_id', user.id)
+            .single();
+
+        if (userData) {
+            document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
+        }
+
+        loadMahasiswaData(); // Muat data setelah auth sukses
+    }
+
+    window.onload = checkAuthAndLoad;
+</script>
 </body>
 </html>
