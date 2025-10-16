@@ -6,10 +6,10 @@
   <title>Login - Jadwal Kuliah</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     /* Styling untuk Kolom Kiri */
     #sidebar-image {
-        /* Asumsi file 'dajal.jpeg' ada di folder yang sama */
         background-image: url('logo.jpeg');
         background-color: #1e3a8a; 
         background-size: cover; 
@@ -47,16 +47,19 @@
 
         <div id="loginForm" class="space-y-4">
             <h2 class="text-2xl font-bold text-gray-800">Login</h2>
-            <p class="text-sm text-gray-600">Masuk untuk melanjutkan ke dashboard.</p>
+            <p class="text-sm text-gray-600">Masuk menggunakan Username.</p>
             
             <div>
-                <label for="loginUsername" class="block text-sm font-medium text-gray-700">Username atau Email</label>
-                <input id="loginUsername" type="text" placeholder="Masukkan Username atau Email" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <label for="loginUsername" class="block text-sm font-medium text-gray-700">Username</label>
+                <input id="loginUsername" type="text" placeholder="Masukkan Username Anda" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
             
-            <div>
+            <div class="relative">
                 <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
                 <input id="loginPassword" type="password" placeholder="Masukkan Password" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <button type="button" onclick="togglePasswordVisibility('loginPassword', 'loginEyeIcon')" class="absolute inset-y-0 right-0 top-6 flex items-center px-3 text-gray-500" title="Tampilkan Password">
+                    <i id="loginEyeIcon" class="fas fa-eye"></i>
+                </button>
             </div>
             
             <button onclick="login()" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -73,9 +76,12 @@
                 <input id="regUsername" type="text" placeholder="Masukkan Username" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
             
-            <div>
+            <div class="relative">
                 <label for="regPassword" class="block text-sm font-medium text-gray-700">Password</label>
                 <input id="regPassword" type="password" placeholder="Password (min 6 karakter)" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <button type="button" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')" class="absolute inset-y-0 right-0 top-6 flex items-center px-3 text-gray-500" title="Tampilkan Password">
+                    <i id="regEyeIcon" class="fas fa-eye"></i>
+                </button>
             </div>
             
             <button onclick="register()" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
@@ -89,7 +95,7 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU5Nzc"; // Ganti dengan KEY Anda yang benar jika ini tidak lengkap
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     // --- FUNGSI GANTI TAB ---
@@ -111,27 +117,35 @@
     // Set default tab
     showTab('login');
 
-    // --- FUNGSI LOGIN (TETAP SAMA) ---
+    // --- FUNGSI TOGGLE PASSWORD ---
+    function togglePasswordVisibility(passwordId, iconId) {
+        const passwordInput = document.getElementById(passwordId);
+        const eyeIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+
+    // --- FUNGSI LOGIN (Hanya Username) ---
     async function login() {
-        // Mengambil nilai dari kolom username/email
-        const input = document.getElementById("loginUsername").value.trim();
+        // HANYA MENGAMBIL USERNAME
+        const username = document.getElementById("loginUsername").value.trim();
         const password = document.getElementById("loginPassword").value;
         
-        if (!input || !password) {
-            alert("❌ Username/Email dan Password wajib diisi.");
+        if (!username || !password) {
+            alert("❌ Username dan Password wajib diisi.");
             return;
         }
         
-        let authEmail;
-        
-        // Cek apakah input mengandung '@' (dianggap Email asli)
-        if (input.includes('@')) {
-            authEmail = input;
-        } else {
-            // Jika tidak mengandung '@', anggap sebagai Username dan buat email dummy
-            authEmail = `${input}@akademikft.com`;
-        }
-
+        // Buat Email Dummy dari Username
+        const authEmail = `${username}@akademikft.com`;
 
         const { error } = await supabaseClient.auth.signInWithPassword({ 
             email: authEmail, 
@@ -139,13 +153,13 @@
         });
 
         if (error) {
-            alert("❌ Login gagal. Pastikan username/email dan password benar. Pesan error: " + error.message);
+            alert("❌ Login gagal. Pastikan username dan password benar. Pesan error: " + error.message);
         } else {
             window.location.href = "dashboard.html";
         }
     }
 
-    // --- FUNGSI REGISTER (TETAP SAMA) ---
+    // --- FUNGSI REGISTER (Username) ---
     async function register() {
         const username = document.getElementById("regUsername").value.trim();
         const password = document.getElementById("regPassword").value;
@@ -175,7 +189,7 @@
              return;
         }
 
-        // Gunakan format email dummy yang unik (LOGIKA INI TETAP DIPERTAHANKAN)
+        // Gunakan format email dummy yang unik
         const authEmail = `${username}@akademikft.com`;
 
 
