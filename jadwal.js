@@ -1,129 +1,250 @@
-// --- Inisialisasi Supabase ---
-const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const tabelBody = document.querySelector("#tabelJadwal tbody");
-let semuaData = [];
-
-// --- Load data saat halaman dibuka ---
-window.onload = async () => {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user.user) {
-    alert("Silakan login dulu!");
-    window.location.href = "index.html";
-    return;
-  }
-  loadData();
-};
-
-// --- Ambil data jadwal dari Supabase ---
-async function loadData() {
-  const { data, error } = await supabase.from("jadwal").select("*").order("id", { ascending: true });
-  if (error) {
-    console.error(error);
-    alert("Gagal memuat data");
-    return;
-  }
-  semuaData = data;
-  tampilkanData(semuaData);
-}
-
-// --- Tampilkan data ke tabel ---
-function tampilkanData(data) {
-  tabelBody.innerHTML = "";
-  data.forEach((row, index) => {
-    const tr = document.createElement("tr");
-    tr.classList.add("border-b");
-    tr.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${row.kode_matkul || "-"}</td>
-      <td>${row.prodi || "-"}</td>
-      <td>${row.hari || "-"}</td>
-      <td>${row.jam_mulai || "-"}</td>
-      <td>${row.jam_akhir || "-"}</td>
-      <td>${row.mata_kuliah || "-"}</td>
-      <td>${row.sks || "-"}</td>
-      <td>${row.dosen || "-"}</td>
-      <td>${row.asisten || "-"}</td>
-      <td>${row.semester || "-"}</td>
-      <td>${row.kelas || "-"}</td>
-      <td>${row.ruangan || "-"}</td>
-      <td>
-        <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded">Edit</button>
-        <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1">Hapus</button>
-      </td>
-    `;
-    tabelBody.appendChild(tr);
-  });
-}
-
-// --- Tambah jadwal baru ---
-async function tambahJadwal(jadwal) {
-  const { data, error } = await supabase.from("jadwal").insert([jadwal]);
-  if (error) {
-    alert("Gagal menambah jadwal");
-    console.error(error);
-  } else {
-    alert("Jadwal berhasil ditambahkan");
-    loadData();
-  }
-}
-
-// --- Edit jadwal (popup sederhana) ---
-async function editJadwal(id) {
-  const row = semuaData.find(r => r.id === id);
-  if (!row) return;
-  const mata_kuliah = prompt("Ubah nama mata kuliah:", row.mata_kuliah);
-  if (!mata_kuliah) return;
-
-  const { error } = await supabase.from("jadwal").update({ mata_kuliah }).eq("id", id);
-  if (error) alert("Gagal memperbarui jadwal");
-  else {
-    alert("Berhasil diperbarui");
-    loadData();
-  }
-}
-
-// --- Hapus jadwal ---
-async function hapusJadwal(id) {
-  if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
-  const { error } = await supabase.from("jadwal").delete().eq("id", id);
-  if (error) alert("Gagal menghapus");
-  else {
-    alert("Berhasil dihapus");
-    loadData();
-  }
-}
-
-// --- Filter data berdasarkan prodi ---
-function filterData() {
-  const filter = document.getElementById("filterProdi").value;
-  const hasil = filter ? semuaData.filter(row => row.prodi === filter) : semuaData;
-  tampilkanData(hasil);
-}
-
-// --- Export ke Excel ---
-function exportExcel() {
-  const ws = XLSX.utils.json_to_sheet(semuaData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Jadwal");
-  XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
-}
-
-// --- Export ke PDF ---
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Jadwal Kuliah", 14, 15);
-  let y = 25;
-  semuaData.forEach((r, i) => {
-    doc.text(`${i + 1}. ${r.mata_kuliah || "-"} (${r.prodi || "-"})`, 14, y);
-    y += 8;
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Jadwal Kuliah</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <style>
+    /* Styling untuk Kolom Kiri */
+    #sidebar-image {
+        background-image: url('dajal.jpeg');
+        background-color: #1e3a8a; /* Default: Warna Biru Tua Solid */
+        background-size: cover; 
+        background-position: center;
+        background-repeat: no-repeat;
     }
-  });
-  doc.save("jadwal_kuliah.pdf");
-}
+    
+    /* Untuk memastikan form container memiliki padding dan background */
+    .form-container {
+        background-color: white;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen p-4">
+  
+  <div class="flex w-full max-w-4xl bg-white shadow-2xl rounded-xl overflow-hidden min-h-[500px]">
+    
+    <div id="sidebar-image" class="hidden md:block md:w-8/12 p-8 relative">
+        <div class="absolute inset-0 bg-blue-900 bg-opacity-70 flex flex-col justify-center items-center p-8">
+            <h1 class="text-4xl font-extrabold text-white text-center mb-4">FAKULTAS TEKNIK</h1>
+            <p class="text-xl text-white text-center font-light">Sistem Informasi Jadwal Kuliah</p>
+        </div>
+    </div>
+
+    <div class="w-full md:w-4/12 p-8 md:p-10 form-container flex flex-col justify-center">
+
+        <h1 id="form-title" class="text-2xl font-bold text-center mb-6 text-blue-600">MASUK</h1>
+
+        <div id="loginForm">
+            <div class="mb-4">
+                <label for="loginCredential" class="block text-sm font-medium text-gray-700">Email atau Username</label>
+                <input id="loginCredential" type="text" placeholder="Masukkan email atau username" class="mt-1 w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-6 relative">
+                <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                <input id="loginPassword" type="password" placeholder="Masukkan password" class="mt-1 w-full border border-gray-300 p-2 rounded-lg pr-10 focus:ring-blue-500 focus:border-blue-500">
+                <button type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')" class="absolute inset-y-0 right-0 top-0 px-3 flex items-center text-gray-500 h-full">
+                    <i id="eyeIconLogin" class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <button onclick="login()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
+                Masuk
+            </button>
+            
+            <p class="text-center text-sm mt-4">
+                Belum punya akun? <a href="#" onclick="showRegister()" class="text-blue-600 hover:text-blue-800 font-medium">Daftar sekarang</a>
+            </p>
+        </div>
+
+        <div id="registerForm" class="hidden">
+            <div class="mb-4">
+                <label for="registerUsername" class="block text-sm font-medium text-gray-700">Username</label>
+                <input id="registerUsername" type="text" placeholder="Buat username unik" class="mt-1 w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-4 relative">
+                <label for="registerPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                <input id="registerPassword" type="password" placeholder="Buat password" class="mt-1 w-full border border-gray-300 p-2 rounded-lg pr-10 focus:ring-blue-500 focus:border-blue-500">
+                <button type="button" onclick="togglePasswordVisibility('registerPassword', 'eyeIconRegister')" class="absolute inset-y-0 right-0 top-0 px-3 flex items-center text-gray-500 h-full">
+                    <i id="eyeIconRegister" class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <button onclick="register()" class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition duration-150">
+                Daftar
+            </button>
+
+            <p class="text-center text-sm mt-4">
+                Sudah punya akun? <a href="#" onclick="showLogin()" class="text-blue-600 hover:text-blue-800 font-medium">Masuk</a>
+            </p>
+        </div>
+
+    </div>
+  </div>
+
+<script>
+    // --- Inisialisasi Supabase ---
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // --- Fungsi Utilitas UI (Telah Diperbarui) ---
+    function showLogin() {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('form-title').textContent = 'MASUK';
+    }
+
+    function showRegister() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('form-title').textContent = 'DAFTAR';
+    }
+
+    // FUNGSI BARU/PERBAIKAN UNTUK MENGGANTI VISIBILITAS PASSWORD DAN IKON
+    function togglePasswordVisibility(inputFieldId, iconId) {
+        const passwordField = document.getElementById(inputFieldId);
+        const eyeIcon = document.getElementById(iconId);
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+
+
+    // --- Login (Menangani Email/Username) ---
+    async function login() {
+        const credential = document.getElementById("loginCredential").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        
+        if (!credential || !password) {
+            alert("❌ Harap isi Email/Username dan Password.");
+            return;
+        }
+
+        let authEmail = credential;
+
+        if (!credential.includes('@')) {
+            // Jika input dianggap username, cari email Supabase-nya
+            const { data: userData, error: userError } = await supabaseClient
+                .from('users_metadata')
+                .select('email')
+                .eq('username', credential)
+                .single();
+
+            if (userError || !userData) {
+                alert("❌ Login gagal: Username atau Password salah.");
+                return;
+            }
+            authEmail = userData.email;
+        }
+        
+        // Coba login dengan email (asli atau dari metadata)
+        const { error: loginError } = await supabaseClient.auth.signInWithPassword({ 
+            email: authEmail, 
+            password: password 
+        });
+
+        if (loginError) {
+            alert("❌ Login gagal: Email/Username atau Password salah.");
+            console.error(loginError);
+        } else {
+            window.location.href = "dashboard.html";
+        }
+    }
+
+
+    // --- Registrasi (Menggunakan Username dan Email Dummy) ---
+    async function register() {
+        const username = document.getElementById("registerUsername").value.trim();
+        const password = document.getElementById("registerPassword").value;
+        
+        if (!username || !password) {
+            alert("❌ Harap isi Username dan Password.");
+            return;
+        }
+        
+        if (password.length < 6) {
+            alert("❌ Password minimal 6 karakter.");
+            return;
+        }
+        
+        // 1. Cek apakah username sudah ada di tabel users_metadata
+        const { data: existingUser, error: checkError } = await supabaseClient
+          .from('users_metadata')
+          .select('username')
+          .eq('username', username);
+
+        if (checkError) {
+            console.error("Error cek username:", checkError);
+            alert("❌ Terjadi kesalahan saat memverifikasi username.");
+            return;
+        }
+
+        if (existingUser && existingUser.length > 0) {
+            alert("❌ Username ini sudah digunakan. Silakan pilih username lain.");
+            return;
+        }
+        
+        // 2. Buat email dummy yang unik
+        const authEmail = `${username}@akademikft.com`;
+
+
+        try {
+            // 3. Daftar di Supabase Auth menggunakan email dummy yang unik
+            const { data, error } = await supabaseClient.auth.signUp(
+              { email: authEmail, password }
+            );
+
+            if (error) {
+                alert("❌ Gagal membuat akun: " + error.message);
+                console.error(error);
+                return;
+            }
+            
+            // 4. Simpan username ke tabel 'users_metadata'
+            if (data.user) {
+                const emailToSave = authEmail; 
+
+                const { error: metadataError } = await supabaseClient
+                    .from('users_metadata')
+                    .insert([{ user_id: data.user.id, email: emailToSave, username: username }]);
+                
+                if (metadataError) {
+                    console.error("Gagal menyimpan metadata:", metadataError);
+                }
+            }
+
+
+            alert("✅ Akun berhasil dibuat! Anda akan langsung masuk ke sistem.");
+            window.location.href = "dashboard.html";
+        } catch (err) {
+            console.error(err);
+            alert("Terjadi kesalahan koneksi ke Supabase.");
+        }
+    }
+
+    // --- CEK LOGIN SAAT MASUK HALAMAN ---
+    window.onload = async () => {
+      const { data } = await supabaseClient.auth.getUser();
+      if (data?.user) {
+        window.location.href = "dashboard.html";
+      }
+    };
+
+</script>
+</body>
+</html>
