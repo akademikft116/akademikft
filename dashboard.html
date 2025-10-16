@@ -186,7 +186,8 @@
 <script>
     // --- Inisialisasi Supabase ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU596A5CM41vzapQJoB1MvJkPQE03o";
+    // Kunci Supabase yang sudah diverifikasi:
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
@@ -194,29 +195,24 @@
 
     // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
-        // Sembunyikan semua konten
         document.getElementById('main').classList.add('hidden');
         document.getElementById('dosen').classList.add('hidden');
         document.getElementById('matkul').classList.add('hidden');
         document.getElementById('pengaturan').classList.add('hidden');
         
-        // Tampilkan konten yang dipilih
         document.getElementById(tabId).classList.remove('hidden');
         
-        // Hapus styling aktif dari semua tombol navigasi
         document.querySelectorAll('aside button.nav-item').forEach(el => {
             el.classList.remove('active-link');
             el.classList.add('text-gray-300');
             el.classList.remove('text-white');
         });
         
-        // Tambahkan styling aktif ke tombol yang diklik
         if (clickedButton) {
             clickedButton.classList.add('active-link');
             clickedButton.classList.remove('text-gray-300');
         }
 
-        // Muat data spesifik jika berpindah ke tab Dosen atau Mata Kuliah
         if (tabId === 'dosen') {
             loadDosenData();
         } else if (tabId === 'matkul') {
@@ -224,8 +220,9 @@
         }
     }
     
-    // Fungsi load data Dosen (tidak berubah)
+    // Fungsi load data Dosen
     async function loadDosenData() {
+        // Asumsi tabel 'dosen' ada di Supabase
         const { data: dataDosen } = await supabaseClient.from('dosen').select('*').order('nama', { ascending: true });
         const tableBody = document.getElementById('dosenTableBody');
         tableBody.innerHTML = ''; 
@@ -240,8 +237,9 @@
             });
         }
     }
-    // Fungsi load data Mata Kuliah (tidak berubah)
+    // Fungsi load data Mata Kuliah
     async function loadMatkulData() {
+        // Asumsi tabel 'matakuliah' ada di Supabase
         const { data: dataMatkul } = await supabaseClient.from('matakuliah').select('*').order('nama', { ascending: true }); 
         const tableBody = document.getElementById('matkulTableBody');
         tableBody.innerHTML = ''; 
@@ -256,18 +254,21 @@
             });
         }
     }
-    // Fungsi load Statistik (tidak berubah)
+    // Fungsi load Statistik
     async function loadStatistics() {
         if (!globalUserId) return;
+        // Asumsi tabel 'jadwal' ada di Supabase
         const { count: jadwalCount } = await supabaseClient.from('jadwal').select('*', { count: 'exact', head: true }).eq('user_id', globalUserId);
         if (jadwalCount !== null) document.getElementById('totalJadwal').textContent = jadwalCount;
+        
         const { count: dosenCount } = await supabaseClient.from('dosen').select('*', { count: 'exact', head: true });
         if (dosenCount !== null) document.getElementById('totalDosen').textContent = dosenCount;
+        
         const { count: matkulCount } = await supabaseClient.from('matakuliah').select('*', { count: 'exact', head: true });
         if (matkulCount !== null) document.getElementById('totalMatkul').textContent = matkulCount;
     }
 
-    // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD (tidak berubah)
+    // FUNGSI TOGGLE PASSWORD
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('newPassword');
         const eyeIcon = document.getElementById('eyeIcon');
@@ -282,10 +283,11 @@
         }
     }
 
-    // --- FUNGSI Cek Auth & Load Data Pengguna (FIXED) ---
+    // --- FUNGSI Cek Auth & Load Data Pengguna (Kunci Supabase FIXED) ---
     window.onload = async () => {
       const { data, error } = await supabaseClient.auth.getUser();
       if (error || !data?.user) {
+        // Jika gagal autentikasi, arahkan ke login
         alert("Silakan login dulu!");
         window.location.href = "index.html"; 
         return;
@@ -295,18 +297,18 @@
       globalUserId = user.id;
       globalUserEmail = user.email;
       
-      // Ambil username dari users_metadata menggunakan user_id (Sumber data yang benar)
+      // Ambil username dari users_metadata
       const { data: userData, error: metadataError } = await supabaseClient
             .from('users_metadata')
             .select('username')
             .eq('user_id', globalUserId) 
             .single();
 
-      if (metadataError) {
+      if (metadataError && metadataError.code !== 'PGRST116') { // PGRST116 = Data tidak ditemukan (user baru)
           console.error("Gagal memuat metadata pengguna:", metadataError);
       }
 
-      // Pastikan username yang ditampilkan adalah yang terbaru dari database
+      // Gunakan username dari metadata, jika tidak ada, gunakan default 'User'
       let username = (userData && userData.username) ? userData.username : 'User';
       
       // Tampilkan info pengguna
@@ -321,17 +323,12 @@
       loadStatistics();
     };
 
-    // --- FUNGSI UPDATE USERNAME (STABIL: Update Metadata dan HANYA UPDATE TAMPILAN) ---
+    // --- FUNGSI UPDATE USERNAME ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
-        if (!newUsername) {
-            alert("❌ Username baru tidak boleh kosong.");
-            return;
-        }
-
-        if (newUsername.length < 3) {
-            alert("❌ Username minimal 3 karakter.");
+        if (!newUsername || newUsername.length < 3) {
+            alert("❌ Username minimal 3 karakter dan wajib diisi.");
             return;
         }
         
@@ -341,11 +338,11 @@
              return;
         }
         
-        // 1. Cek apakah username sudah dipakai (case-insensitive check)
+        // 1. Cek apakah username sudah dipakai
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
-             .ilike('username', newUsername); // Menggunakan ilike untuk case-insensitive
+             .ilike('username', newUsername); 
         
         if (checkError) {
              alert("❌ Error saat cek ketersediaan username: " + checkError.message);
@@ -357,7 +354,7 @@
              return;
         }
 
-        // 2. Update di tabel users_metadata menggunakan user_id
+        // 2. Update di tabel users_metadata
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ username: newUsername }) 
@@ -366,15 +363,13 @@
         if (metadataError) {
             alert("❌ Gagal memperbarui username: " + metadataError.message);
         } else {
-            // Berhasil! HANYA UPDATE TAMPILAN SECARA MANUAL.
             alert("✅ Username berhasil diperbarui menjadi: " + newUsername);
             
-            // Update tampilan di seluruh dashboard SECARA MANUAL
+            // Update tampilan secara manual
             document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
             document.getElementById('displayUsernameMain').textContent = newUsername;
             document.getElementById('currentUsername').textContent = newUsername;
 
-            // Kosongkan input field
             document.getElementById('newUsername').value = '';
         }
     }
