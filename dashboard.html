@@ -38,7 +38,7 @@
 
     <aside class="w-64 fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-900 text-white z-20 overflow-y-auto">
         <nav class="flex flex-col p-4 space-y-2">
-            <a href="dashboard.html" class="active-link flex items-center p-4 text-sm font-medium text-gray-300 transition duration-150">
+            <a href="dashboard.html" id="dashboard-link" class="active-link flex items-center p-4 text-sm font-medium text-gray-300 transition duration-150">
                 <i class="fas fa-tachometer-alt w-6"></i>
                 <span class="ml-3">Dashboard</span>
             </a>
@@ -51,7 +51,6 @@
                 <i class="fas fa-address-card w-6"></i>
                 <span class="ml-3">Biodata Mahasiswa</span>
             </a>
-            
             <a href="pencarian-mahasiswa.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
                 <i class="fas fa-search w-6"></i>
                 <span class="ml-3">Pencarian Mahasiswa</span>
@@ -71,12 +70,13 @@
             </div>
         </nav>
     </aside>
+
+
     <main class="main-content ml-64 p-8 overflow-y-auto">
         <div id="dashboardContent" class="space-y-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Administrator</h1>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
                 <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 border-l-4 border-blue-500">
                     <div class="p-3 bg-blue-100 rounded-full">
                         <i class="fas fa-calendar-alt text-blue-600 text-2xl"></i>
@@ -111,11 +111,13 @@
             <div id="dosenContent" class="hidden bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Data Dosen</h2>
                 <p class="text-gray-500">Konten manajemen data dosen akan dimuat di sini.</p>
+                <p class="mt-4 text-sm text-blue-500">Note: Data Dosen ini bisa dikembangkan menjadi CRUD seperti Mahasiswa.</p>
             </div>
             
             <div id="matakuliahContent" class="hidden bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Data Mata Kuliah</h2>
                 <p class="text-gray-500">Konten manajemen data mata kuliah akan dimuat di sini.</p>
+                <p class="mt-4 text-sm text-blue-500">Note: Data Mata Kuliah ini bisa dikembangkan menjadi CRUD seperti Mahasiswa.</p>
             </div>
 
             <div id="settingsContent" class="hidden bg-white p-6 rounded-xl shadow-lg">
@@ -149,18 +151,22 @@
 
         let globalUserId = null; 
 
-        // --- FUNGSI TAMPILKAN KONTEN (Dosen/Matkul/Settings) ---
+        // --- FUNGSI TAMPILKAN KONTEN (Dosen/Matkul/Settings) - DIUBAH ---
         function showContent(contentId) {
             // Sembunyikan semua konten non-dashboard
             document.querySelectorAll('#dosenContent, #matakuliahContent, #settingsContent').forEach(el => {
                 el.classList.add('hidden');
-                document.getElementById(el.id.replace('Content', '-link')).classList.remove('active-link');
             });
+            // Hapus kelas aktif dari semua link sidebar non-dashboard
+            document.querySelectorAll('#dosen-link, #matakuliah-link, #settings-link').forEach(link => {
+                link.classList.remove('active-link');
+            });
+            // Pastikan link dashboard tidak aktif
+            document.getElementById('dashboard-link').classList.remove('active-link');
+
             // Tampilkan konten yang diminta
             document.getElementById(contentId).classList.remove('hidden');
             document.getElementById(contentId.replace('Content', '-link')).classList.add('active-link');
-            // Pastikan dashboard link tidak aktif
-            document.querySelector('a[href="dashboard.html"]').classList.remove('active-link');
         }
 
         // --- FUNGSI MUAT DATA DASHBOARD ---
@@ -204,7 +210,6 @@
                 
                 // Update tampilan
                 document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
-                document.getElementById('displayUsernameMain').textContent = newUsername; // Jika ada di dashboard
                 document.getElementById('currentUsername').textContent = newUsername;
 
                 document.getElementById('newUsername').value = '';
@@ -258,7 +263,6 @@
 
             if (userData) {
                 document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
-                // Set default username di pengaturan
                 if (document.getElementById('currentUsername')) {
                     document.getElementById('currentUsername').textContent = userData.username;
                 }
@@ -268,13 +272,16 @@
 
             loadDashboardData();
             
-            // Logika untuk menampilkan konten berdasarkan hash (misalnya dari klik Dosen/Matkul di halaman lain)
+            // Logika untuk menampilkan konten berdasarkan hash (defaultnya dashboard)
             const hash = window.location.hash.substring(1);
             if (hash) {
                 const targetContent = document.getElementById(hash);
                 if (targetContent) {
                     showContent(hash);
                 }
+            } else {
+                // Tampilkan konten dashboard secara default
+                document.getElementById('dashboardContent').classList.remove('hidden');
             }
         }
 
