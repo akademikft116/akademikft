@@ -10,7 +10,7 @@
     /* Styling untuk Kolom Kiri */
     #sidebar-image {
         /* Asumsi file 'dajal.jpeg' ada di folder yang sama */
-        background-image: url('lo.jpeg');
+        background-image: url('logo.jpeg');
         background-color: #1e3a8a; 
         background-size: cover; 
         background-position: center;
@@ -34,7 +34,7 @@
                 APLIKASI PENJADWALAN
             </h2>
             <p class="text-xl text-blue-200 mt-2 text-center">
-                Fakultas Teknik - Universitas Langlangbuana
+                Fakultas Teknik - Universitas
             </p>
         </div>
     </div>
@@ -70,7 +70,7 @@
             
             <div>
                 <label for="regUsername" class="block text-sm font-medium text-gray-700">Username</label>
-                <input id="regUsername" type="text" placeholder="Username (akan jadi email dummy)" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <input id="regUsername" type="text" placeholder="Masukkan Username" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
             
             <div>
@@ -111,7 +111,7 @@
     // Set default tab
     showTab('login');
 
-    // --- FUNGSI LOGIN (UPDATED: Dapat menerima Username atau Email) ---
+    // --- FUNGSI LOGIN (TETAP SAMA) ---
     async function login() {
         // Mengambil nilai dari kolom username/email
         const input = document.getElementById("loginUsername").value.trim();
@@ -145,7 +145,7 @@
         }
     }
 
-    // --- FUNGSI REGISTER (UPDATED: Tambah otomatis login) ---
+    // --- FUNGSI REGISTER (TETAP SAMA) ---
     async function register() {
         const username = document.getElementById("regUsername").value.trim();
         const password = document.getElementById("regPassword").value;
@@ -175,7 +175,7 @@
              return;
         }
 
-        // Gunakan format email dummy yang unik
+        // Gunakan format email dummy yang unik (LOGIKA INI TETAP DIPERTAHANKAN)
         const authEmail = `${username}@akademikft.com`;
 
 
