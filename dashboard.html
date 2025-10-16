@@ -187,7 +187,7 @@
     let globalUserId = null;
     let globalUserEmail = null;
 
-    // Fungsi untuk menampilkan konten tab yang dipilih
+    // Fungsi untuk menampilkan konten tab yang dipilih (tidak berubah)
     function showContent(tabId, clickedButton) {
         document.getElementById('main').classList.add('hidden');
         document.getElementById('dosen').classList.add('hidden');
@@ -255,7 +255,7 @@
         if (matkulCount !== null) document.getElementById('totalMatkul').textContent = matkulCount;
     }
 
-    // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD
+    // FUNGSI TOGGLE PASSWORD UNTUK DASHBOARD (tidak berubah)
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('newPassword');
         const eyeIcon = document.getElementById('eyeIcon');
@@ -309,7 +309,7 @@
       loadStatistics();
     };
 
-    // --- FUNGSI UPDATE USERNAME (FIXED: Update Metadata dan Update Sesi Tanpa Logout) ---
+    // --- FUNGSI UPDATE USERNAME (FIXED: Update Metadata dan HANYA UPDATE TAMPILAN) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -354,26 +354,18 @@
         if (metadataError) {
             alert("❌ Gagal memperbarui username: " + metadataError.message);
         } else {
-            // Berhasil!
+            // Berhasil! HANYA UPDATE TAMPILAN SECARA MANUAL.
+            alert("✅ Username berhasil diperbarui menjadi: " + newUsername);
             
-            // 3. (FIX) Paksa refresh sesi Supabase untuk memuat metadata baru
-            const { data: { session }, error: refreshError } = await supabaseClient.auth.refreshSession();
-            
-            if (refreshError || !session) {
-                console.error("Gagal merefresh sesi, memaksa reload.", refreshError);
-            }
-            
-            alert("✅ Username berhasil diperbarui menjadi: " + newUsername + ". Halaman akan dimuat ulang untuk menampilkan perubahan.");
-            
-            // Update tampilan sementara
+            // Update tampilan di seluruh dashboard SECARA MANUAL
             document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
             document.getElementById('displayUsernameMain').textContent = newUsername;
             document.getElementById('currentUsername').textContent = newUsername;
 
-            // Paksa reload halaman
-            setTimeout(() => {
-                window.location.reload(); 
-            }, 1000); // Jeda 1 detik
+            // Kosongkan input field
+            document.getElementById('newUsername').value = '';
+
+            // TIDAK ADA REFRESH ATAU LOGOUT. Perubahan terlihat langsung.
         }
     }
     
