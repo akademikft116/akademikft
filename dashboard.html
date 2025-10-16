@@ -49,7 +49,7 @@
                 <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Penjadwalan</span>
-                </a>
+                </button>
                 
                 <button onclick="showContent('dosen', this)" id="dosenLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-chalkboard-teacher w-5"></i>
@@ -149,20 +149,8 @@
                         </div>
                     </div>
                     
-                    <div class="mb-8 border-b pb-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Ubah Email</h3>
-                         <p class="text-sm text-gray-500 mb-4">Email saat ini: <strong id="currentEmail">...</strong></p>
-                        <div class="space-y-4 max-w-sm">
-                            <input id="newEmail" type="email" placeholder="Masukkan Email Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            <button onclick="updateEmail()" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-150">
-                                Simpan Email Baru
-                            </button>
-                            <p class="text-xs text-red-500 italic">⚠️ Setelah diubah, Anda perlu memverifikasi email baru.</p>
-                        </div>
-                    </div>
-
                     <div class="mb-8 pb-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Ubah Password</h3>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Ubah Password</h3>
                         <div class="space-y-4 max-w-sm">
                             <div class="relative">
                                 <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
@@ -177,7 +165,7 @@
                     </div>
                     
                      <div class="mt-8 pt-6 border-t border-gray-200">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-3">4. Opsi Ganti Akun</h3>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Opsi Ganti Akun</h3>
                         <p class="text-sm text-gray-500 mb-4">Anda akan keluar dari sesi ini dan diarahkan ke halaman login.</p>
                         <button onclick="logout()" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-150">
                             Ganti Akun / Logout
@@ -365,7 +353,7 @@
       
       // Tampilkan di bagian pengaturan
       document.getElementById('currentUsername').textContent = username;
-      document.getElementById('currentEmail').textContent = user.email;
+      // document.getElementById('currentEmail').textContent = user.email; // Baris ini tidak perlu karena Ubah Email dihapus
       
       // Tampilkan konten dashboard utama secara default
       showContent('main', document.getElementById('mainLink'));
@@ -393,7 +381,7 @@
     }
 
 
-    // --- FUNGSI UPDATE USERNAME (DIPERBAIKI UNTUK SINKRONISASI EMAIL DUMMY) ---
+    // --- FUNGSI UPDATE USERNAME (TETAP SINKRONISASI EMAIL DUMMY) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -437,7 +425,7 @@
              return;
         }
 
-        // --- Perbaikan Logika Sinkronisasi Username ---
+        // --- Logika Sinkronisasi Username & Email Dummy (TETAP DIPERTAHANKAN) ---
         const newAuthEmail = `${newUsername}@akademikft.com`; 
 
         // 2. Update Auth Email di Supabase (Email dummy baru)
@@ -463,7 +451,7 @@
         } else {
             // Update Tampilan dan Global State secara real-time
             globalUserEmail = newAuthEmail; // Update global state
-            document.getElementById('currentEmail').textContent = newAuthEmail;
+            // document.getElementById('currentEmail').textContent = newAuthEmail; // Baris ini tidak perlu karena Ubah Email dihapus
             document.getElementById('currentUsername').textContent = newUsername; 
             document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
             document.getElementById('displayUsernameMain').textContent = newUsername;
@@ -472,58 +460,8 @@
         }
     }
 
-    // --- FUNGSI UPDATE EMAIL (DIPERBAIKI UNTUK MENGATASI ERROR "INVALID") ---
-    async function updateEmail() {
-        const newEmail = document.getElementById('newEmail').value.trim();
-
-        // Cek sesi terbaru sebelum update untuk menghindari error "Invalid Refresh Token"
-        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-        if (userError || !userData?.user) {
-            alert("❌ Sesi Anda habis. Silakan refresh halaman atau login ulang.");
-            window.location.reload(); 
-            return;
-        }
-        const currentUserId = userData.user.id; 
-        
-        if (!newEmail || !newEmail.includes('@')) {
-            alert("❌ Masukkan format email yang valid.");
-            return;
-        }
-        
-        if (newEmail === userData.user.email) {
-             alert("❌ Email tidak berubah.");
-             return;
-        }
-        
-        // 1. Update Auth Email di Supabase (Ini yang sering menghasilkan error 'invalid')
-        const { error: authError } = await supabaseClient.auth.updateUser({
-            email: newEmail
-        });
-
-        if (authError) {
-            // Memberikan pesan error yang lebih spesifik untuk "invalid token"
-            if (authError.message.includes('Invalid') || authError.message.includes('expired')) {
-                 alert("❌ Gagal memperbarui email. Token sesi kedaluwarsa. Silakan coba refresh halaman dan ulangi lagi, atau logout/login ulang.");
-            } else {
-                 alert("❌ Gagal memperbarui email: " + authError.message);
-            }
-            return;
-        } 
-        
-        // 2. Update email di tabel users_metadata (SINKRONISASI)
-        const { error: metadataError } = await supabaseClient
-            .from('users_metadata')
-            .update({ email: newEmail })
-            .eq('user_id', currentUserId);
-
-        if (metadataError) {
-            alert("❌ Email di Auth berhasil, namun gagal sinkronisasi ke database metadata: " + metadataError.message);
-        } else {
-            alert("✅ Link verifikasi email baru telah dikirimkan ke " + newEmail + ". Silakan cek kotak masuk Anda. Anda akan diarahkan ke halaman login.");
-            logout();
-        }
-    }
-
+    // --- FUNGSI UPDATE EMAIL DIHAPUS SESUAI PERMINTAAN ---
+    
     // --- FUNGSI UPDATE PASSWORD ---
     async function updatePassword() {
         const newPassword = document.getElementById('newPassword').value;
