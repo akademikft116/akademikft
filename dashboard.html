@@ -214,7 +214,7 @@
         }
     }
     
-    // Fungsi load data
+    // Fungsi load data (tidak berubah)
     async function loadDosenData() {
         const { data: dataDosen } = await supabaseClient.from('dosen').select('*').order('nama', { ascending: true });
         const tableBody = document.getElementById('dosenTableBody');
@@ -283,11 +283,11 @@
       globalUserId = user.id;
       globalUserEmail = user.email;
       
-      // FIX: Ambil username dari users_metadata menggunakan user_id
+      // Ambil username dari users_metadata menggunakan user_id
       const { data: userData, error: metadataError } = await supabaseClient
             .from('users_metadata')
             .select('username')
-            .eq('user_id', globalUserId) // <-- Lookup berdasarkan user_id
+            .eq('user_id', globalUserId) 
             .single();
 
       if (metadataError) {
@@ -309,7 +309,7 @@
       loadStatistics();
     };
 
-    // --- FUNGSI UPDATE USERNAME (FIXED: Hanya update metadata dan memaksa reload) ---
+    // --- FUNGSI UPDATE USERNAME (FIXED: Update Metadata dan Update Sesi Tanpa Logout) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -354,18 +354,26 @@
         if (metadataError) {
             alert("❌ Gagal memperbarui username: " + metadataError.message);
         } else {
-            // Berhasil! 
-            alert("✅ Username berhasil diperbarui menjadi: " + newUsername + ". Halaman akan dimuat ulang dalam 3 detik untuk menerapkan perubahan.");
+            // Berhasil!
             
-            // Perbarui tampilan sementara 
+            // 3. (FIX) Paksa refresh sesi Supabase untuk memuat metadata baru
+            const { data: { session }, error: refreshError } = await supabaseClient.auth.refreshSession();
+            
+            if (refreshError || !session) {
+                console.error("Gagal merefresh sesi, memaksa reload.", refreshError);
+            }
+            
+            alert("✅ Username berhasil diperbarui menjadi: " + newUsername + ". Halaman akan dimuat ulang untuk menampilkan perubahan.");
+            
+            // Update tampilan sementara
             document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
             document.getElementById('displayUsernameMain').textContent = newUsername;
             document.getElementById('currentUsername').textContent = newUsername;
 
-            // Paksa reload halaman setelah jeda 3 detik
+            // Paksa reload halaman
             setTimeout(() => {
                 window.location.reload(); 
-            }, 3000);
+            }, 1000); // Jeda 1 detik
         }
     }
     
