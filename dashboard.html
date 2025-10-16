@@ -185,7 +185,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
-    let globalUserEmail = null; // Email dummy saat ini
+    let globalUserEmail = null;
 
     // Fungsi untuk menampilkan konten tab yang dipilih
     function showContent(tabId, clickedButton) {
@@ -214,7 +214,7 @@
         }
     }
     
-    // Fungsi load data (dihilangkan untuk fokus pada user)
+    // Fungsi load data
     async function loadDosenData() {
         const { data: dataDosen } = await supabaseClient.from('dosen').select('*').order('nama', { ascending: true });
         const tableBody = document.getElementById('dosenTableBody');
@@ -270,7 +270,7 @@
         }
     }
 
-    // --- FUNGSI Cek Auth & Load Data Pengguna (FIXED: Menggunakan user_id untuk lookup) ---
+    // --- FUNGSI Cek Auth & Load Data Pengguna (FIXED) ---
     window.onload = async () => {
       const { data, error } = await supabaseClient.auth.getUser();
       if (error || !data?.user) {
@@ -283,17 +283,18 @@
       globalUserId = user.id;
       globalUserEmail = user.email;
       
-      // FIX: Ambil username dari users_metadata menggunakan user_id, ini lebih akurat
+      // FIX: Ambil username dari users_metadata menggunakan user_id
       const { data: userData, error: metadataError } = await supabaseClient
             .from('users_metadata')
             .select('username')
-            .eq('user_id', globalUserId) // <-- Perbaikan utama: Lookup berdasarkan user_id
+            .eq('user_id', globalUserId) // <-- Lookup berdasarkan user_id
             .single();
 
       if (metadataError) {
           console.error("Gagal memuat metadata pengguna:", metadataError);
       }
 
+      // Pastikan username yang ditampilkan adalah yang terbaru dari database
       let username = (userData && userData.username) ? userData.username : 'User';
       
       // Tampilkan info pengguna
@@ -302,15 +303,13 @@
       
       // Tampilkan di bagian pengaturan
       document.getElementById('currentUsername').textContent = username;
-      // Hapus baris 'document.getElementById('currentEmail').textContent = user.email;' karena kolom email sudah dihapus di HTML
 
-      // Tampilkan konten dashboard utama secara default
       showContent('main', document.getElementById('mainLink'));
       
       loadStatistics();
     };
 
-    // --- FUNGSI UPDATE USERNAME (FIXED: HANYA update tabel metadata) ---
+    // --- FUNGSI UPDATE USERNAME (FIXED: Hanya update metadata dan memaksa reload) ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value.trim();
         
@@ -324,16 +323,17 @@
             return;
         }
         
-        if (newUsername === document.getElementById('currentUsername').textContent) {
+        const currentUsername = document.getElementById('currentUsername').textContent;
+        if (newUsername === currentUsername) {
              alert("❌ Username tidak berubah.");
              return;
         }
         
-        // 1. Cek apakah username sudah dipakai
+        // 1. Cek apakah username sudah dipakai (case-insensitive check)
         const { count: existingCount, error: checkError } = await supabaseClient
              .from('users_metadata')
              .select('username', { count: 'exact', head: true })
-             .eq('username', newUsername);
+             .ilike('username', newUsername); // Menggunakan ilike untuk case-insensitive
         
         if (checkError) {
              alert("❌ Error saat cek ketersediaan username: " + checkError.message);
@@ -354,14 +354,21 @@
         if (metadataError) {
             alert("❌ Gagal memperbarui username: " + metadataError.message);
         } else {
-            // Setelah berhasil update di database, reload agar data baru ter-fetch di onload
-            alert("✅ Username berhasil diperbarui! Halaman akan dimuat ulang untuk menampilkan perubahan.");
-            window.location.reload(); 
+            // Berhasil! 
+            alert("✅ Username berhasil diperbarui menjadi: " + newUsername + ". Halaman akan dimuat ulang dalam 3 detik untuk menerapkan perubahan.");
+            
+            // Perbarui tampilan sementara 
+            document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
+            document.getElementById('displayUsernameMain').textContent = newUsername;
+            document.getElementById('currentUsername').textContent = newUsername;
+
+            // Paksa reload halaman setelah jeda 3 detik
+            setTimeout(() => {
+                window.location.reload(); 
+            }, 3000);
         }
     }
-
-    // FUNGSI updateEmail() DIHAPUS
-
+    
     // --- FUNGSI UPDATE PASSWORD ---
     async function updatePassword() {
         const newPassword = document.getElementById('newPassword').value;
