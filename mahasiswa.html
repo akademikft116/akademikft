@@ -464,7 +464,7 @@
                     'KELAS': 'kelas',
                     'NIK': 'nik_mahasiswa', 
                     'NO_HP': 'no_hp',
-                    'NOMOR_IJAZAH': 'nomor_ijazah', // MAPPING BARU
+                    'NOMOR_IJAZAH': 'nomor_ijazah', 
                     'JUDUL_SKRIPSI': 'judul_skripsi',
                     'NAMA_AYAH': 'nama_ayah',
                     'NAMA_IBU': 'nama_ibu',
@@ -472,7 +472,7 @@
                     'ALAMAT': 'alamat',
                     'KELURAHAN': 'kelurahan',
                     'KECAMATAN': 'kecamatan',
-                    'SEMESTER': 'semester', // Tetap pertahankan jika ada di DB, tapi tidak muncul di form
+                    'SEMESTER': 'semester', // Pertahankan jika ada di Excel lama
                 };
 
                 const studentsToInsert = [];
@@ -507,7 +507,11 @@
                     
                     // Pastikan status ada (default 'Aktif')
                     student.status = student.status || 'Aktif'; 
-                    student.semester = student.semester || null; // Pastikan semester di set null jika tidak ada
+                    // Kolom semester di set null (karena diganti Jenis Kelamin di form)
+                    if (student.semester === undefined) { 
+                         student.semester = null; 
+                    }
+
 
                     if (isValidRow) {
                         studentsToInsert.push(student);
@@ -628,7 +632,7 @@
         const kelas = document.getElementById('kelas').value || null;
         const nik = document.getElementById('nik').value || null;
         const nohp = document.getElementById('nohp').value || null;
-        const nomorIjazah = document.getElementById('nomorIjazah').value || null; // NILAI BARU
+        const nomorIjazah = document.getElementById('nomorIjazah').value || null;
         const judulskripsi = document.getElementById('judulskripsi').value || null;
         
         // Data Personal
@@ -659,7 +663,7 @@
             kelas: kelas,
             nik_mahasiswa: nik,
             no_hp: nohp,
-            nomor_ijazah: nomorIjazah, // KOLOM BARU
+            nomor_ijazah: nomorIjazah,
             judul_skripsi: judulskripsi,
             status: statusMhs,
             
@@ -730,7 +734,7 @@
         statusSelect.setValue(mhs.status); 
         document.getElementById('nik').value = mhs.nik_mahasiswa || '';
         document.getElementById('nohp').value = mhs.no_hp || '';
-        document.getElementById('nomorIjazah').value = mhs.nomor_ijazah || ''; // NILAI BARU
+        document.getElementById('nomorIjazah').value = mhs.nomor_ijazah || ''; 
         document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
         
         // Data Personal
@@ -810,7 +814,8 @@
             <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${statusColor}">${statusText}</span></p>
             <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
             <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Nomor Ijazah</span>: ${mhs.nomor_ijazah || '-'}</p> <hr class="my-3 border-gray-200">
+            <p><span class="font-bold w-32 inline-block">Nomor Ijazah</span>: ${mhs.nomor_ijazah || '-'}</p> 
+            <hr class="my-3 border-gray-200">
             <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
             
             <h4 class="font-bold text-lg text-blue-700 mt-4 mb-2">Data Personal & Orang Tua</h4>
