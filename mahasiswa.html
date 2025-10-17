@@ -638,7 +638,7 @@
     }
 
 
-    // --- FUNGSI EXPORT DATA ---
+    // --- FUNGSI EXPORT DATA (DIPERBARUI) ---
     
     // 1. Export ke Excel
     function exportToExcel() {
@@ -647,30 +647,34 @@
             return;
         }
 
+        // Kolom sesuai urutan template yang diminta pengguna, diikuti kolom wajib/tambahan DB
         const headers = [
-            "NPM", "NAMA", "PRODI", "TAHUN_MASUK", "STATUS", 
-            "KELAS", "JENIS_KELAMIN", "NIK", "NO_HP", "TTL", 
-            "ALAMAT", "KELURAHAN", "KECAMATAN", "NAMA_AYAH", "NAMA_IBU", 
-            "JUDUL_SKRIPSI", "NOMOR_IJAZAH"
+            "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
+            "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
+            "KELAS", "JUDUL_SKRIPSI",
+            // Kolom Tambahan/Wajib Database
+            "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS", "NOMOR_IJAZAH"
         ];
         
         const dataForExport = currentMahasiswaData.map(mhs => [
+            // 12 KOLOM TEMPLATE UTAMA
             mhs.npm,
             mhs.nama,
+            mhs.nik_mahasiswa || '-', // NIK
+            mhs.ttl || '-', // TTL
+            mhs.no_hp || '-', // NO_HP
+            mhs.alamat || '-', // ALAMAT
+            mhs.kelurahan || '-', // KELURAHAN
+            mhs.kecamatan || '-', // KECAMATAN
+            mhs.nama_ibu || '-', // NAMA_IBU
+            mhs.nama_ayah || '-', // NAMA_AYAH
+            mhs.kelas || '-', // KELAS
+            mhs.judul_skripsi || '-', // JUDUL_SKRIPSI
+            // KOLOM TAMBAHAN/WAJIB DATABASE
             mhs.prodi,
+            mhs.jenis_kelamin || '-',
             mhs.tahun_masuk,
             mhs.status,
-            mhs.kelas || '-',
-            mhs.jenis_kelamin || '-',
-            mhs.nik_mahasiswa || '-',
-            mhs.no_hp || '-',
-            mhs.ttl || '-',
-            mhs.alamat || '-',
-            mhs.kelurahan || '-',
-            mhs.kecamatan || '-',
-            mhs.nama_ayah || '-',
-            mhs.nama_ibu || '-',
-            mhs.judul_skripsi || '-',
             mhs.nomor_ijazah || '-'
         ]);
 
@@ -692,23 +696,33 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); // Menggunakan orientasi landscape untuk banyak kolom
 
-        // Header Tabel PDF (Kolom utama yang ditampilkan di tabel)
-        const head = [['NPM', 'Nama', 'Prodi', 'Kelas', 'Tahun Masuk', 'Status']];
+        // Header Tabel PDF (Menggunakan 12 kolom template utama)
+        const head = [[
+            'NPM', 'NAMA', 'NIK', 'TTL', 'NO. HP', 'ALAMAT', 
+            'KELURAHAN', 'KECAMATAN', 'NAMA IBU', 'NAMA AYAH', 
+            'KELAS', 'JUDUL SKRIPSI'
+        ]];
         
-        // Body Tabel PDF 
+        // Body Tabel PDF (Mengikuti urutan header)
         const body = currentMahasiswaData.map(mhs => [
             mhs.npm,
             mhs.nama,
-            mhs.prodi,
+            mhs.nik_mahasiswa || '-',
+            mhs.ttl || '-',
+            mhs.no_hp || '-',
+            mhs.alamat || '-',
+            mhs.kelurahan || '-',
+            mhs.kecamatan || '-',
+            mhs.nama_ibu || '-',
+            mhs.nama_ayah || '-',
             mhs.kelas || '-',
-            String(mhs.tahun_masuk),
-            mhs.status
+            mhs.judul_skripsi || '-'
         ]);
         
         const date = new Date().toLocaleDateString('id-ID');
         
         doc.setFontSize(14);
-        doc.text("Data Mahasiswa Fakultas Teknik", 14, 15);
+        doc.text("Data Mahasiswa Fakultas Teknik (Export PDF)", 14, 15);
         doc.setFontSize(10);
         doc.text(`Tanggal Export: ${date}`, 14, 20);
 
@@ -717,14 +731,20 @@
             body: body,
             startY: 25,
             theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 1, halign: 'center' },
+            styles: { fontSize: 7, cellPadding: 1, halign: 'center' }, // Font lebih kecil agar 12 kolom muat
             columnStyles: {
                 0: { cellWidth: 15 }, // NPM
-                1: { halign: 'left', cellWidth: 60 }, // Nama
-                2: { cellWidth: 20 }, // Prodi
-                3: { cellWidth: 15 }, // Kelas
-                4: { cellWidth: 20 }, // Tahun Masuk
-                5: { cellWidth: 20 }, // Status
+                1: { halign: 'left', cellWidth: 35 }, // NAMA
+                2: { cellWidth: 20 }, // NIK
+                3: { cellWidth: 20 }, // TTL
+                4: { cellWidth: 15 }, // NO_HP
+                5: { halign: 'left', cellWidth: 30 }, // ALAMAT
+                6: { cellWidth: 15 }, // KELURAHAN
+                7: { cellWidth: 15 }, // KECAMATAN
+                8: { halign: 'left', cellWidth: 25 }, // NAMA_IBU
+                9: { halign: 'left', cellWidth: 25 }, // NAMA_AYAH
+                10: { cellWidth: 10 }, // KELAS
+                11: { halign: 'left', cellWidth: 40 }, // JUDUL SKRIPSI
             },
             didDrawPage: function(data) {
                 // Footer
