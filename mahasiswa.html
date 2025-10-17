@@ -269,10 +269,15 @@
             </div>
 
             <div class="flex justify-between mb-4">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-3">
+                    <a href="mahasiswa_template.xlsx" download 
+                       class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
+                       <i class="fas fa-download mr-2"></i> Download Template
+                    </a>
+                    
                     <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
-                    <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer">
-                        <i class="fas fa-file-excel mr-2"></i> Import dari Excel
+                    <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
+                        <i class="fas fa-file-excel mr-2"></i> Import File
                     </label>
                     <span id="importStatus" class="text-sm text-gray-600"></span>
                 </div>
@@ -450,6 +455,7 @@
                     return;
                 }
 
+                // Mapping Header harus sesuai dengan template
                 const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
                 const rawData = excelData.slice(1);
                 
@@ -472,7 +478,7 @@
                     'ALAMAT': 'alamat',
                     'KELURAHAN': 'kelurahan',
                     'KECAMATAN': 'kecamatan',
-                    'SEMESTER': 'semester', // Pertahankan jika ada di Excel lama
+                    'SEMESTER': 'semester', // Dibiarkan untuk kompatibilitas, akan diabaikan/null
                 };
 
                 const studentsToInsert = [];
@@ -490,7 +496,12 @@
                              
                              // Konversi tipe data
                              if (supabaseColumn === 'tahun_masuk' || supabaseColumn === 'semester') {
-                                 value = parseInt(value) || null; 
+                                 // Hati-hati dengan konversi angka dari Excel
+                                 if (typeof value === 'number') {
+                                     value = Math.floor(value);
+                                 } else {
+                                     value = parseInt(String(value).trim()) || null;
+                                 }
                              } else if (value !== null) {
                                  value = String(value).trim() || null;
                              }
@@ -505,12 +516,10 @@
                          isValidRow = false; 
                     }
                     
+                    // Kolom semester di set null (karena tidak dipakai lagi)
+                    student.semester = null; 
                     // Pastikan status ada (default 'Aktif')
                     student.status = student.status || 'Aktif'; 
-                    // Kolom semester di set null (karena diganti Jenis Kelamin di form)
-                    if (student.semester === undefined) { 
-                         student.semester = null; 
-                    }
 
 
                     if (isValidRow) {
@@ -525,12 +534,13 @@
 
                 importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
 
+                // Menggunakan UPSERT untuk menambah data baru atau update data lama berdasarkan NPM
                 const { error: insertError } = await supabaseClient
                     .from('mahasiswa')
                     .upsert(studentsToInsert, { onConflict: 'npm' }); 
 
                 if (insertError) {
-                    alert('❌ Gagal mengimpor data: ' + insertError.message);
+                    alert('❌ Gagal mengimpor data. Pastikan RLS sudah diaktifkan dan kolom lama tidak berstatus NOT NULL. Pesan: ' + insertError.message);
                     importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
                     console.error(insertError);
                 } else {
@@ -643,7 +653,7 @@
         const kelurahan = document.getElementById('kelurahan').value || null;
         const kecamatan = document.getElementById('kecamatan').value || null;
         
-        // Semester di set null
+        // Kolom lama yang diabaikan/di set null di sini:
         const semester = null; 
 
         // Validasi minimal
@@ -658,7 +668,7 @@
             nama: nama,
             prodi: prodi,
             jenis_kelamin: jenisKelamin, 
-            semester: semester, 
+            semester: semester, // Di set NULL
             tahun_masuk: tahunmasuk,
             kelas: kelas,
             nik_mahasiswa: nik,
@@ -697,7 +707,7 @@
                 .insert([mahasiswaData]);
 
             if (insertError) {
-                alert('❌ Gagal menyimpan data mahasiswa. Kemungkinan: NPM sudah terdaftar atau skema database tidak sesuai. Pesan: ' + insertError.message);
+                alert('❌ Gagal menyimpan data mahasiswa. Kemungkinan: NPM sudah terdaftar, skema database tidak sesuai, atau RLS/NOT NULL kolom lama bermasalah. Pesan: ' + insertError.message);
                 console.error(insertError);
             } else {
                 alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
