@@ -243,12 +243,11 @@
 
     // --- FUNGSI CRUD ---
 
-    // 1. Memuat Data Mahasiswa (TANPA FILTER)
+    // 1. Memuat Data Mahasiswa 
     async function loadMahasiswaData() {
         const tableBody = document.getElementById('mahasiswa-table-body');
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
         
-        // Query dimuat tanpa menggunakan filter dari form
         const { data: mahasiswaData, error } = await supabaseClient
             .from('mahasiswa')
             .select('*')
@@ -292,7 +291,7 @@
         });
     }
 
-    // 2. Menyimpan/Memperbarui Data (sama seperti sebelumnya)
+    // 2. Menyimpan/Memperbarui Data (Bagian ini krusial)
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
@@ -302,16 +301,28 @@
         const ttl = document.getElementById('ttl').value || null;
         const nohp = document.getElementById('nohp').value || null;
         const semester = document.getElementById('semester').value;
-        const tahunmasuk = parseInt(tahunMasukSelect.getValue());
+        
+        // Memastikan tahun masuk adalah integer
+        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
+        
         const judulskripsi = document.getElementById('judulskripsi').value || null;
         const alamat = document.getElementById('alamat').value || null;
+        
+        // VALIDASI DASAR: Supaya tidak error saat dikirim ke DB jika ada field yang kosong tapi required
+        if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk)) {
+             alert('❌ Pastikan NPM, Nama, Prodi, Semester, dan Tahun Masuk terisi dengan benar.');
+             return;
+        }
 
+
+        // OBJECT KEY WAJIB SAMA DENGAN NAMA KOLOM DI DATABASE (SQL DI ATAS)
         const mahasiswaData = {
             npm: npm, 
             nama: nama,
             prodi: prodi,
             kelas: kelas,
-            nik_mahasiswa: nik,
+            // Perhatikan penggunaan snake_case yang sesuai dengan SQL
+            nik_mahasiswa: nik, 
             ttl: ttl, 
             no_hp: nohp, 
             semester: semester,
@@ -341,7 +352,8 @@
                 .insert([mahasiswaData]);
 
             if (insertError) {
-                alert('❌ Gagal menyimpan data mahasiswa: ' + insertError.message);
+                // Tampilkan pesan error detail dari Supabase
+                alert('❌ Gagal menyimpan data mahasiswa. Cek konsol browser untuk detail error. Kemungkinan: NPM sudah terdaftar atau skema database tidak sesuai. Pesan: ' + insertError.message);
                 console.error(insertError);
             } else {
                 alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
