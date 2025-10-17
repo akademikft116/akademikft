@@ -153,11 +153,24 @@
                             <label for="nohp" class="block text-sm font-medium text-gray-700">No. HP</label>
                             <input type="text" id="nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
+                        
                         <div>
-                            <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
-                            <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <label for="status" class="block text-sm font-medium text-gray-700">Status Mahasiswa <span class="text-red-500">*</span></label>
+                            <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Cuti">Cuti</option>
+                                <option value="Nonaktif">Nonaktif</option>
+                                <option value="Lulus">Lulus</option>
+                                <option value="Drop Out">Drop Out</option>
+                                <option value="Meninggal">Meninggal Dunia</option>
+                            </select>
                         </div>
 
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
+                        <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                     </div>
                 </div>
 
@@ -290,11 +303,13 @@
     let prodiSelect;
     let tahunMasukSelect;
     let searchTahunSelect; 
+    let statusSelect; // NEW: TomSelect untuk Status
 
     document.addEventListener('DOMContentLoaded', () => {
         // Inisialisasi Tom Select untuk Form Tambah/Edit
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
+        statusSelect = new TomSelect("#status", { create: false }); // NEW: Inisialisasi Status Select
         populateYearSelect(tahunMasukSelect);
         
         // Inisialisasi Tom Select untuk Pencarian
@@ -431,7 +446,7 @@
                 ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>'
                 : mhs.status === 'Lulus' 
                 ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Lulus</span>'
-                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Nonaktif</span>';
+                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">' + mhs.status + '</span>'; // Menampilkan status lainnya
 
             const row = `
                 <tr class="hover:bg-gray-100 transition duration-100">
@@ -460,6 +475,7 @@
         const prodi = prodiSelect.getValue();
         const semester = document.getElementById('semester').value;
         const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
+        const statusMhs = statusSelect.getValue(); // NEW: Ambil nilai Status
         
         // Data Akademik (Opsional)
         const kelas = document.getElementById('kelas').value || null;
@@ -476,8 +492,8 @@
         const kecamatan = document.getElementById('kecamatan').value || null;
 
         // Validasi minimal
-        if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk)) {
-             alert('❌ Pastikan NPM, Nama, Prodi, Semester, dan Tahun Masuk pada tab Data Akademik terisi dengan benar.');
+        if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk) || !statusMhs) {
+             alert('❌ Pastikan NPM, Nama, Prodi, Semester, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
              switchTab('akademik');
              return;
         }
@@ -492,15 +508,15 @@
             nik_mahasiswa: nik,
             no_hp: nohp,
             judul_skripsi: judulskripsi,
+            status: statusMhs, // UPDATED: Menggunakan nilai dari form
             
-            // Kolom Data Personal Baru
+            // Kolom Data Personal
             nama_ayah: namaAyah, 
             nama_ibu: namaIbu,
             ttl: ttl, 
             alamat: alamat,
             kelurahan: kelurahan,
             kecamatan: kecamatan,
-            status: 'Aktif',
         };
 
         if (isEditMode && currentMahasiswaId) {
@@ -558,6 +574,7 @@
         document.getElementById('kelas').value = mhs.kelas || '';
         document.getElementById('semester').value = mhs.semester;
         tahunMasukSelect.setValue(mhs.tahun_masuk);
+        statusSelect.setValue(mhs.status); // NEW: Set Status
         document.getElementById('nik').value = mhs.nik_mahasiswa || '';
         document.getElementById('nohp').value = mhs.no_hp || '';
         document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
@@ -602,6 +619,7 @@
         document.getElementById('mahasiswaForm').reset();
         prodiSelect.clear();
         tahunMasukSelect.clear();
+        statusSelect.setValue('Aktif'); // Set default status ke Aktif saat reset
         isEditMode = false;
         currentMahasiswaId = null;
         document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
@@ -622,6 +640,9 @@
             alert('❌ Data tidak ditemukan.');
             return;
         }
+        
+        const statusText = mhs.status;
+        const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : mhs.status === 'Lulus' ? 'text-blue-600' : 'text-red-600';
 
         const modalContent = `
             <h4 class="font-bold text-lg text-blue-700 mb-2">Data Akademik & Identitas</h4>
@@ -630,9 +651,9 @@
             <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
             <p><span class="font-bold w-32 inline-block">Kelas/Semester</span>: ${mhs.kelas || '-'} / ${mhs.semester}</p>
             <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
+            <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${statusColor}">${statusText}</span></p>
             <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
             <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${mhs.status === 'Aktif' ? 'text-green-600' : 'text-red-600'}">${mhs.status}</span></p>
             <hr class="my-3 border-gray-200">
             <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
             
