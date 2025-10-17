@@ -47,6 +47,9 @@
     #mahasiswa-container.hidden {
         display: none;
     }
+    #mahasiswa-list-container.hidden {
+        display: none;
+    }
     /* Styling khusus untuk tombol tab */
     .tab-button {
         transition: all 0.15s ease-in-out;
@@ -236,7 +239,7 @@
             </form>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
             
             <div class="mb-6 border p-4 rounded-lg bg-gray-50">
@@ -351,7 +354,57 @@
         populateYearSelect(searchTahunSelect, true); 
     });
 
-    // --- FUNGSI BANTUAN ---
+    // --- FUNGSI BANTUAN TAMPILAN ---
+
+    function hideForm() {
+        document.getElementById('mahasiswa-container').classList.add('hidden');
+    }
+
+    function showList() {
+        document.getElementById('mahasiswa-list-container').classList.remove('hidden');
+    }
+    
+    function hideList() {
+        document.getElementById('mahasiswa-list-container').classList.add('hidden');
+    }
+
+
+    // Fungsi untuk menampilkan form Tambah/Edit dan melakukan reset
+    function showForm() {
+        resetForm(); // Reset form, tapi jangan panggil showList di dalam resetForm saat ini
+        hideList(); // SEMBUNYIKAN LIST DAN PENCARIAN
+        document.getElementById('mahasiswa-container').classList.remove('hidden');
+        document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
+        switchTab('akademik');
+    }
+
+    // Fungsi untuk menyembunyikan form (Dipanggil saat Batal atau Selesai Simpan)
+    function hideFormAndShowList() {
+        document.getElementById('mahasiswa-container').classList.add('hidden');
+        showList(); // TAMPILKAN KEMBALI LIST DAN PENCARIAN
+        // Opsional: Gulir ke atas list
+        document.getElementById('mahasiswa-list-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Fungsi Reset Form
+    function resetForm() {
+        document.getElementById('mahasiswaForm').reset();
+        prodiSelect.clear();
+        tahunMasukSelect.clear();
+        document.getElementById('jenisKelamin').value = ''; 
+        statusSelect.setValue('Aktif'); 
+        isEditMode = false;
+        currentMahasiswaId = null;
+        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
+        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
+        document.getElementById('mahasiswaId').value = '';
+        
+        hideFormAndShowList(); // Menutup form dan menampilkan list
+    }
+
+
+    // --- FUNGSI BANTUAN DATA ---
+
     function populateYearSelect(selectInstance, includeAllOption = false) {
         selectInstance.clear(true); 
 
@@ -401,19 +454,6 @@
     }
 
 
-    // Fungsi untuk menampilkan form Tambah/Edit dan melakukan reset
-    function showForm() {
-        resetForm();
-        document.getElementById('mahasiswa-container').classList.remove('hidden');
-        document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
-        switchTab('akademik');
-    }
-
-    // Fungsi untuk menyembunyikan form
-    function hideForm() {
-        document.getElementById('mahasiswa-container').classList.add('hidden');
-    }
-
     // --- FUNGSI PENCARIAN ---
     function performSearch() {
         const searchNama = document.getElementById('searchNama').value.trim();
@@ -430,9 +470,8 @@
         loadMahasiswaData(); 
     }
 
-    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL (SOLUSI BARU) ---
+    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL ---
     function downloadTemplate() {
-        // Header kolom yang wajib dan opsional
         const headers = [
             "NPM", "NAMA", "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", 
             "STATUS", "KELAS", "NIK", "NO_HP", "NOMOR_IJAZAH", 
@@ -440,18 +479,15 @@
             "ALAMAT", "KELURAHAN", "KECAMATAN"
         ];
         
-        // Buat array data (hanya header, baris data kosong)
         const wsData = [
             headers,
             // Baris contoh atau kosong (opsional, tapi membantu pengguna)
             ["12345678", "Contoh Nama", "Industri", "Laki-laki", 2022, "Aktif", "A", "3210123456789012", "081234567890", "", "", "", "", "", "", "", ""]
         ];
 
-        // Buat Workbook dan Worksheet
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         
-        // Atur lebar kolom agar lebih mudah dibaca (opsional)
         ws['!cols'] = [
             { wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
             { wch: 10 }, { wch: 8 }, { wch: 20 }, { wch: 15 }, { wch: 20 },
@@ -460,8 +496,6 @@
         ];
 
         XLSX.utils.book_append_sheet(wb, ws, "BiodataMahasiswa");
-
-        // Unduh file
         XLSX.writeFile(wb, "mahasiswa_template.xlsx");
     }
 
@@ -490,12 +524,9 @@
                     return;
                 }
 
-                // Mapping Header harus sesuai dengan template
-                // Membersihkan header: uppercase, hapus non-alphanumeric, dan trim underscore
                 const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
                 const rawData = excelData.slice(1);
                 
-                // MAPPING KOLOM (Diperbarui untuk Jenis Kelamin dan Nomor Ijazah)
                 const columnMapping = {
                     'NPM': 'npm',
                     'NAMA': 'nama',
@@ -514,7 +545,7 @@
                     'ALAMAT': 'alamat',
                     'KELURAHAN': 'kelurahan',
                     'KECAMATAN': 'kecamatan',
-                    'SEMESTER': 'semester', // Dibiarkan untuk kompatibilitas, akan di set null
+                    'SEMESTER': 'semester', 
                 };
 
                 const studentsToInsert = [];
@@ -530,9 +561,7 @@
                         if (supabaseColumn) {
                              let value = row[i] === undefined ? null : row[i];
                              
-                             // Konversi tipe data
                              if (supabaseColumn === 'tahun_masuk' || supabaseColumn === 'semester') {
-                                 // Hati-hati dengan konversi angka dari Excel
                                  if (typeof value === 'number') {
                                      value = Math.floor(value);
                                  } else {
@@ -546,16 +575,12 @@
                         }
                     }
                     
-                    // Set default/validasi nilai wajib
                     if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
-                         // Pesan ini hanya muncul di console developer
                          console.warn('Baris diabaikan karena data wajib tidak lengkap (NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk):', student);
                          isValidRow = false; 
                     }
                     
-                    // Kolom semester di set null (karena tidak dipakai lagi)
                     student.semester = null; 
-                    // Pastikan status ada (default 'Aktif')
                     student.status = student.status || 'Aktif'; 
 
 
@@ -571,7 +596,6 @@
 
                 importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
 
-                // Menggunakan UPSERT untuk menambah data baru atau update data lama berdasarkan NPM
                 const { error: insertError } = await supabaseClient
                     .from('mahasiswa')
                     .upsert(studentsToInsert, { onConflict: 'npm' }); 
@@ -735,8 +759,7 @@
                 console.error(updateError);
             } else {
                 alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
-                resetForm();
-                hideForm(); 
+                resetForm(); // Memanggil resetForm yang kini menutup form dan menampilkan list
                 loadMahasiswaData();
             }
         } else {
@@ -749,8 +772,7 @@
                 console.error(insertError);
             } else {
                 alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
-                resetForm(); 
-                hideForm(); 
+                resetForm(); // Memanggil resetForm yang kini menutup form dan menampilkan list
                 loadMahasiswaData(); 
             }
         }
@@ -769,7 +791,7 @@
             return;
         }
         
-        showForm();
+        showForm(); // Menampilkan form dan menyembunyikan list
 
         // Data Akademik
         document.getElementById('mahasiswaId').value = mhs.id;
@@ -820,20 +842,6 @@
         }
     }
 
-    // 5. Reset Form
-    function resetForm() {
-        document.getElementById('mahasiswaForm').reset();
-        prodiSelect.clear();
-        tahunMasukSelect.clear();
-        document.getElementById('jenisKelamin').value = ''; 
-        statusSelect.setValue('Aktif'); 
-        isEditMode = false;
-        currentMahasiswaId = null;
-        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
-        document.getElementById('mahasiswaId').value = '';
-        hideForm(); 
-    }
     
     // 6. Tampilkan Detail Modal
     async function showDetail(mahasiswaId) {
