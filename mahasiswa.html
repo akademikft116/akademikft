@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Biodata Mahasiswa - Fakultas Teknik</title>
+  <title>Biodata & Pencarian Mahasiswa - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
@@ -42,6 +42,10 @@
     .modal-active {
         opacity: 1;
     }
+    /* Tambahkan style untuk menyembunyikan form saat tidak dibutuhkan */
+    #mahasiswa-container.hidden {
+        display: none;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -72,10 +76,6 @@
             <i class="fas fa-address-card w-6"></i><span class="ml-3">Biodata Mahasiswa</span>
         </a>
         
-        <a href="pencarian-mahasiswa.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-search w-6"></i><span class="ml-3">Pencarian Mahasiswa</span>
-        </a>
-
         <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
             <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
         </div>
@@ -88,9 +88,9 @@
 
 <main class="main-content pt-20 ml-64">
     <div class="container mx-auto p-4 md:p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata Mahasiswa</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Mahasiswa</h1>
 
-        <div id="mahasiswa-container" class="bg-white p-6 rounded-lg shadow-lg mb-8">
+        <div id="mahasiswa-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="formTitle">Tambah Data Mahasiswa Baru</h2>
             <form id="mahasiswaForm" onsubmit="event.preventDefault(); saveMahasiswa();">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -164,7 +164,24 @@
         </div>
         
         <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa (CRUD)</h2>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
+            
+            <div class="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex w-full md:w-2/3 space-x-2">
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan NPM atau Nama..." class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-search mr-1"></i> Cari
+                    </button>
+                    <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        Reset
+                    </button>
+                </div>
+                <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 w-full md:w-1/3">
+                    <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
+                </button>
+            </div>
+
+
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -211,7 +228,7 @@
     let tahunMasukSelect;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select untuk Prodi dan Tahun Masuk
+        // Inisialisasi Tom Select
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
         populateYearSelect(tahunMasukSelect);
@@ -233,22 +250,48 @@
     
     // Fungsi showContent untuk sidebar (mengarahkan ke dashboard.html untuk menu lain)
     function showContent(contentId) {
-        // Navigasi ke dashboard.html dengan hash
         window.location.href = `dashboard.html#${contentId}`; 
+    }
+
+    // Fungsi untuk menampilkan form Tambah/Edit dan melakukan reset
+    function showForm() {
+        resetForm();
+        document.getElementById('mahasiswa-container').classList.remove('hidden');
+        document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Fungsi untuk menyembunyikan form
+    function hideForm() {
+        document.getElementById('mahasiswa-container').classList.add('hidden');
+    }
+
+    // --- FUNGSI PENCARIAN ---
+    function performSearch() {
+        const searchTerm = document.getElementById('searchInput').value.trim();
+        loadMahasiswaData(searchTerm);
+    }
+
+    function resetSearch() {
+        document.getElementById('searchInput').value = '';
+        loadMahasiswaData(); // Muat ulang semua data
     }
 
 
     // --- FUNGSI CRUD ---
 
-    // 1. Memuat Data Mahasiswa 
-    async function loadMahasiswaData() {
+    // 1. Memuat Data Mahasiswa (Sekarang menerima parameter pencarian)
+    async function loadMahasiswaData(searchTerm = null) {
         const tableBody = document.getElementById('mahasiswa-table-body');
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
         
-        const { data: mahasiswaData, error } = await supabaseClient
-            .from('mahasiswa')
-            .select('*')
-            .order('npm', { ascending: true });
+        let query = supabaseClient.from('mahasiswa').select('*');
+
+        if (searchTerm) {
+            // Logika pencarian: Mencari di kolom 'npm' ATAU di kolom 'nama'
+            query = query.or(`npm.ilike.%${searchTerm}%,nama.ilike.%${searchTerm}%`);
+        }
+        
+        const { data: mahasiswaData, error } = await query.order('npm', { ascending: true });
 
         if (error) {
             console.error('Error saat memuat data:', error);
@@ -299,30 +342,26 @@
         const nohp = document.getElementById('nohp').value || null;
         const semester = document.getElementById('semester').value;
         
-        // Memastikan tahun masuk adalah integer
         const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
         
         const judulskripsi = document.getElementById('judulskripsi').value || null;
         const alamat = document.getElementById('alamat').value || null;
         
-        // VALIDASI DASAR
         if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk)) {
              alert('❌ Pastikan NPM, Nama, Prodi, Semester, dan Tahun Masuk terisi dengan benar.');
              return;
         }
 
-
-        // OBJECT KEY HARUS SAMA DENGAN NAMA KOLOM DI DATABASE (snake_case)
         const mahasiswaData = {
             npm: npm, 
             nama: nama,
             prodi: prodi,
             kelas: kelas,
-            nik_mahasiswa: nik, // Nama kolom di DB
+            nik_mahasiswa: nik,
             ttl: ttl, 
-            no_hp: nohp,         // Nama kolom di DB
+            no_hp: nohp,
             semester: semester,
-            tahun_masuk: tahunmasuk, // Nama kolom di DB
+            tahun_masuk: tahunmasuk,
             judul_skripsi: judulskripsi,
             alamat: alamat,
             status: 'Aktif',
@@ -340,6 +379,7 @@
             } else {
                 alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
                 resetForm();
+                hideForm(); // Sembunyikan form setelah update
                 loadMahasiswaData();
             }
         } else {
@@ -348,12 +388,12 @@
                 .insert([mahasiswaData]);
 
             if (insertError) {
-                // Tampilkan pesan error detail dari Supabase
                 alert('❌ Gagal menyimpan data mahasiswa. Kemungkinan: NPM sudah terdaftar atau skema database tidak sesuai. Pesan: ' + insertError.message);
                 console.error(insertError);
             } else {
                 alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
                 resetForm(); 
+                hideForm(); // Sembunyikan form setelah simpan
                 loadMahasiswaData(); 
             }
         }
@@ -371,6 +411,9 @@
             alert('❌ Data tidak ditemukan untuk diedit.');
             return;
         }
+        
+        // Pastikan form terlihat saat mengedit
+        showForm();
 
         document.getElementById('mahasiswaId').value = mhs.id;
         document.getElementById('npm').value = mhs.npm;
