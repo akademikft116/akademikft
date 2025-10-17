@@ -12,6 +12,8 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   
   <style>
     .header-style {
@@ -285,9 +287,17 @@
                     <span id="importStatus" class="text-sm text-gray-600"></span>
                 </div>
 
-                <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                    <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
-                </button>
+                <div class="flex space-x-2">
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-file-excel mr-2"></i> Export Excel
+                    </button>
+                    <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                    </button>
+                    <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                        <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
+                    </button>
+                </div>
             </div>
 
 
@@ -332,7 +342,8 @@
 
     let isEditMode = false;
     let currentMahasiswaId = null;
-
+    let currentMahasiswaData = []; // NEW: Global variable for current table data
+    
     let prodiSelect;
     let tahunMasukSelect;
     let searchTahunSelect; 
@@ -470,36 +481,39 @@
         loadMahasiswaData(); 
     }
 
-    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL ---
+    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL (UPDATED) ---
     function downloadTemplate() {
+        // Kolom sesuai permintaan user, ditambah kolom wajib di akhir
         const headers = [
-            "NPM", "NAMA", "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", 
-            "STATUS", "KELAS", "NIK", "NO_HP", "NOMOR_IJAZAH", 
-            "JUDUL_SKRIPSI", "NAMA_AYAH", "NAMA_IBU", "TTL", 
-            "ALAMAT", "KELURAHAN", "KECAMATAN"
+            "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
+            "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
+            "KELAS", "JUDUL_SKRIPSI",
+            // Kolom wajib di database:
+            "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS" 
         ];
         
         const wsData = [
             headers,
-            // Baris contoh atau kosong (opsional, tapi membantu pengguna)
-            ["12345678", "Contoh Nama", "Industri", "Laki-laki", 2022, "Aktif", "A", "3210123456789012", "081234567890", "", "", "", "", "", "", "", ""]
+            // Baris contoh untuk panduan (pastikan kolom wajib terisi)
+            ["12345678", "Contoh Nama", "3210123456789012", "Jakarta, 01-01-2000", "081234567890", "Jl. Contoh No. 1", "Kelurahan Contoh", "Kecamatan Contoh", "Nama Ibu", "Nama Ayah", "A", "Skripsi Contoh", "Industri", "Laki-laki", 2023, "Aktif"]
         ];
 
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         
+        // Sesuaikan lebar kolom
         ws['!cols'] = [
-            { wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
-            { wch: 10 }, { wch: 8 }, { wch: 20 }, { wch: 15 }, { wch: 20 },
-            { wch: 40 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, 
-            { wch: 40 }, { wch: 20 }, { wch: 20 }
+            { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 25 }, { wch: 15 }, 
+            { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 25 }, 
+            { wch: 8 }, { wch: 40 }, 
+            { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 10 }
         ];
 
         XLSX.utils.book_append_sheet(wb, ws, "BiodataMahasiswa");
-        XLSX.writeFile(wb, "mahasiswa_template.xlsx");
+        XLSX.writeFile(wb, "mahasiswa_template_ft.xlsx");
     }
 
-    // --- FUNGSI IMPORT EXCEL ---
+    // --- FUNGSI IMPORT EXCEL (Tidak diubah, hanya memastikan mappingnya benar) ---
     async function importFromExcel(event) {
         const file = event.target.files[0];
         if (!file) {
@@ -527,6 +541,7 @@
                 const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
                 const rawData = excelData.slice(1);
                 
+                // Peta kolom Supabase
                 const columnMapping = {
                     'NPM': 'npm',
                     'NAMA': 'nama',
@@ -545,7 +560,6 @@
                     'ALAMAT': 'alamat',
                     'KELURAHAN': 'kelurahan',
                     'KECAMATAN': 'kecamatan',
-                    'SEMESTER': 'semester', 
                 };
 
                 const studentsToInsert = [];
@@ -561,7 +575,7 @@
                         if (supabaseColumn) {
                              let value = row[i] === undefined ? null : row[i];
                              
-                             if (supabaseColumn === 'tahun_masuk' || supabaseColumn === 'semester') {
+                             if (supabaseColumn === 'tahun_masuk') {
                                  if (typeof value === 'number') {
                                      value = Math.floor(value);
                                  } else {
@@ -575,11 +589,13 @@
                         }
                     }
                     
+                    // Validasi minimal (kolom wajib)
                     if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
                          console.warn('Baris diabaikan karena data wajib tidak lengkap (NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk):', student);
                          isValidRow = false; 
                     }
                     
+                    // Set default jika kosong
                     student.semester = null; 
                     student.status = student.status || 'Aktif'; 
 
@@ -622,6 +638,106 @@
     }
 
 
+    // --- FUNGSI EXPORT DATA ---
+    
+    // 1. Export ke Excel
+    function exportToExcel() {
+        if (currentMahasiswaData.length === 0) {
+            alert('❌ Tidak ada data mahasiswa yang tersedia untuk diekspor. Silakan cari data terlebih dahulu.');
+            return;
+        }
+
+        const headers = [
+            "NPM", "NAMA", "PRODI", "TAHUN_MASUK", "STATUS", 
+            "KELAS", "JENIS_KELAMIN", "NIK", "NO_HP", "TTL", 
+            "ALAMAT", "KELURAHAN", "KECAMATAN", "NAMA_AYAH", "NAMA_IBU", 
+            "JUDUL_SKRIPSI", "NOMOR_IJAZAH"
+        ];
+        
+        const dataForExport = currentMahasiswaData.map(mhs => [
+            mhs.npm,
+            mhs.nama,
+            mhs.prodi,
+            mhs.tahun_masuk,
+            mhs.status,
+            mhs.kelas || '-',
+            mhs.jenis_kelamin || '-',
+            mhs.nik_mahasiswa || '-',
+            mhs.no_hp || '-',
+            mhs.ttl || '-',
+            mhs.alamat || '-',
+            mhs.kelurahan || '-',
+            mhs.kecamatan || '-',
+            mhs.nama_ayah || '-',
+            mhs.nama_ibu || '-',
+            mhs.judul_skripsi || '-',
+            mhs.nomor_ijazah || '-'
+        ]);
+
+        const wsData = [headers, ...dataForExport];
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, "DataMahasiswaFT");
+        XLSX.writeFile(wb, "data_mahasiswa_ft.xlsx");
+    }
+    
+    // 2. Export ke PDF
+    function exportToPDF() {
+        if (currentMahasiswaData.length === 0) {
+            alert('❌ Tidak ada data mahasiswa yang tersedia untuk diekspor. Silakan cari data terlebih dahulu.');
+            return;
+        }
+        
+        // Mendapatkan objek jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Menggunakan orientasi landscape untuk banyak kolom
+
+        // Header Tabel PDF (Kolom utama yang ditampilkan di tabel)
+        const head = [['NPM', 'Nama', 'Prodi', 'Kelas', 'Tahun Masuk', 'Status']];
+        
+        // Body Tabel PDF 
+        const body = currentMahasiswaData.map(mhs => [
+            mhs.npm,
+            mhs.nama,
+            mhs.prodi,
+            mhs.kelas || '-',
+            String(mhs.tahun_masuk),
+            mhs.status
+        ]);
+        
+        const date = new Date().toLocaleDateString('id-ID');
+        
+        doc.setFontSize(14);
+        doc.text("Data Mahasiswa Fakultas Teknik", 14, 15);
+        doc.setFontSize(10);
+        doc.text(`Tanggal Export: ${date}`, 14, 20);
+
+        doc.autoTable({
+            head: head,
+            body: body,
+            startY: 25,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 1, halign: 'center' },
+            columnStyles: {
+                0: { cellWidth: 15 }, // NPM
+                1: { halign: 'left', cellWidth: 60 }, // Nama
+                2: { cellWidth: 20 }, // Prodi
+                3: { cellWidth: 15 }, // Kelas
+                4: { cellWidth: 20 }, // Tahun Masuk
+                5: { cellWidth: 20 }, // Status
+            },
+            didDrawPage: function(data) {
+                // Footer
+                doc.setFontSize(8);
+                const pageCount = doc.internal.getNumberOfPages();
+                doc.text('Halaman ' + data.pageNumber + ' dari ' + pageCount, data.settings.margin.left, doc.internal.pageSize.height - 10);
+            }
+        });
+
+        doc.save('data_mahasiswa_ft.pdf');
+    }
+
+
     // --- FUNGSI CRUD ---
 
     // 1. Memuat Data Mahasiswa
@@ -655,8 +771,11 @@
         if (error) {
             console.error('Error saat memuat data:', error);
             tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
+            currentMahasiswaData = []; // Clear data on error
             return;
         }
+
+        currentMahasiswaData = mahasiswaData; // SAVE DATA for export functions
 
         tableBody.innerHTML = '';
         if (mahasiswaData.length === 0) {
