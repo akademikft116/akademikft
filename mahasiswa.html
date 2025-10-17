@@ -101,10 +101,10 @@
                 <div class="border-b border-gray-200 mb-4">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                         <button type="button" id="tab-akademik" onclick="switchTab('akademik')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
-                            <i class="fas fa-user-graduate mr-2"></i> Data Akademik (Wajib)
+                            <i class="fas fa-user-graduate mr-2"></i> Data Akademik & Identitas
                         </button>
                         <button type="button" id="tab-personal" onclick="switchTab('personal')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            <i class="fas fa-id-card mr-2"></i> Data Personal (Opsional)
+                            <i class="fas fa-id-card mr-2"></i> Data Personal & Orang Tua
                         </button>
                     </nav>
                 </div>
@@ -112,15 +112,15 @@
                 <div id="content-akademik" class="tab-content">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label for="npm" class="block text-sm font-medium text-gray-700">NPM</label>
+                            <label for="npm" class="block text-sm font-medium text-gray-700">NPM <span class="text-red-500">*</span></label>
                             <input type="text" id="npm" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
-                            <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                            <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
                             <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
-                            <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi</label>
+                            <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi <span class="text-red-500">*</span></label>
                             <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                 <option value="">Pilih Prodi</option>
                                 <option value="Industri">Teknik Industri</option>
@@ -135,21 +135,16 @@
                             <input type="text" id="kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
-                            <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                            <label for="semester" class="block text-sm font-medium text-gray-700">Semester <span class="text-red-500">*</span></label>
                             <input type="number" id="semester" required min="1" max="14" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
-                            <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
+                            <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
                             <select id="tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                 <option value="">Pilih Tahun</option>
                             </select>
                         </div>
-                    </div>
-                </div>
 
-                <div id="content-personal" class="tab-content hidden">
-                    <p class="text-sm text-gray-600 mb-4">Lengkapi data personal berikut (dapat dikosongkan jika belum tersedia).</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label for="nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
                             <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -159,17 +154,42 @@
                             <input type="text" id="nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
+                            <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
+                            <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="content-personal" class="tab-content hidden">
+                    <p class="text-sm text-gray-600 mb-4">Lengkapi data personal dan orang tua (dapat dikosongkan).</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="namaayah" class="block text-sm font-medium text-gray-700">Nama Ayah</label>
+                            <input type="text" id="namaayah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div>
+                            <label for="namaibu" class="block text-sm font-medium text-gray-700">Nama Ibu</label>
+                            <input type="text" id="namaibu" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div>
                             <label for="ttl" class="block text-sm font-medium text-gray-700">TTL</label>
                             <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
+
+                        <div>
+                            <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
+                            <input type="text" id="kelurahan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div>
+                            <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                            <input type="text" id="kecamatan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                         <div></div>
                     </div>
 
                     <div class="mt-4">
-                        <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
-                        <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div class="mt-4">
-                        <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
+                        <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap (Jalan, RT/RW)</label>
                         <textarea id="alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                 </div>
@@ -299,11 +319,9 @@
         }
         
         selectInstance.refreshOptions(false);
-        // Set nilai default ke 'Semua Tahun' atau tahun saat ini
         if(includeAllOption) {
              selectInstance.setValue('');
         } else if (selectInstance.options.length > 0) {
-            // Set ke tahun paling baru (paling atas)
             selectInstance.setValue(currentYear);
         }
     }
@@ -320,21 +338,17 @@
     
     // Fungsi untuk mengelola perpindahan tab di formulir
     function switchTab(tabName) {
-        // 1. Sembunyikan semua konten tab
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.add('hidden');
         });
 
-        // 2. Reset style semua tombol tab
         document.querySelectorAll('.tab-button').forEach(button => {
             button.classList.remove('text-blue-600', 'border-blue-600');
             button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
         });
 
-        // 3. Tampilkan konten tab yang dipilih
         document.getElementById(`content-${tabName}`).classList.remove('hidden');
 
-        // 4. Set style tombol tab yang aktif
         const activeBtn = document.getElementById(`tab-${tabName}`);
         activeBtn.classList.add('text-blue-600', 'border-blue-600');
         activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
@@ -346,7 +360,6 @@
         resetForm();
         document.getElementById('mahasiswa-container').classList.remove('hidden');
         document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
-        // Set tab awal ke Data Akademik
         switchTab('akademik');
     }
 
@@ -382,15 +395,13 @@
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
         
         let query = supabaseClient.from('mahasiswa').select('*');
-        let filterConditions = [];
-
+        
         // Buat filter menggunakan operator OR untuk Nama dan NPM
         if (nama || npm) {
             let or_filters = [];
             if (nama) or_filters.push(`nama.ilike.%${nama}%`);
             if (npm) or_filters.push(`npm.ilike.%${npm}%`);
             
-            // Gabungkan OR filters
             if (or_filters.length > 0) {
                  query = query.or(or_filters.join(','));
             }
@@ -443,23 +454,30 @@
 
     // 2. Menyimpan/Memperbarui Data
     async function saveMahasiswa() {
+        // Data Akademik (Wajib)
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
         const prodi = prodiSelect.getValue();
-        const kelas = document.getElementById('kelas').value || null;
-        const nik = document.getElementById('nik').value || null;
-        const ttl = document.getElementById('ttl').value || null;
-        const nohp = document.getElementById('nohp').value || null;
         const semester = document.getElementById('semester').value;
-        
         const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
         
+        // Data Akademik (Opsional)
+        const kelas = document.getElementById('kelas').value || null;
+        const nik = document.getElementById('nik').value || null;
+        const nohp = document.getElementById('nohp').value || null;
         const judulskripsi = document.getElementById('judulskripsi').value || null;
-        const alamat = document.getElementById('alamat').value || null;
         
+        // Data Personal
+        const namaAyah = document.getElementById('namaayah').value || null;
+        const namaIbu = document.getElementById('namaibu').value || null;
+        const ttl = document.getElementById('ttl').value || null;
+        const alamat = document.getElementById('alamat').value || null;
+        const kelurahan = document.getElementById('kelurahan').value || null;
+        const kecamatan = document.getElementById('kecamatan').value || null;
+
+        // Validasi minimal
         if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk)) {
              alert('❌ Pastikan NPM, Nama, Prodi, Semester, dan Tahun Masuk pada tab Data Akademik terisi dengan benar.');
-             // Pindah ke tab akademik jika ada error validasi
              switchTab('akademik');
              return;
         }
@@ -468,14 +486,20 @@
             npm: npm, 
             nama: nama,
             prodi: prodi,
-            kelas: kelas,
-            nik_mahasiswa: nik,
-            ttl: ttl, 
-            no_hp: nohp,
             semester: semester,
             tahun_masuk: tahunmasuk,
+            kelas: kelas,
+            nik_mahasiswa: nik,
+            no_hp: nohp,
             judul_skripsi: judulskripsi,
+            
+            // Kolom Data Personal Baru
+            nama_ayah: namaAyah, 
+            nama_ibu: namaIbu,
+            ttl: ttl, 
             alamat: alamat,
+            kelurahan: kelurahan,
+            kecamatan: kecamatan,
             status: 'Aktif',
         };
 
@@ -524,9 +548,9 @@
             return;
         }
         
-        // Pastikan form terlihat saat mengedit
         showForm();
 
+        // Data Akademik
         document.getElementById('mahasiswaId').value = mhs.id;
         document.getElementById('npm').value = mhs.npm;
         document.getElementById('nama').value = mhs.nama;
@@ -535,10 +559,16 @@
         document.getElementById('semester').value = mhs.semester;
         tahunMasukSelect.setValue(mhs.tahun_masuk);
         document.getElementById('nik').value = mhs.nik_mahasiswa || '';
-        document.getElementById('ttl').value = mhs.ttl || '';
         document.getElementById('nohp').value = mhs.no_hp || '';
         document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
+        
+        // Data Personal
+        document.getElementById('namaayah').value = mhs.nama_ayah || '';
+        document.getElementById('namaibu').value = mhs.nama_ibu || '';
+        document.getElementById('ttl').value = mhs.ttl || '';
         document.getElementById('alamat').value = mhs.alamat || '';
+        document.getElementById('kelurahan').value = mhs.kelurahan || '';
+        document.getElementById('kecamatan').value = mhs.kecamatan || '';
         
         isEditMode = true;
         currentMahasiswaId = mhs.id;
@@ -577,7 +607,7 @@
         document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
         document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
         document.getElementById('mahasiswaId').value = '';
-        hideForm(); // Sembunyikan form
+        hideForm(); 
     }
     
     // 6. Tampilkan Detail Modal
@@ -594,19 +624,25 @@
         }
 
         const modalContent = `
+            <h4 class="font-bold text-lg text-blue-700 mb-2">Data Akademik & Identitas</h4>
             <p><span class="font-bold w-32 inline-block">NPM</span>: ${mhs.npm}</p>
             <p><span class="font-bold w-32 inline-block">Nama Lengkap</span>: ${mhs.nama}</p>
             <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
             <p><span class="font-bold w-32 inline-block">Kelas/Semester</span>: ${mhs.kelas || '-'} / ${mhs.semester}</p>
             <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
+            <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
             <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${mhs.status === 'Aktif' ? 'text-green-600' : 'text-red-600'}">${mhs.status}</span></p>
             <hr class="my-3 border-gray-200">
-            <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">TTL</span>: ${mhs.ttl || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Alamat</span>: ${mhs.alamat || '-'}</p>
-            <hr class="my-3 border-gray-200">
             <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
+            
+            <h4 class="font-bold text-lg text-blue-700 mt-4 mb-2">Data Personal & Orang Tua</h4>
+            <p><span class="font-bold w-32 inline-block">Nama Ayah</span>: ${mhs.nama_ayah || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">Nama Ibu</span>: ${mhs.nama_ibu || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">TTL</span>: ${mhs.ttl || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">Alamat</span>: ${mhs.alamat || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">Kelurahan</span>: ${mhs.kelurahan || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">Kecamatan</span>: ${mhs.kecamatan || '-'}</p>
         `;
 
         document.getElementById('modalContent').innerHTML = modalContent;
