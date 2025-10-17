@@ -11,6 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
   
   <style>
     .header-style {
@@ -80,18 +81,16 @@
             <i class="fas fa-address-card w-6"></i><span class="ml-3">Biodata Mahasiswa</span>
         </a>
         
-       <div onclick="showContent('dosenContent')" id="dosen-link" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-                <i class="fas fa-chalkboard-teacher w-6"></i>
-                <span class="ml-3">Data Dosen</span>
-            </div>
-            <div onclick="showContent('matakuliahContent')" id="matakuliah-link" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-                <i class="fas fa-book w-6"></i>
-                <span class="ml-3">Data Mata Kuliah</span>
-            </div>
-            <div onclick="showContent('settingsContent')" id="settings-link" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-                <i class="fas fa-cog w-6"></i>
-                <span class="ml-3">Pengaturan</span>
-            </div>
+        <div onclick="showContent('dosenContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-user-tie w-6"></i><span class="ml-3">Data Dosen</span>
+        </div>
+        
+        <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
+        </div>
+        <div onclick="showContent('settingsContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-cog w-6"></i><span class="ml-3">Pengaturan</span>
+        </div>
     </nav>
 </aside>
 
@@ -258,11 +257,20 @@
                 </div>
             </div>
 
-            <div class="flex justify-end mb-4">
-                 <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+            <div class="flex justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
+                    <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer">
+                        <i class="fas fa-file-excel mr-2"></i> Import dari Excel
+                    </label>
+                    <span id="importStatus" class="text-sm text-gray-600"></span>
+                </div>
+
+                <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
                     <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
                 </button>
             </div>
+
 
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -403,6 +411,136 @@
         document.getElementById('searchNpm').value = '';
         searchTahunSelect.setValue(''); 
         loadMahasiswaData(); 
+    }
+
+    // --- FUNGSI IMPORT EXCEL (NEW) ---
+    /**
+     * Membaca file Excel dan memasukkan data ke Supabase menggunakan upsert.
+     * Header Excel harus sesuai dengan nama kolom Supabase (tidak case sensitive, spasi diabaikan).
+     */
+    async function importFromExcel(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const importStatus = document.getElementById('importStatus');
+        importStatus.textContent = 'Membaca file...';
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                // Mengkonversi ke array of arrays (rawData), lalu ambil header
+                let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                if (excelData.length === 0) {
+                    importStatus.textContent = '❌ File Excel kosong atau tidak terbaca.';
+                    return;
+                }
+
+                // Ambil header (baris pertama) dan bersihkan/ubah ke format yang mudah dimapping
+                const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
+                // Ambil data (baris kedua dan seterusnya)
+                const rawData = excelData.slice(1);
+                
+                // Mapping Header Excel ke Nama Kolom Supabase
+                // Sesuaikan jika Anda menggunakan nama kolom yang berbeda di Excel
+                const columnMapping = {
+                    'NPM': 'npm',
+                    'NAMA': 'nama',
+                    'PRODI': 'prodi',
+                    'SEMESTER': 'semester',
+                    'TAHUN_MASUK': 'tahun_masuk',
+                    'STATUS': 'status',
+                    'KELAS': 'kelas',
+                    'NIK': 'nik_mahasiswa', 
+                    'NO_HP': 'no_hp',
+                    'JUDUL_SKRIPSI': 'judul_skripsi',
+                    'NAMA_AYAH': 'nama_ayah',
+                    'NAMA_IBU': 'nama_ibu',
+                    'TTL': 'ttl',
+                    'ALAMAT': 'alamat',
+                    'KELURAHAN': 'kelurahan',
+                    'KECAMATAN': 'kecamatan',
+                };
+
+                const studentsToInsert = [];
+                
+                for (const row of rawData) {
+                    let student = {};
+                    let isValidRow = true;
+                    
+                    for (let i = 0; i < headers.length; i++) {
+                        const excelHeader = headers[i];
+                        const supabaseColumn = columnMapping[excelHeader];
+                        
+                        if (supabaseColumn) {
+                             let value = row[i] === undefined ? null : row[i];
+                             
+                             // Konversi tipe data
+                             if (supabaseColumn === 'semester' || supabaseColumn === 'tahun_masuk') {
+                                 // Coba parse integer, default null jika gagal
+                                 value = parseInt(value) || null; 
+                             } else if (value !== null) {
+                                 value = String(value).trim() || null;
+                             }
+
+                             student[supabaseColumn] = value;
+                        }
+                    }
+                    
+                    // Set default/validasi nilai wajib
+                    if (!student.npm || !student.nama || !student.prodi || !student.tahun_masuk) {
+                         console.warn('Baris diabaikan karena data wajib tidak lengkap:', student);
+                         isValidRow = false; 
+                    }
+                    
+                    // Pastikan status ada (default 'Aktif')
+                    student.status = student.status || 'Aktif'; 
+
+                    if (isValidRow) {
+                        studentsToInsert.push(student);
+                    }
+                }
+                
+                if (studentsToInsert.length === 0) {
+                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib (NPM, Nama, Prodi, Tahun Masuk) terisi.';
+                    return;
+                }
+
+                importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
+
+                // Proses penyimpanan ke Supabase
+                // Menggunakan upsert: jika NPM sudah ada, data diperbarui; jika belum, data baru dimasukkan.
+                const { error: insertError } = await supabaseClient
+                    .from('mahasiswa')
+                    .upsert(studentsToInsert, { onConflict: 'npm' }); 
+
+                if (insertError) {
+                    alert('❌ Gagal mengimpor data: ' + insertError.message);
+                    importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
+                    console.error(insertError);
+                } else {
+                    alert(`✅ Import Sukses! ${studentsToInsert.length} data mahasiswa berhasil disimpan/diperbarui.`);
+                    importStatus.textContent = `✅ Import Sukses. ${studentsToInsert.length} data disimpan/diperbarui.`;
+                    loadMahasiswaData(); // Reload tabel utama
+                }
+
+
+            } catch (err) {
+                console.error('Error saat memproses file Excel:', err);
+                importStatus.textContent = '❌ Terjadi kesalahan saat memproses file.';
+            } finally {
+                // Clear the file input
+                event.target.value = '';
+            }
+        };
+        reader.readAsArrayBuffer(file);
     }
 
 
