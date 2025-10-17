@@ -270,10 +270,10 @@
 
             <div class="flex justify-between mb-4">
                 <div class="flex items-center space-x-3">
-                    <a href="mahasiswa_template.xlsx" download 
+                    <button onclick="downloadTemplate()"
                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
                        <i class="fas fa-download mr-2"></i> Download Template
-                    </a>
+                    </button>
                     
                     <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
                     <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
@@ -430,6 +430,41 @@
         loadMahasiswaData(); 
     }
 
+    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL (SOLUSI BARU) ---
+    function downloadTemplate() {
+        // Header kolom yang wajib dan opsional
+        const headers = [
+            "NPM", "NAMA", "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", 
+            "STATUS", "KELAS", "NIK", "NO_HP", "NOMOR_IJAZAH", 
+            "JUDUL_SKRIPSI", "NAMA_AYAH", "NAMA_IBU", "TTL", 
+            "ALAMAT", "KELURAHAN", "KECAMATAN"
+        ];
+        
+        // Buat array data (hanya header, baris data kosong)
+        const wsData = [
+            headers,
+            // Baris contoh atau kosong (opsional, tapi membantu pengguna)
+            ["12345678", "Contoh Nama", "Industri", "Laki-laki", 2022, "Aktif", "A", "3210123456789012", "081234567890", "", "", "", "", "", "", "", ""]
+        ];
+
+        // Buat Workbook dan Worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Atur lebar kolom agar lebih mudah dibaca (opsional)
+        ws['!cols'] = [
+            { wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
+            { wch: 10 }, { wch: 8 }, { wch: 20 }, { wch: 15 }, { wch: 20 },
+            { wch: 40 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, 
+            { wch: 40 }, { wch: 20 }, { wch: 20 }
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "BiodataMahasiswa");
+
+        // Unduh file
+        XLSX.writeFile(wb, "mahasiswa_template.xlsx");
+    }
+
     // --- FUNGSI IMPORT EXCEL ---
     async function importFromExcel(event) {
         const file = event.target.files[0];
@@ -450,12 +485,13 @@
                 
                 let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 
-                if (excelData.length === 0) {
-                    importStatus.textContent = '❌ File Excel kosong atau tidak terbaca.';
+                if (excelData.length < 2) {
+                    importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
                     return;
                 }
 
                 // Mapping Header harus sesuai dengan template
+                // Membersihkan header: uppercase, hapus non-alphanumeric, dan trim underscore
                 const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
                 const rawData = excelData.slice(1);
                 
@@ -478,7 +514,7 @@
                     'ALAMAT': 'alamat',
                     'KELURAHAN': 'kelurahan',
                     'KECAMATAN': 'kecamatan',
-                    'SEMESTER': 'semester', // Dibiarkan untuk kompatibilitas, akan diabaikan/null
+                    'SEMESTER': 'semester', // Dibiarkan untuk kompatibilitas, akan di set null
                 };
 
                 const studentsToInsert = [];
@@ -512,7 +548,8 @@
                     
                     // Set default/validasi nilai wajib
                     if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
-                         console.warn('Baris diabaikan karena data wajib tidak lengkap:', student);
+                         // Pesan ini hanya muncul di console developer
+                         console.warn('Baris diabaikan karena data wajib tidak lengkap (NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk):', student);
                          isValidRow = false; 
                     }
                     
@@ -528,7 +565,7 @@
                 }
                 
                 if (studentsToInsert.length === 0) {
-                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib (NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk) terisi.';
+                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib terisi.';
                     return;
                 }
 
@@ -540,7 +577,7 @@
                     .upsert(studentsToInsert, { onConflict: 'npm' }); 
 
                 if (insertError) {
-                    alert('❌ Gagal mengimpor data. Pastikan RLS sudah diaktifkan dan kolom lama tidak berstatus NOT NULL. Pesan: ' + insertError.message);
+                    alert('❌ Gagal mengimpor data. Pesan: ' + insertError.message);
                     importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
                     console.error(insertError);
                 } else {
@@ -552,7 +589,7 @@
 
             } catch (err) {
                 console.error('Error saat memproses file Excel:', err);
-                importStatus.textContent = '❌ Terjadi kesalahan saat memproses file.';
+                importStatus.textContent = '❌ Terjadi kesalahan saat memproses file. Pastikan format file .xlsx/.xls benar.';
             } finally {
                 event.target.value = '';
             }
@@ -575,6 +612,7 @@
         // Buat filter menggunakan operator OR untuk Nama dan NPM
         if (nama || npm) {
             let or_filters = [];
+            // Menggunakan .ilike untuk pencarian sebagian (case-insensitive)
             if (nama) or_filters.push(`nama.ilike.%${nama}%`);
             if (npm) or_filters.push(`npm.ilike.%${npm}%`);
             
@@ -583,7 +621,7 @@
             }
         }
         
-        // Filter Tahun Masuk menggunakan operator EQ (terpisah dari OR)
+        // Filter Tahun Masuk menggunakan operator EQ 
         if (tahun) {
             query = query.eq('tahun_masuk', tahun);
         }
@@ -607,7 +645,7 @@
                 ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>'
                 : mhs.status === 'Lulus' 
                 ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Lulus</span>'
-                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">' + mhs.status + '</span>'; // Menampilkan status lainnya
+                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">' + mhs.status + '</span>'; 
 
             const row = `
                 <tr class="hover:bg-gray-100 transition duration-100">
