@@ -140,8 +140,12 @@
                             <input type="text" id="kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
-                            <label for="semester" class="block text-sm font-medium text-gray-700">Semester <span class="text-red-500">*</span></label>
-                            <input type="number" id="semester" required min="1" max="14" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <label for="jenisKelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
+                            <select id="jenisKelamin" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <option value="">Pilih J. Kelamin</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
                         </div>
                         <div>
                             <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
@@ -151,7 +155,7 @@
                         </div>
 
                         <div>
-                            <label for="nik" class="block text-sm font-medium text-gray-700">NOMOR KTP/NIK</label>
+                            <label for="nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
                             <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div>
@@ -170,6 +174,13 @@
                                 <option value="Meninggal">Meninggal Dunia</option>
                             </select>
                         </div>
+                        
+                        <div>
+                            <label for="nomorIjazah" class="block text-sm font-medium text-gray-700">Nomor Ijazah (Opsional)</label>
+                            <input type="text" id="nomorIjazah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div></div> 
+                        <div></div> 
 
                     </div>
                     
@@ -324,6 +335,7 @@
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
         statusSelect = new TomSelect("#status", { create: false }); 
+        
         populateYearSelect(tahunMasukSelect);
         
         // Inisialisasi Tom Select untuk Pencarian
@@ -413,11 +425,7 @@
         loadMahasiswaData(); 
     }
 
-    // --- FUNGSI IMPORT EXCEL (NEW) ---
-    /**
-     * Membaca file Excel dan memasukkan data ke Supabase menggunakan upsert.
-     * Header Excel harus sesuai dengan nama kolom Supabase (tidak case sensitive, spasi diabaikan).
-     */
+    // --- FUNGSI IMPORT EXCEL ---
     async function importFromExcel(event) {
         const file = event.target.files[0];
         if (!file) {
@@ -435,7 +443,6 @@
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
                 
-                // Mengkonversi ke array of arrays (rawData), lalu ambil header
                 let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 
                 if (excelData.length === 0) {
@@ -443,23 +450,21 @@
                     return;
                 }
 
-                // Ambil header (baris pertama) dan bersihkan/ubah ke format yang mudah dimapping
                 const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
-                // Ambil data (baris kedua dan seterusnya)
                 const rawData = excelData.slice(1);
                 
-                // Mapping Header Excel ke Nama Kolom Supabase
-                // Sesuaikan jika Anda menggunakan nama kolom yang berbeda di Excel
+                // MAPPING KOLOM (Diperbarui untuk Jenis Kelamin dan Nomor Ijazah)
                 const columnMapping = {
                     'NPM': 'npm',
                     'NAMA': 'nama',
                     'PRODI': 'prodi',
-                    'SEMESTER': 'semester',
+                    'JENIS_KELAMIN': 'jenis_kelamin', 
                     'TAHUN_MASUK': 'tahun_masuk',
                     'STATUS': 'status',
                     'KELAS': 'kelas',
                     'NIK': 'nik_mahasiswa', 
                     'NO_HP': 'no_hp',
+                    'NOMOR_IJAZAH': 'nomor_ijazah', // MAPPING BARU
                     'JUDUL_SKRIPSI': 'judul_skripsi',
                     'NAMA_AYAH': 'nama_ayah',
                     'NAMA_IBU': 'nama_ibu',
@@ -467,6 +472,7 @@
                     'ALAMAT': 'alamat',
                     'KELURAHAN': 'kelurahan',
                     'KECAMATAN': 'kecamatan',
+                    'SEMESTER': 'semester', // Tetap pertahankan jika ada di DB, tapi tidak muncul di form
                 };
 
                 const studentsToInsert = [];
@@ -483,25 +489,25 @@
                              let value = row[i] === undefined ? null : row[i];
                              
                              // Konversi tipe data
-                             if (supabaseColumn === 'semester' || supabaseColumn === 'tahun_masuk') {
-                                 // Coba parse integer, default null jika gagal
+                             if (supabaseColumn === 'tahun_masuk' || supabaseColumn === 'semester') {
                                  value = parseInt(value) || null; 
                              } else if (value !== null) {
                                  value = String(value).trim() || null;
                              }
-
+                             
                              student[supabaseColumn] = value;
                         }
                     }
                     
                     // Set default/validasi nilai wajib
-                    if (!student.npm || !student.nama || !student.prodi || !student.tahun_masuk) {
+                    if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
                          console.warn('Baris diabaikan karena data wajib tidak lengkap:', student);
                          isValidRow = false; 
                     }
                     
                     // Pastikan status ada (default 'Aktif')
                     student.status = student.status || 'Aktif'; 
+                    student.semester = student.semester || null; // Pastikan semester di set null jika tidak ada
 
                     if (isValidRow) {
                         studentsToInsert.push(student);
@@ -509,14 +515,12 @@
                 }
                 
                 if (studentsToInsert.length === 0) {
-                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib (NPM, Nama, Prodi, Tahun Masuk) terisi.';
+                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib (NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk) terisi.';
                     return;
                 }
 
                 importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
 
-                // Proses penyimpanan ke Supabase
-                // Menggunakan upsert: jika NPM sudah ada, data diperbarui; jika belum, data baru dimasukkan.
                 const { error: insertError } = await supabaseClient
                     .from('mahasiswa')
                     .upsert(studentsToInsert, { onConflict: 'npm' }); 
@@ -536,7 +540,6 @@
                 console.error('Error saat memproses file Excel:', err);
                 importStatus.textContent = '❌ Terjadi kesalahan saat memproses file.';
             } finally {
-                // Clear the file input
                 event.target.value = '';
             }
         };
@@ -546,7 +549,7 @@
 
     // --- FUNGSI CRUD ---
 
-    // 1. Memuat Data Mahasiswa (Sekarang menerima objek filter)
+    // 1. Memuat Data Mahasiswa
     async function loadMahasiswaData(filters = {}) {
         const { nama, npm, tahun } = filters;
 
@@ -617,7 +620,7 @@
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
         const prodi = prodiSelect.getValue();
-        const semester = document.getElementById('semester').value;
+        const jenisKelamin = document.getElementById('jenisKelamin').value; 
         const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
         const statusMhs = statusSelect.getValue(); 
         
@@ -625,6 +628,7 @@
         const kelas = document.getElementById('kelas').value || null;
         const nik = document.getElementById('nik').value || null;
         const nohp = document.getElementById('nohp').value || null;
+        const nomorIjazah = document.getElementById('nomorIjazah').value || null; // NILAI BARU
         const judulskripsi = document.getElementById('judulskripsi').value || null;
         
         // Data Personal
@@ -634,10 +638,13 @@
         const alamat = document.getElementById('alamat').value || null;
         const kelurahan = document.getElementById('kelurahan').value || null;
         const kecamatan = document.getElementById('kecamatan').value || null;
+        
+        // Semester di set null
+        const semester = null; 
 
         // Validasi minimal
-        if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk) || !statusMhs) {
-             alert('❌ Pastikan NPM, Nama, Prodi, Semester, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
+        if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
+             alert('❌ Pastikan NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
              switchTab('akademik');
              return;
         }
@@ -646,11 +653,13 @@
             npm: npm, 
             nama: nama,
             prodi: prodi,
-            semester: semester,
+            jenis_kelamin: jenisKelamin, 
+            semester: semester, 
             tahun_masuk: tahunmasuk,
             kelas: kelas,
             nik_mahasiswa: nik,
             no_hp: nohp,
+            nomor_ijazah: nomorIjazah, // KOLOM BARU
             judul_skripsi: judulskripsi,
             status: statusMhs,
             
@@ -716,11 +725,12 @@
         document.getElementById('nama').value = mhs.nama;
         prodiSelect.setValue(mhs.prodi);
         document.getElementById('kelas').value = mhs.kelas || '';
-        document.getElementById('semester').value = mhs.semester;
+        document.getElementById('jenisKelamin').value = mhs.jenis_kelamin || ''; 
         tahunMasukSelect.setValue(mhs.tahun_masuk);
         statusSelect.setValue(mhs.status); 
         document.getElementById('nik').value = mhs.nik_mahasiswa || '';
         document.getElementById('nohp').value = mhs.no_hp || '';
+        document.getElementById('nomorIjazah').value = mhs.nomor_ijazah || ''; // NILAI BARU
         document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
         
         // Data Personal
@@ -763,6 +773,7 @@
         document.getElementById('mahasiswaForm').reset();
         prodiSelect.clear();
         tahunMasukSelect.clear();
+        document.getElementById('jenisKelamin').value = ''; 
         statusSelect.setValue('Aktif'); 
         isEditMode = false;
         currentMahasiswaId = null;
@@ -793,12 +804,13 @@
             <p><span class="font-bold w-32 inline-block">NPM</span>: ${mhs.npm}</p>
             <p><span class="font-bold w-32 inline-block">Nama Lengkap</span>: ${mhs.nama}</p>
             <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
-            <p><span class="font-bold w-32 inline-block">Kelas/Semester</span>: ${mhs.kelas || '-'} / ${mhs.semester}</p>
+            <p><span class="font-bold w-32 inline-block">Kelas</span>: ${mhs.kelas || '-'}</p>
+            <p><span class="font-bold w-32 inline-block">Jenis Kelamin</span>: ${mhs.jenis_kelamin || '-'}</p>
             <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
             <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${statusColor}">${statusText}</span></p>
             <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
             <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
-            <hr class="my-3 border-gray-200">
+            <p><span class="font-bold w-32 inline-block">Nomor Ijazah</span>: ${mhs.nomor_ijazah || '-'}</p> <hr class="my-3 border-gray-200">
             <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
             
             <h4 class="font-bold text-lg text-blue-700 mt-4 mb-2">Data Personal & Orang Tua</h4>
