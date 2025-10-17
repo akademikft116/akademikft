@@ -80,6 +80,10 @@
             <i class="fas fa-address-card w-6"></i><span class="ml-3">Biodata Mahasiswa</span>
         </a>
         
+        <a href="dosen.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
+            <i class="fas fa-user-tie w-6"></i><span class="ml-3">Data Dosen</span>
+        </a>
+        
         <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
             <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
         </div>
@@ -303,13 +307,13 @@
     let prodiSelect;
     let tahunMasukSelect;
     let searchTahunSelect; 
-    let statusSelect; // NEW: TomSelect untuk Status
+    let statusSelect; 
 
     document.addEventListener('DOMContentLoaded', () => {
         // Inisialisasi Tom Select untuk Form Tambah/Edit
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-        statusSelect = new TomSelect("#status", { create: false }); // NEW: Inisialisasi Status Select
+        statusSelect = new TomSelect("#status", { create: false }); 
         populateYearSelect(tahunMasukSelect);
         
         // Inisialisasi Tom Select untuk Pencarian
@@ -475,7 +479,7 @@
         const prodi = prodiSelect.getValue();
         const semester = document.getElementById('semester').value;
         const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
-        const statusMhs = statusSelect.getValue(); // NEW: Ambil nilai Status
+        const statusMhs = statusSelect.getValue(); 
         
         // Data Akademik (Opsional)
         const kelas = document.getElementById('kelas').value || null;
@@ -508,7 +512,7 @@
             nik_mahasiswa: nik,
             no_hp: nohp,
             judul_skripsi: judulskripsi,
-            status: statusMhs, // UPDATED: Menggunakan nilai dari form
+            status: statusMhs,
             
             // Kolom Data Personal
             nama_ayah: namaAyah, 
@@ -574,7 +578,7 @@
         document.getElementById('kelas').value = mhs.kelas || '';
         document.getElementById('semester').value = mhs.semester;
         tahunMasukSelect.setValue(mhs.tahun_masuk);
-        statusSelect.setValue(mhs.status); // NEW: Set Status
+        statusSelect.setValue(mhs.status); 
         document.getElementById('nik').value = mhs.nik_mahasiswa || '';
         document.getElementById('nohp').value = mhs.no_hp || '';
         document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
@@ -619,7 +623,7 @@
         document.getElementById('mahasiswaForm').reset();
         prodiSelect.clear();
         tahunMasukSelect.clear();
-        statusSelect.setValue('Aktif'); // Set default status ke Aktif saat reset
+        statusSelect.setValue('Aktif'); 
         isEditMode = false;
         currentMahasiswaId = null;
         document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
