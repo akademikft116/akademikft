@@ -76,9 +76,6 @@
             <i class="fas fa-search w-6"></i><span class="ml-3">Pencarian Mahasiswa</span>
         </a>
 
-        <div onclick="showContent('dosenContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-chalkboard-teacher w-6"></i><span class="ml-3">Data Dosen</span>
-        </div>
         <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
             <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
         </div>
@@ -202,7 +199,7 @@
 
 
 <script>
-    // Konfigurasi Supabase (Harus sama dengan file lain Anda)
+    // Konfigurasi Supabase
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -214,6 +211,7 @@
     let tahunMasukSelect;
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Inisialisasi Tom Select untuk Prodi dan Tahun Masuk
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
         populateYearSelect(tahunMasukSelect);
@@ -233,11 +231,10 @@
       window.location.href = "index.html";
     }
     
-    // Fungsi showContent untuk sidebar (mengarahkan ke dashboard untuk menu lain)
+    // Fungsi showContent untuk sidebar (mengarahkan ke dashboard.html untuk menu lain)
     function showContent(contentId) {
-        if (contentId === 'dosenContent' || contentId === 'matakuliahContent' || contentId === 'settingsContent') {
-             window.location.href = `dashboard.html#${contentId}`; 
-        }
+        // Navigasi ke dashboard.html dengan hash
+        window.location.href = `dashboard.html#${contentId}`; 
     }
 
 
@@ -291,7 +288,7 @@
         });
     }
 
-    // 2. Menyimpan/Memperbarui Data (Bagian ini krusial)
+    // 2. Menyimpan/Memperbarui Data
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
@@ -308,25 +305,24 @@
         const judulskripsi = document.getElementById('judulskripsi').value || null;
         const alamat = document.getElementById('alamat').value || null;
         
-        // VALIDASI DASAR: Supaya tidak error saat dikirim ke DB jika ada field yang kosong tapi required
+        // VALIDASI DASAR
         if (!npm || !nama || !prodi || !semester || isNaN(tahunmasuk)) {
              alert('❌ Pastikan NPM, Nama, Prodi, Semester, dan Tahun Masuk terisi dengan benar.');
              return;
         }
 
 
-        // OBJECT KEY WAJIB SAMA DENGAN NAMA KOLOM DI DATABASE (SQL DI ATAS)
+        // OBJECT KEY HARUS SAMA DENGAN NAMA KOLOM DI DATABASE (snake_case)
         const mahasiswaData = {
             npm: npm, 
             nama: nama,
             prodi: prodi,
             kelas: kelas,
-            // Perhatikan penggunaan snake_case yang sesuai dengan SQL
-            nik_mahasiswa: nik, 
+            nik_mahasiswa: nik, // Nama kolom di DB
             ttl: ttl, 
-            no_hp: nohp, 
+            no_hp: nohp,         // Nama kolom di DB
             semester: semester,
-            tahun_masuk: tahunmasuk,
+            tahun_masuk: tahunmasuk, // Nama kolom di DB
             judul_skripsi: judulskripsi,
             alamat: alamat,
             status: 'Aktif',
@@ -353,7 +349,7 @@
 
             if (insertError) {
                 // Tampilkan pesan error detail dari Supabase
-                alert('❌ Gagal menyimpan data mahasiswa. Cek konsol browser untuk detail error. Kemungkinan: NPM sudah terdaftar atau skema database tidak sesuai. Pesan: ' + insertError.message);
+                alert('❌ Gagal menyimpan data mahasiswa. Kemungkinan: NPM sudah terdaftar atau skema database tidak sesuai. Pesan: ' + insertError.message);
                 console.error(insertError);
             } else {
                 alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
@@ -363,7 +359,7 @@
         }
     }
 
-    // 3. Mengisi Form untuk Edit (sama seperti sebelumnya)
+    // 3. Mengisi Form untuk Edit
     async function editMahasiswa(mahasiswaId) {
         const { data: mhs, error } = await supabaseClient
             .from('mahasiswa')
@@ -397,9 +393,9 @@
         document.getElementById('mahasiswaForm').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 4. Menghapus Data Mahasiswa (sama seperti sebelumnya)
+    // 4. Menghapus Data Mahasiswa
     async function deleteMahasiswa(mahasiswaId, nama) {
-        if (!confirm(`Anda yakin ingin menghapus data mahasiswa ${nama} (ID: ${mahasiswaId}) secara permanen?`)) {
+        if (!confirm(`Anda yakin ingin menghapus data mahasiswa ${nama} secara permanen?`)) {
             return;
         }
 
@@ -416,7 +412,7 @@
         }
     }
 
-    // 5. Reset Form (sama seperti sebelumnya)
+    // 5. Reset Form
     function resetForm() {
         document.getElementById('mahasiswaForm').reset();
         prodiSelect.clear();
@@ -428,7 +424,7 @@
         document.getElementById('mahasiswaId').value = '';
     }
     
-    // 6. Tampilkan Detail Modal (sama seperti sebelumnya)
+    // 6. Tampilkan Detail Modal
     async function showDetail(mahasiswaId) {
         const { data: mhs, error } = await supabaseClient
             .from('mahasiswa')
