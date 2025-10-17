@@ -342,7 +342,7 @@
 
     let isEditMode = false;
     let currentMahasiswaId = null;
-    let currentMahasiswaData = []; // Global variable for current table data
+    let currentMahasiswaData = []; // NEW: Global variable for current table data
     
     let prodiSelect;
     let tahunMasukSelect;
@@ -481,7 +481,7 @@
         loadMahasiswaData(); 
     }
 
-    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL ---
+    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL (UPDATED) ---
     function downloadTemplate() {
         // Kolom sesuai permintaan user, ditambah kolom wajib di akhir
         const headers = [
@@ -513,7 +513,7 @@
         XLSX.writeFile(wb, "mahasiswa_template_ft.xlsx");
     }
 
-    // --- FUNGSI IMPORT EXCEL ---
+    // --- FUNGSI IMPORT EXCEL (Tidak diubah, hanya memastikan mappingnya benar) ---
     async function importFromExcel(event) {
         const file = event.target.files[0];
         if (!file) {
@@ -638,7 +638,7 @@
     }
 
 
-    // --- FUNGSI EXPORT DATA (SUDAH DIPERBAIKI AGAR SESUAI TEMPLATE DAN TIDAK PUTIH) ---
+    // --- FUNGSI EXPORT DATA (DIPERBARUI) ---
     
     // 1. Export ke Excel
     function exportToExcel() {
@@ -678,36 +678,9 @@
             mhs.nomor_ijazah || '-'
         ]);
 
+        const wsData = [headers, ...dataForExport];
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(dataForExport, { header: headers, skipHeader: true }); // Membuat sheet dari data dan header
-
-        // Opsi: Tambahkan judul sebagai baris pertama, dan gabungkan sel
-        const title = ["DATA BIODATA MAHASISWA FAKULTAS TEKNIK"];
-        
-        // Tambahkan baris Judul di A1
-        XLSX.utils.sheet_add_aoa(ws, [title], { origin: "A1" });
-        
-        // Pindahkan Header ke baris 2
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" }); 
-        
-        // Pindahkan Data ke baris 3 (DataForExport sudah dimapping di awal, tinggal di-apply)
-        XLSX.utils.sheet_add_aoa(ws, dataForExport, { origin: "A3" });
-
-
-        // Gabungkan sel untuk judul (A1 hingga kolom terakhir)
-        if (ws['A1']) {
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            range.e.c = headers.length - 1; // Gabungkan hingga kolom terakhir
-            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
-            
-            // Tambahkan sedikit styling ke judul (mungkin diabaikan oleh Excel, tapi untuk kebersihan kode)
-            ws['A1'].s = { 
-                font: { bold: true, sz: 14 },
-                alignment: { horizontal: 'center' }
-            };
-        }
-
-
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
         XLSX.utils.book_append_sheet(wb, ws, "DataMahasiswaFT");
         XLSX.writeFile(wb, "data_mahasiswa_ft.xlsx");
     }
