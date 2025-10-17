@@ -75,7 +75,7 @@
         <a href="mahasiswa.html" class="active-link flex items-center p-4 text-sm font-medium text-gray-300 transition duration-150">
             <i class="fas fa-address-card w-6"></i><span class="ml-3">Biodata Mahasiswa</span>
         </a>
-        
+
         <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
             <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
         </div>
@@ -166,21 +166,40 @@
         <div class="bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
             
-            <div class="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
-                <div class="flex w-full md:w-2/3 space-x-2">
-                    <input type="text" id="searchInput" placeholder="Cari berdasarkan NPM atau Nama..." class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        <i class="fas fa-search mr-1"></i> Cari
-                    </button>
-                    <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        Reset
-                    </button>
+            <div class="mb-6 border p-4 rounded-lg bg-gray-50">
+                <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label for="searchNama" class="block text-sm font-medium text-gray-700">Nama</label>
+                        <input type="text" id="searchNama" placeholder="Ketik Nama Mahasiswa" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="searchNpm" class="block text-sm font-medium text-gray-700">NPM</label>
+                        <input type="text" id="searchNpm" placeholder="Ketik NPM" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="searchTahun" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
+                        <select id="searchTahun" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Semua Tahun</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
+                            <i class="fas fa-search mr-1"></i> Cari
+                        </button>
+                        <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
                 </div>
-                <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 w-full md:w-1/3">
+            </div>
+
+            <div class="flex justify-end mb-4">
+                 <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
                     <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
                 </button>
             </div>
-
 
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -226,20 +245,37 @@
 
     let prodiSelect;
     let tahunMasukSelect;
+    let searchTahunSelect; // Tom Select baru untuk pencarian tahun
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select
+        // Inisialisasi Tom Select untuk Form Tambah/Edit
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
         populateYearSelect(tahunMasukSelect);
+        
+        // Inisialisasi Tom Select untuk Pencarian
+        searchTahunSelect = new TomSelect("#searchTahun", { 
+            create: false,
+            placeholder: "Pilih Tahun",
+        });
+        populateYearSelect(searchTahunSelect, true); // True untuk menambahkan opsi default 'Semua Tahun'
     });
 
     // --- FUNGSI BANTUAN ---
-    function populateYearSelect(selectInstance) {
+    function populateYearSelect(selectInstance, includeAllOption = false) {
+        // Hapus opsi lama sebelum menambahkan yang baru (jika ada)
+        selectInstance.clear(true); 
+
         const currentYear = new Date().getFullYear();
         for (let i = currentYear; i >= 2018; i--) {
             selectInstance.addOption({ value: i, text: i });
         }
+        
+        if(includeAllOption) {
+            // Tambahkan opsi "Semua Tahun" di awal
+            selectInstance.addOption({ value: '', text: 'Semua Tahun' });
+        }
+        
         selectInstance.refreshOptions(false);
     }
     
@@ -267,28 +303,47 @@
 
     // --- FUNGSI PENCARIAN ---
     function performSearch() {
-        const searchTerm = document.getElementById('searchInput').value.trim();
-        loadMahasiswaData(searchTerm);
+        const searchNama = document.getElementById('searchNama').value.trim();
+        const searchNpm = document.getElementById('searchNpm').value.trim();
+        const searchTahun = searchTahunSelect.getValue(); // Ambil nilai dari Tom Select
+
+        loadMahasiswaData({ nama: searchNama, npm: searchNpm, tahun: searchTahun });
     }
 
     function resetSearch() {
-        document.getElementById('searchInput').value = '';
+        document.getElementById('searchNama').value = '';
+        document.getElementById('searchNpm').value = '';
+        searchTahunSelect.setValue(''); // Reset Tom Select Tahun
         loadMahasiswaData(); // Muat ulang semua data
     }
 
 
     // --- FUNGSI CRUD ---
 
-    // 1. Memuat Data Mahasiswa (Sekarang menerima parameter pencarian)
-    async function loadMahasiswaData(searchTerm = null) {
+    // 1. Memuat Data Mahasiswa (Sekarang menerima objek filter)
+    async function loadMahasiswaData(filters = {}) {
+        const { nama, npm, tahun } = filters;
+
         const tableBody = document.getElementById('mahasiswa-table-body');
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
         
         let query = supabaseClient.from('mahasiswa').select('*');
+        let filterConditions = [];
 
-        if (searchTerm) {
-            // Logika pencarian: Mencari di kolom 'npm' ATAU di kolom 'nama'
-            query = query.or(`npm.ilike.%${searchTerm}%,nama.ilike.%${searchTerm}%`);
+        if (nama) {
+            filterConditions.push(`nama.ilike.%${nama}%`);
+        }
+        if (npm) {
+            filterConditions.push(`npm.ilike.%${npm}%`);
+        }
+        if (tahun) {
+            // Karena tahun_masuk adalah integer, gunakan .eq (equal)
+            filterConditions.push(`tahun_masuk.eq.${tahun}`);
+        }
+
+        // Gabungkan semua kondisi dengan 'and' jika ada lebih dari satu
+        if (filterConditions.length > 0) {
+            query = query.filter(filterConditions.join(','));
         }
         
         const { data: mahasiswaData, error } = await query.order('npm', { ascending: true });
