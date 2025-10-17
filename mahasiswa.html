@@ -16,13 +16,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   
   <style>
-    .header-style {
-        background-color: #1e3a8a; 
+    /* STYLE UNTUK MEMASTIKAN LAYOUT FULL-SCREEN SEPERTI DASHBOARD */
+    .active-link {
+        background-color: #1d4ed8; /* blue-700 */
+        color: white;
+        border-left: 4px solid #f97316; /* orange-500 */
     }
     .main-content {
-        padding-top: 5rem; 
-        min-height: 100vh;
-        background-color: #f3f4f6;
+        height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
     }
     .container {
         max-width: 1300px;
@@ -32,12 +33,6 @@
     .ts-wrapper.form-control, .ts-control {
         border-radius: 0.25rem !important;
         border: 1px solid #d1d5db !important;
-    }
-    /* Menandai link aktif di halaman ini */
-    .active-link {
-        background-color: #1d4ed8; /* blue-700 */
-        color: white;
-        border-left: 4px solid #f97316; /* orange-500 */
     }
     .modal {
         transition: opacity 0.3s ease-out;
@@ -62,266 +57,280 @@
 
 <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
     <div class="flex items-center space-x-3">
-        <img src="logo.jpeg" alt="Logo" class="h-10 w-10">
+        <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
         <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
     </div>
     <div class="flex items-center space-x-4">
         <span id="userNameNav" class="text-white text-sm">Halo, Pengguna</span>
-        <button onclick="logout()" class="text-white hover:text-red-300 transition duration-150">
-            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
+            <i class="fas fa-sign-out-alt mr-1"></i> Ganti Akun
         </button>
     </div>
 </nav>
 
-<aside class="w-64 fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gray-900 text-white z-20 overflow-y-auto">
-    <nav class="flex flex-col p-4 space-y-2">
-        <a href="dashboard.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-tachometer-alt w-6"></i><span class="ml-3">Dashboard</span>
-        </a>
-        <a href="main.html" class="flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-calendar-alt w-6"></i><span class="ml-3">Penjadwalan</span>
-        </a>
-        
-        <a href="mahasiswa.html" class="active-link flex items-center p-4 text-sm font-medium text-gray-300 transition duration-150">
-            <i class="fas fa-address-card w-6"></i><span class="ml-3">Biodata Mahasiswa</span>
-        </a>
-        
-        <div onclick="showContent('dosenContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-user-tie w-6"></i><span class="ml-3">Data Dosen</span>
-        </div>
-        
-        <div onclick="showContent('matakuliahContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-book w-6"></i><span class="ml-3">Data Mata Kuliah</span>
-        </div>
-        <div onclick="showContent('settingsContent')" class="cursor-pointer flex items-center p-4 text-sm font-medium text-gray-300 hover:bg-gray-700 transition duration-150">
-            <i class="fas fa-cog w-6"></i><span class="ml-3">Pengaturan</span>
-        </div>
-    </nav>
-</aside>
+<div class="flex pt-16 main-content">
 
-
-<main class="main-content pt-20 ml-64">
-    <div class="container mx-auto p-4 md:p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Mahasiswa</h1>
-
-        <div id="mahasiswa-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="formTitle">Tambah Data Mahasiswa Baru</h2>
-            <form id="mahasiswaForm" onsubmit="event.preventDefault(); saveMahasiswa();">
-                
-                <div class="border-b border-gray-200 mb-4">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                        <button type="button" id="tab-akademik" onclick="switchTab('akademik')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
-                            <i class="fas fa-user-graduate mr-2"></i> Data Akademik & Identitas
-                        </button>
-                        <button type="button" id="tab-personal" onclick="switchTab('personal')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            <i class="fas fa-id-card mr-2"></i> Data Personal & Orang Tua
-                        </button>
-                    </nav>
-                </div>
-
-                <div id="content-akademik" class="tab-content">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="npm" class="block text-sm font-medium text-gray-700">NPM <span class="text-red-500">*</span></label>
-                            <input type="text" id="npm" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
-                            <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi <span class="text-red-500">*</span></label>
-                            <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="">Pilih Prodi</option>
-                                <option value="Industri">Teknik Industri</option>
-                                <option value="Sipil">Teknik Sipil</option>
-                                <option value="Informatika">Teknik Informatika</option>
-                                <option value="Arsitektur">Arsitektur</option>
-                            </select>
-                        </div>
-    
-                        <div>
-                            <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas (A/B/C)</label>
-                            <input type="text" id="kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="jenisKelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
-                            <select id="jenisKelamin" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="">Pilih J. Kelamin</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
-                            <select id="tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="">Pilih Tahun</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
-                            <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="nohp" class="block text-sm font-medium text-gray-700">No. HP</label>
-                            <input type="text" id="nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700">Status Mahasiswa <span class="text-red-500">*</span></label>
-                            <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="Aktif">Aktif</option>
-                                <option value="Cuti">Cuti</option>
-                                <option value="Nonaktif">Nonaktif</option>
-                                <option value="Lulus">Lulus</option>
-                                <option value="Drop Out">Drop Out</option>
-                                <option value="Meninggal">Meninggal Dunia</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label for="nomorIjazah" class="block text-sm font-medium text-gray-700">Nomor Ijazah (Opsional)</label>
-                            <input type="text" id="nomorIjazah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div></div> 
-                        <div></div> 
-
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
-                        <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                </div>
-
-                <div id="content-personal" class="tab-content hidden">
-                    <p class="text-sm text-gray-600 mb-4">Lengkapi data personal dan orang tua (dapat dikosongkan).</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="namaayah" class="block text-sm font-medium text-gray-700">Nama Ayah</label>
-                            <input type="text" id="namaayah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="namaibu" class="block text-sm font-medium text-gray-700">Nama Ibu</label>
-                            <input type="text" id="namaibu" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="ttl" class="block text-sm font-medium text-gray-700">TTL</label>
-                            <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-
-                        <div>
-                            <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
-                            <input type="text" id="kelurahan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
-                            <input type="text" id="kecamatan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                         <div></div>
-                    </div>
-
-                    <div class="mt-4">
-                        <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap (Jalan, RT/RW)</label>
-                        <textarea id="alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-                    </div>
-                </div>
-
-
-                <input type="hidden" id="mahasiswaId" value="">
-                <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
-                    <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        <i class="fas fa-save mr-2"></i> Simpan Data
-                    </button>
-                    <button type="button" onclick="resetForm()" id="reset-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        <i class="fas fa-times mr-2"></i> Batalkan & Tutup
-                    </button>
-                </div>
-            </form>
-        </div>
-        
-        <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
+    <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
+        <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+            <a href="dashboard.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <i class="fas fa-tachometer-alt w-5"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <i class="fas fa-calendar-alt w-5"></i>
+                <span>Penjadwalan</span>
+            </a>
             
-            <div class="mb-6 border p-4 rounded-lg bg-gray-50">
-                <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div>
-                        <label for="searchNama" class="block text-sm font-medium text-gray-700">Nama</label>
-                        <input type="text" id="searchNama" placeholder="Ketik Nama Mahasiswa" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="searchNpm" class="block text-sm font-medium text-gray-700">NPM</label>
-                        <input type="text" id="searchNpm" placeholder="Ketik NPM" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="searchTahun" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
-                        <select id="searchTahun" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Semua Tahun</option>
-                        </select>
-                    </div>
-                    
-                    <div class="flex space-x-2">
-                        <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
-                            <i class="fas fa-search mr-1"></i> Cari
-                        </button>
-                        <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <a href="mahasiswa.html" class="active-link w-full text-left flex items-center space-x-3 p-3 rounded-lg transition duration-150">
+                <i class="fas fa-address-card w-5"></i>
+                <span>Biodata Mahasiswa</span>
+            </a>
+            
+            <a href="dashboard.html#dosen" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <i class="fas fa-user-tie w-5"></i>
+                <span>Data Dosen</span>
+            </a>
+            <a href="dashboard.html#matkul" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <i class="fas fa-book w-5"></i>
+                <span>Data Mata Kuliah</span>
+            </a>
+            <a href="dashboard.html#pengaturan" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <i class="fas fa-cog w-5"></i>
+                <span>Pengaturan</span>
+            </a>
+        </nav>
 
-            <div class="flex justify-between mb-4">
-                <div class="flex items-center space-x-3">
-                    <button onclick="downloadTemplate()"
-                       class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
-                       <i class="fas fa-download mr-2"></i> Download Template
-                    </button>
-                    
-                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
-                    <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
-                        <i class="fas fa-file-excel mr-2"></i> Import File
-                    </label>
-                    <span id="importStatus" class="text-sm text-gray-600"></span>
-                </div>
-
-                <div class="flex space-x-2">
-                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        <i class="fas fa-file-excel mr-2"></i> Export Excel
-                    </button>
-                    <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        <i class="fas fa-file-pdf mr-2"></i> Export PDF
-                    </button>
-                    <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                        <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
-                    </button>
-                </div>
-            </div>
-
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPM</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
-                        </tbody>
-                </table>
-            </div>
+        <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+            <p>&copy; 2024 Akademik FT</p>
+            <p>Designed by Rifqi & Alfi</p>
         </div>
+    </aside>
 
-    </div>
-</main>
+
+    <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
+        <div class="container mx-auto p-0">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Mahasiswa</h1>
+
+            <div id="mahasiswa-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="formTitle">Tambah Data Mahasiswa Baru</h2>
+                <form id="mahasiswaForm" onsubmit="event.preventDefault(); saveMahasiswa();">
+                    
+                    <div class="border-b border-gray-200 mb-4">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button type="button" id="tab-akademik" onclick="switchTab('akademik')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
+                                <i class="fas fa-user-graduate mr-2"></i> Data Akademik & Identitas
+                            </button>
+                            <button type="button" id="tab-personal" onclick="switchTab('personal')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                <i class="fas fa-id-card mr-2"></i> Data Personal & Orang Tua
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div id="content-akademik" class="tab-content">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="npm" class="block text-sm font-medium text-gray-700">NPM <span class="text-red-500">*</span></label>
+                                <input type="text" id="npm" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
+                                <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi <span class="text-red-500">*</span></label>
+                                <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    <option value="">Pilih Prodi</option>
+                                    <option value="Industri">Teknik Industri</option>
+                                    <option value="Sipil">Teknik Sipil</option>
+                                    <option value="Informatika">Teknik Informatika</option>
+                                    <option value="Arsitektur">Arsitektur</option>
+                                </select>
+                            </div>
+        
+                            <div>
+                                <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas (A/B/C)</label>
+                                <input type="text" id="kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="jenisKelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
+                                <select id="jenisKelamin" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    <option value="">Pilih J. Kelamin</option>
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
+                                <select id="tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    <option value="">Pilih Tahun</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
+                                <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="nohp" class="block text-sm font-medium text-gray-700">No. HP</label>
+                                <input type="text" id="nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700">Status Mahasiswa <span class="text-red-500">*</span></label>
+                                <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Cuti">Cuti</option>
+                                    <option value="Nonaktif">Nonaktif</option>
+                                    <option value="Lulus">Lulus</option>
+                                    <option value="Drop Out">Drop Out</option>
+                                    <option value="Meninggal">Meninggal Dunia</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="nomorIjazah" class="block text-sm font-medium text-gray-700">Nomor Ijazah (Opsional)</label>
+                                <input type="text" id="nomorIjazah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div></div> 
+                            <div></div> 
+
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
+                            <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                    </div>
+
+                    <div id="content-personal" class="tab-content hidden">
+                        <p class="text-sm text-gray-600 mb-4">Lengkapi data personal dan orang tua (dapat dikosongkan).</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="namaayah" class="block text-sm font-medium text-gray-700">Nama Ayah</label>
+                                <input type="text" id="namaayah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="namaibu" class="block text-sm font-medium text-gray-700">Nama Ibu</label>
+                                <input type="text" id="namaibu" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="ttl" class="block text-sm font-medium text-gray-700">TTL</label>
+                                <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+
+                            <div>
+                                <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
+                                <input type="text" id="kelurahan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                                <input type="text" id="kecamatan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div></div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap (Jalan, RT/RW)</label>
+                            <textarea id="alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                        </div>
+                    </div>
+
+
+                    <input type="hidden" id="mahasiswaId" value="">
+                    <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
+                        <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                            <i class="fas fa-save mr-2"></i> Simpan Data
+                        </button>
+                        <button type="button" onclick="resetForm()" id="reset-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                            <i class="fas fa-times mr-2"></i> Batalkan & Tutup
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
+                
+                <div class="mb-6 border p-4 rounded-lg bg-gray-50">
+                    <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label for="searchNama" class="block text-sm font-medium text-gray-700">Nama</label>
+                            <input type="text" id="searchNama" placeholder="Ketik Nama Mahasiswa" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div>
+                            <label for="searchNpm" class="block text-sm font-medium text-gray-700">NPM</label>
+                            <input type="text" id="searchNpm" placeholder="Ketik NPM" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div>
+                            <label for="searchTahun" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
+                            <select id="searchTahun" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                                <option value="">Semua Tahun</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
+                                <i class="fas fa-search mr-1"></i> Cari
+                            </button>
+                            <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="downloadTemplate()"
+                           class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
+                           <i class="fas fa-download mr-2"></i> Download Template
+                        </button>
+                        
+                        <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
+                        <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
+                            <i class="fas fa-file-excel mr-2"></i> Import File
+                        </label>
+                        <span id="importStatus" class="text-sm text-gray-600"></span>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                            <i class="fas fa-file-excel mr-2"></i> Export Excel
+                        </button>
+                        <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                            <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                        </button>
+                        <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                            <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPM</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</div>
 
 
 <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
@@ -342,7 +351,7 @@
 
     let isEditMode = false;
     let currentMahasiswaId = null;
-    let currentMahasiswaData = []; // NEW: Global variable for current table data
+    let currentMahasiswaData = []; // Global variable for current table data
     
     let prodiSelect;
     let tahunMasukSelect;
@@ -441,11 +450,6 @@
       window.location.href = "index.html";
     }
     
-    // Fungsi showContent untuk sidebar (mengarahkan ke dashboard.html untuk menu lain)
-    function showContent(contentId) {
-        window.location.href = `dashboard.html#${contentId}`; 
-    }
-    
     // Fungsi untuk mengelola perpindahan tab di formulir
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(content => {
@@ -481,7 +485,7 @@
         loadMahasiswaData(); 
     }
 
-    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL (UPDATED) ---
+    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL ---
     function downloadTemplate() {
         // Kolom sesuai permintaan user, ditambah kolom wajib di akhir
         const headers = [
@@ -513,7 +517,7 @@
         XLSX.writeFile(wb, "mahasiswa_template_ft.xlsx");
     }
 
-    // --- FUNGSI IMPORT EXCEL (Tidak diubah, hanya memastikan mappingnya benar) ---
+    // --- FUNGSI IMPORT EXCEL ---
     async function importFromExcel(event) {
         const file = event.target.files[0];
         if (!file) {
@@ -638,7 +642,7 @@
     }
 
 
-    // --- FUNGSI EXPORT DATA (DIPERBARUI) ---
+    // --- FUNGSI EXPORT DATA (SUDAH DIPERBAIKI AGAR SESUAI TEMPLATE DAN TIDAK PUTIH) ---
     
     // 1. Export ke Excel
     function exportToExcel() {
@@ -678,9 +682,36 @@
             mhs.nomor_ijazah || '-'
         ]);
 
-        const wsData = [headers, ...dataForExport];
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        const ws = XLSX.utils.json_to_sheet(dataForExport, { header: headers, skipHeader: true }); // Membuat sheet dari data dan header
+
+        // Opsi: Tambahkan judul sebagai baris pertama, dan gabungkan sel
+        const title = ["DATA BIODATA MAHASISWA FAKULTAS TEKNIK"];
+        
+        // Tambahkan baris Judul di A1
+        XLSX.utils.sheet_add_aoa(ws, [title], { origin: "A1" });
+        
+        // Pindahkan Header ke baris 2
+        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" }); 
+        
+        // Pindahkan Data ke baris 3 (DataForExport sudah dimapping di awal, tinggal di-apply)
+        XLSX.utils.sheet_add_aoa(ws, dataForExport, { origin: "A3" });
+
+
+        // Gabungkan sel untuk judul (A1 hingga kolom terakhir)
+        if (ws['A1']) {
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            range.e.c = headers.length - 1; // Gabungkan hingga kolom terakhir
+            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
+            
+            // Tambahkan sedikit styling ke judul (mungkin diabaikan oleh Excel, tapi untuk kebersihan kode)
+            ws['A1'].s = { 
+                font: { bold: true, sz: 14 },
+                alignment: { horizontal: 'center' }
+            };
+        }
+
+
         XLSX.utils.book_append_sheet(wb, ws, "DataMahasiswaFT");
         XLSX.writeFile(wb, "data_mahasiswa_ft.xlsx");
     }
