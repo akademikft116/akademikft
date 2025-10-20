@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Penjadwalan Kuliah - Fakultas Teknik</title>
-  
+  <title>Jadwal Kuliah</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5CM41vzapQJoB1MvJkPQE03o" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
@@ -12,404 +11,389 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  
   <style>
-    /* Styling untuk menandai menu aktif di sidebar (Consistent with Dashboard) */
-    .active-link {
-        background-color: #1d4ed8; /* blue-700 */
-        color: white;
-        border-left: 4px solid #f97316; /* orange-500 */
-    }
-    /* TomSelect fix styling dengan Tailwind */
-    .ts-control {
-        border-radius: 0.25rem !important;
-        border: 1px solid #d1d5db !important;
-        padding: 0.5rem !important;
-        min-height: 2.5rem !important; 
-    }
-    .icon-btn {
-        padding: 0.5rem 0.75rem; 
-    }
-    /* Style background warna baris untuk PDF/Export */
-    .row-Industri { background-color: #fcebeb; } 
-    .row-Sipil { background-color: #ebf5fb; }     
-    .row-Arsitektur { background-color: #eaf7ee; } 
-    .row-Elektro { background-color: #faebd7; }    
-    .row-Informatika { background-color: #fffbe6; } 
+    /* Styling khusus untuk tabel */
+    .row-Industri { background-color: #ffeaea; }
+    .row-Sipil { background-color: #eaf8ff; }
+    .row-Arsitektur { background-color: #eaffea; }
+    .row-Elektro { background-color: #fff4eb; }
+    .row-Informatika { background-color: #ffffea; }
 
-    /* Tinggi konten utama disesuaikan */
-    .main-content {
-        height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
-    }
+    .icon-btn { padding: 6px 10px; margin: 0; }
+    
+    /* TomSelect Override untuk Tailwind */
+    .ts-wrapper.single.focus .ts-control { border-color: #3b82f6 !important; box-shadow: 0 0 0 1px #3b82f6 !important; }
+    .ts-control { border-radius: 4px !important; padding: 10px !important; height: auto !important; }
+    .ts-wrapper .dropdown-input { border: none !important; }
+
+    /* Modal Styling */
+    .modal-overlay { background-color: rgba(0, 0, 0, 0.5); }
+    .modal-container { max-width: 90%; width: 800px; }
   </style>
-  </head>
+</head>
+<body class="bg-gray-100 min-h-screen">
 
-<body class="bg-gray-100">
+  <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+    <div class="flex items-center space-x-3">
+        <img src="logo.jpeg" alt="Logo FT" class="h-8 w-8 rounded-full">
+        <span class="text-xl font-bold text-white">Fakultas Teknik</span>
+    </div>
+    <div class="space-x-4">
+        <button onclick="window.location.href='dashboard.html'" class="text-white hover:text-blue-200">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </button>
+        <button onclick="window.location.href='mahasiswa.html'" class="text-white hover:text-blue-200">
+            <i class="fas fa-users"></i> Mahasiswa
+        </button>
+        <button onclick="logout()" class="text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+  </nav>
 
-    <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-6">
-        <div class="flex items-center space-x-3">
-            <img src="logo.jpeg" alt="Logo FT" class="h-8 w-auto"> 
-            <span class="text-xl font-bold text-white hidden sm:block">Akademik FT</span>
+  <div class="pt-24 pb-8 px-6 max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Manajemen Jadwal Kuliah</h1>
+
+    <div id="jadwal-form" class="bg-white p-6 rounded-lg shadow-xl mb-8 border-t-4 border-green-500">
+      <h2 class="text-xl font-semibold mb-4 text-gray-700">Tambah Jadwal Baru</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label>
+          <select id="tahun_akademik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></select>
         </div>
-        <div class="flex items-center space-x-4">
-            <span id="userNameNav" class="text-white text-sm font-semibold hidden md:block">Halo, Administrator</span> 
-            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
-                <i class="fas fa-sign-out-alt mr-1"></i> Logout
-            </button>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Kode Mata Kuliah / Nama</label>
+          <select id="kode_matkul_search" class="mt-1 block w-full"></select>
         </div>
-    </nav>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Prodi</label>
+          <select id="prodi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            <option disabled selected>Pilih Prodi</option>
+            <option value="Industri">Industri</option>
+            <option value="Sipil">Sipil</option>
+            <option value="Arsitektur">Arsitektur</option>
+            <option value="Elektro">Elektro</option>
+            <option value="Informatika">Informatika</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">SKS</label>
+          <input type="number" id="sks" placeholder="Otomatis terisi" readonly class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100">
+        </div>
 
-    <div class="flex h-screen bg-gray-100">
-        <aside class="w-64 fixed left-0 top-0 h-screen bg-gray-800 p-4 pt-16 z-20 flex flex-col">
-            <nav class="flex flex-col space-y-2 flex-grow">
-                <a href="dashboard.html" class="p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-150 flex items-center">
-                    <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
-                </a>
-                <a href="mahasiswa.html" class="p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-150 flex items-center">
-                    <i class="fas fa-user-graduate mr-3"></i> Data Mahasiswa
-                </a>
-                <a href="main.html" class="active-link p-3 rounded-lg transition duration-150 flex items-center">
-                    <i class="fas fa-calendar-alt mr-3"></i> Penjadwalan
-                </a>
-                <a href="#" id="openModalBtn" class="p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-150 flex items-center">
-                    <i class="fas fa-cog mr-3"></i> Pengaturan Akun
-                </a>
-            </nav>
-            <div class="text-center text-xs text-gray-400 border-t border-gray-700 mt-auto pt-4">
-                <p>&copy; 2024 Akademik FT</p>
-                <p>Designed by Rifqi & Alfi</p>
-            </div>
-        </aside>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Hari</label>
+          <select id="hari" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            <option disabled selected>Pilih Hari</option>
+            <option value="Senin">Senin</option>
+            <option value="Selasa">Selasa</option>
+            <option value="Rabu">Rabu</option>
+            <option value="Kamis">Kamis</option>
+            <option value="Jumat">Jumat</option>
+            <option value="Sabtu">Sabtu</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
+          <input type="time" id="jam_mulai" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Jam Akhir</label>
+          <input type="time" id="jam_akhir" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Dosen Pengampu</label>
+          <select id="dosen" class="mt-1 block w-full"></select>
+        </div>
 
-        <main id="mainContent" class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 main-content pt-20"> 
-            
-            <div id="loadingMessage" class="text-center p-10 text-gray-500">Memuat konten penjadwalan...</div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Asisten (Opsional)</label>
+          <select id="asisten" class="mt-1 block w-full"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Semester</label>
+          <select id="semester" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            <option disabled selected>Pilih Semester</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Kelas</label>
+          <select id="kelas" class="mt-1 block w-full"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Ruangan</label>
+          <select id="ruangan" class="mt-1 block w-full"></select>
+        </div>
 
-            <div id="contentWrapper" class="hidden">
-                <div class="container mx-auto p-0">
-                    
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Jadwal Kuliah</h1>
-                    
-                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
-                        
-                        <div class="mb-6 border p-4 rounded bg-gray-50">
-                            <h2 class="text-xl font-semibold mb-3">Tambah Jadwal Baru</h2>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"> 
-                                
-                                <select id="kode_matkul_search" placeholder="Cari Kode / Mata Kuliah" class="border p-2 rounded col-span-full md:col-span-1">
-                                    <option value="">Cari Kode / Mata Kuliah</option> 
-                                </select>
-                                
-                                <select id="prodi" class="border p-2 rounded">
-                                <option value="" disabled selected>Pilih Prodi</option>
-                                <option value="Industri">Industri</option>
-                                <option value="Sipil">Sipil</option>
-                                <option value="Arsitektur">Arsitektur</option>
-                                <option value="Elektro">Elektro</option>
-                                <option value="Informatika">Informatika</option>
-                                </select>
-                                
-                                <select id="hari" class="border p-2 rounded">
-                                <option value="" disabled selected>Pilih Hari</option>
-                                <option value="-">-</option>
-                                <option value="Senin">Senin</option>
-                                <option value="Selasa">Selasa</option>
-                                <option value="Rabu">Rabu</option>
-                                <option value="Kamis">Kamis</option>
-                                <option value="Jumat">Jumat</option>
-                                <option value="Sabtu">Sabtu</option>
-                                </select>
-
-                                <input id="jam_mulai" type="time" placeholder="Jam Mulai" class="border p-2 rounded">
-                                <input id="jam_akhir" type="time" placeholder="Jam Akhir" class="border p-2 rounded">
-                                
-                                <input id="sks" type="number" placeholder="SKS" class="border p-2 rounded" min="0" readonly>
-
-                                <select id="dosen" class="border p-2 rounded">
-                                    <option value="" disabled selected>Pilih Dosen</option>
-                                </select>
-
-                                <select id="asisten" class="border p-2 rounded">
-                                    <option value="" disabled selected>Pilih Asisten</option>
-                                </select>
-
-                                <select id="semester" class="border p-2 rounded">
-                                <option value="" disabled selected>Pilih Semester</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                </select>
-
-                                <select id="kelas" class="border p-2 rounded">
-                                    <option value="" disabled selected>Pilih Kelas</option>
-                                </select>
-
-                                <select id="ruangan" class="border p-2 rounded">
-                                    <option value="" disabled selected>Pilih Ruangan</option>
-                                </select>
-                                
-                                <select id="tahun_akademik" class="border p-2 rounded">
-                                    <option value="" disabled selected>Pilih Tahun Akademik</option>
-                                </select>
-                            </div>
-                            <button onclick="simpanJadwal()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-150">
-                                <i class="fas fa-plus mr-1"></i> Tambah Jadwal
-                            </button>
-                        </div>
-                        
-                        <div class="flex items-center mb-4 space-x-2 flex-wrap border-b pb-4">
-                            <select id="filterProdi" class="border p-2 rounded min-w-min">
-                                <option value="">Semua Prodi</option>
-                                <option value="Industri">Industri</option>
-                                <option value="Sipil">Sipil</option>
-                                <option value="Arsitektur">Arsitektur</option>
-                                <option value="Elektro">Elektro</option>
-                                <option value="Informatika">Informatika</option>
-                            </select>
-                            <select id="filterSemester" class="border p-2 rounded min-w-min">
-                                <option value="">Semua Semester</option>
-                                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                            </select>
-                            
-                            <select id="filterKelas" class="border p-2 rounded min-w-min">
-                                <option value="">Semua Kelas</option>
-                            </select>
-                            
-                            <select id="filterMataKuliah" class="border p-2 rounded min-w-min">
-                                <option value="">Memuat Mata Kuliah...</option>
-                            </select>
-                            
-                            <select id="filterDosen" class="border p-2 rounded min-w-min">
-                                <option value="">Memuat Dosen...</option>
-                            </select>
-                            
-                            <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
-                                <option value="">Semua Tahun Akademik</option>
-                            </select>
-                            
-                            <button onclick="filterData()" class="bg-blue-500 hover:bg-blue-600 text-white rounded icon-btn transition duration-150" title="Terapkan Filter">
-                                <i class="fas fa-magnifying-glass"></i> 
-                            </button>
-                            <button onclick="exportExcel()" class="bg-green-500 hover:bg-green-600 text-white rounded icon-btn transition duration-150" title="Export ke Excel">
-                                <i class="fas fa-file-excel"></i>
-                            </button>
-                            <button onclick="exportPDF()" class="bg-red-500 hover:bg-red-600 text-white rounded icon-btn transition duration-150" title="Export ke PDF">
-                                <i class="fas fa-file-pdf"></i>
-                            </button>
-                        </div>
-
-                        <div class="overflow-x-auto shadow-md rounded-lg">
-                            <table id="tabelJadwal" class="min-w-full border-collapse text-sm">
-                                <thead class="bg-gray-800 text-white">
-                                <tr>
-                                    <th class="border px-2 py-2 text-center">No</th>
-                                    <th class="border px-2 py-2 text-center">Tahun Akademik</th> 
-                                    <th class="border px-2 py-2 text-center">Kode</th>
-                                    <th class="border px-2 py-2 text-left">Prodi</th>
-                                    <th class="border px-2 py-2 text-center">Hari</th>
-                                    <th class="border px-2 py-2 text-center">Jam Mulai</th>
-                                    <th class="border px-2 py-2 text-center">Jam Akhir</th>
-                                    <th class="border px-2 py-2 text-left">Mata Kuliah</th>
-                                    <th class="border px-2 py-2 text-center">SKS</th>
-                                    <th class="border px-2 py-2 text-left">Dosen</th>
-                                    <th class="border px-2 py-2 text-left">Asisten</th>
-                                    <th class="border px-2 py-2 text-center">Semester</th>
-                                    <th class="border px-2 py-2 text-center">Kelas</th>
-                                    <th class="border px-2 py-2 text-center">Ruangan</th>
-                                    <th class="border px-2 py-2 text-center">Aksi</th>
-                                </tr>
-                                </thead>
-                                <tbody class="bg-white">
-                                    <tr><td colspan="15" class="text-center py-4 text-gray-500">Silakan terapkan filter untuk memuat data atau tunggu proses loading...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl">
-                        <div class="p-6">
-                            <h2 class="text-xl font-bold mb-4 border-b pb-2">Edit Detail Jadwal</h2>
-                            <form id="editForm" onsubmit="return false;">
-                                <input type="hidden" id="edit_id">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-                                    
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Mata Kuliah</label>
-                                        <select id="edit_kode_matkul_search" class="mt-1 block w-full border p-2 rounded">
-                                            <option value="" disabled selected>Cari Kode / Mata Kuliah</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Prodi</label>
-                                        <select id="edit_prodi" class="mt-1 block w-full border p-2 rounded">
-                                            <option value="Industri">Industri</option><option value="Sipil">Sipil</option><option value="Arsitektur">Arsitektur</option><option value="Elektro">Elektro</option><option value="Informatika">Informatika</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Hari</label>
-                                        <select id="edit_hari" class="mt-1 block w-full border p-2 rounded">
-                                            <option value="-">-</option><option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
-                                        <input id="edit_jam_mulai" type="time" class="mt-1 block w-full border p-2 rounded">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Jam Akhir</label>
-                                        <input id="edit_jam_akhir" type="time" class="mt-1 block w-full border p-2 rounded">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">SKS</label>
-                                        <input id="edit_sks" type="number" class="mt-1 block w-full border p-2 rounded" readonly>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Dosen</label>
-                                        <select id="edit_dosen" class="mt-1 block w-full border p-2 rounded">
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Asisten</label>
-                                        <select id="edit_asisten" class="mt-1 block w-full border p-2 rounded">
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Semester</label>
-                                        <select id="edit_semester" class="mt-1 block w-full border p-2 rounded">
-                                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Kelas</label>
-                                        <select id="edit_kelas" class="mt-1 block w-full border p-2 rounded">
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Ruangan</label>
-                                        <select id="edit_ruangan" class="mt-1 block w-full border p-2 rounded">
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label>
-                                        <select id="edit_tahun_akademik" class="mt-1 block w-full border p-2 rounded">
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-2 mt-4">
-                                    <button type="button" onclick="closeEditModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition duration-150">Batal</button>
-                                    <button type="submit" onclick="updateJadwal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-150">Simpan Perubahan</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="accountModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
-                        <div class="p-6">
-                            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                                <h2 class="text-xl font-bold">Pengaturan Akun</h2>
-                                <button onclick="closeAccountModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-                            </div>
-                            
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Username</h3>
-                                <p class="text-sm text-gray-600 mb-3">Username Anda saat ini: <strong id="currentUsername">Memuat...</strong></p>
-                                <div class="flex space-x-2">
-                                    <input type="text" id="newUsername" placeholder="Username Baru" class="flex-grow border p-2 rounded" required>
-                                    <button onclick="updateUsername()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">Update</button>
-                                </div>
-                            </div>
-
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Password</h3>
-                                <div class="flex space-x-2">
-                                    <input type="password" id="newPassword" placeholder="Password Baru (min 6 karakter)" class="flex-grow border p-2 rounded" required>
-                                    <button onclick="updatePassword()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Update</button>
-                                </div>
-                                <p class="text-xs text-red-500 mt-1">*Anda akan otomatis logout setelah mengganti password.</p>
-                            </div>
-
-                            <div class="border-t pt-4 flex justify-end">
-                                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-                                    <i class="fas fa-sign-out-alt mr-1"></i> Logout (Ganti Akun)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </main>
+      </div>
+      <div class="mt-6 text-center">
+        <button id="submit-btn" onclick="simpanJadwal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">
+          <i class="fas fa-plus-circle"></i> Simpan Jadwal
+        </button>
+      </div>
     </div>
 
-    <script>
-    // --- Inisialisasi Supabase ---
-    // Pastikan URL dan KEY Supabase sudah benar
+    <div class="bg-white p-6 rounded-lg shadow-xl mb-8 border-t-4 border-blue-500">
+      <h2 class="text-xl font-semibold mb-4 text-gray-700">Filter & Ekspor Data</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label>
+          <select id="filterTahunAkademik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Prodi</label>
+          <select id="filterProdi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            <option value="">Semua Prodi</option>
+            <option value="Industri">Industri</option>
+            <option value="Sipil">Sipil</option>
+            <option value="Arsitektur">Arsitektur</option>
+            <option value="Elektro">Elektro</option>
+            <option value="Informatika">Informatika</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Semester</label>
+          <select id="filterSemester" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            <option value="">Semua Semester</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Dosen</label>
+          <select id="filterDosen" class="mt-1 block w-full"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mata Kuliah</label>
+          <select id="filterMataKuliah" class="mt-1 block w-full"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Kelas</label>
+          <select id="filterKelas" class="mt-1 block w-full"></select>
+        </div>
+      </div>
+      <div class="text-right space-x-2">
+        <button onclick="exportExcel()" class="export-btn excel-btn bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-lg">
+          <i class="fas fa-file-excel"></i> Ekspor Excel
+        </button>
+        <button onclick="exportPDF()" class="export-btn pdf-btn bg-red-600 hover:bg-red-700 py-2 px-4 rounded-lg">
+          <i class="fas fa-file-pdf"></i> Ekspor PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-xl overflow-x-auto">
+      <h2 class="text-xl font-semibold mb-4 text-gray-700">Data Jadwal Kuliah</h2>
+      <table id="tabelJadwal" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Akademik</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hari</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Mulai</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Akhir</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Kuliah</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosen</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asisten</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruangan</th>
+            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr><td colspan="15" class="text-center py-4 text-gray-500">Memuat konten penjadwalan...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden modal-overlay z-20">
+    <div class="relative top-20 mx-auto p-5 border w-full modal-container shadow-lg rounded-md bg-white">
+      
+      <div class="flex justify-between items-center pb-3 border-b">
+        <h3 class="text-2xl font-bold text-gray-900">Edit Jadwal Kuliah</h3>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <div class="mt-4">
+        <input type="hidden" id="edit_id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label>
+              <select id="edit_tahun_akademik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Kode Mata Kuliah / Nama</label>
+              <select id="edit_kode_matkul_search" class="mt-1 block w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Prodi</label>
+              <select id="edit_prodi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                <option value="Industri">Industri</option>
+                <option value="Sipil">Sipil</option>
+                <option value="Arsitektur">Arsitektur</option>
+                <option value="Elektro">Elektro</option>
+                <option value="Informatika">Informatika</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">SKS</label>
+              <input type="number" id="edit_sks" readonly class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Hari</label>
+              <select id="edit_hari" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option>
+                <option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
+              <input type="time" id="edit_jam_mulai" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Jam Akhir</label>
+              <input type="time" id="edit_jam_akhir" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Dosen Pengampu</label>
+              <select id="edit_dosen" class="mt-1 block w-full"></select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Asisten (Opsional)</label>
+              <select id="edit_asisten" class="mt-1 block w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Semester</label>
+              <select id="edit_semester" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Kelas</label>
+              <select id="edit_kelas" class="mt-1 block w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Ruangan</label>
+              <select id="edit_ruangan" class="mt-1 block w-full"></select>
+            </div>
+
+          </div>
+        </div>
+
+      <div class="mt-6 text-right">
+        <button onclick="updateJadwal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+          <i class="fas fa-save"></i> Perbarui
+        </button>
+        <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
+          Batal
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+<script>
+    // --- KONFIGURASI SUPABASE ---
+    // GANTI DENGAN URL DAN KEY SUPABASE ANDA YANG AKTIF
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTUxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-    const supabaseClient = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-    
-    // Variabel Global
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // --- VARIABEL GLOBAL ---
     let dataYangDitampilkan = [];
     let allMatakuliah = [];
     let globalUserId = null; 
 
-    // --- FUNGSI BANTUAN TAMPILAN ---
-    function getProdiColors(prodi) {
-        switch (prodi) {
-            case 'Industri': return { header: [236, 112, 99], text: [255, 255, 255], background: [252, 235, 235] }; 
-            case 'Sipil': return { header: [84, 153, 199], text: [255, 255, 255], background: [235, 245, 251] }; 
-            case 'Arsitektur': return { header: [82, 190, 128], text: [255, 255, 255], background: [234, 247, 238] }; 
-            case 'Elektro': return { header: [247, 183, 49], text: [0, 0, 0], background: [250, 235, 215] }; 
-            case 'Informatika': return { header: [241, 196, 15], text: [0, 0, 0], background: [255, 251, 230] };
-            default: return { header: [52, 73, 94], text: [255, 255, 255], background: [240, 240, 240] };
-        }
-    }
-
-    // --- FUNGSI POPULATE SELECT (TomSelect & Regular) ---
+    // TomSelect Variables - Dideklarasikan di sini agar bisa diakses secara global
     let dosenSelect, asistenSelect, ruanganSelect, kelasSelect;
     let editDosenSelect, editAsistenSelect, editRuanganSelect, editKelasSelect;
     let filterMataKuliahSelect, filterDosenSelect, filterKelasSelect;
-    let kodeMatkulSearchSelect, editKodeMatkulSearchSelect;
+    let kodeMatkulSearchSelect, editKodeMatkulSearchSelect; 
+    let filterTahunAkademikSelect; // Dideklarasikan walau belum digunakan di TomSelect, untuk konsistensi
 
+    // --- FUNGSI BANTUAN TAMPILAN ---
+
+    // Fungsi untuk mendapatkan warna baris berdasarkan Prodi
+    function getProdiColors(prodi) {
+        switch (prodi) {
+            case 'Industri': return { row: 'row-Industri', header: '#ffcccc', text: '#800000' };
+            case 'Sipil': return { row: 'row-Sipil', header: '#cceeff', text: '#000080' };
+            case 'Arsitektur': return { row: 'row-Arsitektur', header: '#ccffcc', text: '#006400' };
+            case 'Elektro': return { row: 'row-Elektro', header: '#ffebcc', text: '#8b4513' };
+            case 'Informatika': return { row: 'row-Informatika', header: '#ffffcc', text: '#808000' };
+            default: return { row: '', header: '#f3f4f6', text: '#000000' };
+        }
+    }
+    
+    // --- FUNGSI POPULATE SELECT (Dropdown Biasa) ---
+
+    // Data referensi untuk pengulangan
     const references = [
-        { table: 'dosen', elementId: 'dosen', editElementId: 'edit_dosen', filterElementId: 'filterDosen', defaultText: 'Pilih Dosen', filterDefaultText: 'Memuat Dosen...', column: 'nama', isFilter: true },
-        { table: 'dosen', elementId: 'asisten', editElementId: 'edit_asisten', column: 'nama', defaultText: 'Pilih Asisten' },
-        { table: 'ruangan', elementId: 'ruangan', editElementId: 'edit_ruangan', column: 'nama', defaultText: 'Pilih Ruangan' },
-        { table: 'kelas', elementId: 'kelas', editElementId: 'edit_kelas', column: 'nama', defaultText: 'Pilih Kelas', isFilter: true, filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
+        { table: 'dosen', column: 'nama', elementId: 'dosen', defaultText: 'Pilih Dosen', filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen' },
+        { table: 'dosen', column: 'nama', elementId: 'asisten', defaultText: 'Pilih Asisten (Opsional)', filterElementId: 'filterAsisten', filterDefaultText: 'Semua Asisten' },
+        { table: 'ruangan', column: 'nama', elementId: 'ruangan', defaultText: 'Pilih Ruangan', filterElementId: 'filterRuangan', filterDefaultText: 'Semua Ruangan' },
+        { table: 'kelas', column: 'nama', elementId: 'kelas', defaultText: 'Pilih Kelas', filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
     ];
 
-    const populateSelect = (elementId, dataArray, defaultText, isFilter = false) => {
-        const selectElement = document.getElementById(elementId);
+    function populateSelect(selectId, options, defaultText, isFilter = false) {
+        const selectElement = document.getElementById(selectId);
         if (!selectElement) return;
-        selectElement.innerHTML = `<option value="" ${isFilter ? '' : 'disabled selected'}>${defaultText}</option>`;
-        dataArray.forEach(value => {
+
+        // Kosongkan opsi yang ada
+        selectElement.innerHTML = '';
+        
+        // Tambahkan default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = isFilter ? "" : "";
+        defaultOption.textContent = defaultText;
+        if (!isFilter) {
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+        }
+        selectElement.appendChild(defaultOption);
+
+        // Tambahkan opsi dari data
+        options.forEach(optionValue => {
             const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
+            option.value = optionValue;
+            option.textContent = optionValue;
             selectElement.appendChild(option);
         });
-    };
-    
+    }
+
+    // --- FUNGSI INIALISASI TOMSELECT (DENGAN PERBAIKAN) ---
+
     const initializeTomSelects = (mode) => {
         const elementId = mode === 'add' ? 'kode_matkul_search' : 'edit_kode_matkul_search';
         
-        // Hancurkan instance TomSelect yang sudah ada
+        // Tentukan variabel global yang sesuai
         const currentTomSelect = mode === 'add' ? kodeMatkulSearchSelect : editKodeMatkulSearchSelect;
-        if (currentTomSelect) { currentTomSelect.destroy(); }
+        
+        // *** PERBAIKAN UTAMA: Cek apakah instance TomSelect sudah ada sebelum destroy ***
+        if (currentTomSelect && currentTomSelect.destroy) { 
+            currentTomSelect.destroy(); 
+        }
+        // ********************************************************************************
 
         const selectElement = document.getElementById(elementId);
         if (!selectElement) return;
@@ -418,6 +402,7 @@
             value: mk.kode_matkul,
             text: `${mk.kode_matkul} - ${mk.nama_matkul}`,
             nama_matkul: mk.nama_matkul,
+            sks: mk.sks,
         }));
         
         const tomSelect = new TomSelect(`#${elementId}`, {
@@ -442,6 +427,7 @@
             }
         });
 
+        // Simpan instance baru ke variabel global
         if (mode === 'add') {
             kodeMatkulSearchSelect = tomSelect;
         } else {
@@ -479,7 +465,11 @@
                 text: `${mk.nama_matkul} (${mk.kode_matkul})`
             }))
         );
-        if (filterMataKuliahSelect) filterMataKuliahSelect.destroy();
+        
+        // *** PERBAIKAN: Cek sebelum destroy ***
+        if (filterMataKuliahSelect && filterMataKuliahSelect.destroy) filterMataKuliahSelect.destroy();
+        // **************************************
+
         filterMataKuliahSelect = new TomSelect("#filterMataKuliah", {
             options: filterOptions,
             valueField: 'value',
@@ -487,8 +477,11 @@
             searchField: ['value', 'text'],
             create: false,
             placeholder: "Filter Mata Kuliah",
+            onInitialize: function() {
+                this.setValue("");
+            }
         });
-        filterMataKuliahSelect.setValue("");
+        
 
 
         // 2. Ambil data Dosen, Ruangan, Kelas
@@ -507,53 +500,65 @@
             
             // Inisialisasi Tom Selects (Dosen, Asisten, Ruangan, Kelas)
             const options = uniqueData.map(d => ({value: d, text: d}));
+            options.unshift({value: "", text: ref.defaultText}); // Tambahkan placeholder
 
+            // Dosen & Asisten (Menggunakan data yang sama: tabel 'dosen')
             if (ref.elementId === 'dosen') {
-                if (dosenSelect) dosenSelect.destroy();
-                dosenSelect = new TomSelect("#dosen", { create: false, placeholder: ref.defaultText, options: options });
+                // *** PERBAIKAN: Cek sebelum destroy ***
+                if (dosenSelect && dosenSelect.destroy) dosenSelect.destroy();
+                dosenSelect = new TomSelect("#dosen", { create: false, placeholder: references.find(r => r.elementId === 'dosen').defaultText, options: options.filter(o => o.value !== "") });
                 
-                if (editDosenSelect) editDosenSelect.destroy();
-                editDosenSelect = new TomSelect("#edit_dosen", { create: false, placeholder: ref.defaultText, options: options });
+                if (editDosenSelect && editDosenSelect.destroy) editDosenSelect.destroy();
+                editDosenSelect = new TomSelect("#edit_dosen", { create: false, placeholder: references.find(r => r.elementId === 'dosen').defaultText, options: options.filter(o => o.value !== "") });
                 
-                if (asistenSelect) asistenSelect.destroy();
-                asistenSelect = new TomSelect("#asisten", { create: false, placeholder: references.find(r => r.elementId === 'asisten').defaultText, options: options });
+                if (asistenSelect && asistenSelect.destroy) asistenSelect.destroy();
+                asistenSelect = new TomSelect("#asisten", { create: false, placeholder: references.find(r => r.elementId === 'asisten').defaultText, options: options.filter(o => o.value !== "") });
                 
-                if (editAsistenSelect) editAsistenSelect.destroy();
-                editAsistenSelect = new TomSelect("#edit_asisten", { create: false, placeholder: references.find(r => r.elementId === 'asisten').defaultText, options: options });
+                if (editAsistenSelect && editAsistenSelect.destroy) editAsistenSelect.destroy();
+                editAsistenSelect = new TomSelect("#edit_asisten", { create: false, placeholder: references.find(r => r.elementId === 'asisten').defaultText, options: options.filter(o => o.value !== "") });
 
                  // Filter Dosen
-                 if (filterDosenSelect) filterDosenSelect.destroy();
+                 const filterDosenOptions = [{value: "", text: ref.filterDefaultText}].concat(options.filter(o => o.value !== ""));
+                 if (filterDosenSelect && filterDosenSelect.destroy) filterDosenSelect.destroy();
                  filterDosenSelect = new TomSelect(`#${ref.filterElementId}`, { 
                     create: false, 
                     placeholder: ref.filterDefaultText,
-                    options: options,
+                    options: filterDosenOptions,
+                    onInitialize: function() { this.setValue(""); }
                 });
-                filterDosenSelect.addOption({value: "", text: 'Semua Dosen'});
-                filterDosenSelect.setValue("");
+                // **************************************
             }
+
+            // Ruangan
             if (ref.elementId === 'ruangan') {
-                if (ruanganSelect) ruanganSelect.destroy();
-                ruanganSelect = new TomSelect("#ruangan", { create: false, placeholder: ref.defaultText, options: options });
+                // *** PERBAIKAN: Cek sebelum destroy ***
+                if (ruanganSelect && ruanganSelect.destroy) ruanganSelect.destroy();
+                ruanganSelect = new TomSelect("#ruangan", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
                 
-                if (editRuanganSelect) editRuanganSelect.destroy();
-                editRuanganSelect = new TomSelect("#edit_ruangan", { create: false, placeholder: ref.defaultText, options: options });
+                if (editRuanganSelect && editRuanganSelect.destroy) editRuanganSelect.destroy();
+                editRuanganSelect = new TomSelect("#edit_ruangan", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
+                // **************************************
             }
+
+            // Kelas
             if (ref.elementId === 'kelas') {
-                if (kelasSelect) kelasSelect.destroy();
-                kelasSelect = new TomSelect("#kelas", { create: false, placeholder: ref.defaultText, options: options });
+                // *** PERBAIKAN: Cek sebelum destroy ***
+                if (kelasSelect && kelasSelect.destroy) kelasSelect.destroy();
+                kelasSelect = new TomSelect("#kelas", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
                 
-                if (editKelasSelect) editKelasSelect.destroy();
-                editKelasSelect = new TomSelect("#edit_kelas", { create: false, placeholder: ref.defaultText, options: options });
+                if (editKelasSelect && editKelasSelect.destroy) editKelasSelect.destroy();
+                editKelasSelect = new TomSelect("#edit_kelas", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
 
                 // Filter Kelas
-                if (filterKelasSelect) filterKelasSelect.destroy();
+                const filterKelasOptions = [{value: "", text: ref.filterDefaultText}].concat(options.filter(o => o.value !== ""));
+                if (filterKelasSelect && filterKelasSelect.destroy) filterKelasSelect.destroy();
                 filterKelasSelect = new TomSelect(`#${ref.filterElementId}`, { 
                     create: false, 
                     placeholder: ref.filterDefaultText,
-                    options: options,
+                    options: filterKelasOptions,
+                    onInitialize: function() { this.setValue(""); }
                 });
-                filterKelasSelect.addOption({value: "", text: ref.filterDefaultText});
-                filterKelasSelect.setValue("");
+                // **************************************
             }
         }
 
@@ -571,367 +576,242 @@
         const tahunAkademikOptions = Array.from(new Set(taData.map(item => item.tahun_akademik))).filter(Boolean).sort((a, b) => b.localeCompare(a));
         const taDefaultText = 'Pilih Tahun Akademik';
         const taFilterDefaultText = 'Semua Tahun Akademik';
+        
+        // Menggunakan fungsi populateSelect untuk dropdown biasa
         populateSelect('tahun_akademik', tahunAkademikOptions, taDefaultText);
         populateSelect('edit_tahun_akademik', tahunAkademikOptions, taDefaultText);
         populateSelect('filterTahunAkademik', tahunAkademikOptions, taFilterDefaultText, true);
+
+        // Setelah semua referensi dimuat, panggil loadData
+        await loadData();
     }
 
-    // --- CEK AUTHENTIKASI DAN MUAT DATA (PERBAIKAN RELOG) ---
+
+    // --- FUNGSI UTAMA (CRUD & FETCH DATA) ---
+
     async function checkAuthAndLoad() {
-        document.getElementById('loadingMessage').classList.remove('hidden'); 
-        document.getElementById('contentWrapper').classList.add('hidden');
+        const { data: userData } = await supabaseClient.auth.getUser();
+        const user = userData.user;
 
-        if (!supabaseClient) {
-            document.getElementById('mainContent').innerHTML = '<div class="text-center p-10 text-red-600">❌ Gagal terhubung ke layanan Supabase.</div>';
+        if (!user) {
+            window.location.href = "index.html"; 
             return;
         }
+        globalUserId = user.id;
 
-        try {
-            const { data: userData } = await supabaseClient.auth.getUser();
-            const user = userData.user;
-            
-            // Perbaikan utama: Jika tidak ada user, redirect ke halaman login
-            if (!user) {
-                window.location.href = "index.html";
-                return;
-            }
-            
-            globalUserId = user.id;
-
-            // Ambil dan tampilkan username di navbar & modal
-            const { data: metadata } = await supabaseClient
-                .from('users_metadata')
-                .select('username')
-                .eq('user_id', user.id)
-                .single();
-
-            const username = (metadata && metadata.username) ? metadata.username : user.email;
-
-            document.getElementById('userNameNav').textContent = `Halo, ${username}`;
-            document.getElementById('currentUsername').textContent = username;
-            
-            // Muat referensi (dosen, matkul, dll) dan data tabel
-            await loadReferences();
-            await loadData();
-            
-            // Sembunyikan loading dan Tampilkan konten utama
-            document.getElementById('loadingMessage').classList.add('hidden');
-            document.getElementById('contentWrapper').classList.remove('hidden');
-
-
-        } catch (e) {
-            console.error("Fatal Error during page load:", e);
-            document.getElementById('loadingMessage').classList.add('hidden');
-            // Tampilkan pesan error informatif di layar
-            document.getElementById('mainContent').innerHTML = `
-                <div class="text-center p-10 bg-red-100 border border-red-400 text-red-700 rounded-lg mx-auto">
-                    <h2 class="text-xl font-bold mb-3">❌ Gagal Memuat Halaman Penjadwalan</h2>
-                    <p class="mb-2">Terjadi kesalahan saat memuat data referensi. Pastikan Anda sudah login.</p>
-                    <p class="text-sm italic">Detail Error: ${e.message}</p>
-                    <p class="mt-4">Silakan coba <button onclick="window.location.reload()" class="font-bold underline">refresh halaman</button> atau <button onclick="logout()" class="font-bold underline text-red-700">Logout</button>.</p>
-                </div>
-            `;
-        }
+        await loadReferences(); 
     }
-
-    // Panggil fungsi otentikasi saat halaman dimuat
-    window.onload = checkAuthAndLoad; 
-
-    // --- FUNGSI LOGIN & PENGATURAN AKUN ---
-    async function logout() { 
-        await supabaseClient.auth.signOut(); 
-        window.location.href = "index.html"; 
-    }
-
-    function openAccountModal() {
-        document.getElementById('accountModal').classList.remove('hidden');
-        document.getElementById('accountModal').classList.add('flex');
-    }
-
-    function closeAccountModal() {
-        document.getElementById('accountModal').classList.remove('flex');
-        document.getElementById('accountModal').classList.add('hidden');
-    }
-
-    document.getElementById('openModalBtn').addEventListener('click', openAccountModal);
-
-    async function updateUsername() {
-        const newUsername = document.getElementById('newUsername').value.trim();
-        if (!newUsername) {
-            alert("❌ Username tidak boleh kosong.");
-            return;
-        }
-
-        if (globalUserId) {
-            const { error: metadataError } = await supabaseClient
-                .from('users_metadata')
-                .update({ username: newUsername }) 
-                .eq('user_id', globalUserId);
-
-            if (metadataError) {
-                alert("❌ Gagal memperbarui username: " + metadataError.message);
-            } else {
-                alert("✅ Username berhasil diperbarui menjadi: " + newUsername);
-                document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
-                document.getElementById('currentUsername').textContent = newUsername;
-                document.getElementById('newUsername').value = '';
-            }
-        }
-    }
-    
-    async function updatePassword() {
-        const newPassword = document.getElementById('newPassword').value;
-        if (newPassword.length < 6) {
-            alert("❌ Password baru minimal 6 karakter.");
-            return;
-        }
-
-        const { error } = await supabaseClient.auth.updateUser({
-          password: newPassword
-        });
-
-        if (error) {
-            alert("❌ Gagal memperbarui password: " + error.message);
-        } else {
-            alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login.");
-            logout();
-        }
-    }
-    
-    // --- FUNGSI CRUD (CREATE, READ, UPDATE, DELETE) ---
 
     async function loadData(filters = {}) {
-        const tableBody = document.querySelector("#tabelJadwal tbody");
-        tableBody.innerHTML = '<tr><td colspan="15" class="text-center py-4 text-gray-500">Memuat data...</td></tr>';
+        const tbody = document.querySelector('#tabelJadwal tbody');
+        if (!tbody) return;
         
-        try {
-            const { prodi, semester, kelas, matkul, dosen, tahun_akademik } = filters;
-            let query = supabaseClient.from("jadwal_kuliah").select('*').order('hari', { ascending: true });
+        tbody.innerHTML = `<tr><td colspan="15" class="text-center py-4 text-gray-500">Memuat konten penjadwalan...</td></tr>`;
 
-            // Apply filters
-            if (prodi) query = query.eq('prodi', prodi);
-            if (semester) query = query.eq('semester', semester);
-            if (kelas) query = query.eq('kelas', kelas);
-            if (matkul) query = query.eq('kode_matkul', matkul);
-            if (dosen) query = query.eq('dosen', dosen);
-            if (tahun_akademik) query = query.eq('tahun_akademik', tahun_akademik);
+        let query = supabaseClient.from('jadwal_kuliah').select('*').order('hari', { ascending: true }).order('jam_mulai', { ascending: true });
 
-            const { data, error } = await query;
+        // Terapkan filter
+        if (filters.prodi) query = query.eq('prodi', filters.prodi);
+        if (filters.semester) query = query.eq('semester', filters.semester);
+        if (filters.kelas) query = query.eq('kelas', filters.kelas);
+        if (filters.kode_matkul) query = query.eq('kode_matkul', filters.kode_matkul);
+        if (filters.dosen) query = query.eq('dosen', filters.dosen);
+        if (filters.tahun_akademik) query = query.eq('tahun_akademik', filters.tahun_akademik);
 
-            if (error) {
-                tableBody.innerHTML = `<tr><td colspan="15" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-                console.error(error);
-                return;
-            }
+        const { data, error } = await query;
+        
+        tbody.innerHTML = ''; // Clear loading message
 
-            dataYangDitampilkan = data;
-            renderTable(data);
-        } catch (e) {
-             tableBody.innerHTML = `<tr><td colspan="15" class="text-center py-4 text-red-500">Terjadi kesalahan saat memproses data: ${e.message}</td></tr>`;
-             console.error("Error in loadData:", e);
-        }
-    }
-
-    function renderTable(data) {
-        const tableBody = document.querySelector("#tabelJadwal tbody");
-        tableBody.innerHTML = ''; // Clear existing rows
-
-        if (data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="15" class="text-center py-4 text-gray-500">Tidak ada data jadwal kuliah ditemukan dengan filter saat ini.</td></tr>';
+        if (error) {
+            console.error("Gagal memuat data jadwal:", error);
+            tbody.innerHTML = `<tr><td colspan="15" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
+            dataYangDitampilkan = [];
             return;
         }
 
-        data.forEach((row, index) => {
-            const matkul = allMatakuliah.find(mk => mk.kode_matkul === row.kode_matkul);
-            const rowClass = row.prodi ? `row-${row.prodi.replace(/\s/g, '')}` : ''; // Untuk warna baris di PDF
+        dataYangDitampilkan = data; 
+        
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="15" class="text-center py-4 text-gray-500">Tidak ada data jadwal yang ditemukan.</td></tr>`;
+            return;
+        }
 
-            const newRow = tableBody.insertRow();
-            newRow.className = rowClass + ' hover:bg-gray-50'; // Tambahkan efek hover
+        data.forEach((jadwal, index) => {
+            const row = tbody.insertRow();
+            const colors = getProdiColors(jadwal.prodi);
+            row.className = colors.row; 
 
-            newRow.innerHTML = `
-                <td class="border px-2 py-2 text-center">${index + 1}</td>
-                <td class="border px-2 py-2 text-center">${row.tahun_akademik || '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.kode_matkul || '-'}</td>
-                <td class="border px-2 py-2 text-left">${row.prodi || '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.hari || '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.jam_mulai ? row.jam_mulai.substring(0, 5) : '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.jam_akhir ? row.jam_akhir.substring(0, 5) : '-'}</td>
-                <td class="border px-2 py-2 text-left">${matkul ? matkul.nama_matkul : (row.mata_kuliah || '-')}</td>
-                <td class="border px-2 py-2 text-center">${row.sks || 0}</td>
-                <td class="border px-2 py-2 text-left">${row.dosen || '-'}</td>
-                <td class="border px-2 py-2 text-left">${row.asisten || '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.semester || '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.kelas || '-'}</td>
-                <td class="border px-2 py-2 text-center">${row.ruangan || '-'}</td>
-                <td class="border px-2 py-2 text-center whitespace-nowrap">
-                    <button onclick="openEditModal(${row.id})" class="bg-yellow-500 hover:bg-yellow-600 text-white rounded icon-btn text-xs transition duration-150" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="deleteJadwal(${row.id})" class="bg-red-600 hover:bg-red-700 text-white rounded icon-btn text-xs transition duration-150" title="Hapus">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
+            row.insertCell().textContent = index + 1;
+            row.insertCell().textContent = jadwal.tahun_akademik || '-';
+            row.insertCell().textContent = jadwal.kode_matkul || '-';
+            row.insertCell().textContent = jadwal.prodi || '-';
+            row.insertCell().textContent = jadwal.hari || '-';
+            row.insertCell().textContent = jadwal.jam_mulai ? jadwal.jam_mulai.substring(0, 5) : '-';
+            row.insertCell().textContent = jadwal.jam_akhir ? jadwal.jam_akhir.substring(0, 5) : '-';
+            
+            // Cari nama mata kuliah dari allMatakuliah
+            const matkul = allMatakuliah.find(mk => mk.kode_matkul === jadwal.kode_matkul);
+            row.insertCell().textContent = matkul ? matkul.nama_matkul : '-';
+            
+            row.insertCell().textContent = jadwal.sks || '-';
+            row.insertCell().textContent = jadwal.dosen || '-';
+            row.insertCell().textContent = jadwal.asisten || '-';
+            row.insertCell().textContent = jadwal.semester || '-';
+            row.insertCell().textContent = jadwal.kelas || '-';
+            row.insertCell().textContent = jadwal.ruangan || '-';
+
+            const actionCell = row.insertCell();
+            actionCell.className = "text-center";
+            actionCell.innerHTML = `
+                <button onclick="editJadwal('${jadwal.id}')" class="bg-yellow-500 text-white icon-btn rounded-l" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteJadwal('${jadwal.id}')" class="bg-red-500 text-white icon-btn rounded-r" title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             `;
         });
     }
 
-    function filterData() {
-        const filters = {
-            prodi: document.getElementById('filterProdi').value,
-            semester: document.getElementById('filterSemester').value,
-            kelas: filterKelasSelect ? filterKelasSelect.getValue() : '', 
-            matkul: filterMataKuliahSelect ? filterMataKuliahSelect.getValue() : '', 
-            dosen: filterDosenSelect ? filterDosenSelect.getValue() : '', 
-            tahun_akademik: document.getElementById('filterTahunAkademik').value,
-        };
-        loadData(filters);
-    }
-    
-    // 1. CREATE
     async function simpanJadwal() {
-        const kode_matkul = kodeMatkulSearchSelect ? kodeMatkulSearchSelect.getValue() : '';
-        const matkul_obj = allMatakuliah.find(mk => mk.kode_matkul === kode_matkul);
-        const mata_kuliah = matkul_obj ? matkul_obj.nama_matkul : ''; 
-        
-        const dataJadwal = {
-            kode_matkul: kode_matkul,
-            mata_kuliah: mata_kuliah, 
+        // Ambil nilai dari TomSelects dan input/select biasa
+        const jadwalBaru = {
+            tahun_akademik: document.getElementById('tahun_akademik').value,
+            kode_matkul: kodeMatkulSearchSelect ? kodeMatkulSearchSelect.getValue() : '',
             prodi: document.getElementById('prodi').value,
             hari: document.getElementById('hari').value,
             jam_mulai: document.getElementById('jam_mulai').value,
             jam_akhir: document.getElementById('jam_akhir').value,
             sks: parseInt(document.getElementById('sks').value) || 0,
-            dosen: dosenSelect ? dosenSelect.getValue() : document.getElementById('dosen').value,
-            asisten: asistenSelect ? asistenSelect.getValue() : document.getElementById('asisten').value,
+            dosen: dosenSelect ? dosenSelect.getValue() : '',
+            asisten: asistenSelect ? asistenSelect.getValue() : '',
             semester: document.getElementById('semester').value,
-            kelas: kelasSelect ? kelasSelect.getValue() : document.getElementById('kelas').value,
-            ruangan: ruanganSelect ? ruanganSelect.getValue() : document.getElementById('ruangan').value,
-            tahun_akademik: document.getElementById('tahun_akademik').value,
-        };
-
-        // Validasi
-        if (!dataJadwal.kode_matkul || !dataJadwal.prodi || !dataJadwal.hari || !dataJadwal.jam_mulai || !dataJadwal.jam_akhir || !dataJadwal.dosen || !dataJadwal.semester || !dataJadwal.kelas || !dataJadwal.ruangan || !dataJadwal.tahun_akademik) {
-            alert("❌ Harap lengkapi semua data wajib (kecuali Asisten).");
-            return;
-        }
-
-        const { error } = await supabaseClient.from('jadwal_kuliah').insert([dataJadwal]);
-
-        if (error) {
-            alert('❌ Gagal menyimpan jadwal: ' + error.message);
-            console.error(error);
-        } else {
-            alert('✅ Jadwal Kuliah berhasil ditambahkan!');
-            
-            // Reset form
-            document.getElementById('prodi').value = '';
-            document.getElementById('hari').value = '';
-            document.getElementById('jam_mulai').value = '';
-            document.getElementById('jam_akhir').value = '';
-            document.getElementById('sks').value = '';
-            document.getElementById('semester').value = '';
-            document.getElementById('tahun_akademik').value = '';
-            
-            kodeMatkulSearchSelect?.clear();
-            dosenSelect?.clear();
-            asistenSelect?.clear();
-            kelasSelect?.clear();
-            ruanganSelect?.clear();
-            
-
-            loadData(getFilterValues()); // Reload data dengan filter saat ini
-        }
-    }
-
-    // 3. UPDATE
-    async function openEditModal(id) {
-        const jadwal = dataYangDitampilkan.find(j => j.id === id);
-        if (!jadwal) return;
-
-        document.getElementById('edit_id').value = id;
-        
-        // Atur nilai Tom Select
-        editKodeMatkulSearchSelect?.setValue(jadwal.kode_matkul || '');
-        editDosenSelect?.setValue(jadwal.dosen || '');
-        editAsistenSelect?.setValue(jadwal.asisten || '');
-        editKelasSelect?.setValue(jadwal.kelas || '');
-        editRuanganSelect?.setValue(jadwal.ruangan || '');
-
-        // Atur nilai Select biasa
-        document.getElementById('edit_prodi').value = jadwal.prodi || '';
-        document.getElementById('edit_hari').value = jadwal.hari || '';
-        document.getElementById('edit_semester').value = jadwal.semester || '';
-        document.getElementById('edit_tahun_akademik').value = jadwal.tahun_akademik || '';
-        
-        // Atur nilai Input
-        document.getElementById('edit_jam_mulai').value = jadwal.jam_mulai || '';
-        document.getElementById('edit_jam_akhir').value = jadwal.jam_akhir || '';
-        document.getElementById('edit_sks').value = jadwal.sks || 0;
-        
-        // Update SKS jika kode matkul sudah dipilih di TomSelect
-        const matkul = allMatakuliah.find(mk => mk.kode_matkul === jadwal.kode_matkul);
-        if (matkul) {
-             document.getElementById('edit_sks').value = matkul.sks;
-        }
-
-
-        document.getElementById('editModal').classList.remove('hidden');
-        document.getElementById('editModal').classList.add('flex');
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.remove('flex');
-        document.getElementById('editModal').classList.add('hidden');
-    }
-
-    async function updateJadwal() {
-        const id = document.getElementById('edit_id').value;
-        const kode_matkul = editKodeMatkulSearchSelect?.getValue();
-        const matkul_obj = allMatakuliah.find(mk => mk.kode_matkul === kode_matkul);
-        const mata_kuliah = matkul_obj ? matkul_obj.nama_matkul : ''; 
-
-        const updatedData = {
-            kode_matkul: kode_matkul,
-            mata_kuliah: mata_kuliah, 
-            prodi: document.getElementById('edit_prodi').value,
-            hari: document.getElementById('edit_hari').value,
-            jam_mulai: document.getElementById('edit_jam_mulai').value,
-            jam_akhir: document.getElementById('edit_jam_akhir').value,
-            sks: parseInt(document.getElementById('edit_sks').value) || 0,
-            dosen: editDosenSelect?.getValue(),
-            asisten: editAsistenSelect?.getValue(),
-            semester: document.getElementById('edit_semester').value,
-            kelas: editKelasSelect?.getValue(),
-            ruangan: editRuanganSelect?.getValue(),
-            tahun_akademik: document.getElementById('edit_tahun_akademik').value,
+            kelas: kelasSelect ? kelasSelect.getValue() : '',
+            ruangan: ruanganSelect ? ruanganSelect.getValue() : '',
         };
         
-        // Validasi
-        if (!updatedData.kode_matkul || !updatedData.prodi || !updatedData.hari || !updatedData.jam_mulai || !updatedData.jam_akhir || !updatedData.dosen || !updatedData.semester || !updatedData.kelas || !updatedData.ruangan || !updatedData.tahun_akademik) {
-            alert("❌ Harap lengkapi semua data wajib (kecuali Asisten).");
+        // Validasi Sederhana
+        if (!jadwalBaru.tahun_akademik || !jadwalBaru.kode_matkul || !jadwalBaru.prodi || !jadwalBaru.hari || !jadwalBaru.jam_mulai || !jadwalBaru.jam_akhir || !jadwalBaru.dosen || !jadwalBaru.semester || !jadwalBaru.kelas || !jadwalBaru.ruangan) {
+            alert("❌ Harap lengkapi semua kolom wajib (kecuali Asisten).");
             return;
         }
 
         const { error } = await supabaseClient
             .from('jadwal_kuliah')
-            .update(updatedData)
+            .insert([jadwalBaru]);
+
+        if (error) {
+            alert("❌ Gagal menyimpan jadwal: " + error.message);
+            console.error(error);
+        } else {
+            alert("✅ Jadwal berhasil ditambahkan!");
+            // Reset Form (kecuali Tahun Akademik dan Prodi untuk kemudahan input berulang)
+            document.getElementById('prodi').value = "";
+            document.getElementById('hari').value = "";
+            document.getElementById('jam_mulai').value = "";
+            document.getElementById('jam_akhir').value = "";
+            document.getElementById('sks').value = "";
+            if (kodeMatkulSearchSelect) kodeMatkulSearchSelect.clear();
+            if (dosenSelect) dosenSelect.clear();
+            if (asistenSelect) asistenSelect.clear();
+            document.getElementById('semester').value = "";
+            if (kelasSelect) kelasSelect.clear();
+            if (ruanganSelect) ruanganSelect.clear();
+            
+            // Muat ulang data
+            filterData();
+        }
+    }
+    
+    // --- FUNGSI FILTER DATA ---
+
+    function filterData() {
+        const filters = {
+            prodi: document.getElementById('filterProdi').value,
+            semester: document.getElementById('filterSemester').value,
+            // TomSelect filters
+            kelas: filterKelasSelect ? filterKelasSelect.getValue() : '',
+            kode_matkul: filterMataKuliahSelect ? filterMataKuliahSelect.getValue() : '',
+            dosen: filterDosenSelect ? filterDosenSelect.getValue() : '',
+            // Select biasa
+            tahun_akademik: document.getElementById('filterTahunAkademik').value,
+        };
+        
+        loadData(filters);
+    }
+
+    // --- FUNGSI EDIT & DELETE ---
+
+    async function editJadwal(id) {
+        const jadwal = dataYangDitampilkan.find(j => j.id == id);
+        if (!jadwal) return alert("Jadwal tidak ditemukan.");
+
+        // Set nilai form edit
+        document.getElementById('edit_id').value = id;
+        
+        // TomSelect harus diset nilainya. Panggil initializeTomSelects('edit') lagi untuk memastikan TomSelect siap.
+        // Kemudian setValue.
+        if (editKodeMatkulSearchSelect) editKodeMatkulSearchSelect.setValue(jadwal.kode_matkul); else initializeTomSelects('edit').setValue(jadwal.kode_matkul);
+        if (editDosenSelect) editDosenSelect.setValue(jadwal.dosen);
+        if (editAsistenSelect) editAsistenSelect.setValue(jadwal.asisten);
+        if (editRuanganSelect) editRuanganSelect.setValue(jadwal.ruangan);
+        if (editKelasSelect) editKelasSelect.setValue(jadwal.kelas);
+
+        // Dropdown/Input biasa
+        document.getElementById('edit_prodi').value = jadwal.prodi;
+        document.getElementById('edit_hari').value = jadwal.hari;
+        document.getElementById('edit_jam_mulai').value = jadwal.jam_mulai ? jadwal.jam_mulai.substring(0, 5) : '';
+        document.getElementById('edit_jam_akhir').value = jadwal.jam_akhir ? jadwal.jam_akhir.substring(0, 5) : '';
+        document.getElementById('edit_sks').value = jadwal.sks;
+        document.getElementById('edit_semester').value = jadwal.semester;
+        document.getElementById('edit_tahun_akademik').value = jadwal.tahun_akademik;
+
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+    
+    function closeModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
+
+    async function updateJadwal() {
+        const id = document.getElementById('edit_id').value;
+        const dataUpdate = {
+            tahun_akademik: document.getElementById('edit_tahun_akademik').value,
+            kode_matkul: editKodeMatkulSearchSelect ? editKodeMatkulSearchSelect.getValue() : '',
+            prodi: document.getElementById('edit_prodi').value,
+            hari: document.getElementById('edit_hari').value,
+            jam_mulai: document.getElementById('edit_jam_mulai').value,
+            jam_akhir: document.getElementById('edit_jam_akhir').value,
+            sks: parseInt(document.getElementById('edit_sks').value) || 0,
+            dosen: editDosenSelect ? editDosenSelect.getValue() : '',
+            asisten: editAsistenSelect ? editAsistenSelect.getValue() : '',
+            semester: document.getElementById('edit_semester').value,
+            kelas: editKelasSelect ? editKelasSelect.getValue() : '',
+            ruangan: editRuanganSelect ? editRuanganSelect.getValue() : '',
+        };
+
+        if (!dataUpdate.kode_matkul || !dataUpdate.prodi || !dataUpdate.hari || !dataUpdate.jam_mulai || !dataUpdate.dosen || !dataUpdate.semester || !dataUpdate.kelas || !dataUpdate.ruangan || !dataUpdate.tahun_akademik) {
+            alert("❌ Harap lengkapi semua kolom wajib.");
+            return;
+        }
+
+        const { error } = await supabaseClient
+            .from('jadwal_kuliah')
+            .update(dataUpdate)
             .eq('id', id);
 
         if (error) {
-            alert('❌ Gagal memperbarui jadwal: ' + error.message);
+            alert("❌ Gagal memperbarui jadwal: " + error.message);
             console.error(error);
         } else {
-            alert('✅ Jadwal Kuliah berhasil diperbarui!');
-            closeEditModal();
-            loadData(getFilterValues()); // Reload data dengan filter saat ini
+            alert("✅ Jadwal berhasil diperbarui!");
+            closeModal();
+            filterData(); // Muat ulang data setelah update
         }
     }
 
-    // 4. DELETE
     async function deleteJadwal(id) {
-        if (!confirm('Anda yakin ingin menghapus jadwal ini secara permanen?')) {
-            return;
-        }
+        if (!confirm("Apakah Anda yakin ingin menghapus jadwal ini?")) return;
 
         const { error } = await supabaseClient
             .from('jadwal_kuliah')
@@ -939,128 +819,94 @@
             .eq('id', id);
 
         if (error) {
-            alert('❌ Gagal menghapus jadwal: ' + error.message);
+            alert("❌ Gagal menghapus jadwal: " + error.message);
+            console.error(error);
         } else {
-            alert('✅ Jadwal Kuliah berhasil dihapus.');
-            loadData(getFilterValues()); // Reload data dengan filter saat ini
+            alert("✅ Jadwal berhasil dihapus!");
+            filterData(); // Muat ulang data setelah hapus
         }
     }
-
-    // FUNGSI BANTUAN FILTER
-    function getFilterValues() {
-        return {
-            prodi: document.getElementById('filterProdi').value,
-            semester: document.getElementById('filterSemester').value,
-            kelas: filterKelasSelect ? filterKelasSelect.getValue() : '', 
-            matkul: filterMataKuliahSelect ? filterMataKuliahSelect.getValue() : '', 
-            dosen: filterDosenSelect ? filterDosenSelect.getValue() : '', 
-            tahun_akademik: document.getElementById('filterTahunAkademik').value,
-        };
-    }
-
-    // --- FUNGSI EXPORT DATA (Excel dan PDF) ---
+    
+    // --- FUNGSI EKSPORT ---
 
     function exportExcel() {
         if (dataYangDitampilkan.length === 0) {
-            alert("Tidak ada data untuk diexport.");
+            alert("Tidak ada data untuk diekspor.");
             return;
         }
-        
-        const dataForExport = dataYangDitampilkan.map((row, index) => {
-            const matkul = allMatakuliah.find(mk => mk.kode_matkul === row.kode_matkul);
+
+        const headers = ["No", "Tahun Akademik", "Kode", "Prodi", "Hari", "Jam Mulai", "Jam Akhir", "Mata Kuliah", "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"];
+        const data = dataYangDitampilkan.map((j, index) => {
+            const matkul = allMatakuliah.find(mk => mk.kode_matkul === j.kode_matkul);
             return [
                 index + 1,
-                row.tahun_akademik || '-',
-                row.kode_matkul || '-',
-                row.prodi || '-',
-                row.hari || '-',
-                row.jam_mulai || '-',
-                row.jam_akhir || '-',
-                matkul ? matkul.nama_matkul : (row.mata_kuliah || '-'),
-                row.sks || 0,
-                row.dosen || '-',
-                row.asisten || '-',
-                row.semester || '-',
-                row.kelas || '-',
-                row.ruangan || '-',
+                j.tahun_akademik || '-',
+                j.kode_matkul || '-',
+                j.prodi || '-',
+                j.hari || '-',
+                j.jam_mulai ? j.jam_mulai.substring(0, 5) : '-',
+                j.jam_akhir ? j.jam_akhir.substring(0, 5) : '-',
+                matkul ? matkul.nama_matkul : '-',
+                j.sks || '-',
+                j.dosen || '-',
+                j.asisten || '-',
+                j.semester || '-',
+                j.kelas || '-',
+                j.ruangan || '-',
             ];
         });
 
-        const headers = [
-            "No", "Tahun Akademik", "Kode", "Prodi", "Hari", "Jam Mulai", "Jam Akhir", 
-            "Mata Kuliah", "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
-        ];
-
-        const ws = XLSX.utils.aoa_to_sheet([headers].concat(dataForExport));
-        const title = ["DATA PENJADWALAN KULIAH FAKULTAS TEKNIK"];
-        XLSX.utils.sheet_add_aoa(ws, [title], { origin: "A1" });
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" });
-        XLSX.utils.sheet_add_aoa(ws, dataForExport, { origin: "A3" });
-
-        if (ws['A1']) {
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            range.e.c = headers.length - 1; 
-            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
-            ws['A1'].s = { font: { sz: 14, bold: true }, alignment: { horizontal: "center" } };
-        }
-
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Jadwal Kuliah");
-
-        XLSX.writeFile(wb, "jadwal_kuliah_ft.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Kuliah");
+        XLSX.writeFile(wb, "Jadwal_Kuliah.xlsx");
     }
 
     function exportPDF() {
         if (dataYangDitampilkan.length === 0) {
-            alert("Tidak ada data untuk diexport.");
+            alert("Tidak ada data untuk diekspor.");
             return;
         }
-        
-        const filterProdi = document.getElementById('filterProdi').value;
-        const filterSemester = document.getElementById('filterSemester').value;
-        const filterTahunAkademik = document.getElementById('filterTahunAkademik').value;
-        const prodiColor = getProdiColors(filterProdi || null);
 
-        const dataPDF = dataYangDitampilkan.map((row, index) => [
-            index + 1,
-            row.tahun_akademik || '-',
-            row.kode_matkul || '-',
-            row.prodi || '-',
-            row.hari || '-',
-            row.jam_mulai ? row.jam_mulai.substring(0, 5) : '-',
-            row.jam_akhir ? row.jam_akhir.substring(0, 5) : '-',
-            allMatakuliah.find(mk => mk.kode_matkul === row.kode_matkul)?.nama_matkul || row.mata_kuliah || '-',
-            row.sks || 0,
-            row.dosen || '-',
-            row.asisten || '-',
-            row.semester || '-',
-            row.kelas || '-',
-            row.ruangan || '-',
-        ]);
-
-        const headers = [
-            "No", "Tahun Akademik", "Kode", "Prodi", "Hari", "Mulai", "Akhir",
-            "Mata Kuliah", "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
-        ];
-        
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); 
+        const doc = new jsPDF({ orientation: 'landscape', format: 'a4' }); 
 
-        doc.setFontSize(16);
-        doc.text("DATA PENJADWALAN KULIAH FAKULTAS TEKNIK", 148.5, 15, null, null, 'center'); 
-        
+        const headers = [["No", "Tahun Akademik", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", "SKS", "Dosen", "Asisten", "Smt", "Kls", "Rgn"]];
+        const rows = dataYangDitampilkan.map((j, index) => {
+             const matkul = allMatakuliah.find(mk => mk.kode_matkul === j.kode_matkul);
+            return [
+                index + 1,
+                j.tahun_akademik || '-',
+                j.kode_matkul || '-',
+                j.prodi || '-',
+                j.hari || '-',
+                j.jam_mulai ? j.jam_mulai.substring(0, 5) : '-',
+                j.jam_akhir ? j.jam_akhir.substring(0, 5) : '-',
+                matkul ? matkul.nama_matkul : '-',
+                j.sks || '-',
+                j.dosen || '-',
+                j.asisten || '-',
+                j.semester || '-',
+                j.kelas || '-',
+                j.ruangan || '-',
+            ];
+        });
+
+        const currentFilterProdi = document.getElementById('filterProdi').value;
+        const prodiColor = getProdiColors(currentFilterProdi);
+        const prodiDisplay = currentFilterProdi || "Semua Prodi";
+
+        doc.setFontSize(14);
+        doc.text("JADWAL KULIAH FAKULTAS TEKNIK", 148.5, 15, { align: 'center' }); // A4 Landscape width is 297mm
         doc.setFontSize(10);
-        let subTitle = `Filter: Prodi: ${filterProdi || 'Semua'}, Semester: ${filterSemester || 'Semua'}, Tahun: ${filterTahunAkademik || 'Semua'}`;
-        doc.text(subTitle, 148.5, 22, null, null, 'center');
-        
-        const startY = 28; 
+        doc.text(`Filter Prodi: ${prodiDisplay}`, 148.5, 20, { align: 'center' });
 
         doc.autoTable({
-            head: [headers],
-            body: dataPDF,
-            startY: startY,
+            startY: 25,
+            head: headers,
+            body: rows,
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1.5, halign: 'center' },
+            styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
             margin: { left: 5, right: 5 }, 
             headStyles: { 
                 fillColor: prodiColor.header, 
@@ -1069,31 +915,61 @@
                 halign: 'center' 
             },
             columnStyles: {
-                0: { halign: 'center', cellWidth: 7 }, 1: { halign: 'center', cellWidth: 20 }, 
-                2: { halign: 'center', cellWidth: 15 }, 3: { halign: 'left', cellWidth: 25 }, 
-                4: { halign: 'center', cellWidth: 15 }, 5: { halign: 'center', cellWidth: 15 }, 
-                6: { halign: 'center', cellWidth: 15 }, 7: { halign: 'left', cellWidth: 40 }, 
-                8: { halign: 'center', cellWidth: 10 }, 9: { halign: 'left', cellWidth: 30 }, 
-                10: { halign: 'left', cellWidth: 30 }, 11: { halign: 'center', cellWidth: 15 }, 
-                12: { halign: 'center', cellWidth: 15 }, 13: { halign: 'center', cellWidth: 15 }, 
+                0: { halign: 'center', cellWidth: 7 }, 1: { halign: 'center', cellWidth: 15 }, 
+                2: { halign: 'center', cellWidth: 10 }, 4: { halign: 'center', cellWidth: 12 }, 
+                5: { halign: 'center', cellWidth: 10 }, 6: { halign: 'center', cellWidth: 10 }, 
+                8: { halign: 'center', cellWidth: 8 }, 11: { halign: 'center', cellWidth: 8 }, 
+                12: { halign: 'center', cellWidth: 10 }, 13: { halign: 'center', cellWidth: 10 }, 
+                3: { halign: 'left', cellWidth: 20 }, 7: { halign: 'left', cellWidth: 40 }, 
+                9: { halign: 'left', cellWidth: 30 }, 10: { halign: 'left', cellWidth: 30 }, 
             },
             didParseCell: function (data) {
-                const row = dataYangDitampilkan[data.row.index];
-                if (data.section === 'body' && row) {
-                    const cellProdiColor = getProdiColors(row.prodi);
-                    data.cell.styles.fillColor = cellProdiColor.background;
+                if (data.section === 'body' && data.column.index === 3) {
+                    const cellProdi = data.row.raw[3]; 
+                    const cellColors = getProdiColors(cellProdi);
+                    data.cell.styles.fillColor = cellColors.header;
                 }
-            },
-            didDrawPage: function(data) {
-                doc.setFontSize(8);
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.text('Halaman ' + data.pageNumber + ' dari ' + pageCount, data.settings.margin.left, doc.internal.pageSize.height - 10);
             }
         });
 
-        doc.save('jadwal_kuliah_ft.pdf');
+        doc.save('Jadwal_Kuliah.pdf');
+    }
+    
+    // --- FUNGSI LOGOUT ---
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = "index.html";
     }
 
-    </script>
+    // --- INISIALISASI ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tambahkan event listener untuk filter select biasa
+        document.getElementById('filterProdi').addEventListener('change', filterData);
+        document.getElementById('filterSemester').addEventListener('change', filterData);
+        document.getElementById('filterTahunAkademik').addEventListener('change', filterData);
+        
+        // Panggil checkAuthAndLoad untuk memulai semuanya
+        checkAuthAndLoad();
+    });
+    
+    // Tambahkan event listener untuk TomSelect Filters (agar memanggil filterData)
+    // Karena instance TomSelect baru ada setelah loadReferences, kita tambahkan listener di akhir loadReferences
+    document.addEventListener('tomselect:ready', (e) => {
+        if (e.detail.id === 'filterMataKuliah' && filterMataKuliahSelect) {
+            filterMataKuliahSelect.on('change', filterData);
+        }
+        if (e.detail.id === 'filterDosen' && filterDosenSelect) {
+            filterDosenSelect.on('change', filterData);
+        }
+        if (e.detail.id === 'filterKelas' && filterKelasSelect) {
+            filterKelasSelect.on('change', filterData);
+        }
+    });
+
+    // Pemicu event kustom setelah TomSelect siap (Ini hanya untuk membantu testing/debugging)
+    // Pada implementasi riil, ini dipicu setelah loadReferences selesai.
+    // Namun karena kita sudah memanggil filterData di akhir loadReferences, ini hanya sebagai fallback/debugging.
+
+</script>
 </body>
 </html>
