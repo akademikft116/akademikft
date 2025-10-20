@@ -180,6 +180,9 @@
         </div>
       </div>
       <div class="text-right space-x-2">
+        <button onclick="filterData()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg">
+          <i class="fas fa-filter"></i> Terapkan Filter
+        </button>
         <button onclick="exportExcel()" class="export-btn excel-btn bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-lg">
           <i class="fas fa-file-excel"></i> Ekspor Excel
         </button>
@@ -324,12 +327,11 @@
     let allMatakuliah = [];
     let globalUserId = null; 
 
-    // TomSelect Variables - Dideklarasikan di sini agar bisa diakses secara global
+    // TomSelect Variables
     let dosenSelect, asistenSelect, ruanganSelect, kelasSelect;
     let editDosenSelect, editAsistenSelect, editRuanganSelect, editKelasSelect;
     let filterMataKuliahSelect, filterDosenSelect, filterKelasSelect;
     let kodeMatkulSearchSelect, editKodeMatkulSearchSelect; 
-    let filterTahunAkademikSelect; // Dideklarasikan walau belum digunakan di TomSelect, untuk konsistensi
 
     // --- FUNGSI BANTUAN TAMPILAN ---
 
@@ -345,43 +347,7 @@
         }
     }
     
-    // --- FUNGSI POPULATE SELECT (Dropdown Biasa) ---
-
-    // Data referensi untuk pengulangan
-    const references = [
-        { table: 'dosen', column: 'nama', elementId: 'dosen', defaultText: 'Pilih Dosen', filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen' },
-        { table: 'dosen', column: 'nama', elementId: 'asisten', defaultText: 'Pilih Asisten (Opsional)', filterElementId: 'filterAsisten', filterDefaultText: 'Semua Asisten' },
-        { table: 'ruangan', column: 'nama', elementId: 'ruangan', defaultText: 'Pilih Ruangan', filterElementId: 'filterRuangan', filterDefaultText: 'Semua Ruangan' },
-        { table: 'kelas', column: 'nama', elementId: 'kelas', defaultText: 'Pilih Kelas', filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
-    ];
-
-    function populateSelect(selectId, options, defaultText, isFilter = false) {
-        const selectElement = document.getElementById(selectId);
-        if (!selectElement) return;
-
-        // Kosongkan opsi yang ada
-        selectElement.innerHTML = '';
-        
-        // Tambahkan default option
-        const defaultOption = document.createElement('option');
-        defaultOption.value = isFilter ? "" : "";
-        defaultOption.textContent = defaultText;
-        if (!isFilter) {
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-        }
-        selectElement.appendChild(defaultOption);
-
-        // Tambahkan opsi dari data
-        options.forEach(optionValue => {
-            const option = document.createElement('option');
-            option.value = optionValue;
-            option.textContent = optionValue;
-            selectElement.appendChild(option);
-        });
-    }
-
-    // --- FUNGSI INIALISASI TOMSELECT (DENGAN PERBAIKAN) ---
+    // --- FUNGSI INIALISASI TOMSELECT (DENGAN PERBAIKAN DESTROY) ---
 
     const initializeTomSelects = (mode) => {
         const elementId = mode === 'add' ? 'kode_matkul_search' : 'edit_kode_matkul_search';
@@ -389,11 +355,10 @@
         // Tentukan variabel global yang sesuai
         const currentTomSelect = mode === 'add' ? kodeMatkulSearchSelect : editKodeMatkulSearchSelect;
         
-        // *** PERBAIKAN UTAMA: Cek apakah instance TomSelect sudah ada sebelum destroy ***
+        // Cek apakah instance TomSelect sudah ada sebelum destroy
         if (currentTomSelect && currentTomSelect.destroy) { 
             currentTomSelect.destroy(); 
         }
-        // ********************************************************************************
 
         const selectElement = document.getElementById(elementId);
         if (!selectElement) return;
@@ -459,19 +424,17 @@
         initializeTomSelects('edit');
 
         // Tom Select untuk Filter Mata Kuliah
-        const filterOptions = [{value: "", text: "Semua Mata Kuliah"}].concat(
+        const filterMatkulOptions = [{value: "", text: "Semua Mata Kuliah"}].concat(
             allMatakuliah.map(mk => ({
                 value: mk.kode_matkul,
                 text: `${mk.nama_matkul} (${mk.kode_matkul})`
             }))
         );
         
-        // *** PERBAIKAN: Cek sebelum destroy ***
         if (filterMataKuliahSelect && filterMataKuliahSelect.destroy) filterMataKuliahSelect.destroy();
-        // **************************************
 
         filterMataKuliahSelect = new TomSelect("#filterMataKuliah", {
-            options: filterOptions,
+            options: filterMatkulOptions,
             valueField: 'value',
             labelField: 'text',
             searchField: ['value', 'text'],
@@ -481,7 +444,9 @@
                 this.setValue("");
             }
         });
-        
+        // --- PERBAIKAN: Listener untuk filter TomSelects
+        filterMataKuliahSelect.on('change', filterData);
+        // ------------------------------------------------
 
 
         // 2. Ambil data Dosen, Ruangan, Kelas
@@ -500,17 +465,17 @@
             
             // Inisialisasi Tom Selects (Dosen, Asisten, Ruangan, Kelas)
             const options = uniqueData.map(d => ({value: d, text: d}));
-            options.unshift({value: "", text: ref.defaultText}); // Tambahkan placeholder
-
+            
             // Dosen & Asisten (Menggunakan data yang sama: tabel 'dosen')
             if (ref.elementId === 'dosen') {
-                // *** PERBAIKAN: Cek sebelum destroy ***
+                // Input Dosen (tambah & edit)
                 if (dosenSelect && dosenSelect.destroy) dosenSelect.destroy();
                 dosenSelect = new TomSelect("#dosen", { create: false, placeholder: references.find(r => r.elementId === 'dosen').defaultText, options: options.filter(o => o.value !== "") });
                 
                 if (editDosenSelect && editDosenSelect.destroy) editDosenSelect.destroy();
                 editDosenSelect = new TomSelect("#edit_dosen", { create: false, placeholder: references.find(r => r.elementId === 'dosen').defaultText, options: options.filter(o => o.value !== "") });
                 
+                // Input Asisten (tambah & edit)
                 if (asistenSelect && asistenSelect.destroy) asistenSelect.destroy();
                 asistenSelect = new TomSelect("#asisten", { create: false, placeholder: references.find(r => r.elementId === 'asisten').defaultText, options: options.filter(o => o.value !== "") });
                 
@@ -526,23 +491,23 @@
                     options: filterDosenOptions,
                     onInitialize: function() { this.setValue(""); }
                 });
-                // **************************************
+                // --- PERBAIKAN: Listener untuk filter TomSelects
+                filterDosenSelect.on('change', filterData);
+                // ------------------------------------------------
             }
 
             // Ruangan
             if (ref.elementId === 'ruangan') {
-                // *** PERBAIKAN: Cek sebelum destroy ***
                 if (ruanganSelect && ruanganSelect.destroy) ruanganSelect.destroy();
                 ruanganSelect = new TomSelect("#ruangan", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
                 
                 if (editRuanganSelect && editRuanganSelect.destroy) editRuanganSelect.destroy();
                 editRuanganSelect = new TomSelect("#edit_ruangan", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
-                // **************************************
             }
 
             // Kelas
             if (ref.elementId === 'kelas') {
-                // *** PERBAIKAN: Cek sebelum destroy ***
+                // Input Kelas (tambah & edit)
                 if (kelasSelect && kelasSelect.destroy) kelasSelect.destroy();
                 kelasSelect = new TomSelect("#kelas", { create: false, placeholder: ref.defaultText, options: options.filter(o => o.value !== "") });
                 
@@ -558,7 +523,9 @@
                     options: filterKelasOptions,
                     onInitialize: function() { this.setValue(""); }
                 });
-                // **************************************
+                // --- PERBAIKAN: Listener untuk filter TomSelects
+                filterKelasSelect.on('change', filterData);
+                // ------------------------------------------------
             }
         }
 
@@ -580,12 +547,66 @@
         // Menggunakan fungsi populateSelect untuk dropdown biasa
         populateSelect('tahun_akademik', tahunAkademikOptions, taDefaultText);
         populateSelect('edit_tahun_akademik', tahunAkademikOptions, taDefaultText);
-        populateSelect('filterTahunAkademik', tahunAkademikOptions, taFilterDefaultText, true);
+        
+        // Filter Tahun Akademik (Dropdown biasa)
+        const filterTaElement = document.getElementById('filterTahunAkademik');
+        if(filterTaElement) {
+             filterTaElement.innerHTML = ''; // Kosongkan
+             // Tambahkan default option
+             const defaultOption = document.createElement('option');
+             defaultOption.value = "";
+             defaultOption.textContent = taFilterDefaultText;
+             filterTaElement.appendChild(defaultOption);
+             // Tambahkan opsi dari data
+             tahunAkademikOptions.forEach(optionValue => {
+                 const option = document.createElement('option');
+                 option.value = optionValue;
+                 option.textContent = optionValue;
+                 filterTaElement.appendChild(option);
+             });
+             // Listener sudah ada di DOMContentLoaded
+        }
 
         // Setelah semua referensi dimuat, panggil loadData
         await loadData();
     }
 
+
+    // --- FUNGSI POPULATE SELECT (Dropdown Biasa) ---
+
+    // Data referensi untuk pengulangan
+    const references = [
+        { table: 'dosen', column: 'nama', elementId: 'dosen', defaultText: 'Pilih Dosen', filterElementId: 'filterDosen', filterDefaultText: 'Semua Dosen' },
+        { table: 'dosen', column: 'nama', elementId: 'asisten', defaultText: 'Pilih Asisten (Opsional)', filterElementId: 'filterAsisten', filterDefaultText: 'Semua Asisten' },
+        { table: 'ruangan', column: 'nama', elementId: 'ruangan', defaultText: 'Pilih Ruangan', filterElementId: 'filterRuangan', filterDefaultText: 'Semua Ruangan' },
+        { table: 'kelas', column: 'nama', elementId: 'kelas', defaultText: 'Pilih Kelas', filterElementId: 'filterKelas', filterDefaultText: 'Semua Kelas' },
+    ];
+
+    function populateSelect(selectId, options, defaultText, isFilter = false) {
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) return;
+
+        // Kosongkan opsi yang ada
+        selectElement.innerHTML = '';
+        
+        // Tambahkan default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = isFilter ? "" : "";
+        defaultOption.textContent = defaultText;
+        if (!isFilter) {
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+        }
+        selectElement.appendChild(defaultOption);
+
+        // Tambahkan opsi dari data
+        options.forEach(optionValue => {
+            const option = document.createElement('option');
+            option.value = optionValue;
+            option.textContent = optionValue;
+            selectElement.appendChild(option);
+        });
+    }
 
     // --- FUNGSI UTAMA (CRUD & FETCH DATA) ---
 
@@ -677,6 +698,7 @@
         // Ambil nilai dari TomSelects dan input/select biasa
         const jadwalBaru = {
             tahun_akademik: document.getElementById('tahun_akademik').value,
+            // Cek instance sebelum getValue()
             kode_matkul: kodeMatkulSearchSelect ? kodeMatkulSearchSelect.getValue() : '',
             prodi: document.getElementById('prodi').value,
             hari: document.getElementById('hari').value,
@@ -729,7 +751,7 @@
         const filters = {
             prodi: document.getElementById('filterProdi').value,
             semester: document.getElementById('filterSemester').value,
-            // TomSelect filters
+            // TomSelect filters (memastikan instance tidak null sebelum getValue)
             kelas: filterKelasSelect ? filterKelasSelect.getValue() : '',
             kode_matkul: filterMataKuliahSelect ? filterMataKuliahSelect.getValue() : '',
             dosen: filterDosenSelect ? filterDosenSelect.getValue() : '',
@@ -749,13 +771,12 @@
         // Set nilai form edit
         document.getElementById('edit_id').value = id;
         
-        // TomSelect harus diset nilainya. Panggil initializeTomSelects('edit') lagi untuk memastikan TomSelect siap.
-        // Kemudian setValue.
-        if (editKodeMatkulSearchSelect) editKodeMatkulSearchSelect.setValue(jadwal.kode_matkul); else initializeTomSelects('edit').setValue(jadwal.kode_matkul);
-        if (editDosenSelect) editDosenSelect.setValue(jadwal.dosen);
-        if (editAsistenSelect) editAsistenSelect.setValue(jadwal.asisten);
-        if (editRuanganSelect) editRuanganSelect.setValue(jadwal.ruangan);
-        if (editKelasSelect) editKelasSelect.setValue(jadwal.kelas);
+        // Set nilai TomSelect (Gunakan cek untuk memastikan instance ada)
+        if (editKodeMatkulSearchSelect) editKodeMatkulSearchSelect.setValue(jadwal.kode_matkul, true);
+        if (editDosenSelect) editDosenSelect.setValue(jadwal.dosen || '', true); // Set ke '' jika null
+        if (editAsistenSelect) editAsistenSelect.setValue(jadwal.asisten || '', true);
+        if (editRuanganSelect) editRuanganSelect.setValue(jadwal.ruangan || '', true);
+        if (editKelasSelect) editKelasSelect.setValue(jadwal.kelas || '', true);
 
         // Dropdown/Input biasa
         document.getElementById('edit_prodi').value = jadwal.prodi;
@@ -952,23 +973,8 @@
         checkAuthAndLoad();
     });
     
-    // Tambahkan event listener untuk TomSelect Filters (agar memanggil filterData)
-    // Karena instance TomSelect baru ada setelah loadReferences, kita tambahkan listener di akhir loadReferences
-    document.addEventListener('tomselect:ready', (e) => {
-        if (e.detail.id === 'filterMataKuliah' && filterMataKuliahSelect) {
-            filterMataKuliahSelect.on('change', filterData);
-        }
-        if (e.detail.id === 'filterDosen' && filterDosenSelect) {
-            filterDosenSelect.on('change', filterData);
-        }
-        if (e.detail.id === 'filterKelas' && filterKelasSelect) {
-            filterKelasSelect.on('change', filterData);
-        }
-    });
-
-    // Pemicu event kustom setelah TomSelect siap (Ini hanya untuk membantu testing/debugging)
-    // Pada implementasi riil, ini dipicu setelah loadReferences selesai.
-    // Namun karena kita sudah memanggil filterData di akhir loadReferences, ini hanya sebagai fallback/debugging.
+    // Catatan: Event listener untuk filter TomSelects (Mata Kuliah, Dosen, Kelas)
+    // sekarang diikat secara langsung di dalam fungsi loadReferences setelah TomSelect dibuat.
 
 </script>
 </body>
