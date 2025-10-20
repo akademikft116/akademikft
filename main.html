@@ -80,7 +80,7 @@
 
         <main id="mainContent" class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full pt-20"> 
             
-            <div class="text-center p-10 text-gray-500">Memuat konten penjadwalan...</div>
+            <div id="loadingMessage" class="text-center p-10 text-gray-500">Memuat konten penjadwalan...</div>
 
             <div id="contentWrapper" class="hidden">
                 <div class="container mx-auto p-0">
@@ -567,10 +567,10 @@
         populateSelect('filterTahunAkademik', tahunAkademikOptions, taFilterDefaultText, true);
     }
 
-    // --- Cek login user dan muat data (DENGAN TRY...CATCH) ---
+    // --- Cek login user dan muat data (DENGAN TRY...CATCH UNTUK MENCEGAH RELOG) ---
     async function checkAuthAndLoad() {
         // Hilangkan pesan loading awal
-        document.getElementById('mainContent').innerHTML = ''; 
+        document.getElementById('loadingMessage').classList.add('hidden'); 
 
         if (!supabaseClient) {
             document.getElementById('mainContent').innerHTML = '<div class="text-center p-10 text-red-600">❌ Gagal terhubung ke layanan Supabase. Cek koneksi internet Anda atau pastikan URL/Key Supabase sudah benar.</div>';
@@ -581,8 +581,8 @@
             const { data: userData } = await supabaseClient.auth.getUser();
             const user = userData.user;
             
+            // Perbaikan utama: Jika tidak ada user, redirect ke halaman login
             if (!user) {
-                // Jika tidak ada user, redirect ke halaman login
                 window.location.href = "index.html";
                 return;
             }
@@ -590,11 +590,15 @@
             globalUserId = user.id;
 
             // Ambil dan tampilkan username di navbar
-            const { data: metadata } = await supabaseClient
+            const { data: metadata, error: metadataError } = await supabaseClient
                 .from('users_metadata')
                 .select('username')
                 .eq('user_id', user.id)
                 .single();
+
+            if (metadataError) {
+                console.warn("Gagal memuat metadata pengguna:", metadataError.message);
+            }
 
             if (metadata && metadata.username) {
                 document.getElementById('userNameNav').textContent = `Halo, ${metadata.username}`;
@@ -606,7 +610,7 @@
             
             // Muat referensi (dosen, matkul, dll) dan data tabel
             await loadReferences();
-            loadData();
+            await loadData();
             
             // Tampilkan konten utama setelah semua selesai dimuat
             document.getElementById('contentWrapper').classList.remove('hidden');
@@ -618,9 +622,9 @@
             document.getElementById('mainContent').innerHTML = `
                 <div class="text-center p-10 bg-red-100 border border-red-400 text-red-700 rounded-lg mx-auto">
                     <h2 class="text-xl font-bold mb-3">❌ Gagal Memuat Halaman Penjadwalan</h2>
-                    <p class="mb-2">Terjadi kesalahan saat memuat data referensi (Mata Kuliah, Dosen, dll.).</p>
+                    <p class="mb-2">Terjadi kesalahan saat memuat data referensi. Cek status login Anda.</p>
                     <p class="text-sm italic">Detail Error: ${e.message}</p>
-                    <p class="mt-4">Silakan coba <button onclick="window.location.reload()" class="font-bold underline">refresh halaman</button> atau periksa koneksi Supabase Anda di Console Log.</p>
+                    <p class="mt-4">Silakan coba <button onclick="window.location.reload()" class="font-bold underline">refresh halaman</button>.</p>
                 </div>
             `;
             document.getElementById('contentWrapper').classList.add('hidden');
@@ -628,6 +632,7 @@
         }
     }
 
+    // Panggil fungsi otentikasi saat halaman dimuat
     window.onload = checkAuthAndLoad; 
 
     async function logout() { 
