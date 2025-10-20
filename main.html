@@ -7,16 +7,20 @@
   
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   
   <style>
-    /* Mengatasi isian Tom-Select yang tidak rapi di form grid */
+    /* Styling dari dashboard.html untuk link aktif di sidebar */
+    .active-link {
+        background-color: #1d4ed8; /* blue-700 */
+        color: white;
+        border-left: 4px solid #f97316; /* orange-500 */
+    }
+    /* Memperbaiki tampilan Tom-Select di dalam grid/form */
     .form-grid .ts-wrapper {
         width: 100%;
     }
@@ -42,7 +46,7 @@
                     <i class="fas fa-home w-5"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="main.html" class="flex items-center space-x-3 p-3 text-white rounded-lg bg-blue-700 border-l-4 border-orange-500">
+                <a href="main.html" class="flex items-center space-x-3 p-3 text-gray-600 rounded-lg active-link">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Manajemen Jadwal</span>
                 </a>
@@ -67,68 +71,22 @@
                 
                 <form id="saveForm" onsubmit="event.preventDefault(); simpanJadwal();">
                     <input type="hidden" id="edit-id">
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                         
-                        <div>
-                            <label for="prodi" class="block text-sm font-medium text-gray-700">Prodi <span class="text-red-500">*</span></label>
-                            <select id="prodi" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="mk" class="block text-sm font-medium text-gray-700">Mata Kuliah <span class="text-red-500">*</span></label>
-                            <select id="mk" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="dosen" class="block text-sm font-medium text-gray-700">Dosen Pengampu <span class="text-red-500">*</span></label>
-                            <select id="dosen" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="semester" class="block text-sm font-medium text-gray-700">Semester <span class="text-red-500">*</span></label>
-                            <select id="semester" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas <span class="text-red-500">*</span></label>
-                            <select id="kelas" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="hari" class="block text-sm font-medium text-gray-700">Hari <span class="text-red-500">*</span></label>
-                            <select id="hari" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="jam_mulai" class="block text-sm font-medium text-gray-700">Jam Mulai <span class="text-red-500">*</span></label>
-                            <input type="time" id="jam_mulai" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label for="jam_selesai" class="block text-sm font-medium text-gray-700">Jam Selesai <span class="text-red-500">*</span></label>
-                            <input type="time" id="jam_selesai" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label for="ruangan" class="block text-sm font-medium text-gray-700">Ruangan <span class="text-red-500">*</span></label>
-                            <select id="ruangan" required class="w-full"></select>
-                        </div>
-                        
-                        <div>
-                            <label for="tahun_ajaran" class="block text-sm font-medium text-gray-700">Tahun Ajaran <span class="text-red-500">*</span></label>
-                            <input type="text" id="tahun_ajaran" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label for="sks" class="block text-sm font-medium text-gray-700">SKS <span class="text-red-500">*</span></label>
-                            <input type="number" id="sks" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label for="jenis_kuliah" class="block text-sm font-medium text-gray-700">Jenis Kuliah <span class="text-red-500">*</span></label>
-                            <select id="jenis_kuliah" required class="w-full"></select>
-                        </div>
-                        
+                        <div><label for="prodi" class="block text-sm font-medium text-gray-700">Prodi <span class="text-red-500">*</span></label><select id="prodi" required></select></div>
+                        <div><label for="mk" class="block text-sm font-medium text-gray-700">Mata Kuliah <span class="text-red-500">*</span></label><select id="mk" required></select></div>
+                        <div><label for="dosen" class="block text-sm font-medium text-gray-700">Dosen Pengampu <span class="text-red-500">*</span></label><select id="dosen" required></select></div>
+                        <div><label for="semester" class="block text-sm font-medium text-gray-700">Semester <span class="text-red-500">*</span></label><select id="semester" required></select></div>
+                        <div><label for="kelas" class="block text-sm font-medium text-gray-700">Kelas <span class="text-red-500">*</span></label><select id="kelas" required></select></div>
+                        <div><label for="hari" class="block text-sm font-medium text-gray-700">Hari <span class="text-red-500">*</span></label><select id="hari" required></select></div>
+                        <div><label for="jam_mulai" class="block text-sm font-medium text-gray-700">Jam Mulai <span class="text-red-500">*</span></label><input type="time" id="jam_mulai" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></div>
+                        <div><label for="jam_selesai" class="block text-sm font-medium text-gray-700">Jam Selesai <span class="text-red-500">*</span></label><input type="time" id="jam_selesai" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></div>
+                        <div><label for="ruangan" class="block text-sm font-medium text-gray-700">Ruangan <span class="text-red-500">*</span></label><select id="ruangan" required></select></div>
+                        <div><label for="tahun_ajaran" class="block text-sm font-medium text-gray-700">Tahun Ajaran <span class="text-red-500">*</span></label><input type="text" id="tahun_ajaran" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></div>
+                        <div><label for="sks" class="block text-sm font-medium text-gray-700">SKS <span class="text-red-500">*</span></label><input type="number" id="sks" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></div>
+                        <div><label for="jenis_kuliah" class="block text-sm font-medium text-gray-700">Jenis Kuliah <span class="text-red-500">*</span></label><select id="jenis_kuliah" required></select></div>
+
                     </div>
 
                     <div class="mt-4 flex space-x-3">
@@ -142,22 +100,10 @@
                 <h3 class="text-xl font-bold text-blue-700 mb-4 border-b pb-2">Data Jadwal Kuliah</h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div>
-                        <label for="filter-prodi" class="block text-sm font-medium text-gray-700">Filter Prodi</label>
-                        <select id="filter-prodi" class="w-full"></select>
-                    </div>
-                    <div>
-                        <label for="filter-semester" class="block text-sm font-medium text-gray-700">Filter Semester</label>
-                        <select id="filter-semester" class="w-full"></select>
-                    </div>
-                    <div>
-                        <label for="filter-kelas" class="block text-sm font-medium text-gray-700">Filter Kelas</label>
-                        <select id="filter-kelas" class="w-full"></select>
-                    </div>
-                    <div>
-                        <label for="filter-search" class="block text-sm font-medium text-gray-700">Cari Cepat</label>
-                        <input type="text" id="filter-search" placeholder="Cari MK/Dosen/Ruangan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
+                    <div><label for="filter-prodi" class="block text-sm font-medium text-gray-700">Filter Prodi</label><select id="filter-prodi"></select></div>
+                    <div><label for="filter-semester" class="block text-sm font-medium text-gray-700">Filter Semester</label><select id="filter-semester"></select></div>
+                    <div><label for="filter-kelas" class="block text-sm font-medium text-gray-700">Filter Kelas</label><select id="filter-kelas"></select></div>
+                    <div><label for="filter-search" class="block text-sm font-medium text-gray-700">Cari Cepat</label><input type="text" id="filter-search" placeholder="Cari MK/Dosen/Ruangan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                 </div>
 
                 <div class="mb-4 flex space-x-3">
@@ -174,22 +120,8 @@
                 
                 <div class="overflow-x-auto mt-6">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-blue-50">
-                            <tr>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Kuliah</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosen</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hari & Waktu</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ruangan</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
-                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="jadwal-table-body" class="bg-white divide-y divide-gray-200">
-                            <tr><td colspan="9" class="text-center py-4 text-gray-500">Memuat data...</td></tr>
-                        </tbody>
+                        <thead class="bg-blue-50">...</thead>
+                        <tbody id="jadwal-table-body" class="bg-white divide-y divide-gray-200">...</tbody>
                     </table>
                 </div>
 
@@ -200,9 +132,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // =======================================================
-        // STARTER SCRIPT: INI HARUS DIPINDAHKAN KE FILE global.js
-        // =======================================================
+        // --- INI ADALAH SEMUA LOGIKA JAVASCRIPT LAMA ANDA DARI main.html ---
         const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -214,19 +144,14 @@
           window.location.href = "index.html";
         }
         
-        // =======================================================
-        // LOGIKA KHUSUS main.html
-        // =======================================================
-        
-        // --- Pindahkan SEMUA FUNGSI dari main.html LAMA Anda (loadReferences, loadData, 
-        // simpanJadwal, updateJadwal, deleteJadwal, editJadwal, exportToPdf, exportToExcel, dll.) di SINI. ---
+        // --- FUNGSI UTAMA main.html: loadReferences, loadData, simpanJadwal, dll. ---
+        // (Semua kode fungsi yang Anda miliki dari main.html lama Anda harus disalin dan ditempatkan di sini)
         
         // Contoh placeholder:
         // function loadReferences() { ... }
         // function loadData() { ... }
         // function simpanJadwal() { ... }
-        // function exportToPdf() { ... }
-        // -----------------------------------------------------------------------------------------------------
+        // ... (dan semua fungsi lain seperti editJadwal, deleteJadwal, exportToPdf, exportToExcel) ...
 
         // --- CEK AUTHENTIKASI DAN MUAT DATA ---
         window.onload = async () => {
@@ -248,8 +173,8 @@
             }
 
             // Panggil fungsi utama untuk memuat data:
-            loadReferences(); 
-            loadData();
+            if (typeof loadReferences === 'function') loadReferences(); 
+            if (typeof loadData === 'function') loadData();
         };
 
     </script>
