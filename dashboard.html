@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Fakultas Teknik</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet"> 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
@@ -15,15 +15,29 @@
             color: white;
             border-left: 4px solid #f97316; /* orange-500 */
         }
-        /* Tinggi layar penuh diatur untuk konten utama */
+        /* Tinggi layar penuh diatur untuk konten utama (100% viewport height) */
         .main-content {
-            height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
+            height: 100vh; 
+        }
+        /* Style untuk sidebar agar berada di atas konten utama */
+        .sidebar {
+            z-index: 20; /* Lebih tinggi dari konten utama */
+        }
+        /* Style untuk konten utama agar tidak tertutup header & sidebar */
+        .content-area {
+             /* pt-16 (4rem) untuk menghindari header fixed */
+            padding-top: 4rem; 
+            /* ml-64 (16rem) untuk menghindari sidebar fixed */
+            margin-left: 16rem; 
+            height: 100%; /* Memenuhi tinggi container main-content */
+            overflow-y: auto; /* Memungkinkan scrolling untuk konten di dalam */
+            width: calc(100% - 16rem); /* Sisa lebar setelah sidebar */
         }
     </style>
 </head>
 <body class="bg-gray-100">
 
-    <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6">
+    <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-6">
         <div class="flex items-center space-x-3">
             <img src="logo.jpeg" class="h-10 w-auto"> 
             <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
@@ -36,17 +50,17 @@
         </div>
     </nav>
     
-    <div class="flex pt-16 main-content">
+    <div class="flex main-content">
         
-        <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-10 shadow-xl">
+        <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 sidebar shadow-xl">
             <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
                 
-                <a href="dashboard.html" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg active-link">
+                <button onclick="showContent('main', this)" id="mainLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg active-link">
                     <i class="fas fa-home w-5"></i>
                     <span>Dashboard</span>
-                </a>
+                </button>
                 
-                <a href="main.html" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Penjadwalan</span>
                 </a>
@@ -56,20 +70,20 @@
                     <span>Data Mahasiswa</span>
                 </a>
                 
-                <a href="#dosen-area" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <button onclick="showContent('dosen', this)" id="dosenLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-chalkboard-teacher w-5"></i>
                     <span>Dosen</span>
-                </a>
+                </button>
                 
-                <a href="#matkul-area" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <button onclick="showContent('matkul', this)" id="matkulLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-book-open w-5"></i>
                     <span>Mata Kuliah</span>
-                </a>
+                </button>
 
-                <a href="#settings-area" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
+                <button onclick="showContent('pengaturan', this)" id="pengaturanLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                     <i class="fas fa-cog w-5"></i>
                     <span>Pengaturan</span>
-                </a>
+                </button>
                 
             </nav>
             
@@ -79,202 +93,324 @@
                 <p>ABD</p>
             </div>
         </aside>
-
-        <main class="flex-grow p-8 overflow-y-auto bg-gray-100 h-full w-full"> 
+        
+        <main class="content-area bg-gray-100 p-8">
             
-            <div class="bg-white p-6 rounded-lg shadow-xl min-h-full **ml-64**"> <h1 class="text-3xl font-bold mb-6 text-blue-800">Selamat Datang di Dashboard Akademik FT</h1>
-
-                <p class="text-gray-700 mb-8">Halo, <span id="displayUsernameMain" class="font-bold text-lg text-orange-600">Memuat...</span>. Anda telah login sebagai Administrator.</p>
+            <div id="contentArea" class="space-y-8">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-blue-100 p-4 rounded-lg shadow flex items-center space-x-4 border-l-4 border-blue-500">
-                        <i class="fas fa-calendar-alt text-3xl text-blue-600"></i>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Jadwal Aktif</p>
-                            <p id="totalJadwal" class="text-2xl font-bold text-blue-800">0</p>
-                        </div>
-                    </div>
+                <div id="main" class="bg-white p-6 rounded-lg shadow-xl min-h-full">
+                    <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
+                    <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
+                        Halo, <strong id="displayUsernameMain">...</strong>! Selamat bekerja.
+                    </p>
                     
-                    <div class="bg-green-100 p-4 rounded-lg shadow flex items-center space-x-4 border-l-4 border-green-500">
-                        <i class="fas fa-chalkboard-teacher text-3xl text-green-600"></i>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Dosen</p>
-                            <p id="totalDosen" class="text-2xl font-bold text-green-800">0</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                        <div class="bg-blue-100 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                            <p class="text-sm font-medium text-blue-600">Total Jadwal (Anda)</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalJadwal">0</p>
                         </div>
-                    </div>
-                    
-                    <div class="bg-yellow-100 p-4 rounded-lg shadow flex items-center space-x-4 border-l-4 border-yellow-500">
-                        <i class="fas fa-book-open text-3xl text-yellow-600"></i>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Mata Kuliah</p>
-                            <p id="totalMatkul" class="text-2xl font-bold text-yellow-800">0</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-red-100 p-4 rounded-lg shadow flex items-center space-x-4 border-l-4 border-red-500">
-                        <i class="fas fa-user-graduate text-3xl text-red-600"></i>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Mahasiswa</p>
-                            <p id="totalMahasiswa" class="text-2xl font-bold text-red-800">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="border-gray-200" id="settings-area">
-                
-                <h2 class="text-2xl font-bold mb-4 text-blue-800 mt-8" id="dosen-area">Pengaturan Akun Saya</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 p-6 rounded-lg shadow-md border border-gray-200">
-                        <h3 class="text-xl font-semibold mb-3 flex items-center"><i class="fas fa-user-edit mr-2"></i> Ganti Username</h3>
-                        <p class="mb-4 text-sm text-gray-600">Username saat ini: <span id="currentUsername" class="font-bold">Memuat...</span></p>
                         
-                        <input type="text" id="newUsername" placeholder="Username Baru" class="w-full p-2 border border-gray-300 rounded mb-3">
-                        <button onclick="updateUsername()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-150">Simpan Username</button>
+                        <div class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                            <p class="text-sm font-medium text-green-600">Total Dosen</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalDosen">0</p>
+                            <span class="text-xs text-green-700 mt-2 block">Lihat detail di navigasi Dosen.</span>
+                        </div>
+                        
+                        <div class="bg-yellow-100 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+                            <p class="text-sm font-medium text-yellow-600">Total Mata Kuliah</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalMatkul">0</p>
+                            <span class="text-xs text-yellow-700 mt-2 block">Lihat detail di navigasi Mata Kuliah.</span>
+                        </div>
                     </div>
-                    
-                    <div class="bg-gray-50 p-6 rounded-lg shadow-md border border-gray-200" id="matkul-area"> <h3 class="text-xl font-semibold mb-3 flex items-center"><i class="fas fa-lock mr-2"></i> Ganti Password</h3>
-                        <input type="password" id="newPassword" placeholder="Password Baru (min 6 karakter)" class="w-full p-2 border border-gray-300 rounded mb-3">
-                        <button onclick="updatePassword()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition duration-150">Simpan Password</button>
+                </div>
+                
+                <div id="dosen" class="bg-white p-6 rounded-lg shadow-xl hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Dosen</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Dosen</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIDN</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dosenTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode MK</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="text-center mt-12 text-gray-500">
-                    <p class="text-xs">Pastikan Anda selalu log out setelah selesai bekerja.</p>
+                <div id="pengaturan" class="bg-white p-6 rounded-lg shadow-xl hidden max-w-2xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Akun</h2>
+                    
+                    <div class="mb-8 border-b pb-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Ubah Username</h3>
+                        <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">...</strong></p>
+                        <div class="space-y-4 max-w-sm">
+                            <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
+                                Simpan Username Baru
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8 pb-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Ubah Password</h3>
+                        <div class="space-y-4 max-w-sm">
+                            <div class="relative">
+                                <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
+                                    <i id="eyeIcon" class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <button onclick="updatePassword()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
+                                Simpan Password Baru
+                            </button>
+                        </div>
+                    </div>
+                    
+                     <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Opsi Ganti Akun</h3>
+                        <p class="text-sm text-gray-500 mb-4">Anda akan keluar dari sesi ini dan diarahkan ke halaman login.</p>
+                        <button onclick="logout()" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-150">
+                            Ganti Akun / Logout
+                        </button>
+                    </div>
+
                 </div>
 
             </div>
-            
         </main>
     </div>
 
-    <script>
-        // --- Supabase setup ---
-        const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+    // --- Inisialisasi Supabase (TETAP PERTAHANKAN) ---
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let globalUserId;
+    let globalUserId = null;
+    let globalUserEmail = null;
 
-        // --- FUNGSI UTAMA UNTUK MUAT DATA DASHBOARD ---
-        async function loadDashboardData() {
-            // Ambil Total Jadwal
-            const { count: jadwalCount, error: jadwalError } = await supabaseClient
-                .from('jadwal')
-                .select('*', { count: 'exact', head: true });
-            if (!jadwalError) {
-                document.getElementById('totalJadwal').textContent = jadwalCount;
-            }
-
-            // Ambil Total Dosen
-            const { count: dosenCount, error: dosenError } = await supabaseClient
-                .from('dosen')
-                .select('*', { count: 'exact', head: true });
-            if (!dosenError) {
-                document.getElementById('totalDosen').textContent = dosenCount;
-            }
-
-            // Ambil Total Mata Kuliah
-            const { count: matkulCount, error: matkulError } = await supabaseClient
-                .from('matakuliah')
-                .select('*', { count: 'exact', head: true });
-            if (!matkulError) {
-                document.getElementById('totalMatkul').textContent = matkulCount;
-            }
-            
-            // Ambil Total Mahasiswa
-            const { count: mhsCount, error: mhsError } = await supabaseClient
-                .from('mahasiswa')
-                .select('*', { count: 'exact', head: true });
-            if (!mhsError) {
-                document.getElementById('totalMahasiswa').textContent = mhsCount;
-            }
-        }
-
-        // --- FUNGSI CEK AUTHENTIKASI & USERNAME ---
-        async function checkAuthAndLoad() {
-            const { data: userData } = await supabaseClient.auth.getUser();
-            const user = userData.user;
-
-            if (!user) {
-                // Jika belum login, arahkan ke halaman login
-                window.location.href = "index.html";
-                return;
-            }
-            
-            globalUserId = user.id;
-
-            // Ambil username dari tabel users_metadata
-            const { data: metadata, error: metadataError } = await supabaseClient
-              .from('users_metadata')
-              .select('username')
-              .eq('user_id', user.id)
-              .single();
-              
-            let username = (metadata && metadata.username) ? metadata.username : 'User';
-            
-            document.getElementById('userNameNav').textContent = `Halo, ${username}`;
-            document.getElementById('displayUsernameMain').textContent = username;
-            document.getElementById('currentUsername').textContent = username;
-
-            loadDashboardData();
-        }
-
-        // --- FUNGSI UPDATE USERNAME ---
-        async function updateUsername() {
-            const newUsername = document.getElementById('newUsername').value.trim();
-
-            if (!newUsername) {
-                alert("❌ Username baru tidak boleh kosong.");
-                return;
-            }
-
-            const { error: metadataError } = await supabaseClient
-                .from('users_metadata')
-                .update({ username: newUsername })
-                .eq('user_id', globalUserId);
-
-            if (metadataError) {
-                alert("❌ Gagal memperbarui username: " + metadataError.message);
-            } else {
-                alert("✅ Username berhasil diperbarui menjadi: " + newUsername);
-                
-                // Update tampilan secara manual
-                document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
-                document.getElementById('displayUsernameMain').textContent = newUsername;
-                document.getElementById('currentUsername').textContent = newUsername;
-
-                document.getElementById('newUsername').value = '';
-            }
-        }
+    // Fungsi untuk menampilkan konten tab yang dipilih (TETAP PERTAHANKAN)
+    function showContent(tabId, clickedButton) {
+        document.getElementById('main').classList.add('hidden');
+        document.getElementById('dosen').classList.add('hidden');
+        document.getElementById('matkul').classList.add('hidden');
+        document.getElementById('pengaturan').classList.add('hidden');
         
-        // --- FUNGSI UPDATE PASSWORD ---
-        async function updatePassword() {
-            const newPassword = document.getElementById('newPassword').value;
-            
-            if (newPassword.length < 6) {
-                alert("❌ Password baru minimal 6 karakter.");
-                return;
-            }
+        document.getElementById(tabId).classList.remove('hidden');
+        
+        document.querySelectorAll('aside button.nav-item').forEach(el => {
+            el.classList.remove('active-link');
+            el.classList.add('text-gray-300');
+            el.classList.remove('text-white');
+        });
+        
+        if (clickedButton) {
+            clickedButton.classList.add('active-link');
+            clickedButton.classList.remove('text-gray-300');
+        }
 
-            const { error } = await supabaseClient.auth.updateUser({
-              password: newPassword
+        if (tabId === 'dosen') {
+            loadDosenData();
+        } else if (tabId === 'matkul') {
+            loadMatkulData();
+        }
+    }
+    
+    // Fungsi load data Dosen (TETAP PERTAHANKAN)
+    async function loadDosenData() {
+        const { data: dataDosen } = await supabaseClient.from('dosen').select('*').order('nama', { ascending: true });
+        const tableBody = document.getElementById('dosenTableBody');
+        tableBody.innerHTML = ''; 
+        if (dataDosen) {
+            dataDosen.forEach((dosen, index) => {
+                const row = tableBody.insertRow();
+                row.className = 'hover:bg-gray-50';
+                row.insertCell().textContent = index + 1;
+                row.insertCell().textContent = dosen.nama || '-';
+                row.insertCell().textContent = dosen.nidn || '-';
+                row.insertCell().textContent = dosen.prodi || '-';
             });
+        }
+    }
+    
+    // Fungsi load data Mata Kuliah (TETAP PERTAHANKAN)
+    async function loadMatkulData() {
+        const { data: dataMatkul } = await supabaseClient.from('matakuliah').select('*').order('nama', { ascending: true }); 
+        const tableBody = document.getElementById('matkulTableBody');
+        tableBody.innerHTML = ''; 
+        if (dataMatkul) {
+            dataMatkul.forEach((matkul, index) => {
+                const row = tableBody.insertRow();
+                row.className = 'hover:bg-gray-50';
+                row.insertCell().textContent = index + 1;
+                row.insertCell().textContent = matkul.kode || '-'; 
+                row.insertCell().textContent = matkul.nama || '-'; 
+                row.insertCell().textContent = matkul.sks || '-';
+            });
+        }
+    }
+    
+    // Fungsi load Statistik (TETAP PERTAHANKAN)
+    async function loadStatistics() {
+        if (!globalUserId) return;
+        const { count: jadwalCount } = await supabaseClient.from('jadwal').select('*', { count: 'exact', head: true }).eq('user_id', globalUserId);
+        if (jadwalCount !== null) document.getElementById('totalJadwal').textContent = jadwalCount;
+        
+        const { count: dosenCount } = await supabaseClient.from('dosen').select('*', { count: 'exact', head: true });
+        if (dosenCount !== null) document.getElementById('totalDosen').textContent = dosenCount;
+        
+        const { count: matkulCount } = await supabaseClient.from('matakuliah').select('*', { count: 'exact', head: true });
+        if (matkulCount !== null) document.getElementById('totalMatkul').textContent = matkulCount;
+    }
 
-            if (error) {
-                alert("❌ Gagal memperbarui password: " + error.message);
-            } else {
-                alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login.");
-                logout();
-            }
+    // FUNGSI TOGGLE PASSWORD (TETAP PERTAHANKAN)
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('newPassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+
+    // --- FUNGSI Cek Auth & Load Data Pengguna (TETAP PERTAHANKAN) ---
+    window.onload = async () => {
+      const { data, error } = await supabaseClient.auth.getUser();
+      if (error || !data?.user) {
+        alert("Silakan login dulu!");
+        window.location.href = "index.html"; 
+        return;
+      }
+      
+      const user = data.user;
+      globalUserId = user.id;
+      globalUserEmail = user.email;
+      
+      const { data: userData, error: metadataError } = await supabaseClient
+            .from('users_metadata')
+            .select('username')
+            .eq('user_id', globalUserId) 
+            .single();
+
+      if (metadataError && metadataError.code !== 'PGRST116') { 
+          console.error("Gagal memuat metadata pengguna:", metadataError);
+      }
+
+      let username = (userData && userData.username) ? userData.username : 'User';
+      
+      document.getElementById('userNameNav').textContent = `Halo, ${username}`;
+      document.getElementById('displayUsernameMain').textContent = username;
+      document.getElementById('currentUsername').textContent = username;
+
+      showContent('main', document.getElementById('mainLink'));
+      
+      loadStatistics();
+    };
+
+    // --- FUNGSI UPDATE USERNAME (TETAP PERTAHANKAN) ---
+    async function updateUsername() {
+        const newUsername = document.getElementById('newUsername').value.trim();
+        
+        if (!newUsername || newUsername.length < 3) {
+            alert("❌ Username minimal 3 karakter dan wajib diisi.");
+            return;
         }
         
-        // --- Fungsi Logout (Ganti Akun) ---
-        async function logout() {
-          await supabaseClient.auth.signOut();
-          window.location.href = "index.html";
+        const currentUsername = document.getElementById('currentUsername').textContent;
+        if (newUsername === currentUsername) {
+             alert("❌ Username tidak berubah.");
+             return;
         }
         
-        // Panggil fungsi saat halaman dimuat
-        window.onload = checkAuthAndLoad;
-    </script>
+        // 1. Cek apakah username sudah dipakai
+        const { count: existingCount, error: checkError } = await supabaseClient
+             .from('users_metadata')
+             .select('username', { count: 'exact', head: true })
+             .ilike('username', newUsername); 
+        
+        if (checkError) {
+             alert("❌ Error saat cek ketersediaan username: " + checkError.message);
+             return;
+        }
+
+        if (existingCount > 0) {
+             alert("❌ Username ini sudah digunakan oleh akun lain.");
+             return;
+        }
+
+        // 2. Update di tabel users_metadata
+        const { error: metadataError } = await supabaseClient
+            .from('users_metadata')
+            .update({ username: newUsername }) 
+            .eq('user_id', globalUserId);
+
+        if (metadataError) {
+            alert("❌ Gagal memperbarui username: " + metadataError.message);
+        } else {
+            alert("✅ Username berhasil diperbarui menjadi: " + newUsername);
+            
+            document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
+            document.getElementById('displayUsernameMain').textContent = newUsername;
+            document.getElementById('currentUsername').textContent = newUsername;
+
+            document.getElementById('newUsername').value = '';
+        }
+    }
+    
+    // --- FUNGSI UPDATE PASSWORD (TETAP PERTAHANKAN) ---
+    async function updatePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        
+        if (newPassword.length < 6) {
+            alert("❌ Password baru minimal 6 karakter.");
+            return;
+        }
+
+        const { error } = await supabaseClient.auth.updateUser({
+          password: newPassword
+        });
+
+        if (error) {
+            alert("❌ Gagal memperbarui password: " + error.message);
+        } else {
+            alert("✅ Password berhasil diperbarui! Anda akan diarahkan ke halaman login.");
+            logout();
+        }
+    }
+    
+    // --- Fungsi Logout (Ganti Akun) (TETAP PERTAHANKAN) ---
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = "index.html";
+    }
+</script>
 </body>
 </html>
