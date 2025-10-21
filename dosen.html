@@ -69,7 +69,7 @@
         </div>
       </div>
 
-       Daftar Dosen 
+      <!-- 📋 Daftar Dosen -->
       <div id="dosen-list-container" class="bg-white p-6 rounded-lg shadow-lg">
         <div class="flex justify-between mb-4">
           <h2 class="text-2xl font-semibold text-gray-700">Daftar Dosen</h2>
@@ -126,7 +126,10 @@ async function loadDosenData() {
 
 function renderTable(data) {
   const tbody = document.getElementById("dosen-table-body");
-  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data</td></tr>'; return; }
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data</td></tr>';
+    return;
+  }
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
@@ -143,12 +146,15 @@ function renderTable(data) {
 }
 
 function applyFilter() {
-  const nidnValue = document.getElementById("filterNidn").value.toLowerCase();
-  const namaValue = document.getElementById("filterNama").value.toLowerCase();
-  filteredData = allDosenData.filter(d =>
-    (d.nidn?.toLowerCase().includes(nidnValue)) &&
-    (d.nama?.toLowerCase().includes(namaValue))
-  );
+  const nidnValue = document.getElementById("filterNidn").value.toLowerCase().trim();
+  const namaValue = document.getElementById("filterNama").value.toLowerCase().trim();
+
+  filteredData = allDosenData.filter(d => {
+    const matchNidn = nidnValue ? d.nidn?.toLowerCase().includes(nidnValue) : true;
+    const matchNama = namaValue ? d.nama?.toLowerCase().includes(namaValue) : true;
+    return matchNidn && matchNama;
+  });
+
   renderTable(filteredData);
 }
 
