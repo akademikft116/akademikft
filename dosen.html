@@ -101,6 +101,25 @@
   </main>
 </div>
 
+<!-- 🔹 Popup Tambah Dosen -->
+<div id="formModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden justify-center items-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-700">Tambah Dosen</h2>
+    <div class="grid grid-cols-1 gap-4">
+      <input id="nidnInput" class="border p-2 rounded-md" placeholder="NIDN" />
+      <input id="namaInput" class="border p-2 rounded-md" placeholder="Nama Lengkap" />
+      <input id="prodiInput" class="border p-2 rounded-md" placeholder="Program Studi" />
+      <input id="jabatanInput" class="border p-2 rounded-md" placeholder="Jabatan Fungsional" />
+      <input id="statusInput" class="border p-2 rounded-md" placeholder="Status (Aktif/Tidak)" />
+      <input id="emailInput" class="border p-2 rounded-md" placeholder="Email" />
+    </div>
+    <div class="flex justify-end mt-4 space-x-2">
+      <button onclick="closeForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md">Batal</button>
+      <button onclick="saveDosen()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
@@ -148,13 +167,11 @@ function renderTable(data) {
 function applyFilter() {
   const nidnValue = document.getElementById("filterNidn").value.toLowerCase().trim();
   const namaValue = document.getElementById("filterNama").value.toLowerCase().trim();
-
   filteredData = allDosenData.filter(d => {
     const matchNidn = nidnValue ? d.nidn?.toLowerCase().includes(nidnValue) : true;
     const matchNama = namaValue ? d.nama?.toLowerCase().includes(namaValue) : true;
     return matchNidn && matchNama;
   });
-
   renderTable(filteredData);
 }
 
@@ -172,6 +189,41 @@ function exportToExcel() {
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   XLSX.utils.book_append_sheet(wb, ws, "Dosen");
   XLSX.writeFile(wb, "data_dosen_filtered.xlsx");
+}
+
+function showForm() {
+  document.getElementById("formModal").classList.remove("hidden");
+  document.getElementById("formModal").classList.add("flex");
+}
+
+function closeForm() {
+  document.getElementById("formModal").classList.add("hidden");
+}
+
+async function saveDosen() {
+  const newData = {
+    nidn: document.getElementById("nidnInput").value,
+    nama: document.getElementById("namaInput").value,
+    prodi: document.getElementById("prodiInput").value,
+    jabatan_fungsional: document.getElementById("jabatanInput").value,
+    status: document.getElementById("statusInput").value,
+    email: document.getElementById("emailInput").value
+  };
+
+  if (!newData.nidn || !newData.nama) {
+    alert("NIDN dan Nama wajib diisi!");
+    return;
+  }
+
+  const { error } = await supabaseClient.from("dosen").insert([newData]);
+  if (error) {
+    alert("Gagal menyimpan data!");
+    console.error(error);
+  } else {
+    alert("Data dosen berhasil ditambahkan!");
+    closeForm();
+    loadDosenData();
+  }
 }
 
 async function logout() {
