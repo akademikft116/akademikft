@@ -6,463 +6,263 @@
   <title>Biodata & Pencarian Dosen - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  
   <style>
-    .active-link {
-        background-color: #1d4ed8; /* blue-700 */
-        color: white;
-        border-left: 4px solid #f97316; /* orange-500 */
-    }
-    .main-content {
-        height: calc(100vh - 4rem);
-    }
-    .container {
-        max-width: 1300px;
-        margin: auto;
-    }
-    .ts-wrapper.form-control, .ts-control {
-        border-radius: 0.25rem !important;
-        border: 1px solid #d1d5db !important;
-    }
-    .modal {
-        transition: opacity 0.3s ease-out;
-    }
-    .modal-active {
-        opacity: 1;
-    }
-    #dosen-container.hidden, #dosen-list-container.hidden {
-        display: none;
-    }
+    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
+    .main-content { height: calc(100vh - 4rem); }
+    .container { max-width: 1300px; margin: auto; }
+    .ts-wrapper.form-control, .ts-control { border-radius: 0.25rem !important; border: 1px solid #d1d5db !important; }
+    #dosen-container.hidden, #dosen-list-container.hidden { display: none; }
   </style>
 </head>
 <body class="bg-gray-100">
 
+<!-- 🔹 Navbar -->
 <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
-    <div class="flex items-center space-x-3">
-        <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
-        <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
-    </div>
-    <div class="flex items-center space-x-4">
-        <span id="userNameNav" class="text-white text-sm">Halo, Pengguna</span>
-        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
-            <i class="fas fa-sign-out-alt mr-1"></i> Ganti Akun
-        </button>
-    </div>
+  <div class="flex items-center space-x-3">
+    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
+  </div>
+  <div class="flex items-center space-x-4">
+    <span id="userNameNav" class="text-white text-sm">Halo, Pengguna</span>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition">
+      <i class="fas fa-sign-out-alt mr-1"></i> Ganti Akun
+    </button>
+  </div>
 </nav>
 
+<!-- 🔹 Sidebar + Konten -->
 <div class="flex pt-16 main-content">
+  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
+    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+      <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-tachometer-alt w-5"></i><span>Dashboard</span></a>
+      <a href="main.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
+      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-address-card w-5"></i><span>Biodata Mahasiswa</span></a>
+      <a href="dosen.html" class="active-link flex items-center space-x-3 p-3 rounded-lg"><i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
+      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-book w-5"></i><span>Data Mata Kuliah</span></a>
+      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
+    </nav>
+    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+      <p>&copy; 2024 Akademik FT</p>
+      <p>Designed by Rifqi & Alfi, Shidqi</p>
+    </div>
+  </aside>
 
-    <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
-        <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-            <a href="dashboard.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-tachometer-alt w-5"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-calendar-alt w-5"></i>
-                <span>Penjadwalan</span>
-            </a>
-            
-            <a href="mahasiswa.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-address-card w-5"></i>
-                <span>Biodata Mahasiswa</span>
-            </a>
-            
-            <a href="dosen.html" class="active-link w-full text-left flex items-center space-x-3 p-3 rounded-lg transition duration-150">
-                <i class="fas fa-user-tie w-5"></i>
-                <span>Data Dosen</span>
-            </a>
-            <a href="dashboard.html#matkul" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-book w-5"></i>
-                <span>Data Mata Kuliah</span>
-            </a>
-            <a href="dashboard.html#pengaturan" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-cog w-5"></i>
-                <span>Pengaturan</span>
-            </a>
-        </nav>
+  <!-- 🔹 Main Content -->
+  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+    <div class="container">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Dosen</h1>
 
-        <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
-            <p>&copy; 2024 Akademik FT</p>
-            <p>Designed by Rifqi & Alfi, Shidqi</p>
-        </div>
-    </aside>
-
-    <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
-        <div class="container mx-auto p-0">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Dosen</h1>
-
-            <div id="dosen-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="formTitle">Tambah Data Dosen Baru</h2>
-                <form id="dosenForm" onsubmit="event.preventDefault(); saveDosen();">
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="nidn" class="block text-sm font-medium text-gray-700">NIDU <span class="text-red-500">*</span></label>
-                            <input type="text" id="nidn" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                          <label for="nidn" class="block text-sm font-medium text-gray-700">NIK <span class="text-red-500">*</span></label>
-                            <input type="text" id="nidn" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="nama" class="block text-sm font-medium text-gray-700">Tanggal Lahir <span class="text-red-500">*</span></label>
-                            <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                         <div>
-                            <label for="gelar" class="block text-sm font-medium text-gray-700">Pangkat / Golongan</label>
-                            <input type="text" id="gelar" placeholder="Contoh: S.T., M.T." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="prodi" class="block text-sm font-medium text-gray-700">Jabatan Fungsional <span class="text-red-500">*</span></label>
-                            <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="">Pilih Prodi</option>
-                                <option value="Industri">Teknik Industri</option>
-                                <option value="Sipil">Teknik Sipil</option>
-                                <option value="Informatika">Teknik Informatika</option>
-                                <option value="Arsitektur">Arsitektur</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="jabatan_fungsional" class="block text-sm font-medium text-gray-700">jabatan Fungsional</label>
-                            <input type="text" id="jabatan_fungsional" placeholder="Contoh: Lektor Kepala" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700">Status Dosen <span class="text-red-500">*</span></label>
-                            <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="Aktif">Aktif</option>
-                                <option value="Cuti">Cuti</option>
-                                <option value="Tugas Belajar">Tugas Belajar</option>
-                                <option value="Pensiun">Pensiun</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="no_hp" class="block text-sm font-medium text-gray-700">No. HP</label>
-                            <input type="text" id="no_hp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                    <input type="hidden" id="dosenId" value="">
-                    <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
-                        <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-save mr-2"></i> Simpan Data
-                        </button>
-                        <button type="button" onclick="resetForm()" id="reset-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-times mr-2"></i> Batalkan & Tutup
-                        </button>
-                    </div>
-                </form>
+      <!-- 🧾 Form Tambah/Edit -->
+      <div id="dosen-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
+        <h2 id="formTitle" class="text-2xl font-semibold text-gray-700 mb-4">Tambah Data Dosen Baru</h2>
+        <form id="dosenForm" onsubmit="event.preventDefault(); saveDosen();">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">NIDN <span class="text-red-500">*</span></label>
+              <input type="text" id="nidn" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
             </div>
-            
-            <div id="dosen-list-container" class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Dosen</h2>
-                
-                <div class="mb-6 border p-4 rounded-lg bg-gray-50">
-                    <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <div>
-                            <label for="searchNama" class="block text-sm font-medium text-gray-700">Nama</label>
-                            <input type="text" id="searchNama" placeholder="Ketik Nama Dosen" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="searchNidn" class="block text-sm font-medium text-gray-700">NIDN</label>
-                            <input type="text" id="searchNidn" placeholder="Ketik NIDN" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div class="col-span-1"></div>
-                        <div class="flex space-x-2">
-                            <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
-                                <i class="fas fa-search mr-1"></i> Cari
-                            </button>
-                            <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between mb-4">
-                     <div></div>
-                    <div class="flex space-x-2">
-                        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-file-excel mr-2"></i> Export Excel
-                        </button>
-                         <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-plus-circle mr-2"></i> Tambah Data Dosen
-                        </button>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIDN</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama & Gelar</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jabatan Fungsional</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="dosen-table-body">
-                        </tbody>
-                    </table>
-                </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">NIK <span class="text-red-500">*</span></label>
+              <input type="text" id="nik" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+              <input type="date" id="tgl_lahir" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Gelar Akademik</label>
+              <input type="text" id="gelar" placeholder="Contoh: S.T., M.T." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Prodi <span class="text-red-500">*</span></label>
+              <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                <option value="">Pilih Prodi</option>
+                <option value="Industri">Teknik Industri</option>
+                <option value="Sipil">Teknik Sipil</option>
+                <option value="Informatika">Teknik Informatika</option>
+                <option value="Arsitektur">Arsitektur</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Jabatan Fungsional</label>
+              <input type="text" id="jabatan_fungsional" placeholder="Contoh: Lektor Kepala" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
+              <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                <option value="Aktif">Aktif</option>
+                <option value="Cuti">Cuti</option>
+                <option value="Tugas Belajar">Tugas Belajar</option>
+                <option value="Pensiun">Pensiun</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">No. HP</label>
+              <input type="text" id="no_hp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Email</label>
+              <input type="email" id="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+            </div>
+          </div>
+          <input type="hidden" id="dosenId">
+          <div class="mt-6 pt-4 border-t flex justify-end space-x-3">
+            <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
+              <i class="fas fa-save mr-2"></i> Simpan Data
+            </button>
+            <button type="button" onclick="resetForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md">
+              <i class="fas fa-times mr-2"></i> Batal
+            </button>
+          </div>
+        </form>
+      </div>
 
+      <!-- 📋 Daftar Dosen -->
+      <div id="dosen-list-container" class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex justify-between mb-4">
+          <h2 class="text-2xl font-semibold text-gray-700">Daftar Dosen</h2>
+          <div class="flex space-x-2">
+            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"><i class="fas fa-file-excel mr-2"></i>Excel</button>
+            <button onclick="showForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"><i class="fas fa-plus-circle mr-2"></i>Tambah</button>
+          </div>
         </div>
-    </main>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIDN</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prodi</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="dosen-table-body" class="bg-white divide-y divide-gray-200">
+              <tr><td colspan="6" class="text-center py-4 text-gray-500">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
+<!-- 🔹 Modal Detail -->
 <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-        <h3 class="text-xl font-bold mb-4 border-b pb-2">Detail Biodata Dosen</h3>
-        <div id="modalContent" class="text-sm space-y-2"></div>
-        <button onclick="document.getElementById('detailModal').classList.add('hidden')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Tutup</button>
-    </div>
+  <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+    <h3 class="text-xl font-bold mb-4 border-b pb-2">Detail Dosen</h3>
+    <div id="modalContent" class="text-sm space-y-2"></div>
+    <button onclick="document.getElementById('detailModal').classList.add('hidden')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded">Tutup</button>
+  </div>
 </div>
 
 <script>
-    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let isEditMode = false;
-    let currentDosenId = null;
-    let currentDosenData = [];
-    
-    let prodiSelect;
-    let statusSelect;
+let isEditMode = false;
+let currentDosenId = null;
+let currentDosenData = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
-        prodiSelect = new TomSelect("#prodi", { create: false });
-        statusSelect = new TomSelect("#status", { create: false });
-    });
+document.addEventListener("DOMContentLoaded", async () => {
+  new TomSelect("#prodi", { create: false });
+  new TomSelect("#status", { create: false });
+  await checkAuthAndLoad();
+});
 
-    function showForm() {
-        resetForm();
-        document.getElementById('dosen-list-container').classList.add('hidden');
-        document.getElementById('dosen-container').classList.remove('hidden');
-        document.getElementById('dosen-container').scrollIntoView({ behavior: 'smooth' });
-    }
+async function checkAuthAndLoad() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return loadDosenData();
+  loadDosenData();
+}
 
-    function hideFormAndShowList() {
-        document.getElementById('dosen-container').classList.add('hidden');
-        document.getElementById('dosen-list-container').classList.remove('hidden');
-    }
+async function loadDosenData() {
+  const tableBody = document.getElementById('dosen-table-body');
+  tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Memuat data...</td></tr>';
 
-    function resetForm() {
-        document.getElementById('dosenForm').reset();
-        prodiSelect.clear();
-        statusSelect.setValue('Aktif');
-        isEditMode = false;
-        currentDosenId = null;
-        document.getElementById('formTitle').textContent = 'Tambah Data Dosen Baru';
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
-        document.getElementById('dosenId').value = '';
-        hideFormAndShowList();
-    }
+  const { data, error } = await supabaseClient.from('dosen').select('*').order('nama');
+  if (error) {
+    console.error(error);
+    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Gagal memuat data!</td></tr>`;
+    return;
+  }
 
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      window.location.href = "index.html";
-    }
+  currentDosenData = data;
+  if (data.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-4">Belum ada data dosen.</td></tr>`;
+    return;
+  }
 
-    function performSearch() {
-        const searchNama = document.getElementById('searchNama').value.trim();
-        const searchNidn = document.getElementById('searchNidn').value.trim();
-        loadDosenData({ nama: searchNama, nidn: searchNidn });
-    }
+  tableBody.innerHTML = data.map(d => `
+    <tr class="hover:bg-gray-100">
+      <td class="px-6 py-4">${d.nidn || '-'}</td>
+      <td class="px-6 py-4">${d.nama || '-'}</td>
+      <td class="px-6 py-4">${d.prodi || '-'}</td>
+      <td class="px-6 py-4">${d.jabatan_fungsional || '-'}</td>
+      <td class="px-6 py-4 text-center">${d.status || '-'}</td>
+      <td class="px-6 py-4 text-center space-x-2">
+        <button onclick="showDetail(${d.id})" class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></button>
+        <button onclick="editDosen(${d.id})" class="text-yellow-600 hover:text-yellow-800"><i class="fas fa-edit"></i></button>
+        <button onclick="deleteDosen(${d.id})" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+  `).join('');
+}
 
-    function resetSearch() {
-        document.getElementById('searchNama').value = '';
-        document.getElementById('searchNidn').value = '';
-        loadDosenData();
-    }
-    
-    function exportToExcel() {
-        if (currentDosenData.length === 0) {
-            alert('Tidak ada data dosen untuk diekspor.');
-            return;
-        }
-        const headers = ["NIDN", "NAMA", "GELAR", "PRODI", "JABATAN_FUNGSIONAL", "STATUS", "NO_HP", "EMAIL"];
-        const dataForExport = currentDosenData.map(d => [d.nidn, d.nama, d.gelar, d.prodi, d.jabatan_fungsional, d.status, d.no_hp, d.email]);
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet([headers, ...dataForExport]);
-        ws['!cols'] = [{wch:18},{wch:30},{wch:15},{wch:20},{wch:20},{wch:10},{wch:15},{wch:25}];
-        XLSX.utils.book_append_sheet(wb, ws, "DataDosenFT");
-        XLSX.writeFile(wb, "data_dosen_ft.xlsx");
-    }
+function showForm() {
+  document.getElementById('dosen-list-container').classList.add('hidden');
+  document.getElementById('dosen-container').classList.remove('hidden');
+}
 
-    async function loadDosenData(filters = {}) {
-        const { nama, nidn } = filters;
-        const tableBody = document.getElementById('dosen-table-body');
-        tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>`;
-        
-        let query = supabaseClient.from('dosen').select('*');
-        
-        if (nama) query = query.ilike('nama', `%${nama}%`);
-        if (nidn) query = query.ilike('nidn', `%${nidn}%`);
+function resetForm() {
+  document.getElementById('dosenForm').reset();
+  isEditMode = false;
+  currentDosenId = null;
+  document.getElementById('dosen-container').classList.add('hidden');
+  document.getElementById('dosen-list-container').classList.remove('hidden');
+}
 
-        const { data, error } = await query.order('nama', { ascending: true });
+async function saveDosen() {
+  const dosenData = {
+    nidn: document.getElementById('nidn').value,
+    nik: document.getElementById('nik').value,
+    nama: document.getElementById('nama')?.value || '-',
+    tgl_lahir: document.getElementById('tgl_lahir').value,
+    gelar: document.getElementById('gelar').value,
+    prodi: document.getElementById('prodi').value,
+    jabatan_fungsional: document.getElementById('jabatan_fungsional').value,
+    status: document.getElementById('status').value,
+    no_hp: document.getElementById('no_hp').value,
+    email: document.getElementById('email').value
+  };
 
-        if (error) {
-            console.error('Error:', error);
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>`;
-            currentDosenData = [];
-            return;
-        }
+  let res;
+  if (isEditMode) res = await supabaseClient.from('dosen').update(dosenData).eq('id', currentDosenId);
+  else res = await supabaseClient.from('dosen').insert([dosenData]);
 
-        currentDosenData = data;
-        tableBody.innerHTML = '';
-        if (data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Tidak ada data dosen ditemukan.</td></tr>';
-            return;
-        }
+  if (res.error) alert('Gagal menyimpan: ' + res.error.message);
+  else {
+    alert('Data berhasil disimpan!');
+    resetForm();
+    loadDosenData();
+  }
+}
 
-        data.forEach(d => {
-            const statusBadge = d.status === 'Aktif' 
-                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>'
-                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">' + d.status + '</span>';
-
-            const row = `
-                <tr class="hover:bg-gray-100">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${d.nidn}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${d.nama}${d.gelar ? ', ' + d.gelar : ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${d.prodi}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${d.jabatan_fungsional || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">${statusBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                        <button onclick="showDetail(${d.id})" class="text-indigo-600 hover:text-indigo-900"><i class="fas fa-eye"></i> Detail</button>
-                        <button onclick="editDosen(${d.id})" class="text-yellow-600 hover:text-yellow-900"><i class="fas fa-edit"></i> Edit</button>
-                        <button onclick="deleteDosen(${d.id}, '${d.nama}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i> Hapus</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    async function saveDosen() {
-        const nidn = document.getElementById('nidn').value;
-        const nama = document.getElementById('nama').value;
-        const prodi = prodiSelect.getValue();
-        const status = statusSelect.getValue();
-
-        if (!nidn || !nama || !prodi || !status) {
-             alert('Pastikan NIDN, Nama, Prodi, dan Status Dosen terisi.');
-             return;
-        }
-
-        const dosenData = {
-            nidn,
-            nama,
-            prodi,
-            status,
-            gelar: document.getElementById('gelar').value || null,
-            jabatan_fungsional: document.getElementById('jabatan_fungsional').value || null,
-            no_hp: document.getElementById('no_hp').value || null,
-            email: document.getElementById('email').value || null,
-        };
-
-        let response;
-        if (isEditMode) {
-            response = await supabaseClient.from('dosen').update(dosenData).eq('id', currentDosenId);
-        } else {
-            response = await supabaseClient.from('dosen').insert([dosenData]);
-        }
-        
-        const { error } = response;
-        if (error) {
-            alert('Gagal menyimpan data: ' + error.message);
-            console.error(error);
-        } else {
-            alert(`Data dosen ${nama} berhasil ${isEditMode ? 'diperbarui' : 'ditambahkan'}!`);
-            resetForm();
-            loadDosenData();
-        }
-    }
-
-    async function editDosen(id) {
-        const { data, error } = await supabaseClient.from('dosen').select('*').eq('id', id).single();
-        if (error || !data) {
-            alert('Data tidak ditemukan.');
-            return;
-        }
-        showForm();
-        document.getElementById('dosenId').value = data.id;
-        document.getElementById('nidn').value = data.nidn;
-        document.getElementById('nama').value = data.nama;
-        document.getElementById('gelar').value = data.gelar || '';
-        prodiSelect.setValue(data.prodi);
-        document.getElementById('jabatan_fungsional').value = data.jabatan_fungsional || '';
-        statusSelect.setValue(data.status);
-        document.getElementById('no_hp').value = data.no_hp || '';
-        document.getElementById('email').value = data.email || '';
-        
-        isEditMode = true;
-        currentDosenId = data.id;
-        document.getElementById('formTitle').textContent = `Edit Data Dosen: ${data.nama}`;
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update Data';
-        document.getElementById('dosenForm').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    async function deleteDosen(id, nama) {
-        if (!confirm(`Yakin ingin menghapus data dosen ${nama}?`)) return;
-
-        const { error } = await supabaseClient.from('dosen').delete().eq('id', id);
-        if (error) {
-            alert('Gagal menghapus data: ' + error.message);
-        } else {
-            alert(`Data dosen ${nama} berhasil dihapus.`);
-            loadDosenData();
-        }
-    }
-
-    async function showDetail(id) {
-        const { data: d, error } = await supabaseClient.from('dosen').select('*').eq('id', id).single();
-        if (error || !d) {
-            alert('Data tidak ditemukan.');
-            return;
-        }
-        
-        const modalContent = `
-            <p><span class="font-bold w-40 inline-block">NIDN / NIDK</span>: ${d.nidn}</p>
-            <p><span class="font-bold w-40 inline-block">Nama Lengkap</span>: ${d.nama}</p>
-            <p><span class="font-bold w-40 inline-block">Gelar Akademik</span>: ${d.gelar || '-'}</p>
-            <p><span class="font-bold w-40 inline-block">Homebase Prodi</span>: ${d.prodi}</p>
-            <p><span class="font-bold w-40 inline-block">Jabatan Fungsional</span>: ${d.jabatan_fungsional || '-'}</p>
-            <p><span class="font-bold w-40 inline-block">Status</span>: ${d.status}</p>
-            <hr class="my-3">
-            <p><span class="font-bold w-40 inline-block">No. HP</span>: ${d.no_hp || '-'}</p>
-            <p><span class="font-bold w-40 inline-block">Email</span>: ${d.email || '-'}</p>
-        `;
-        document.getElementById('modalContent').innerHTML = modalContent;
-        document.getElementById('detailModal').classList.remove('hidden');
-    }
-
-    async function checkAuthAndLoad() {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-            window.location.href = "index.html";
-            return;
-        }
-        
-        const { data: userData } = await supabaseClient.from('users_metadata').select('username').eq('user_id', user.id).single();
-        if (userData) {
-            document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
-        }
-        loadDosenData();
-    }
-
-    window.onload = checkAuthAndLoad;
-</script>
-</body>
-</html>
+async function editDosen(id) {
+  const { data } = await supabaseClient.from('dosen').select('*').eq('id', id).single();
+  if (!data) return alert('Data tidak ditemukan!');
+  showForm();
+  currentDosenId = data.id;
+  isEditMode = true;
+  document.getElementById('nidn').value = data.nidn;
+  document.getElementById('nik').value = data.nik;
+  document.getElementById('gelar').value = data.gelar || '';
+  document.getElementById('prodi').value = data.prodi;
+  document.getElementById('jabatan_fungsional').value = data.jabatan_fungsional ||
