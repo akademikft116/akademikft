@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Biodata & Pencarian Dosen - Fakultas Teknik</title>
+  <title>Manajemen Data Dosen - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
-    .main-content { height: calc(100vh - 4rem); }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; }
+    .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -49,7 +50,7 @@
   <!-- 🔹 Main Content -->
   <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
     <div class="container mx-auto">
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Dosen</h1>
+      <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Data Dosen</h1>
 
       <!-- 🔍 Filter -->
       <div class="bg-white p-4 rounded-lg shadow mb-6">
@@ -70,12 +71,12 @@
       </div>
 
       <!-- 📋 Daftar Dosen -->
-      <div id="dosen-list-container" class="bg-white p-6 rounded-lg shadow-lg">
+      <div class="bg-white p-6 rounded-lg shadow-lg">
         <div class="flex justify-between mb-4">
           <h2 class="text-2xl font-semibold text-gray-700">Daftar Dosen</h2>
           <div class="flex space-x-2">
             <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"><i class="fas fa-file-excel mr-2"></i>Excel</button>
-            <button onclick="showForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"><i class="fas fa-plus-circle mr-2"></i>Tambah</button>
+            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"><i class="fas fa-plus-circle mr-2"></i>Tambah</button>
           </div>
         </div>
 
@@ -101,22 +102,31 @@
   </main>
 </div>
 
-<!-- 🔹 Popup Tambah Dosen -->
-<div id="formModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden justify-center items-center z-50">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-    <h2 class="text-2xl font-semibold mb-4 text-gray-700">Tambah Dosen</h2>
-    <div class="grid grid-cols-1 gap-4">
-      <input id="nidnInput" class="border p-2 rounded-md" placeholder="NIDN" />
-      <input id="namaInput" class="border p-2 rounded-md" placeholder="Nama Lengkap" />
-      <input id="prodiInput" class="border p-2 rounded-md" placeholder="Program Studi" />
-      <input id="jabatanInput" class="border p-2 rounded-md" placeholder="Jabatan Fungsional" />
-      <input id="statusInput" class="border p-2 rounded-md" placeholder="Status (Aktif/Tidak)" />
-      <input id="emailInput" class="border p-2 rounded-md" placeholder="Email" />
-    </div>
-    <div class="flex justify-end mt-4 space-x-2">
-      <button onclick="closeForm()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md">Batal</button>
-      <button onclick="saveDosen()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Simpan</button>
-    </div>
+<!-- 🔹 Modal Form -->
+<div id="dosenModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle" class="text-2xl font-semibold mb-4">Tambah Dosen</h2>
+    <form id="dosenForm" class="space-y-3">
+      <input type="hidden" id="dosenId">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
+        <input id="nik" class="border p-2 rounded" placeholder="NIK">
+        <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap">
+        <input id="tgl_lahir" type="date" class="border p-2 rounded">
+        <input id="prodi" class="border p-2 rounded" placeholder="Program Studi">
+        <input id="pangkat" class="border p-2 rounded" placeholder="Pangkat / Golongan">
+        <input id="jabatan_fungsional" class="border p-2 rounded" placeholder="Jabatan Fungsional">
+        <input id="pendidikan_terakhir" class="border p-2 rounded" placeholder="Pendidikan Terakhir">
+        <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
+        <input id="status" class="border p-2 rounded" placeholder="Status">
+        <input id="email" class="border p-2 rounded" placeholder="Email">
+      </div>
+      <textarea id="alamat" class="border p-2 rounded w-full" placeholder="Alamat Lengkap"></textarea>
+      <div class="flex justify-end space-x-3 mt-4">
+        <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -124,31 +134,24 @@
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let allDosenData = [];
-let filteredData = [];
 
-document.addEventListener("DOMContentLoaded", () => loadDosenData());
+let allDosenData = [];
+let editMode = false;
+
+document.addEventListener("DOMContentLoaded", loadDosenData);
+document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
-  tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>';
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
-  if (error) { 
-    console.error(error);
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500">Gagal memuat data</td></tr>`;
-    return;
-  }
+  if (error) return console.error(error);
   allDosenData = data;
-  filteredData = data;
   renderTable(data);
 }
 
 function renderTable(data) {
   const tbody = document.getElementById("dosen-table-body");
-  if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data</td></tr>';
-    return;
-  }
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
@@ -157,22 +160,48 @@ function renderTable(data) {
       <td class="px-6 py-4">${d.jabatan_fungsional || '-'}</td>
       <td class="px-6 py-4 text-center">${d.status || '-'}</td>
       <td class="px-6 py-4 text-center space-x-2">
-        <button class="text-blue-600"><i class="fas fa-eye"></i></button>
-        <button class="text-yellow-600"><i class="fas fa-edit"></i></button>
-        <button class="text-red-600"><i class="fas fa-trash"></i></button>
+        <button class="text-yellow-600" onclick="editDosen('${d.id}')"><i class="fas fa-edit"></i></button>
+        <button class="text-red-600" onclick="deleteDosen('${d.id}')"><i class="fas fa-trash"></i></button>
       </td>
     </tr>`).join('');
 }
 
+function openModal() {
+  document.getElementById("dosenForm").reset();
+  document.getElementById("modalTitle").textContent = "Tambah Dosen";
+  document.getElementById("dosenModal").style.display = "flex";
+  editMode = false;
+}
+
+function closeModal() {
+  document.getElementById("dosenModal").style.display = "none";
+}
+
+async function saveDosen(e) {
+  e.preventDefault();
+  const formData = {
+    nidn: nidn.value, nik: nik.value, nama: nama.value, tgl_lahir: tgl_lahir.value,
+    prodi: prodi.value, pangkat: pangkat.value, jabatan_fungsional: jabatan_fungsional.value,
+    alamat: alamat.value, no_telp: no_telp.value, pendidikan_terakhir: pendidikan_terakhir.value,
+    status: status.value, email: email.value
+  };
+  if (editMode) {
+    await supabaseClient.from("dosen").update(formData).eq("id", document.getElementById("dosenId").value);
+  } else {
+    await supabaseClient.from("dosen").insert([formData]);
+  }
+  closeModal();
+  loadDosenData();
+}
+
 function applyFilter() {
-  const nidnValue = document.getElementById("filterNidn").value.toLowerCase().trim();
-  const namaValue = document.getElementById("filterNama").value.toLowerCase().trim();
-  filteredData = allDosenData.filter(d => {
-    const matchNidn = nidnValue ? d.nidn?.toLowerCase().includes(nidnValue) : true;
-    const matchNama = namaValue ? d.nama?.toLowerCase().includes(namaValue) : true;
-    return matchNidn && matchNama;
-  });
-  renderTable(filteredData);
+  const nidnVal = document.getElementById("filterNidn").value.toLowerCase();
+  const namaVal = document.getElementById("filterNama").value.toLowerCase();
+  const filtered = allDosenData.filter(d =>
+    (!nidnVal || d.nidn?.toLowerCase().includes(nidnVal)) &&
+    (!namaVal || d.nama?.toLowerCase().includes(namaVal))
+  );
+  renderTable(filtered);
 }
 
 function resetFilter() {
@@ -181,54 +210,38 @@ function resetFilter() {
   renderTable(allDosenData);
 }
 
+async function editDosen(id) {
+  const dosen = allDosenData.find(d => d.id == id);
+  if (!dosen) return;
+  Object.keys(dosen).forEach(k => {
+    if (document.getElementById(k)) document.getElementById(k).value = dosen[k];
+  });
+  document.getElementById("dosenId").value = id;
+  document.getElementById("modalTitle").textContent = "Edit Dosen";
+  document.getElementById("dosenModal").style.display = "flex";
+  editMode = true;
+}
+
+async function deleteDosen(id) {
+  if (!confirm("Yakin ingin menghapus data dosen ini?")) return;
+  await supabaseClient.from("dosen").delete().eq("id", id);
+  loadDosenData();
+}
+
 function exportToExcel() {
-  if (!filteredData.length) return alert("Tidak ada data untuk diekspor!");
-  const headers = ["NIDN","Nama","Prodi","Jabatan","Status","Email"];
-  const rows = filteredData.map(d=>[d.nidn,d.nama,d.prodi,d.jabatan_fungsional,d.status,d.email]);
+  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat","Jabatan","Alamat","No Telp","Pendidikan","Status","Email"];
+  const rows = allDosenData.map(d=>[
+    d.nidn,d.nik,d.nama,d.tgl_lahir,d.prodi,d.pangkat,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_terakhir,d.status,d.email
+  ]);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   XLSX.utils.book_append_sheet(wb, ws, "Dosen");
-  XLSX.writeFile(wb, "data_dosen_filtered.xlsx");
-}
-
-function showForm() {
-  document.getElementById("formModal").classList.remove("hidden");
-  document.getElementById("formModal").classList.add("flex");
-}
-
-function closeForm() {
-  document.getElementById("formModal").classList.add("hidden");
-}
-
-async function saveDosen() {
-  const newData = {
-    nidn: document.getElementById("nidnInput").value,
-    nama: document.getElementById("namaInput").value,
-    prodi: document.getElementById("prodiInput").value,
-    jabatan_fungsional: document.getElementById("jabatanInput").value,
-    status: document.getElementById("statusInput").value,
-    email: document.getElementById("emailInput").value
-  };
-
-  if (!newData.nidn || !newData.nama) {
-    alert("NIDN dan Nama wajib diisi!");
-    return;
-  }
-
-  const { error } = await supabaseClient.from("dosen").insert([newData]);
-  if (error) {
-    alert("Gagal menyimpan data!");
-    console.error(error);
-  } else {
-    alert("Data dosen berhasil ditambahkan!");
-    closeForm();
-    loadDosenData();
-  }
+  XLSX.writeFile(wb, "data_dosen.xlsx");
 }
 
 async function logout() {
   await supabaseClient.auth.signOut();
-  window.location.href="index.html";
+  window.location.href = "index.html";
 }
 </script>
 </body>
