@@ -103,12 +103,12 @@
     <form id="dosenForm" class="space-y-3">
       <input type="hidden" id="dosenId">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        
         <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         
-        <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap"> 
-        
-        <input id="tanggal_lahir" type="date" class="border p-2 rounded"> 
+        <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap">
+        <input id="tanggal_lahir" type="date" class="border p-2 rounded" placeholder="Tanggal Lahir"> 
         
         <input id="prodi" class="border p-2 rounded" placeholder="Program Studi">
         <input id="pangkat_golongan" class="border p-2 rounded" placeholder="Pangkat / Golongan">
@@ -116,14 +116,15 @@
         <input id="jabatan_fungsional" class="border p-2 rounded" placeholder="Jabatan Fungsional">
         <input id="pendidikan_tertinggi" class="border p-2 rounded" placeholder="Pendidikan Tertinggi">
 
-        <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
         <input id="status" class="border p-2 rounded" placeholder="Status">
+        <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
 
         <div class="md:col-span-2">
             <input id="email" type="email" class="border p-2 rounded w-full" placeholder="Email Dosen">
         </div>
       </div>
       <textarea id="alamat" class="border p-2 rounded w-full" placeholder="Alamat Lengkap"></textarea>
+      
       <div class="flex justify-end space-x-3 mt-4">
         <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
@@ -191,20 +192,20 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // PERBAIKAN: Memastikan nama field di FormData sesuai dengan ID di HTML
+  // Memastikan nama field di FormData sesuai dengan ID di HTML
   const dosenData = {
     nidn: document.getElementById("nidn").value,
     nik: document.getElementById("nik").value,
-    nama: document.getElementById("nama").value, // Sebelumnya 'nama_lengkap' di form, diubah ke 'nama'
-    tanggal_lahir: document.getElementById("tanggal_lahir").value, // Sebelumnya 'tgl_lahir', diubah ke 'tanggal_lahir'
+    nama: document.getElementById("nama").value,
+    tanggal_lahir: document.getElementById("tanggal_lahir").value,
     prodi: document.getElementById("prodi").value,
-    pangkat_golongan: document.getElementById("pangkat_golongan").value, // Sebelumnya 'pangkat', diubah ke 'pangkat_golongan'
+    pangkat_golongan: document.getElementById("pangkat_golongan").value,
     jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
     alamat: document.getElementById("alamat").value,
     no_telp: document.getElementById("no_telp").value,
-    pendidikan_tertinggi: document.getElementById("pendidikan_tertinggi").value, // Sebelumnya 'pendidikan_terakhir', diubah ke 'pendidikan_tertinggi'
+    pendidikan_tertinggi: document.getElementById("pendidikan_tertinggi").value,
     status: document.getElementById("status").value,
-    email: document.getElementById("email").value, // Email ditambahkan di modal
+    email: document.getElementById("email").value, 
   };
   
   let result;
@@ -247,7 +248,7 @@ async function editDosen(id) {
       return;
   }
   
-  // PERBAIKAN: Mengisi field satu per satu agar lebih stabil (mengatasi bug pengisian data)
+  // Mengisi semua field yang diminta
   document.getElementById("nidn").value = dosen.nidn || "";
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama").value = dosen.nama || "";
