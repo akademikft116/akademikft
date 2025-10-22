@@ -174,42 +174,24 @@ function closeModal() {
 
 async function saveDosen(e) {
   e.preventDefault();
-
   const formData = {
-    nidn: document.getElementById("nidn").value,
-    nik: document.getElementById("nik").value,
-    nama: document.getElementById("nama_lengkap").value,
-    tanggal_lahir: document.getElementById("tgl_lahir").value,
-    program_studi: document.getElementById("prodi").value,
-    pangkat_golongan: document.getElementById("pangkat").value,
-    jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
-    alamat: document.getElementById("alamat").value,
-    no_telp: document.getElementById("no_telp").value,
-    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value,
-    status: document.getElementById("status").value || "-"
+    nidn: nidn.value,
+    nik: nik.value,
+    nama: nama.value,
+    tanggal_lahir: tanggal_lahir.value,
+    prodi: prodi.value,
+    pangkat_golongan: pangkat_golongan.value,
+    jabatan_fungsional: jabatan_fungsional.value,
+    alamat: alamat.value,
+    no_telp: no_telp.value,
+    pendidikan_terakhir: pendidikan_terakhir.value
   };
 
-  try {
-    if (editMode) {
-      const { error } = await supabaseClient
-        .from("dosen")
-        .update(formData)
-        .eq("id", document.getElementById("dosenId").value);
-      if (error) throw error;
-      alert("Data dosen berhasil diperbarui!");
-    } else {
-      const { error } = await supabaseClient.from("dosen").insert([formData]);
-      if (error) throw error;
-      alert("Data dosen berhasil ditambahkan!");
-    }
-  } catch (err) {
-    console.error("Error:", err.message);
-    alert("Gagal menyimpan data: " + err.message);
+  if (editMode) {
+    await supabaseClient.from("dosen").update(formData).eq("id", document.getElementById("dosenId").value);
+  } else {
+    await supabaseClient.from("dosen").insert([formData]);
   }
-
-  closeModal();
-  loadDosenData();
-}
 
   closeModal();
   loadDosenData();
