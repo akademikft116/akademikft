@@ -196,8 +196,6 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // FIX: Menggunakan string kosong ("") untuk kolom yang ada di tabel namun tidak ada di form.
-  // Ini memastikan key 'prodi' dan 'status' terkirim ke DB, mengatasi bug tampilan/edit.
   const dosenData = {
     nidn: document.getElementById("nidn").value,
     nik: document.getElementById("nik").value,
@@ -205,10 +203,10 @@ async function saveDosen(e) {
     // Nama Lengkap (nama_lengkap -> nama)
     nama: document.getElementById("nama_lengkap").value,
     
-    // Kolom yang ada di tabel namun dihapus dari modal, diisi string kosong
+    // Kolom yang ada di tabel namun dihapus dari modal, diisi string kosong agar tampil di tabel
     prodi: "", 
     status: "", 
-    email: null, // Email dibiarkan null (diabaikan)
+    email: null, 
     
     // Mapping ID HTML ke Nama Kolom Supabase
     tanggal_lahir: document.getElementById("tgl_lahir").value, // tgl_lahir -> tanggal_lahir
@@ -216,7 +214,9 @@ async function saveDosen(e) {
     jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
     alamat: document.getElementById("alamat").value,
     no_telp: document.getElementById("no_telp").value,
-    pendidikan_tertinggi: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir -> pendidikan_tertinggi
+    
+    // PERBAIKAN: Menggunakan kolom 'pendidikan_terakhir' (sesuai permintaan)
+    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value, 
   };
   
   // Hapus properti yang bernilai null (hanya email dalam kasus ini)
@@ -226,8 +226,10 @@ async function saveDosen(e) {
 
   let result;
   if (editMode) {
+    // FIX: Menggunakan 'pendidikan_terakhir' dalam update
     result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value);
   } else {
+    // FIX: Menggunakan 'pendidikan_terakhir' dalam insert
     result = await supabaseClient.from("dosen").insert([filteredData]);
   }
   
@@ -274,7 +276,8 @@ async function editDosen(id) {
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("alamat").value = dosen.alamat || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
-  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_tertinggi || ""; 
+  // PERBAIKAN: Mengambil data dari kolom 'pendidikan_terakhir'
+  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || ""; 
   
   document.getElementById("dosenId").value = id;
   document.getElementById("modalTitle").textContent = "Edit Dosen";
@@ -295,9 +298,11 @@ async function deleteDosen(id) {
 }
 
 function exportToExcel() {
-  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan"];
+  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan Terakhir"];
   const rows = allDosenData.map(d=>[
-    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi
+    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,
+    // PERBAIKAN: Mengambil data dari kolom 'pendidikan_terakhir'
+    d.pendidikan_terakhir
   ]);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
