@@ -154,8 +154,13 @@ const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Mengakses jsPDF langsung dari window (scope global)
-const jsPDF = window.jsPDF; 
+// KOREKSI DEKLARASI: Menggunakan destructuring yang lebih aman jika sudah dimuat
+// Ini adalah cara terbaik yang seharusnya sudah berfungsi
+const { jsPDF } = window.jspdf; 
+
+// Jika cara di atas masih gagal, gunakan ini:
+// const jsPDF = window.jsPDF; 
+
 
 let allDosenData = [];
 let editMode = false;
@@ -286,7 +291,7 @@ function getDetailDataForExport() {
 function exportDetailToPdf() {
     if (!currentDosenDetail) return alert("Tidak ada data detail untuk diekspor.");
     
-    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet atau tag script.");
+    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet, hard refresh, atau deklarasi variabel.");
 
     const doc = new jsPDF();
     const data = getDetailDataForExport();
@@ -331,7 +336,7 @@ function exportDetailToExcel() {
 // FUNGSI EKSPOR SEMUA DATA KE PDF
 function exportAllToPdf() {
     if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
-    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet atau tag script.");
+    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet, hard refresh, atau deklarasi variabel.");
 
     const doc = new jsPDF('l', 'mm', 'a4'); // 'l' untuk Landscape
     
