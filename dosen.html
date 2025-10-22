@@ -216,7 +216,7 @@ async function saveDosen(e) {
     jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
     alamat: document.getElementById("alamat").value,
     no_telp: document.getElementById("no_telp").value,
-    pendidikan_tertinggi: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir -> pendidikan_tertinggi
+    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir
   };
   
   // Hapus properti yang bernilai null (prodi, status, email)
@@ -274,7 +274,7 @@ async function editDosen(id) {
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("alamat").value = dosen.alamat || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
-  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_tertinggi || ""; // Kolom 'pendidikan_tertinggi' ke ID 'pendidikan_terakhir'
+  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || ""; 
   
   // Field yang dihilangkan dari form (prodi, status, email) tidak perlu diisi.
   
@@ -299,7 +299,7 @@ async function deleteDosen(id) {
 function exportToExcel() {
   const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan"];
   const rows = allDosenData.map(d=>[
-    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi
+    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_terakhir
   ]);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
