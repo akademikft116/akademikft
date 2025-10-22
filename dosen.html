@@ -107,24 +107,17 @@
         <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         
-        <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap">
-        <input id="tanggal_lahir" type="date" class="border p-2 rounded" placeholder="Tanggal Lahir"> 
+        <input id="tgl_lahir" type="date" class="border p-2 rounded" placeholder="Tanggal Lahir">
         
-        <input id="prodi" class="border p-2 rounded" placeholder="Program Studi">
-        <input id="pangkat_golongan" class="border p-2 rounded" placeholder="Pangkat / Golongan">
+        <input id="pangkat" class="border p-2 rounded" placeholder="Pangkat / Golongan">
         
         <input id="jabatan_fungsional" class="border p-2 rounded" placeholder="Jabatan Fungsional">
-        <input id="pendidikan_tertinggi" class="border p-2 rounded" placeholder="Pendidikan Tertinggi">
-
-        <input id="status" class="border p-2 rounded" placeholder="Status">
+        <input id="pendidikan_terakhir" class="border p-2 rounded" placeholder="Pendidikan Terakhir">
+        
         <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
-
-        <div class="md:col-span-2">
-            <input id="email" type="email" class="border p-2 rounded w-full" placeholder="Email Dosen">
+        
         </div>
-      </div>
       <textarea id="alamat" class="border p-2 rounded w-full" placeholder="Alamat Lengkap"></textarea>
-      
       <div class="flex justify-end space-x-3 mt-4">
         <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
@@ -150,8 +143,14 @@ document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
   tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
+  
+  // Mengambil semua data untuk filter
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
-  if (error) return console.error(error);
+  if (error) {
+      console.error(error);
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>`;
+      return;
+  }
   allDosenData = data;
   renderTable(data);
 }
@@ -163,6 +162,7 @@ function renderTable(data) {
       return;
   }
   
+  // Catatan: Kolom 'nama', 'prodi', dan 'status' di tabel utama mungkin kosong jika tidak dimasukkan via modal baru.
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
@@ -192,27 +192,38 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // Memastikan nama field di FormData sesuai dengan ID di HTML
+  // PERBAIKAN: Hanya mengambil field yang diminta dan memetakan ke kolom Supabase yang benar
   const dosenData = {
     nidn: document.getElementById("nidn").value,
     nik: document.getElementById("nik").value,
-    nama: document.getElementById("nama").value,
-    tanggal_lahir: document.getElementById("tanggal_lahir").value,
-    prodi: document.getElementById("prodi").value,
-    pangkat_golongan: document.getElementById("pangkat_golongan").value,
+    
+    // Nama Lengkap, Prodi, Status, Email diabaikan (dibiarkan NULL di DB jika tidak ada input)
+    // Supaya tidak error, kita biarkan nama, prodi, status, dan email kosong
+    nama: null, 
+    prodi: null,
+    status: null,
+    email: null,
+    
+    // Mapping ID HTML ke Nama Kolom Supabase
+    tanggal_lahir: document.getElementById("tgl_lahir").value, // tgl_lahir -> tanggal_lahir
+    pangkat_golongan: document.getElementById("pangkat").value, // pangkat -> pangkat_golongan
     jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
     alamat: document.getElementById("alamat").value,
     no_telp: document.getElementById("no_telp").value,
-    pendidikan_tertinggi: document.getElementById("pendidikan_tertinggi").value,
-    status: document.getElementById("status").value,
-    email: document.getElementById("email").value, 
+    pendidikan_tertinggi: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir -> pendidikan_tertinggi
   };
   
+  // Hapus properti yang bernilai null (kecuali ada data lama yang ingin dipertahankan)
+  // Untuk mode edit, data lama akan di-overwrite, jadi kita hanya kirim yang ada di form
+  const filteredData = Object.fromEntries(
+    Object.entries(dosenData).filter(([_, v]) => v !== null)
+  );
+
   let result;
   if (editMode) {
-    result = await supabaseClient.from("dosen").update(dosenData).eq("id", document.getElementById("dosenId").value);
+    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value);
   } else {
-    result = await supabaseClient.from("dosen").insert([dosenData]);
+    result = await supabaseClient.from("dosen").insert([filteredData]);
   }
   
   if (result.error) {
@@ -248,21 +259,18 @@ async function editDosen(id) {
       return;
   }
   
-  // Mengisi semua field yang diminta
+  // PERBAIKAN: Mengisi field dari kolom Supabase ke ID HTML yang sesuai
   document.getElementById("nidn").value = dosen.nidn || "";
   document.getElementById("nik").value = dosen.nik || "";
-  document.getElementById("nama").value = dosen.nama || "";
-  document.getElementById("tanggal_lahir").value = dosen.tanggal_lahir || "";
-  document.getElementById("prodi").value = dosen.prodi || "";
-  document.getElementById("pangkat_golongan").value = dosen.pangkat_golongan || "";
+  // Field yang dihilangkan dari form akan diisi dengan data DB (walaupun tidak terlihat, penting untuk mode edit)
+  
+  document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; // Kolom 'tanggal_lahir' ke ID 'tgl_lahir'
+  document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; // Kolom 'pangkat_golongan' ke ID 'pangkat'
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("alamat").value = dosen.alamat || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
-  document.getElementById("pendidikan_tertinggi").value = dosen.pendidikan_tertinggi || "";
-  document.getElementById("status").value = dosen.status || "";
-  document.getElementById("email").value = dosen.email || "";
-
-
+  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_tertinggi || ""; // Kolom 'pendidikan_tertinggi' ke ID 'pendidikan_terakhir'
+  
   document.getElementById("dosenId").value = id;
   document.getElementById("modalTitle").textContent = "Edit Dosen";
   document.getElementById("dosenModal").style.display = "flex";
@@ -282,6 +290,7 @@ async function deleteDosen(id) {
 }
 
 function exportToExcel() {
+  // Hanya mengekspor kolom yang relevan dari data DB yang ada
   const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat","Jabatan","Alamat","No Telp","Pendidikan","Status","Email"];
   const rows = allDosenData.map(d=>[
     d.nidn,d.nik,d.nama,d.tanggal_lahir,d.prodi,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi,d.status,d.email
