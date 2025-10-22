@@ -108,6 +108,16 @@
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         
         <div class="md:col-span-2">
+            <select id="prodi" class="border p-2 rounded w-full">
+                <option value="">Pilih Program Studi</option>
+                <option value="Teknik Informatika">Teknik Informatika</option>
+                <option value="Teknik Sipil">Teknik Sipil</option>
+                <option value="Teknik Elektro">Teknik Elektro</option>
+                <option option="Arsitektur">Arsitektur</option>
+            </select>
+        </div>
+
+        <div class="md:col-span-2">
             <input id="nama_lengkap" class="border p-2 rounded w-full" placeholder="Nama Lengkap">
         </div>
         
@@ -203,8 +213,10 @@ async function saveDosen(e) {
     // Nama Lengkap (nama_lengkap -> nama)
     nama: document.getElementById("nama_lengkap").value,
     
-    // Kolom yang ada di tabel namun dihapus dari modal, diisi string kosong agar tampil di tabel
-    prodi: "", 
+    // PROGRAM STUDI (DARI FORM)
+    prodi: document.getElementById("prodi").value, 
+    
+    // Kolom lain yang dihapus dari modal, diisi string kosong/null
     status: "", 
     email: null, 
     
@@ -215,7 +227,7 @@ async function saveDosen(e) {
     alamat: document.getElementById("alamat").value,
     no_telp: document.getElementById("no_telp").value,
     
-    // PERBAIKAN: Menggunakan kolom 'pendidikan_terakhir' (sesuai permintaan)
+    // Menggunakan kolom 'pendidikan_terakhir'
     pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value, 
   };
   
@@ -226,10 +238,8 @@ async function saveDosen(e) {
 
   let result;
   if (editMode) {
-    // FIX: Menggunakan 'pendidikan_terakhir' dalam update
     result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value);
   } else {
-    // FIX: Menggunakan 'pendidikan_terakhir' dalam insert
     result = await supabaseClient.from("dosen").insert([filteredData]);
   }
   
@@ -271,12 +281,14 @@ async function editDosen(id) {
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   
+  // MENGISI PROGRAM STUDI
+  document.getElementById("prodi").value = dosen.prodi || ""; 
+
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; 
   document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; 
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("alamat").value = dosen.alamat || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
-  // PERBAIKAN: Mengambil data dari kolom 'pendidikan_terakhir'
   document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || ""; 
   
   document.getElementById("dosenId").value = id;
@@ -298,10 +310,9 @@ async function deleteDosen(id) {
 }
 
 function exportToExcel() {
-  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan Terakhir"];
+  const headers = ["NIDN","NIK","Nama","Program Studi", "Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan Terakhir"];
   const rows = allDosenData.map(d=>[
-    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,
-    // PERBAIKAN: Mengambil data dari kolom 'pendidikan_terakhir'
+    d.nidn,d.nik,d.nama,d.prodi,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,
     d.pendidikan_terakhir
   ]);
   const wb = XLSX.utils.book_new();
