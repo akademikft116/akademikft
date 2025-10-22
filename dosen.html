@@ -165,12 +165,13 @@ document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
+  // Tampilkan loading saat data dimuat
   tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
   
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   if (error) {
-      console.error(error);
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>`;
+      console.error("Gagal memuat data dosen:", error);
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat data. ${error.message}</td></tr>`;
       return;
   }
   allDosenData = data;
@@ -215,47 +216,48 @@ async function saveDosen(e) {
   e.preventDefault();
   
   const dosenData = {
-    nidn: document.getElementById("nidn").value,
-    nik: document.getElementById("nik").value,
+    nidn: document.getElementById("nidn").value || null,
+    nik: document.getElementById("nik").value || null,
     
     // Nama Lengkap (nama_lengkap -> nama)
-    nama: document.getElementById("nama_lengkap").value,
+    nama: document.getElementById("nama_lengkap").value || null,
     
     // PROGRAM STUDI
-    prodi: document.getElementById("prodi").value, 
+    prodi: document.getElementById("prodi").value || null, 
     
     // STATUS DOSEN
-    status: document.getElementById("status").value || "", 
+    status: document.getElementById("status").value || null, 
     
-    email: null, 
+    email: null, // Kolom yang tidak digunakan di modal, tetap null
     
     // Mapping ID HTML ke Nama Kolom Supabase
-    tanggal_lahir: document.getElementById("tgl_lahir").value, // tgl_lahir -> tanggal_lahir
-    pangkat_golongan: document.getElementById("pangkat").value, // pangkat -> pangkat_golongan
-    jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
-    alamat: document.getElementById("alamat").value,
-    no_telp: document.getElementById("no_telp").value,
+    tanggal_lahir: document.getElementById("tgl_lahir").value || null, // tgl_lahir -> tanggal_lahir
+    pangkat_golongan: document.getElementById("pangkat").value || null, // pangkat -> pangkat_golongan
+    jabatan_fungsional: document.getElementById("jabatan_fungsional").value || null,
+    alamat: document.getElementById("alamat").value || null,
+    no_telp: document.getElementById("no_telp").value || null,
     
     // Menggunakan kolom 'pendidikan_terakhir'
-    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value, 
+    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value || null, 
   };
   
-  // Hapus properti yang bernilai null (hanya email dalam kasus ini)
+  // Hapus properti yang bernilai null/kosong agar Supabase menggunakan default atau mengabaikannya
   const filteredData = Object.fromEntries(
-    Object.entries(dosenData).filter(([k, v]) => v !== null)
+    Object.entries(dosenData).filter(([k, v]) => v !== null && v !== "")
   );
 
   let result;
   if (editMode) {
-    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value);
+    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value).select(); // Tambah .select() untuk mendapatkan data yang diperbarui
   } else {
-    result = await supabaseClient.from("dosen").insert([filteredData]);
+    result = await supabaseClient.from("dosen").insert([filteredData]).select(); // Tambah .select() untuk mendapatkan data yang baru dimasukkan
   }
   
   if (result.error) {
        alert("❌ Operasi gagal: " + result.error.message);
        console.error("Supabase Error:", result.error);
   } else {
+      // 🚨 PERBAIKAN PENTING: Panggil loadDosenData() untuk memuat ulang tabel.
       alert(editMode ? "✅ Data dosen berhasil diperbarui!" : "✅ Dosen baru berhasil ditambahkan!");
       closeModal();
       loadDosenData();
@@ -291,7 +293,7 @@ async function editDosen(id) {
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   
   document.getElementById("prodi").value = dosen.prodi || ""; 
-  document.getElementById("status").value = dosen.status || ""; // Mengisi Status Dosen
+  document.getElementById("status").value = dosen.status || ""; 
 
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; 
   document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; 
