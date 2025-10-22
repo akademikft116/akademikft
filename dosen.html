@@ -161,11 +161,20 @@ let editMode = false;
 document.addEventListener("DOMContentLoaded", loadDosenData);
 document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 
+// 🚨 FUNGSI PEMBANTU BARU: Mengubah string kosong menjadi NULL
+const toNullIfEmpty = (val) => {
+    if (typeof val === 'string') {
+        // Cek string kosong atau string hanya spasi
+        const trimmedVal = val.trim();
+        return trimmedVal === "" ? null : trimmedVal;
+    }
+    return val; // Kembalikan nilai aslinya jika bukan string
+};
+
 // --- FUNGSI UTAMA ---
 
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
-  // Tampilkan loading saat data dimuat
   tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
   
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
@@ -215,37 +224,42 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // 🚨 PERBAIKAN: Menggunakan .trim() dan menghilangkan || null untuk field string
-  // agar nilai string kosong ("") yang berasal dari form tetap terkirim/terupdate.
+  // 🚨 REVISI: Menggunakan toNullIfEmpty untuk semua field yang boleh null di DB
   const dosenData = {
-    // Field yang harus mengirim string kosong jika input kosong
-    nidn: document.getElementById("nidn").value.trim(),
-    nik: document.getElementById("nik").value.trim(),
-    nama: document.getElementById("nama_lengkap").value.trim(),
-    prodi: document.getElementById("prodi").value, 
-    status: document.getElementById("status").value, // Nilai "" jika default dipilih
-    pangkat_golongan: document.getElementById("pangkat").value.trim(),
-    jabatan_fungsional: document.getElementById("jabatan_fungsional").value.trim(),
-    alamat: document.getElementById("alamat").value.trim(),
-    no_telp: document.getElementById("no_telp").value.trim(),
-    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value.trim(), 
+    nidn: toNullIfEmpty(document.getElementById("nidn").value),
+    nik: toNullIfEmpty(document.getElementById("nik").value),
+    nama: toNullIfEmpty(document.getElementById("nama_lengkap").value),
     
-    // Field yang sebaiknya mengirim null jika kosong (untuk date/email)
+    // Dropdown fields
+    prodi: toNullIfEmpty(document.getElementById("prodi").value), 
+    status: toNullIfEmpty(document.getElementById("status").value),
+    
+    // Other fields
+    pangkat_golongan: toNullIfEmpty(document.getElementById("pangkat").value),
+    jabatan_fungsional: toNullIfEmpty(document.getElementById("jabatan_fungsional").value),
+    alamat: toNullIfEmpty(document.getElementById("alamat").value),
+    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
+    pendidikan_terakhir: toNullIfEmpty(document.getElementById("pendidikan_terakhir").value), 
+    
+    // Date/Email fields
     tanggal_lahir: document.getElementById("tgl_lahir").value || null, 
     email: null, 
   };
   
-  // Hapus properti yang bernilai null (hanya email dan tgl_lahir jika kosong)
-  // Nilai string kosong ("") akan tetap dimasukkan, memastikan update kolom status/prodi
-  const filteredData = Object.fromEntries(
-    Object.entries(dosenData).filter(([k, v]) => v !== null)
+  let result;
+  
+  // Filter data untuk memastikan hanya field yang memiliki nilai (tidak null) yang dikirim saat EDIT.
+  // Ini penting agar kolom lain yang tidak diisi di form (seperti 'email') tidak menimpa nilai lama.
+  const payloadData = Object.fromEntries(
+    Object.entries(dosenData).filter(([k, v]) => v !== undefined)
   );
 
-  let result;
   if (editMode) {
-    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value).select(); 
+    // Saat EDIT, kita menggunakan payloadData (yang sudah difilter dari nilai undefined)
+    result = await supabaseClient.from("dosen").update(payloadData).eq("id", document.getElementById("dosenId").value).select(); 
   } else {
-    result = await supabaseClient.from("dosen").insert([filteredData]).select(); 
+    // Saat TAMBAH, kita tetap bisa menggunakan payloadData
+    result = await supabaseClient.from("dosen").insert([payloadData]).select(); 
   }
   
   if (result.error) {
@@ -286,6 +300,7 @@ async function editDosen(id) {
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   
+  // Jika nilai di DB adalah NULL, dropdown akan diset ke "" (opsi default 'Pilih...')
   document.getElementById("prodi").value = dosen.prodi || ""; 
   document.getElementById("status").value = dosen.status || ""; 
 
@@ -322,8 +337,7 @@ function exportToExcel() {
   ]);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  XLSX.utils.book_append_sheet(wb, ws, "Dosen");
-  XLSX.writeFile(wb, "data_dosen.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "data_dosen.xlsx");
 }
 
 async function logout() {
