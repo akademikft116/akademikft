@@ -170,7 +170,6 @@ const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Mendeklarasikan jsPDF (seharusnya sudah berfungsi setelah koreksi CDN)
 const { jsPDF } = window.jspdf; 
 
 let allDosenData = [];
@@ -183,7 +182,7 @@ document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 const toNullIfEmpty = (val) => {
     if (typeof val === 'string') {
         const trimmedVal = val.trim();
-        // Mengubah string kosong menjadi null (kecuali untuk select yang nilainya 'null' saat default)
+        // Nilai default dari select option (nilai kosong) akan diubah menjadi null
         return trimmedVal === "" || trimmedVal === "Pilih Program Studi" || trimmedVal === "Pilih Status" ? null : trimmedVal; 
     }
     return val;
@@ -238,7 +237,7 @@ function openModal() {
   document.getElementById("modalTitle").textContent = "Tambah Dosen";
   document.getElementById("dosenModal").style.display = "flex";
   editMode = false;
-  // Reset select ke default (opsi disabled selected)
+  // Set kembali select ke default (opsi disabled selected)
   document.getElementById("prodi").value = ""; 
   document.getElementById("status").value = ""; 
 }
@@ -425,14 +424,12 @@ async function saveDosen(e) {
     nik: toNullIfEmpty(document.getElementById("nik").value), 
     nama: toNullIfEmpty(document.getElementById("nama_lengkap").value), 
     tanggal_lahir: toNullIfEmpty(document.getElementById("tgl_lahir").value), 
-    // Menggunakan toNullIfEmpty untuk memastikan nilai default "" menjadi null
     prodi: toNullIfEmpty(document.getElementById("prodi").value), 
     pangkat_golongan: toNullIfEmpty(document.getElementById("pangkat").value), 
     jabatan_fungsional: toNullIfEmpty(document.getElementById("jabatan_fungsional").value),
     alamat: toNullIfEmpty(document.getElementById("alamat").value),
     no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
     pendidikan_terakhir: toNullIfEmpty(document.getElementById("pendidikan_terakhir").value),
-    // Menggunakan toNullIfEmpty untuk memastikan nilai default "" menjadi null
     status: toNullIfEmpty(document.getElementById("status").value), 
   };
   
@@ -487,13 +484,14 @@ async function editDosen(id) {
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || "";
-  // Menggunakan || "" untuk memastikan nilai default select option ter-set jika data null
+  
+  // KOREKSI UTAMA: Set nilai untuk elemen <select>
+  // Menggunakan nilai dari database atau string kosong ("") jika null/undefined
   document.getElementById("prodi").value = dosen.prodi || ""; 
   document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; 
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
-  // Menggunakan || "" untuk memastikan nilai default select option ter-set jika data null
   document.getElementById("status").value = dosen.status || "";
   document.getElementById("alamat").value = dosen.alamat || "";
 
