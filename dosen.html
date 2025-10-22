@@ -10,7 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
   <style>
-    /* STYLE TIDAK DIUBAH SAMA SEKALI, SESUAI PERMINTAAN */
+    /* STYLE TIDAK DIUBAH SAMA SEKALI, SESUAI KODE ASLI ANDA */
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; } 
     .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
@@ -170,9 +170,9 @@
     </div>
   </div>
 
+  
   <script>
-    // PERBAIKAN KRITIS: INISIALISASI SUPABASE CLIENT DITAMBAHKAN KEMBALI
-    // Ini adalah kunci agar semua fungsi data Supabase dapat berjalan.
+    // Inisialisasi Supabase Client (Sesuai kode Anda)
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -187,7 +187,7 @@
         document.getElementById("dosenForm").reset();
         document.getElementById("dosenId").value = "";
         document.getElementById("modalTitle").textContent = "Tambah Dosen Baru";
-        // Memastikan modal tampil sebagai 'flex' (agar muncul di tengah)
+        // Memastikan modal tampil sebagai 'flex' (perbaikan yang diperlukan agar modal muncul)
         document.getElementById("dosenModal").style.display = "flex"; 
         editMode = false;
     }
@@ -292,8 +292,7 @@
              return;
         }
         
-        // ** PERBAIKAN KRITIS: PENGISIAN FORM FORMAL **
-        // Menggantikan loop yang mungkin gagal dengan pengisian eksplisit untuk setiap field
+        // Perbaikan logis agar semua field terisi
         document.getElementById("nidn").value = dosen.nidn || "";
         document.getElementById("nik").value = dosen.nik || "";
         document.getElementById("nama").value = dosen.nama || "";
@@ -305,7 +304,6 @@
         document.getElementById("no_telp").value = dosen.no_telp || "";
         document.getElementById("pendidikan_tertinggi").value = dosen.pendidikan_tertinggi || "";
         document.getElementById("email").value = dosen.email || "";
-
 
         document.getElementById("dosenId").value = id;
         document.getElementById("modalTitle").textContent = "Edit Dosen";
@@ -327,7 +325,7 @@
         }
     }
     
-    // --- FUNGSI FILTER & EXPORT (Dipertahankan) ---
+    // --- FUNGSI FILTER & EXPORT ---
     function filterData() {
         const nidnVal = document.getElementById("filterNidn").value.toLowerCase();
         const namaVal = document.getElementById("filterNama").value.toLowerCase();
