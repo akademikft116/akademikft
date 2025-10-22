@@ -107,6 +107,10 @@
         <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         
+        <div class="md:col-span-2">
+            <input id="nama_lengkap" class="border p-2 rounded w-full" placeholder="Nama Lengkap">
+        </div>
+        
         <input id="tgl_lahir" type="date" class="border p-2 rounded" placeholder="Tanggal Lahir">
         
         <input id="pangkat" class="border p-2 rounded" placeholder="Pangkat / Golongan">
@@ -115,8 +119,9 @@
         <input id="pendidikan_terakhir" class="border p-2 rounded" placeholder="Pendidikan Terakhir">
         
         <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
-        
-        </div>
+        <div></div> 
+
+      </div>
       <textarea id="alamat" class="border p-2 rounded w-full" placeholder="Alamat Lengkap"></textarea>
       <div class="flex justify-end space-x-3 mt-4">
         <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
@@ -162,7 +167,7 @@ function renderTable(data) {
       return;
   }
   
-  // Catatan: Kolom 'nama', 'prodi', dan 'status' di tabel utama mungkin kosong jika tidak dimasukkan via modal baru.
+  // Catatan: Kolom 'prodi' dan 'status' di tabel utama mungkin kosong jika tidak dimasukkan via modal baru.
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
@@ -197,9 +202,10 @@ async function saveDosen(e) {
     nidn: document.getElementById("nidn").value,
     nik: document.getElementById("nik").value,
     
-    // Nama Lengkap, Prodi, Status, Email diabaikan (dibiarkan NULL di DB jika tidak ada input)
-    // Supaya tidak error, kita biarkan nama, prodi, status, dan email kosong
-    nama: null, 
+    // Nama Lengkap (nama_lengkap -> nama)
+    nama: document.getElementById("nama_lengkap").value,
+    
+    // Prodi, Status, Email diabaikan (dibiarkan NULL di DB jika tidak ada input)
     prodi: null,
     status: null,
     email: null,
@@ -213,10 +219,9 @@ async function saveDosen(e) {
     pendidikan_tertinggi: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir -> pendidikan_tertinggi
   };
   
-  // Hapus properti yang bernilai null (kecuali ada data lama yang ingin dipertahankan)
-  // Untuk mode edit, data lama akan di-overwrite, jadi kita hanya kirim yang ada di form
+  // Hapus properti yang bernilai null (prodi, status, email)
   const filteredData = Object.fromEntries(
-    Object.entries(dosenData).filter(([_, v]) => v !== null)
+    Object.entries(dosenData).filter(([k, v]) => v !== null)
   );
 
   let result;
@@ -262,7 +267,7 @@ async function editDosen(id) {
   // PERBAIKAN: Mengisi field dari kolom Supabase ke ID HTML yang sesuai
   document.getElementById("nidn").value = dosen.nidn || "";
   document.getElementById("nik").value = dosen.nik || "";
-  // Field yang dihilangkan dari form akan diisi dengan data DB (walaupun tidak terlihat, penting untuk mode edit)
+  document.getElementById("nama_lengkap").value = dosen.nama || ""; // Kolom 'nama' ke ID 'nama_lengkap'
   
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; // Kolom 'tanggal_lahir' ke ID 'tgl_lahir'
   document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; // Kolom 'pangkat_golongan' ke ID 'pangkat'
@@ -270,6 +275,8 @@ async function editDosen(id) {
   document.getElementById("alamat").value = dosen.alamat || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
   document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_tertinggi || ""; // Kolom 'pendidikan_tertinggi' ke ID 'pendidikan_terakhir'
+  
+  // Field yang dihilangkan dari form (prodi, status, email) tidak perlu diisi.
   
   document.getElementById("dosenId").value = id;
   document.getElementById("modalTitle").textContent = "Edit Dosen";
@@ -290,10 +297,9 @@ async function deleteDosen(id) {
 }
 
 function exportToExcel() {
-  // Hanya mengekspor kolom yang relevan dari data DB yang ada
-  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat","Jabatan","Alamat","No Telp","Pendidikan","Status","Email"];
+  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan"];
   const rows = allDosenData.map(d=>[
-    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.prodi,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi,d.status,d.email
+    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi
   ]);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
