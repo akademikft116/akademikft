@@ -10,8 +10,8 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/npm/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   
   <style>
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
@@ -154,7 +154,7 @@ const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 🚨 PERBAIKAN: Mengakses jsPDF langsung dari window (scope global)
+// Mengakses jsPDF langsung dari window (scope global)
 const jsPDF = window.jsPDF; 
 
 let allDosenData = [];
@@ -333,7 +333,7 @@ function exportAllToPdf() {
     if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
     if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet atau tag script.");
 
-    const doc = new jsPDF('l', 'mm', 'a4'); 
+    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' untuk Landscape
     
     const headers = ["NIDN","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"];
     
