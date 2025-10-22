@@ -8,384 +8,293 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
   <style>
-    /* STYLE INI TIDAK DIUBAH (SAMA PERSIS DENGAN KODE ASLI ANDA) */
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; } 
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; }
     .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
-<body class="bg-gray-100 flex h-screen">
+<body class="bg-gray-100">
 
-  <div class="w-64 bg-blue-800 text-white flex flex-col fixed h-full z-20 shadow-lg">
-    <div class="p-6 text-xl font-bold border-b border-blue-700">Akademik FT</div>
-    <nav class="flex-grow p-4 space-y-2">
-      <a href="dashboard.html" class="flex items-center p-3 rounded-lg hover:bg-blue-700 transition duration-200">
-        <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
-      </a>
-      <a href="main.html" class="flex items-center p-3 rounded-lg hover:bg-blue-700 transition duration-200">
-        <i class="fas fa-calendar-alt mr-3"></i> Jadwal Kuliah
-      </a>
-      <a href="dosen.html" class="active-link flex items-center p-3 rounded-lg transition duration-200">
-        <i class="fas fa-chalkboard-teacher mr-3"></i> Data Dosen
-      </a>
-      <a href="mahasiswa.html" class="flex items-center p-3 rounded-lg hover:bg-blue-700 transition duration-200">
-        <i class="fas fa-user-graduate mr-3"></i> Data Mahasiswa
-      </a>
-    </nav>
-    <div class="p-4 border-t border-blue-700">
-      <button onclick="logout()" class="w-full text-left p-3 rounded-lg bg-red-600 hover:bg-red-700 transition duration-200 flex items-center">
-        <i class="fas fa-sign-out-alt mr-3"></i> Logout
-      </button>
-    </div>
+<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+  <div class="flex items-center space-x-3">
+    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
   </div>
+  <div class="flex items-center space-x-4">
+    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition">
+      <i class="fas fa-sign-out-alt mr-1"></i> Ganti Akun
+    </button>
+  </div>
+</nav>
 
-  <div class="flex-1 flex flex-col ml-64">
-    
-    <header class="bg-white shadow-md p-4 flex justify-between items-center fixed w-full top-0 left-64 z-10">
-      <h1 class="text-2xl font-semibold text-gray-800">Manajemen Data Dosen</h1>
-      <span id="userNameNav" class="text-gray-600 font-medium">Halo, User</span>
-    </header>
+<div class="flex pt-16 main-content">
+  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
+    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+      <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-tachometer-alt w-5"></i><span>Dashboard</span></a>
+      <a href="main.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
+      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-address-card w-5"></i><span>Biodata Mahasiswa</span></a>
+      <a href="dosen.html" class="active-link flex items-center space-x-3 p-3 rounded-lg"><i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
+      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-book w-5"></i><span>Data Mata Kuliah</span></a>
+      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
+    </nav>
+    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+      <p>&copy; 2024 Akademik FT</p>
+      <p>Designed by Rifqi & Alfi</p>
+    </div>
+  </aside>
 
-    <main class="p-6 pt-20 flex-1 overflow-y-auto">
-      
-      <div class="bg-white p-6 rounded-xl shadow-lg">
-        
-        <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
-          <div class="flex space-x-2">
-            <input type="text" id="filterNidn" placeholder="Filter NIDN" class="border p-2 rounded-lg text-sm" onkeyup="filterData()">
-            <input type="text" id="filterNama" placeholder="Filter Nama" class="border p-2 rounded-lg text-sm" onkeyup="filterData()">
-            <button onclick="resetFilter()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-200 text-sm">
-              Reset
-            </button>
+  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+    <div class="container mx-auto">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Data Dosen</h1>
+
+      <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-semibold mb-3 text-gray-700">Filter Data Dosen</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Cari berdasarkan NIDN</label>
+            <input type="text" id="filterNidn" placeholder="Masukkan NIDN..." onkeyup="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
           </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Cari berdasarkan Nama</label>
+            <input type="text" id="filterNama" placeholder="Masukkan Nama Dosen..." onkeyup="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
+          </div>
+          <div class="flex items-end">
+            <button onclick="resetFilter()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"><i class="fas fa-undo mr-2"></i>Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex justify-between mb-4">
+          <h2 class="text-2xl font-semibold text-gray-700">Daftar Dosen</h2>
           <div class="flex space-x-2">
-            <button onclick="showAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 text-sm">
-              <i class="fas fa-plus mr-2"></i>Tambah Dosen
-            </button>
-            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200 text-sm">
-              <i class="fas fa-file-excel mr-2"></i>Export Excel
-            </button>
+            <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"><i class="fas fa-file-excel mr-2"></i>Excel</button>
+            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"><i class="fas fa-plus-circle mr-2"></i>Tambah</button>
           </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 border">
+          <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIDN</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIK</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jabatan</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Telp</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIDN</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prodi</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
               </tr>
             </thead>
-            <tbody id="dosenTableBody" class="bg-white divide-y divide-gray-200">
-              <tr><td colspan="7" class="py-4 text-center text-gray-500">Memuat data...</td></tr>
+            <tbody id="dosen-table-body" class="bg-white divide-y divide-gray-200">
+              <tr><td colspan="6" class="text-center py-4 text-gray-500">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
-
-    </main>
-  </div>
-
-  <div id="dosenModal" class="modal">
-    <div class="modal-content">
-      <h2 id="modalTitle" class="text-2xl font-bold mb-4 text-gray-800">Tambah Dosen Baru</h2>
-      <form id="dosenForm" onsubmit="event.preventDefault(); saveDosen();">
-        <input type="hidden" id="dosenId">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-          <div>
-            <label for="nidn" class="block text-sm font-medium text-gray-700">NIDN</label>
-            <input type="text" id="nidn" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-          <div>
-            <label for="nik" class="block text-sm font-medium text-gray-700">NIK</label>
-            <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-
-          <div class="md:col-span-2">
-            <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-            <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-          <div>
-            <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-            <input type="date" id="tanggal_lahir" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" id="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-
-          <div>
-            <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi</label>
-            <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                <option value="">Pilih Prodi</option>
-                <option value="Teknik Informatika">Teknik Informatika</option>
-                <option value="Teknik Mesin">Teknik Mesin</option>
-                <option value="Teknik Elektro">Teknik Elektro</option>
-                <option value="Teknik Sipil">Teknik Sipil</option>
-            </select>
-          </div>
-          <div>
-            <label for="pangkat_golongan" class="block text-sm font-medium text-gray-700">Pangkat/Golongan</label>
-            <input type="text" id="pangkat_golongan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-
-          <div>
-            <label for="jabatan_fungsional" class="block text-sm font-medium text-gray-700">Jabatan Fungsional</label>
-            <input type="text" id="jabatan_fungsional" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-          <div>
-            <label for="pendidikan_tertinggi" class="block text-sm font-medium text-gray-700">Pendidikan Tertinggi</label>
-            <input type="text" id="pendidikan_tertinggi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-
-          <div class="md:col-span-2">
-            <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
-            <textarea id="alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-          </div>
-          <div>
-            <label for="no_telp" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
-            <input type="text" id="no_telp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-          </div>
-
-        </div>
-
-        <div class="mt-6 flex justify-end space-x-3">
-          <button type="button" onclick="hideModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded transition duration-200">
-            Batal
-          </button>
-          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-            Simpan Data
-          </button>
-        </div>
-      </form>
     </div>
+  </main>
+</div>
+
+<div id="dosenModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle" class="text-2xl font-semibold mb-4">Tambah Dosen</h2>
+    <form id="dosenForm" class="space-y-3">
+      <input type="hidden" id="dosenId">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
+        <input id="nik" class="border p-2 rounded" placeholder="NIK">
+        
+        <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap"> 
+        
+        <input id="tanggal_lahir" type="date" class="border p-2 rounded"> 
+        
+        <input id="prodi" class="border p-2 rounded" placeholder="Program Studi">
+        <input id="pangkat_golongan" class="border p-2 rounded" placeholder="Pangkat / Golongan">
+        
+        <input id="jabatan_fungsional" class="border p-2 rounded" placeholder="Jabatan Fungsional">
+        <input id="pendidikan_tertinggi" class="border p-2 rounded" placeholder="Pendidikan Tertinggi">
+
+        <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
+        <input id="status" class="border p-2 rounded" placeholder="Status">
+
+        <div class="md:col-span-2">
+            <input id="email" type="email" class="border p-2 rounded w-full" placeholder="Email Dosen">
+        </div>
+      </div>
+      <textarea id="alamat" class="border p-2 rounded w-full" placeholder="Alamat Lengkap"></textarea>
+      <div class="flex justify-end space-x-3 mt-4">
+        <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
+      </div>
+    </form>
   </div>
+</div>
 
+<script>
+// --- KONFIGURASI SUPABASE (TIDAK DIUBAH) ---
+const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allDosenData = [];
+let editMode = false;
+
+document.addEventListener("DOMContentLoaded", loadDosenData);
+document.getElementById("dosenForm").addEventListener("submit", saveDosen);
+
+// --- FUNGSI UTAMA ---
+
+async function loadDosenData() {
+  const tbody = document.getElementById("dosen-table-body");
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
+  const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
+  if (error) return console.error(error);
+  allDosenData = data;
+  renderTable(data);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById("dosen-table-body");
+  if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Data dosen tidak ditemukan.</td></tr>`;
+      return;
+  }
   
-  <script>
-    // Inisialisasi Supabase Client (Kunci untuk fungsionalitas)
-    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  tbody.innerHTML = data.map(d => `
+    <tr class="hover:bg-gray-100">
+      <td class="px-6 py-4">${d.nidn || '-'}</td>
+      <td class="px-6 py-4">${d.nama || '-'}</td>
+      <td class="px-6 py-4">${d.prodi || '-'}</td>
+      <td class="px-6 py-4">${d.jabatan_fungsional || '-'}</td>
+      <td class="px-6 py-4 text-center">${d.status || '-'}</td>
+      <td class="px-6 py-4 text-center space-x-2">
+        <button class="text-yellow-600" onclick="editDosen('${d.id}')"><i class="fas fa-edit"></i></button>
+        <button class="text-red-600" onclick="deleteDosen('${d.id}')"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
 
-    // Variabel global
-    let allDosenData = [];
-    let editMode = false;
-    let globalUserId; 
+function openModal() {
+  document.getElementById("dosenForm").reset();
+  document.getElementById("dosenId").value = "";
+  document.getElementById("modalTitle").textContent = "Tambah Dosen";
+  document.getElementById("dosenModal").style.display = "flex";
+  editMode = false;
+}
 
-    // --- FUNGSI MODAL ---
-    function showAddModal() {
-        document.getElementById("dosenForm").reset();
-        document.getElementById("dosenId").value = "";
-        document.getElementById("modalTitle").textContent = "Tambah Dosen Baru";
-        // Perbaikan: Memastikan modal tampil (modal 'display: none' di CSS)
-        document.getElementById("dosenModal").style.display = "flex"; 
-        editMode = false;
-    }
+function closeModal() {
+  document.getElementById("dosenModal").style.display = "none";
+}
 
-    function hideModal() {
-        document.getElementById("dosenModal").style.display = "none";
-    }
+async function saveDosen(e) {
+  e.preventDefault();
+  
+  // PERBAIKAN: Memastikan nama field di FormData sesuai dengan ID di HTML
+  const dosenData = {
+    nidn: document.getElementById("nidn").value,
+    nik: document.getElementById("nik").value,
+    nama: document.getElementById("nama").value, // Sebelumnya 'nama_lengkap' di form, diubah ke 'nama'
+    tanggal_lahir: document.getElementById("tanggal_lahir").value, // Sebelumnya 'tgl_lahir', diubah ke 'tanggal_lahir'
+    prodi: document.getElementById("prodi").value,
+    pangkat_golongan: document.getElementById("pangkat_golongan").value, // Sebelumnya 'pangkat', diubah ke 'pangkat_golongan'
+    jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
+    alamat: document.getElementById("alamat").value,
+    no_telp: document.getElementById("no_telp").value,
+    pendidikan_tertinggi: document.getElementById("pendidikan_tertinggi").value, // Sebelumnya 'pendidikan_terakhir', diubah ke 'pendidikan_tertinggi'
+    status: document.getElementById("status").value,
+    email: document.getElementById("email").value, // Email ditambahkan di modal
+  };
+  
+  let result;
+  if (editMode) {
+    result = await supabaseClient.from("dosen").update(dosenData).eq("id", document.getElementById("dosenId").value);
+  } else {
+    result = await supabaseClient.from("dosen").insert([dosenData]);
+  }
+  
+  if (result.error) {
+       alert("❌ Operasi gagal: " + result.error.message);
+       console.error("Supabase Error:", result.error);
+  } else {
+      alert(editMode ? "✅ Data dosen berhasil diperbarui!" : "✅ Dosen baru berhasil ditambahkan!");
+      closeModal();
+      loadDosenData();
+  }
+}
 
-    // --- FUNGSI LOAD DATA ---
-    async function loadDosenData() {
-        const { data, error } = await supabaseClient.from("dosen").select("*");
-        
-        if (error) {
-            console.error("Gagal memuat data dosen:", error);
-            document.getElementById("dosenTableBody").innerHTML = `<tr><td colspan="7" class="py-4 text-center text-red-500">Gagal memuat data. Periksa konsol browser.</td></tr>`;
-            return;
-        }
+function applyFilter() {
+  const nidnVal = document.getElementById("filterNidn").value.toLowerCase();
+  const namaVal = document.getElementById("filterNama").value.toLowerCase();
+  const filtered = allDosenData.filter(d =>
+    (!nidnVal || d.nidn?.toLowerCase().includes(nidnVal)) &&
+    (!namaVal || d.nama?.toLowerCase().includes(namaVal))
+  );
+  renderTable(filtered);
+}
 
-        allDosenData = data;
-        renderTable(allDosenData);
-    }
+function resetFilter() {
+  document.getElementById("filterNidn").value = "";
+  document.getElementById("filterNama").value = "";
+  renderTable(allDosenData);
+}
 
-    // --- FUNGSI RENDER TABEL ---
-    function renderTable(data) {
-        const tableBody = document.getElementById("dosenTableBody");
-        tableBody.innerHTML = "";
+async function editDosen(id) {
+  const dosen = allDosenData.find(d => d.id == id);
+  if (!dosen) {
+      alert("❌ Data dosen tidak ditemukan.");
+      return;
+  }
+  
+  // PERBAIKAN: Mengisi field satu per satu agar lebih stabil (mengatasi bug pengisian data)
+  document.getElementById("nidn").value = dosen.nidn || "";
+  document.getElementById("nik").value = dosen.nik || "";
+  document.getElementById("nama").value = dosen.nama || "";
+  document.getElementById("tanggal_lahir").value = dosen.tanggal_lahir || "";
+  document.getElementById("prodi").value = dosen.prodi || "";
+  document.getElementById("pangkat_golongan").value = dosen.pangkat_golongan || "";
+  document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
+  document.getElementById("alamat").value = dosen.alamat || "";
+  document.getElementById("no_telp").value = dosen.no_telp || "";
+  document.getElementById("pendidikan_tertinggi").value = dosen.pendidikan_tertinggi || "";
+  document.getElementById("status").value = dosen.status || "";
+  document.getElementById("email").value = dosen.email || "";
 
-        if (data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-500">Data dosen tidak ditemukan.</td></tr>`;
-            return;
-        }
 
-        data.forEach((dosen) => {
-            const row = tableBody.insertRow();
-            row.className = "bg-white border-b hover:bg-gray-50 text-sm";
-            row.insertCell().textContent = dosen.nidn || "-";
-            row.insertCell().textContent = dosen.nik || "-";
-            row.insertCell().textContent = dosen.nama || "-";
-            row.insertCell().textContent = dosen.prodi || "-";
-            row.insertCell().textContent = dosen.jabatan_fungsional || "-";
-            row.insertCell().textContent = dosen.no_telp || "-";
+  document.getElementById("dosenId").value = id;
+  document.getElementById("modalTitle").textContent = "Edit Dosen";
+  document.getElementById("dosenModal").style.display = "flex";
+  editMode = true;
+}
 
-            const actionCell = row.insertCell();
-            actionCell.className = "flex space-x-2 p-2";
+async function deleteDosen(id) {
+  if (!confirm("Yakin ingin menghapus data dosen ini?")) return;
+  const { error } = await supabaseClient.from("dosen").delete().eq("id", id);
+  if (error) {
+       alert("❌ Gagal menghapus: " + error.message);
+       console.error("Hapus Error:", error);
+  } else {
+       alert("✅ Data berhasil dihapus!");
+       loadDosenData();
+  }
+}
 
-            // Tombol Edit
-            const editBtn = document.createElement("button");
-            editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
-            editBtn.className = "text-yellow-600 hover:text-yellow-800 p-1 rounded transition duration-150";
-            editBtn.onclick = () => editDosen(dosen.id);
-            actionCell.appendChild(editBtn);
+function exportToExcel() {
+  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat","Jabatan","Alamat","No Telp","Pendidikan","Status","Email"];
+  const rows = allDosenData.map(d=>[
+    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.prodi,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi,d.status,d.email
+  ]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, "Dosen");
+  XLSX.writeFile(wb, "data_dosen.xlsx");
+}
 
-            // Tombol Hapus
-            const deleteBtn = document.createElement("button");
-            deleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i>`;
-            deleteBtn.className = "text-red-600 hover:text-red-800 p-1 rounded transition duration-150";
-            deleteBtn.onclick = () => deleteDosen(dosen.id);
-            actionCell.appendChild(deleteBtn);
-        });
-    }
-
-    // --- FUNGSI SUBMIT/UPDATE ---
-    async function saveDosen() {
-        const dosenData = {
-            nidn: document.getElementById("nidn").value,
-            nik: document.getElementById("nik").value,
-            nama: document.getElementById("nama").value,
-            tanggal_lahir: document.getElementById("tanggal_lahir").value,
-            prodi: document.getElementById("prodi").value,
-            pangkat_golongan: document.getElementById("pangkat_golongan").value,
-            jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
-            alamat: document.getElementById("alamat").value,
-            no_telp: document.getElementById("no_telp").value,
-            pendidikan_tertinggi: document.getElementById("pendidikan_tertinggi").value,
-            email: document.getElementById("email").value,
-        };
-
-        let result;
-        if (editMode) {
-            const id = document.getElementById("dosenId").value;
-            result = await supabaseClient.from("dosen").update(dosenData).eq("id", id);
-            if (!result.error) alert("✅ Data dosen berhasil diperbarui!");
-        } else {
-            result = await supabaseClient.from("dosen").insert([dosenData]);
-            if (!result.error) alert("✅ Dosen baru berhasil ditambahkan!");
-        }
-
-        if (result.error) {
-             alert("❌ Operasi gagal: " + result.error.message);
-             console.error("Supabase Error:", result.error);
-        } else {
-            hideModal();
-            loadDosenData();
-        }
-    }
-
-    // --- FUNGSI EDIT & DELETE ---
-    async function editDosen(id) {
-        const dosen = allDosenData.find(d => d.id == id);
-        if (!dosen) {
-             alert("❌ Data dosen tidak ditemukan.");
-             return;
-        }
-        
-        // Perbaikan: Memastikan semua field terisi dengan benar (mengatasi bug pengisian data)
-        document.getElementById("nidn").value = dosen.nidn || "";
-        document.getElementById("nik").value = dosen.nik || "";
-        document.getElementById("nama").value = dosen.nama || "";
-        document.getElementById("tanggal_lahir").value = dosen.tanggal_lahir || "";
-        document.getElementById("prodi").value = dosen.prodi || "";
-        document.getElementById("pangkat_golongan").value = dosen.pangkat_golongan || "";
-        document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
-        document.getElementById("alamat").value = dosen.alamat || "";
-        document.getElementById("no_telp").value = dosen.no_telp || "";
-        document.getElementById("pendidikan_tertinggi").value = dosen.pendidikan_tertinggi || "";
-        document.getElementById("email").value = dosen.email || "";
-
-        document.getElementById("dosenId").value = id;
-        document.getElementById("modalTitle").textContent = "Edit Dosen";
-        document.getElementById("dosenModal").style.display = "flex"; // Memastikan modal muncul
-        editMode = true;
-    }
-
-    async function deleteDosen(id) {
-        if (!confirm("Yakin ingin menghapus data dosen ini?")) return;
-        
-        const { error } = await supabaseClient.from("dosen").delete().eq("id", id);
-        
-        if (!error) {
-             alert("✅ Data berhasil dihapus!");
-             loadDosenData();
-        } else {
-             alert("❌ Gagal menghapus: " + error.message);
-             console.error("Hapus Error:", error);
-        }
-    }
-    
-    // --- FUNGSI FILTER & EXPORT ---
-    function filterData() {
-        const nidnVal = document.getElementById("filterNidn").value.toLowerCase();
-        const namaVal = document.getElementById("filterNama").value.toLowerCase();
-        
-        const filtered = allDosenData.filter(d => 
-            (!nidnVal || d.nidn?.toLowerCase().includes(nidnVal)) &&
-            (!namaVal || d.nama?.toLowerCase().includes(namaVal))
-        );
-        renderTable(filtered);
-    }
-    
-    function resetFilter() {
-        document.getElementById("filterNidn").value = "";
-        document.getElementById("filterNama").value = "";
-        renderTable(allDosenData);
-    }
-    
-    function exportToExcel() {
-        const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat","Jabatan","Alamat","No Telp","Pendidikan"];
-        const rows = allDosenData.map(d=>[
-            d.nidn,d.nik,d.nama,d.tanggal_lahir,d.prodi,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi
-        ]);
-
-        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Data Dosen");
-        XLSX.writeFile(wb, "Data_Dosen_FT.xlsx");
-    }
-
-    // --- FUNGSI OTENTIKASI ---
-    async function checkAuthAndLoad() {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-            window.location.href = "index.html";
-            return;
-        }
-        
-        globalUserId = user.id;
-
-        const { data: userData } = await supabaseClient
-            .from('users_metadata')
-            .select('username')
-            .eq('user_id', user.id)
-            .single();
-
-        if (userData) {
-            document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
-        }
-
-        loadDosenData();
-    }
-
-    async function logout() {
-        await supabaseClient.auth.signOut();
-        window.location.href = "index.html";
-    }
-
-    // --- INISIALISASI ---
-    window.onload = checkAuthAndLoad;
-
+async function logout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = "index.html";
+}
 </script>
 </body>
 </html>
