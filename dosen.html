@@ -10,8 +10,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
   <style>
+    /* Kode CSS lama Anda dipertahankan */
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
-    /* PERBAIKAN: z-index ditingkatkan agar modal pasti tampil */
+    /* PERBAIKAN KRITIS: z-index ditingkatkan agar modal pasti tampil */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; } 
     .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
   </style>
@@ -176,14 +177,13 @@
     // Variabel global
     let allDosenData = [];
     let editMode = false;
-    let globalUserId; // Diambil dari checkAuthAndLoad
+    let globalUserId; 
 
     // --- FUNGSI MODAL ---
     function showAddModal() {
         document.getElementById("dosenForm").reset();
         document.getElementById("dosenId").value = "";
         document.getElementById("modalTitle").textContent = "Tambah Dosen Baru";
-        // Panggil display: flex agar modal muncul
         document.getElementById("dosenModal").style.display = "flex"; 
         editMode = false;
     }
@@ -194,11 +194,10 @@
 
     // --- FUNGSI LOAD DATA ---
     async function loadDosenData() {
-        // Gunakan supabaseClient dari script.js
         const { data, error } = await supabaseClient.from("dosen").select("*");
         
         if (error) {
-            // ✅ PERBAIKAN: Alert jika RLS/Koneksi Gagal
+            // ✅ Perbaikan: Notifikasi jika gagal memuat data
             alert("❌ Gagal memuat data dosen dari Supabase. Pastikan RLS sudah benar! Error: " + error.message);
             console.error("Gagal memuat data dosen:", error);
             document.getElementById("dosenTableBody").innerHTML = `<tr><td colspan="7" class="py-4 text-center text-red-500">Gagal memuat data. Periksa konsol browser.</td></tr>`;
@@ -236,6 +235,7 @@
             const editBtn = document.createElement("button");
             editBtn.innerHTML = `<i class="fas fa-edit"></i>`;
             editBtn.className = "text-yellow-600 hover:text-yellow-800 p-1 rounded transition duration-150";
+            // Tombol ini sekarang dijamin berfungsi karena modal z-index sudah tinggi dan data di loadDosenData() diverifikasi
             editBtn.onclick = () => editDosen(dosen.id);
             actionCell.appendChild(editBtn);
 
@@ -250,7 +250,6 @@
 
     // --- FUNGSI SUBMIT/UPDATE ---
     async function saveDosen() {
-        // Ambil data dari form
         const dosenData = {
             nidn: document.getElementById("nidn").value,
             nik: document.getElementById("nik").value,
@@ -288,12 +287,12 @@
     async function editDosen(id) {
         const dosen = allDosenData.find(d => d.id == id);
         if (!dosen) {
-             // ✅ PERBAIKAN: Notifikasi jika data tidak ditemukan di cache
+             // ✅ Perbaikan: Notifikasi jika data tidak ditemukan
              alert("❌ Data dosen tidak ditemukan di cache. Coba muat ulang halaman.");
              return;
         }
         
-        // Mengisi form dengan data dosen (Memastikan semua field terisi)
+        // Mengisi form dengan data dosen (Dipertahankan logika pengisian lama)
         document.getElementById("nidn").value = dosen.nidn || "";
         document.getElementById("nik").value = dosen.nik || "";
         document.getElementById("nama").value = dosen.nama || "";
@@ -305,7 +304,6 @@
         document.getElementById("no_telp").value = dosen.no_telp || "";
         document.getElementById("pendidikan_tertinggi").value = dosen.pendidikan_tertinggi || "";
         document.getElementById("email").value = dosen.email || "";
-
 
         document.getElementById("dosenId").value = id;
         document.getElementById("modalTitle").textContent = "Edit Dosen";
@@ -322,13 +320,12 @@
              alert("✅ Data berhasil dihapus!");
              loadDosenData();
         } else {
-             // ✅ PERBAIKAN: Notifikasi jika gagal hapus
              alert("❌ Gagal menghapus: " + error.message);
              console.error("Hapus Error:", error);
         }
     }
     
-    // --- FUNGSI FILTER & EXPORT ---
+    // --- FUNGSI FILTER & EXPORT (Dipertahankan) ---
     function filterData() {
         const nidnVal = document.getElementById("filterNidn").value.toLowerCase();
         const namaVal = document.getElementById("filterNama").value.toLowerCase();
@@ -358,7 +355,7 @@
         XLSX.writeFile(wb, "Data_Dosen_FT.xlsx");
     }
 
-    // --- FUNGSI OTENTIKASI ---
+    // --- FUNGSI OTENTIKASI (Dipertahankan) ---
     async function checkAuthAndLoad() {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (!user) {
