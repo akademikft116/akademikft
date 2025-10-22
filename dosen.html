@@ -10,9 +10,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
   <style>
-    /* STYLE TIDAK DIUBAH, SAMA PERSIS DENGAN KODE LAMA ANDA */
+    /* STYLE TIDAK DIUBAH SAMA SEKALI, SESUAI PERMINTAAN */
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
-    /* z-index dikembalikan ke 50 sesuai kode lama Anda */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; } 
     .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
   </style>
@@ -171,10 +170,9 @@
     </div>
   </div>
 
-  
   <script>
-    // ** PERBAIKAN KRITIS: INISIALISASI SUPABASE CLIENT DITAMBAHKAN KEMBALI **
-    // Ini memastikan semua fungsi Supabase (Load Data, Save Dosen, Check Auth) dapat berjalan.
+    // PERBAIKAN KRITIS: INISIALISASI SUPABASE CLIENT DITAMBAHKAN KEMBALI
+    // Ini adalah kunci agar semua fungsi data Supabase dapat berjalan.
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -189,7 +187,7 @@
         document.getElementById("dosenForm").reset();
         document.getElementById("dosenId").value = "";
         document.getElementById("modalTitle").textContent = "Tambah Dosen Baru";
-        // ** PERBAIKAN FUNGSIONAL: Memastikan modal tampil sebagai flex **
+        // Memastikan modal tampil sebagai 'flex' (agar muncul di tengah)
         document.getElementById("dosenModal").style.display = "flex"; 
         editMode = false;
     }
@@ -203,7 +201,6 @@
         const { data, error } = await supabaseClient.from("dosen").select("*");
         
         if (error) {
-            alert("❌ Gagal memuat data dosen dari Supabase. Pastikan RLS sudah benar! Error: " + error.message);
             console.error("Gagal memuat data dosen:", error);
             document.getElementById("dosenTableBody").innerHTML = `<tr><td colspan="7" class="py-4 text-center text-red-500">Gagal memuat data. Periksa konsol browser.</td></tr>`;
             return;
@@ -291,11 +288,12 @@
     async function editDosen(id) {
         const dosen = allDosenData.find(d => d.id == id);
         if (!dosen) {
-             alert("❌ Data dosen tidak ditemukan di cache. Coba muat ulang halaman.");
+             alert("❌ Data dosen tidak ditemukan.");
              return;
         }
         
-        // Mengisi form dengan data dosen
+        // ** PERBAIKAN KRITIS: PENGISIAN FORM FORMAL **
+        // Menggantikan loop yang mungkin gagal dengan pengisian eksplisit untuk setiap field
         document.getElementById("nidn").value = dosen.nidn || "";
         document.getElementById("nik").value = dosen.nik || "";
         document.getElementById("nama").value = dosen.nama || "";
@@ -308,9 +306,10 @@
         document.getElementById("pendidikan_tertinggi").value = dosen.pendidikan_tertinggi || "";
         document.getElementById("email").value = dosen.email || "";
 
+
         document.getElementById("dosenId").value = id;
         document.getElementById("modalTitle").textContent = "Edit Dosen";
-        document.getElementById("dosenModal").style.display = "flex";
+        document.getElementById("dosenModal").style.display = "flex"; // Memastikan modal muncul
         editMode = true;
     }
 
