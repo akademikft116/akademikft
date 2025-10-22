@@ -132,7 +132,7 @@
 </div>
 
 <script>
-// --- KONFIGURASI SUPABASE (TIDAK DIUBAH) ---
+// --- KONFIGURASI SUPABASE ---
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -149,7 +149,6 @@ async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
   tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
   
-  // Mengambil semua data untuk filter
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   if (error) {
       console.error(error);
@@ -167,7 +166,7 @@ function renderTable(data) {
       return;
   }
   
-  // Catatan: Kolom 'prodi' dan 'status' di tabel utama mungkin kosong jika tidak dimasukkan via modal baru.
+  // Memastikan kolom 'nama', 'prodi', dan 'status' selalu ada, minimal sebagai '-'
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
@@ -197,7 +196,8 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // PERBAIKAN: Hanya mengambil field yang diminta dan memetakan ke kolom Supabase yang benar
+  // FIX: Menggunakan string kosong ("") untuk kolom yang ada di tabel namun tidak ada di form.
+  // Ini memastikan key 'prodi' dan 'status' terkirim ke DB, mengatasi bug tampilan/edit.
   const dosenData = {
     nidn: document.getElementById("nidn").value,
     nik: document.getElementById("nik").value,
@@ -205,10 +205,10 @@ async function saveDosen(e) {
     // Nama Lengkap (nama_lengkap -> nama)
     nama: document.getElementById("nama_lengkap").value,
     
-    // Prodi, Status, Email diabaikan (dibiarkan NULL di DB jika tidak ada input)
-    prodi: null,
-    status: null,
-    email: null,
+    // Kolom yang ada di tabel namun dihapus dari modal, diisi string kosong
+    prodi: "", 
+    status: "", 
+    email: null, // Email dibiarkan null (diabaikan)
     
     // Mapping ID HTML ke Nama Kolom Supabase
     tanggal_lahir: document.getElementById("tgl_lahir").value, // tgl_lahir -> tanggal_lahir
@@ -216,10 +216,10 @@ async function saveDosen(e) {
     jabatan_fungsional: document.getElementById("jabatan_fungsional").value,
     alamat: document.getElementById("alamat").value,
     no_telp: document.getElementById("no_telp").value,
-    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir
+    pendidikan_tertinggi: document.getElementById("pendidikan_terakhir").value, // pendidikan_terakhir -> pendidikan_tertinggi
   };
   
-  // Hapus properti yang bernilai null (prodi, status, email)
+  // Hapus properti yang bernilai null (hanya email dalam kasus ini)
   const filteredData = Object.fromEntries(
     Object.entries(dosenData).filter(([k, v]) => v !== null)
   );
@@ -264,19 +264,17 @@ async function editDosen(id) {
       return;
   }
   
-  // PERBAIKAN: Mengisi field dari kolom Supabase ke ID HTML yang sesuai
+  // Mengisi field dari kolom Supabase ke ID HTML yang sesuai
   document.getElementById("nidn").value = dosen.nidn || "";
   document.getElementById("nik").value = dosen.nik || "";
-  document.getElementById("nama_lengkap").value = dosen.nama || ""; // Kolom 'nama' ke ID 'nama_lengkap'
+  document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   
-  document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; // Kolom 'tanggal_lahir' ke ID 'tgl_lahir'
-  document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; // Kolom 'pangkat_golongan' ke ID 'pangkat'
+  document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; 
+  document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; 
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("alamat").value = dosen.alamat || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
-  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || ""; 
-  
-  // Field yang dihilangkan dari form (prodi, status, email) tidak perlu diisi.
+  document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_tertinggi || ""; 
   
   document.getElementById("dosenId").value = id;
   document.getElementById("modalTitle").textContent = "Edit Dosen";
@@ -299,7 +297,7 @@ async function deleteDosen(id) {
 function exportToExcel() {
   const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan"];
   const rows = allDosenData.map(d=>[
-    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_terakhir
+    d.nidn,d.nik,d.nama,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,d.pendidikan_tertinggi
   ]);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
