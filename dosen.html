@@ -154,8 +154,8 @@ const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Mendapatkan objek jspdf dari global window
-const { jsPDF } = window.jspdf;
+// 🚨 PERBAIKAN: Mengakses jsPDF langsung dari window (scope global)
+const jsPDF = window.jsPDF; 
 
 let allDosenData = [];
 let editMode = false;
@@ -224,7 +224,7 @@ function openModal() {
 }
 
 // ------------------------------------------
-// FUNGSI DETAIL & EKSPOR BARU
+// FUNGSI DETAIL & EKSPOR 
 
 function showDetail(id) {
     const dosen = allDosenData.find(d => d.id == id);
@@ -286,6 +286,8 @@ function getDetailDataForExport() {
 function exportDetailToPdf() {
     if (!currentDosenDetail) return alert("Tidak ada data detail untuk diekspor.");
     
+    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet atau tag script.");
+
     const doc = new jsPDF();
     const data = getDetailDataForExport();
     const namaFile = `Detail Dosen - ${currentDosenDetail.nama || currentDosenDetail.nidn || 'Data'}.pdf`;
@@ -326,11 +328,12 @@ function exportDetailToExcel() {
     XLSX.writeFile(wb, `Detail Dosen - ${currentDosenDetail.nama || 'Data'}.xlsx`);
 }
 
-// 🚨 FUNGSI BARU: EKSPOR SEMUA DATA KE PDF
+// FUNGSI EKSPOR SEMUA DATA KE PDF
 function exportAllToPdf() {
     if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
+    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet atau tag script.");
 
-    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' untuk Landscape
+    const doc = new jsPDF('l', 'mm', 'a4'); 
     
     const headers = ["NIDN","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"];
     
@@ -357,9 +360,8 @@ function exportAllToPdf() {
         body: data,
         theme: 'striped',
         styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
-        headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' }, // Biru Tua
+        headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' }, 
         columnStyles: {
-            // Lebar kolom diatur untuk A4 landscape
             0: { cellWidth: 15 }, 
             1: { cellWidth: 20 }, 
             2: { cellWidth: 35 }, 
@@ -370,7 +372,7 @@ function exportAllToPdf() {
             7: { cellWidth: 20 }, 
             8: { cellWidth: 15 }, 
             9: { cellWidth: 20 }, 
-            10: { cellWidth: 50 }, // Alamat lebih lebar
+            10: { cellWidth: 50 }, 
         }
     });
 
@@ -379,6 +381,8 @@ function exportAllToPdf() {
 
 // FUNGSI EKSPOR EXCEL SEMUA DATA
 function exportAllToExcel() {
+  if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
+  
   const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
   
   const rows = allDosenData.map(d=>[
