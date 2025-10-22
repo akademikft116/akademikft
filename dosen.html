@@ -107,13 +107,21 @@
         <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         
-        <div class="md:col-span-2">
+        <div>
             <select id="prodi" class="border p-2 rounded w-full">
                 <option value="">Pilih Program Studi</option>
                 <option value="Teknik Informatika">Teknik Informatika</option>
                 <option value="Teknik Sipil">Teknik Sipil</option>
                 <option value="Teknik Elektro">Teknik Elektro</option>
-                <option option="Arsitektur">Arsitektur</option>
+                <option value="Arsitektur">Arsitektur</option>
+            </select>
+        </div>
+        
+        <div>
+            <select id="status" class="border p-2 rounded w-full">
+                <option value="">Pilih Status Dosen</option>
+                <option value="Aktif">Aktif</option>
+                <option value="Tidak Aktif">Tidak Aktif</option>
             </select>
         </div>
 
@@ -213,11 +221,12 @@ async function saveDosen(e) {
     // Nama Lengkap (nama_lengkap -> nama)
     nama: document.getElementById("nama_lengkap").value,
     
-    // PROGRAM STUDI (DARI FORM)
+    // PROGRAM STUDI
     prodi: document.getElementById("prodi").value, 
     
-    // Kolom lain yang dihapus dari modal, diisi string kosong/null
-    status: "", 
+    // STATUS DOSEN
+    status: document.getElementById("status").value || "", 
+    
     email: null, 
     
     // Mapping ID HTML ke Nama Kolom Supabase
@@ -281,8 +290,8 @@ async function editDosen(id) {
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   
-  // MENGISI PROGRAM STUDI
   document.getElementById("prodi").value = dosen.prodi || ""; 
+  document.getElementById("status").value = dosen.status || ""; // Mengisi Status Dosen
 
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ""; 
   document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; 
@@ -310,9 +319,9 @@ async function deleteDosen(id) {
 }
 
 function exportToExcel() {
-  const headers = ["NIDN","NIK","Nama","Program Studi", "Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan Terakhir"];
+  const headers = ["NIDN","NIK","Nama","Program Studi", "Status", "Tanggal Lahir","Pangkat","Jabatan","Alamat","No Telp","Pendidikan Terakhir"];
   const rows = allDosenData.map(d=>[
-    d.nidn,d.nik,d.nama,d.prodi,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,
+    d.nidn,d.nik,d.nama,d.prodi,d.status,d.tanggal_lahir,d.pangkat_golongan,d.jabatan_fungsional,d.alamat,d.no_telp,
     d.pendidikan_terakhir
   ]);
   const wb = XLSX.utils.book_new();
