@@ -10,14 +10,14 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/npm/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.min.js"></script>
   
   <style>
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; }
     .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-    .detail-label { font-weight: 600; width: 140px; display: inline-block; } /* Untuk label di modal detail */
+    .detail-label { font-weight: 600; width: 140px; display: inline-block; } 
   </style>
 </head>
 <body class="bg-gray-100">
@@ -76,7 +76,8 @@
         <div class="flex justify-between mb-4">
           <h2 class="text-2xl font-semibold text-gray-700">Daftar Dosen</h2>
           <div class="flex space-x-2">
-            <button onclick="exportAllToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"><i class="fas fa-file-excel mr-2"></i>Ekspor Semua</button>
+            <button onclick="exportAllToPdf()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"><i class="fas fa-file-pdf mr-2"></i>PDF Semua</button>
+            <button onclick="exportAllToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"><i class="fas fa-file-excel mr-2"></i>Excel Semua</button>
             <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"><i class="fas fa-plus-circle mr-2"></i>Tambah</button>
           </div>
         </div>
@@ -153,9 +154,12 @@ const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Mendapatkan objek jspdf dari global window
+const { jsPDF } = window.jspdf;
+
 let allDosenData = [];
 let editMode = false;
-let currentDosenDetail = null; // Menyimpan data dosen yang sedang dilihat detailnya
+let currentDosenDetail = null; 
 
 document.addEventListener("DOMContentLoaded", loadDosenData);
 document.getElementById("dosenForm").addEventListener("submit", saveDosen);
@@ -229,10 +233,8 @@ function showDetail(id) {
         return;
     }
     
-    // Simpan data dosen yang sedang aktif
     currentDosenDetail = dosen; 
 
-    // Fungsi helper untuk format baris detail
     const detailRow = (label, value) => {
         return `<p class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <span class="detail-label">${label}</span>
@@ -284,7 +286,7 @@ function getDetailDataForExport() {
 function exportDetailToPdf() {
     if (!currentDosenDetail) return alert("Tidak ada data detail untuk diekspor.");
     
-    const doc = new jspdf.jsPDF();
+    const doc = new jsPDF();
     const data = getDetailDataForExport();
     const namaFile = `Detail Dosen - ${currentDosenDetail.nama || currentDosenDetail.nidn || 'Data'}.pdf`;
 
@@ -312,22 +314,70 @@ function exportDetailToExcel() {
     if (!currentDosenDetail) return alert("Tidak ada data detail untuk diekspor.");
     
     const data = getDetailDataForExport();
-    const worksheetData = [['Data Detail Dosen'], [''], ...data]; // Judul dan data
+    const worksheetData = [['Data Detail Dosen'], [''], ...data]; 
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(worksheetData);
     
-    // Mengatur lebar kolom agar terbaca
     ws['!cols'] = [{ wch: 25 }, { wch: 50 }];
-
-    // Menggabungkan sel A1 dan B1 untuk judul
     ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
     
     XLSX.utils.book_append_sheet(wb, ws, "Detail Dosen");
     XLSX.writeFile(wb, `Detail Dosen - ${currentDosenDetail.nama || 'Data'}.xlsx`);
 }
 
-// FUNGSI EKSPOR EXCEL SEMUA DATA (yang sudah ada sebelumnya, ganti nama)
+// 🚨 FUNGSI BARU: EKSPOR SEMUA DATA KE PDF
+function exportAllToPdf() {
+    if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
+
+    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' untuk Landscape
+    
+    const headers = ["NIDN","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"];
+    
+    const data = allDosenData.map(d => [
+        d.nidn || '-', 
+        d.nik || '-', 
+        d.nama || '-', 
+        d.tanggal_lahir || '-', 
+        d.prodi || '-', 
+        d.pangkat_golongan || '-', 
+        d.jabatan_fungsional || '-', 
+        d.pendidikan_terakhir || '-',
+        d.status || '-',
+        d.no_telp || '-',
+        d.alamat || '-',
+    ]);
+
+    doc.setFontSize(14);
+    doc.text("Data Seluruh Dosen Fakultas Teknik", 14, 20);
+
+    doc.autoTable({
+        startY: 25,
+        head: [headers],
+        body: data,
+        theme: 'striped',
+        styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
+        headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' }, // Biru Tua
+        columnStyles: {
+            // Lebar kolom diatur untuk A4 landscape
+            0: { cellWidth: 15 }, 
+            1: { cellWidth: 20 }, 
+            2: { cellWidth: 35 }, 
+            3: { cellWidth: 18 }, 
+            4: { cellWidth: 25 }, 
+            5: { cellWidth: 25 }, 
+            6: { cellWidth: 25 }, 
+            7: { cellWidth: 20 }, 
+            8: { cellWidth: 15 }, 
+            9: { cellWidth: 20 }, 
+            10: { cellWidth: 50 }, // Alamat lebih lebar
+        }
+    });
+
+    doc.save("data_dosen_all.pdf");
+}
+
+// FUNGSI EKSPOR EXCEL SEMUA DATA
 function exportAllToExcel() {
   const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
   
