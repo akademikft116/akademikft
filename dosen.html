@@ -215,52 +215,46 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
+  // 🚨 PERBAIKAN: Menggunakan .trim() dan menghilangkan || null untuk field string
+  // agar nilai string kosong ("") yang berasal dari form tetap terkirim/terupdate.
   const dosenData = {
-    nidn: document.getElementById("nidn").value || null,
-    nik: document.getElementById("nik").value || null,
+    // Field yang harus mengirim string kosong jika input kosong
+    nidn: document.getElementById("nidn").value.trim(),
+    nik: document.getElementById("nik").value.trim(),
+    nama: document.getElementById("nama_lengkap").value.trim(),
+    prodi: document.getElementById("prodi").value, 
+    status: document.getElementById("status").value, // Nilai "" jika default dipilih
+    pangkat_golongan: document.getElementById("pangkat").value.trim(),
+    jabatan_fungsional: document.getElementById("jabatan_fungsional").value.trim(),
+    alamat: document.getElementById("alamat").value.trim(),
+    no_telp: document.getElementById("no_telp").value.trim(),
+    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value.trim(), 
     
-    // Nama Lengkap (nama_lengkap -> nama)
-    nama: document.getElementById("nama_lengkap").value || null,
-    
-    // PROGRAM STUDI
-    prodi: document.getElementById("prodi").value || null, 
-    
-    // STATUS DOSEN
-    status: document.getElementById("status").value || null, 
-    
-    email: null, // Kolom yang tidak digunakan di modal, tetap null
-    
-    // Mapping ID HTML ke Nama Kolom Supabase
-    tanggal_lahir: document.getElementById("tgl_lahir").value || null, // tgl_lahir -> tanggal_lahir
-    pangkat_golongan: document.getElementById("pangkat").value || null, // pangkat -> pangkat_golongan
-    jabatan_fungsional: document.getElementById("jabatan_fungsional").value || null,
-    alamat: document.getElementById("alamat").value || null,
-    no_telp: document.getElementById("no_telp").value || null,
-    
-    // Menggunakan kolom 'pendidikan_terakhir'
-    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value || null, 
+    // Field yang sebaiknya mengirim null jika kosong (untuk date/email)
+    tanggal_lahir: document.getElementById("tgl_lahir").value || null, 
+    email: null, 
   };
   
-  // Hapus properti yang bernilai null/kosong agar Supabase menggunakan default atau mengabaikannya
+  // Hapus properti yang bernilai null (hanya email dan tgl_lahir jika kosong)
+  // Nilai string kosong ("") akan tetap dimasukkan, memastikan update kolom status/prodi
   const filteredData = Object.fromEntries(
-    Object.entries(dosenData).filter(([k, v]) => v !== null && v !== "")
+    Object.entries(dosenData).filter(([k, v]) => v !== null)
   );
 
   let result;
   if (editMode) {
-    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value).select(); // Tambah .select() untuk mendapatkan data yang diperbarui
+    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value).select(); 
   } else {
-    result = await supabaseClient.from("dosen").insert([filteredData]).select(); // Tambah .select() untuk mendapatkan data yang baru dimasukkan
+    result = await supabaseClient.from("dosen").insert([filteredData]).select(); 
   }
   
   if (result.error) {
        alert("❌ Operasi gagal: " + result.error.message);
        console.error("Supabase Error:", result.error);
   } else {
-      // 🚨 PERBAIKAN PENTING: Panggil loadDosenData() untuk memuat ulang tabel.
       alert(editMode ? "✅ Data dosen berhasil diperbarui!" : "✅ Dosen baru berhasil ditambahkan!");
       closeModal();
-      loadDosenData();
+      loadDosenData(); // Memuat ulang tabel setelah berhasil
   }
 }
 
