@@ -134,13 +134,12 @@ let editMode = false;
 document.addEventListener("DOMContentLoaded", loadDosenData);
 document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 
-// 🚨 FUNGSI PERBAIKAN: Mengubah string kosong/spasi menjadi NULL
+// FUNGSI PEMBANTU: Mengubah string kosong/spasi menjadi NULL
 const toNullIfEmpty = (val) => {
     if (typeof val === 'string') {
         const trimmedVal = val.trim();
         return trimmedVal === "" ? null : trimmedVal; 
     }
-    // Date/Number input yang kosong akan menjadi string kosong, jadi ini tetap aman
     return val;
 };
 
@@ -185,6 +184,7 @@ function openModal() {
   document.getElementById("modalTitle").textContent = "Tambah Dosen";
   document.getElementById("dosenModal").style.display = "flex";
   editMode = false;
+  // Email field dihilangkan, jadi tidak perlu di-reset
 }
 
 function closeModal() {
@@ -194,41 +194,31 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // 🚨 PERBAIKAN: Ambil nilai dengan konversi ke NULL jika kosong
+  // Mapping field yang sesuai dengan permintaan dan database
   const dosenData = {
     nidn: toNullIfEmpty(document.getElementById("nidn").value), 
     nik: toNullIfEmpty(document.getElementById("nik").value), 
     nama: toNullIfEmpty(document.getElementById("nama_lengkap").value), 
-    
-    // Asumsi nama kolom di DB adalah 'tanggal_lahir'
     tanggal_lahir: toNullIfEmpty(document.getElementById("tgl_lahir").value), 
     prodi: toNullIfEmpty(document.getElementById("prodi").value), 
-    
-    // Asumsi nama kolom di DB adalah 'pangkat_golongan' (berdasarkan fungsi export)
     pangkat_golongan: toNullIfEmpty(document.getElementById("pangkat").value), 
-    
     jabatan_fungsional: toNullIfEmpty(document.getElementById("jabatan_fungsional").value),
     alamat: toNullIfEmpty(document.getElementById("alamat").value),
     no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
     pendidikan_terakhir: toNullIfEmpty(document.getElementById("pendidikan_terakhir").value),
     status: toNullIfEmpty(document.getElementById("status").value), 
-    
-    // Karena tidak ada ID 'email' di form Anda, kita set ke null
-    email: null,
+    // Email field DIHAPUS
   };
   
   let result;
   
-  // Filter data untuk memastikan hanya field yang memiliki nilai yang dikirim.
   const payloadData = Object.fromEntries(
     Object.entries(dosenData).filter(([k, v]) => v !== undefined)
   );
 
   if (editMode) {
-    // Tambah .select() untuk memastikan Supabase me-refresh data
     result = await supabaseClient.from("dosen").update(payloadData).eq("id", document.getElementById("dosenId").value).select();
   } else {
-    // Tambah .select() untuk memastikan Supabase me-refresh data
     result = await supabaseClient.from("dosen").insert([payloadData]).select();
   }
   
@@ -238,7 +228,6 @@ async function saveDosen(e) {
   } else {
       alert(editMode ? "✅ Data dosen berhasil diperbarui!" : "✅ Dosen baru berhasil ditambahkan!");
       closeModal();
-      // 🚨 PERBAIKAN UTAMA: Memuat ulang tabel setelah operasi sukses
       loadDosenData(); 
   }
 }
@@ -263,21 +252,19 @@ async function editDosen(id) {
   const dosen = allDosenData.find(d => d.id == id);
   if (!dosen) return;
   
-  // 🚨 PERBAIKAN: Mapping eksplisit agar sesuai ID di form dan kunci di DB
+  // Mapping data dari DB ke form
   document.getElementById("nidn").value = dosen.nidn || "";
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || "";
   document.getElementById("prodi").value = dosen.prodi || ""; 
-  
-  // Mapping 'pangkat_golongan' dari DB ke ID 'pangkat' di form
   document.getElementById("pangkat").value = dosen.pangkat_golongan || ""; 
-  
   document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || "";
   document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || "";
   document.getElementById("no_telp").value = dosen.no_telp || "";
   document.getElementById("status").value = dosen.status || "";
   document.getElementById("alamat").value = dosen.alamat || "";
+  // Email field DIHAPUS
 
   document.getElementById("dosenId").value = id;
   document.getElementById("modalTitle").textContent = "Edit Dosen";
@@ -299,11 +286,14 @@ async function deleteDosen(id) {
 }
 
 function exportToExcel() {
-  // 🚨 PERBAIKAN: Sesuaikan dengan kolom data yang diambil
-  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status","Email"];
+  // 🚨 Header disesuaikan (Email dihapus)
+  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
+  
+  // 🚨 Data baris disesuaikan (d.email dihapus)
   const rows = allDosenData.map(d=>[
-    d.nidn, d.nik, d.nama, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status, d.email
+    d.nidn, d.nik, d.nama, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status
   ]);
+  
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   XLSX.utils.book_append_sheet(wb, ws, "Dosen");
