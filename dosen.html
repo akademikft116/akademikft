@@ -18,7 +18,7 @@
 
 <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
   <div class="flex items-center space-x-3">
-    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto"> 
     <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
   </div>
   <div class="flex items-center space-x-4">
@@ -150,7 +150,7 @@
 </div>
 
 <script>
-// --- KONFIGURASI SUPABASE ---
+// --- KONFIGURASI SUPABASE (PASTIKAN INI SESUAI DENGAN KEY ANDA) ---
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -161,19 +161,40 @@ let editMode = false;
 document.addEventListener("DOMContentLoaded", loadDosenData);
 document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 
+// --- FUNGSI PEMBANTU: Mengubah string kosong menjadi NULL ---
+const toNullIfEmpty = (val) => {
+    if (typeof val === 'string') {
+        const trimmedVal = val.trim();
+        // Mengirim NULL jika string kosong
+        return trimmedVal === "" ? null : trimmedVal; 
+    }
+    return val;
+};
+
+
 // --- FUNGSI UTAMA ---
 
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
-  // Tampilkan loading saat data dimuat
   tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
   
-  const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
+  const { data, error } = await supabaseClient
+      .from("dosen")
+      .select("*")
+      .order("nama");
+
   if (error) {
-      console.error("Gagal memuat data dosen:", error);
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat data. ${error.message}</td></tr>`;
+      console.error("❌ Gagal memuat data dosen (RLS mungkin memblokir):", error.message, error);
+      
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">
+          Gagal memuat data. Periksa koneksi atau kebijakan RLS Supabase. 
+          Pesan Error: ${error.message}
+      </td></tr>`;
       return;
   }
+  
+  console.log("Data Dosen berhasil dimuat:", data);
+
   allDosenData = data;
   renderTable(data);
 }
@@ -185,7 +206,7 @@ function renderTable(data) {
       return;
   }
   
-  // Memastikan kolom 'nama', 'prodi', dan 'status' selalu ada, minimal sebagai '-'
+  // Menggunakan d.status || '-' untuk menampilkan '-' jika nilainya NULL di database
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
@@ -215,37 +236,36 @@ function closeModal() {
 async function saveDosen(e) {
   e.preventDefault();
   
-  // 🚨 PERBAIKAN: Menggunakan .trim() dan menghilangkan || null untuk field string
-  // agar nilai string kosong ("") yang berasal dari form tetap terkirim/terupdate.
+  // Menerapkan toNullIfEmpty untuk semua field string
   const dosenData = {
-    // Field yang harus mengirim string kosong jika input kosong
-    nidn: document.getElementById("nidn").value.trim(),
-    nik: document.getElementById("nik").value.trim(),
-    nama: document.getElementById("nama_lengkap").value.trim(),
-    prodi: document.getElementById("prodi").value, 
-    status: document.getElementById("status").value, // Nilai "" jika default dipilih
-    pangkat_golongan: document.getElementById("pangkat").value.trim(),
-    jabatan_fungsional: document.getElementById("jabatan_fungsional").value.trim(),
-    alamat: document.getElementById("alamat").value.trim(),
-    no_telp: document.getElementById("no_telp").value.trim(),
-    pendidikan_terakhir: document.getElementById("pendidikan_terakhir").value.trim(), 
+    nidn: toNullIfEmpty(document.getElementById("nidn").value),
+    nik: toNullIfEmpty(document.getElementById("nik").value),
+    nama: toNullIfEmpty(document.getElementById("nama_lengkap").value),
     
-    // Field yang sebaiknya mengirim null jika kosong (untuk date/email)
+    prodi: toNullIfEmpty(document.getElementById("prodi").value), 
+    status: toNullIfEmpty(document.getElementById("status").value), // PENTING: Mengubah "" menjadi NULL
+    
+    pangkat_golongan: toNullIfEmpty(document.getElementById("pangkat").value),
+    jabatan_fungsional: toNullIfEmpty(document.getElementById("jabatan_fungsional").value),
+    alamat: toNullIfEmpty(document.getElementById("alamat").value),
+    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
+    pendidikan_terakhir: toNullIfEmpty(document.getElementById("pendidikan_terakhir").value), 
+    
     tanggal_lahir: document.getElementById("tgl_lahir").value || null, 
     email: null, 
   };
   
-  // Hapus properti yang bernilai null (hanya email dan tgl_lahir jika kosong)
-  // Nilai string kosong ("") akan tetap dimasukkan, memastikan update kolom status/prodi
-  const filteredData = Object.fromEntries(
-    Object.entries(dosenData).filter(([k, v]) => v !== null)
+  let result;
+  
+  // Hanya masukkan data yang didefinisikan (bukan undefined)
+  const payloadData = Object.fromEntries(
+    Object.entries(dosenData).filter(([k, v]) => v !== undefined)
   );
 
-  let result;
   if (editMode) {
-    result = await supabaseClient.from("dosen").update(filteredData).eq("id", document.getElementById("dosenId").value).select(); 
+    result = await supabaseClient.from("dosen").update(payloadData).eq("id", document.getElementById("dosenId").value).select(); 
   } else {
-    result = await supabaseClient.from("dosen").insert([filteredData]).select(); 
+    result = await supabaseClient.from("dosen").insert([payloadData]).select(); 
   }
   
   if (result.error) {
@@ -254,7 +274,8 @@ async function saveDosen(e) {
   } else {
       alert(editMode ? "✅ Data dosen berhasil diperbarui!" : "✅ Dosen baru berhasil ditambahkan!");
       closeModal();
-      loadDosenData(); // Memuat ulang tabel setelah berhasil
+      // PENTING: Memuat ulang tabel setelah berhasil
+      loadDosenData(); 
   }
 }
 
@@ -281,7 +302,7 @@ async function editDosen(id) {
       return;
   }
   
-  // Mengisi field dari kolom Supabase ke ID HTML yang sesuai
+  // Mengisi field dengan nilai dari DB. Gunakan || "" untuk menangani NULL.
   document.getElementById("nidn").value = dosen.nidn || "";
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
