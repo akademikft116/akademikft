@@ -286,7 +286,7 @@ async function loadDosenAndMatkul() {
 
     // Muat Data Mata Kuliah
     let { data: matkulData, error: matkulError } = await supabaseClient
-        .from('mata_kuliah')
+        .from('matakuliah')
         .select('kode_matkul, nama_matkul, sks, semester, prodi')
         .order('nama_matkul');
 
