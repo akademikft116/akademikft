@@ -87,7 +87,7 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIDN</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIDU</th> <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prodi</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
                 <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -95,8 +95,7 @@
               </tr>
             </thead>
             <tbody id="dosen-table-body" class="bg-white divide-y divide-gray-200">
-              <tr><td colspan="6" class="text-center py-4 text-gray-500">Memuat data...</td></tr>
-            </tbody>
+              <tr><td colspan="7" class="text-center py-4 text-gray-500">Memuat data...</td></tr> </tbody>
           </table>
         </div>
       </div>
@@ -111,7 +110,7 @@
       <input type="hidden" id="dosenId">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
-        <input id="nik" class="border p-2 rounded" placeholder="NIK">
+        <input id="nidu" class="border p-2 rounded" placeholder="NIDU"> <input id="nik" class="border p-2 rounded" placeholder="NIK">
         <input id="nama_lengkap" class="border p-2 rounded" placeholder="Nama Lengkap">
         <input id="tgl_lahir" type="date" class="border p-2 rounded">
         
@@ -195,14 +194,15 @@ function closeModal(modalId = 'dosenModal') {
 
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
-  tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>`;
+  // UPDATE colspan 6 -> 7
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`; 
   
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   
   if (error) {
       console.error("❌ Gagal memuat data dosen:", error);
       alert("❌ ERROR MEMUAT DATA. Pesan: " + error.message);
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}</td></tr>`;
       return;
   }
   
@@ -213,14 +213,15 @@ async function loadDosenData() {
 function renderTable(data) {
   const tbody = document.getElementById("dosen-table-body");
   if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Data dosen tidak ditemukan.</td></tr>`;
+      // UPDATE colspan 6 -> 7
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Data dosen tidak ditemukan.</td></tr>`;
       return;
   }
   
   tbody.innerHTML = data.map(d => `
     <tr class="hover:bg-gray-100">
       <td class="px-6 py-4">${d.nidn || '-'}</td>
-      <td class="px-6 py-4">${d.nama || '-'}</td>
+      <td class="px-6 py-4">${d.nidu || '-'}</td> <td class="px-6 py-4">${d.nama || '-'}</td>
       <td class="px-6 py-4">${d.prodi || '-'}</td>
       <td class="px-6 py-4">${d.jabatan_fungsional || '-'}</td>
       <td class="px-6 py-4 text-center">${d.status || '-'}</td>
@@ -266,7 +267,7 @@ function showDetail(id) {
         <h3 class="text-xl font-bold text-blue-700 mb-4">${dosen.nama || 'Nama Dosen'}</h3>
         <div class="space-y-2">
             ${detailRow('NIDN', dosen.nidn)}
-            ${detailRow('NIK', dosen.nik)}
+            ${detailRow('NIDU', dosen.nidu)} ${detailRow('NIK', dosen.nik)}
             ${detailRow('Tanggal Lahir', dosen.tanggal_lahir)}
             ${detailRow('Prodi', dosen.prodi)}
             ${detailRow('Pangkat/Golongan', dosen.pangkat_golongan)}
@@ -290,7 +291,7 @@ function getDetailDataForExport() {
     return [
         ['Nama Dosen', d.nama || '-'],
         ['NIDN', d.nidn || '-'],
-        ['NIK', d.nik || '-'],
+        ['NIDU', d.nidu || '-'], ['NIK', d.nik || '-'],
         ['Tanggal Lahir', d.tanggal_lahir || '-'],
         ['Prodi', d.prodi || '-'],
         ['Pangkat/Golongan', d.pangkat_golongan || '-'],
@@ -355,10 +356,13 @@ function exportAllToPdf() {
 
     const doc = new jsPDF('l', 'mm', 'a4'); // 'l' untuk Landscape
     
-    const headers = ["NIDN","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"];
+    // UPDATE: Tambahkan NIDU di index 1
+    const headers = ["NIDN","NIDU","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"]; 
     
+    // UPDATE: Tambahkan d.nidu di data mapping
     const data = allDosenData.map(d => [
         d.nidn || '-', 
+        d.nidu || '-', // BARU
         d.nik || '-', 
         d.nama || '-', 
         d.tanggal_lahir || '-', 
@@ -381,18 +385,20 @@ function exportAllToPdf() {
         theme: 'striped',
         styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
         headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' }, 
+        // UPDATE: Penyesuaian lebar kolom untuk mengakomodasi NIDU di index 1
         columnStyles: {
-            0: { cellWidth: 15 }, 
-            1: { cellWidth: 20 }, 
-            2: { cellWidth: 35 }, 
-            3: { cellWidth: 18 }, 
-            4: { cellWidth: 25 }, 
-            5: { cellWidth: 25 }, 
-            6: { cellWidth: 25 }, 
-            7: { cellWidth: 20 }, 
-            8: { cellWidth: 15 }, 
-            9: { cellWidth: 20 }, 
-            10: { cellWidth: 50 }, 
+            0: { cellWidth: 14 }, 
+            1: { cellWidth: 14 }, // BARU: NIDU
+            2: { cellWidth: 20 }, // NIK
+            3: { cellWidth: 35 }, // Nama
+            4: { cellWidth: 18 }, // Tgl Lahir
+            5: { cellWidth: 25 }, // Prodi
+            6: { cellWidth: 25 }, // Pangkat/Gol
+            7: { cellWidth: 25 }, // Jabatan Fungsional
+            8: { cellWidth: 20 }, // Pendidikan Terakhir
+            9: { cellWidth: 15 }, // Status
+            10: { cellWidth: 20 }, // No Telp
+            11: { cellWidth: 50 }, // Alamat
         }
     });
 
@@ -403,10 +409,12 @@ function exportAllToPdf() {
 function exportAllToExcel() {
   if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
   
-  const headers = ["NIDN","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
+  // UPDATE: Tambahkan NIDU di index 1
+  const headers = ["NIDN","NIDU","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
   
+  // UPDATE: Tambahkan d.nidu
   const rows = allDosenData.map(d=>[
-    d.nidn, d.nik, d.nama, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status
+    d.nidn, d.nidu, d.nik, d.nama, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status
   ]);
   
   const wb = XLSX.utils.book_new();
@@ -422,6 +430,7 @@ async function saveDosen(e) {
   
   const dosenData = {
     nidn: toNullIfEmpty(document.getElementById("nidn").value), 
+    nidu: toNullIfEmpty(document.getElementById("nidu").value), // BARU: Ambil nilai NIDU
     nik: toNullIfEmpty(document.getElementById("nik").value), 
     nama: toNullIfEmpty(document.getElementById("nama_lengkap").value), 
     tanggal_lahir: toNullIfEmpty(document.getElementById("tgl_lahir").value), 
@@ -482,6 +491,7 @@ async function editDosen(id) {
   if (!dosen) return;
   
   document.getElementById("nidn").value = dosen.nidn || "";
+  document.getElementById("nidu").value = dosen.nidu || ""; // BARU: Load NIDU
   document.getElementById("nik").value = dosen.nik || "";
   document.getElementById("nama_lengkap").value = dosen.nama || ""; 
   document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || "";
