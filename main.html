@@ -280,7 +280,6 @@ async function loadDosenAndMatkul() {
 
     if (dosenError) {
         console.error("Gagal memuat data dosen:", dosenError);
-        // Lanjutkan saja, TomSelect akan kosong
         return;
     }
     allDosenData = dosenData.map(d => ({ value: d.nidn, text: `${d.nama} (${d.nidn})` }));
@@ -306,10 +305,6 @@ async function loadDosenAndMatkul() {
 }
 
 function initializeTomSelect() {
-    // Hapus TomSelect yang sudah ada jika ada (penting untuk mode Edit/Load ulang)
-    if (tomSelectDosen) tomSelectDosen.destroy();
-    if (tomSelectMatkul) tomSelectMatkul.destroy();
-
     // 1. TomSelect untuk Dosen
     tomSelectDosen = new TomSelect("#dosen", {
         valueField: 'value',
@@ -363,29 +358,26 @@ const toNullIfEmpty = (val) => {
 };
 
 
-// ----------------------------------------------------
-// ✅ FUNGSI PENTING: loadJadwalData (DIKOREKSI)
-// ----------------------------------------------------
 async function loadJadwalData() {
   const tbody = document.getElementById("jadwal-table-body");
   tbody.innerHTML = `<tr><td colspan="12" class="text-center py-4">Memuat data...</td></tr>`;
   
-  // MENGGUNAKAN Left Join STANDAR untuk keamanan data (menghapus !inner)
+  // Menggunakan 'matakuliah!inner(nama_matkul, sks)' dan 'dosen!inner(nama)'
   const { data, error } = await supabaseClient
       .from("jadwal")
       .select(`
           *,
-          matakuliah(nama_matkul, sks),
-          dosen(nama)
+          matakuliah!inner(nama_matkul, sks),
+          dosen!inner(nama)
       `)
-      .order("prodi", { ascending: true })
-      .order("semester", { ascending: true })
-      .order("hari", { ascending: true }); // Order by hari (nama hari)
+      .order("prodi")
+      .order("semester")
+      .order("hari_urut"); // Asumsi ada kolom hari_urut di Supabase
 
   if (error) {
       console.error("❌ Gagal memuat data jadwal:", error);
-      alert("❌ ERROR MEMUAT DATA. Pesan: " + error.message + ". Pastikan RLS di tabel jadwal di Supabase sudah diizinkan (SELECT).");
-      tbody.innerHTML = `<tr><td colspan="12" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}. Cek Console!</td></tr>`;
+      alert("❌ ERROR MEMUAT DATA. Pesan: " + error.message);
+      tbody.innerHTML = `<tr><td colspan="12" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}</td></tr>`;
       return;
   }
   
@@ -422,9 +414,6 @@ function renderTable(data) {
 }
 
 
-// ----------------------------------------------------
-// ✅ FUNGSI PENTING: saveJadwal (DIKOREKSI)
-// ----------------------------------------------------
 async function saveJadwal(e) {
   e.preventDefault();
   
@@ -440,24 +429,22 @@ async function saveJadwal(e) {
 
   // Cek validasi dasar
   if (!prodi || !semester || !kode_matkul || !nidn || !hari || !waktu_mulai || !waktu_selesai || !kelas || !ruangan) {
-    alert("❌ Harap lengkapi semua bidang wajib.");
+    alert("❌ Harap lengkapi semua bidang wajib (kecuali yang bersifat opsional).");
     return;
   }
 
   // Mendapatkan SKS dari data matkul yang tersimpan
   const selectedMatkul = allMatkulData.find(m => m.value === kode_matkul);
-  // Ambil SKS, pastikan nilainya adalah integer (atau null)
-  const sks = selectedMatkul ? parseInt(selectedMatkul.data.sks) : null; 
+  const sks = selectedMatkul ? selectedMatkul.data.sks : null;
 
 
-  // Tentukan urutan hari (optional, hanya jika kolom hari_urut ada dan bertipe integer)
+  // Tentukan urutan hari untuk pengurutan di database (jika ada kolom hari_urut)
   const hariOrder = { "Senin": 1, "Selasa": 2, "Rabu": 3, "Kamis": 4, "Jumat": 5, "Sabtu": 6 };
-  const hari_urut = hariOrder[hari] || null;
+  const hari_urut = hariOrder[hari];
 
   const jadwalData = {
     prodi: toNullIfEmpty(prodi), 
-    // Konversi semester ke integer untuk database
-    semester: parseInt(toNullIfEmpty(semester)) || null, 
+    semester: toNullIfEmpty(semester), 
     kode_matkul: toNullIfEmpty(kode_matkul),
     nidn: toNullIfEmpty(nidn),
     kelas: toNullIfEmpty(kelas),
@@ -465,40 +452,30 @@ async function saveJadwal(e) {
     hari: toNullIfEmpty(hari),
     waktu_mulai: toNullIfEmpty(waktu_mulai),
     waktu_selesai: toNullIfEmpty(waktu_selesai),
-    sks: sks, 
+    sks: sks, // Langsung dari data matkul
     hari_urut: hari_urut
   };
   
   let result;
   
-  // Filter data yang null/undefined agar Supabase tidak error karena nilai yang tidak valid
   const payloadData = Object.fromEntries(
-    Object.entries(jadwalData).filter(([k, v]) => v !== undefined && v !== null)
+    Object.entries(jadwalData).filter(([k, v]) => v !== undefined)
   );
+
+
+  if (editMode) {
+    result = await supabaseClient.from("jadwal").update(payloadData).eq("id", document.getElementById("jadwalId").value).select();
+  } else {
+    result = await supabaseClient.from("jadwal").insert([payloadData]).select();
+  }
   
-  // Masukkan kembali nilai yang harus null agar proses update/insert berjalan lancar
-  if (jadwalData.hari_urut === null) payloadData.hari_urut = null;
-  if (jadwalData.sks === null) payloadData.sks = null;
-  if (jadwalData.semester === null) payloadData.semester = null;
-
-  try {
-      if (editMode) {
-        result = await supabaseClient.from("jadwal").update(payloadData).eq("id", document.getElementById("jadwalId").value).select();
-      } else {
-        result = await supabaseClient.from("jadwal").insert([payloadData]).select();
-      }
-      
-      if (result.error) {
-          throw result.error;
-      }
-
+  if (result.error) {
+       alert("❌ Operasi GAGAL. Pesan: " + result.error.message);
+       console.error("Supabase Error:", result.error);
+  } else {
       alert(editMode ? "✅ Data jadwal berhasil diperbarui!" : "✅ Jadwal baru berhasil ditambahkan!");
       closeModal('jadwalModal');
       loadJadwalData(); 
-
-  } catch (error) {
-       alert("❌ Operasi GAGAL. Pesan: " + error.message + ". Cek RLS (INSERT/UPDATE) atau kolom database.");
-       console.error("Supabase Operation Error:", error);
   }
 }
 
@@ -571,16 +548,14 @@ function resetFilter() {
 // ---------------------------
 
 const prodiColors = {
-    "Industri": { header: [255, 165, 0], text: 0 },   
-    "Sipil": { header: [0, 128, 0], text: 255 },       
-    "Arsitektur": { header: [128, 0, 128], text: 255 }, 
-    "Elektro": { header: [0, 0, 255], text: 255 },     
-    "Informatika": { header: [255, 0, 0], text: 255 }, 
-    "LAINNYA": { header: [108, 117, 125], text: 255 }, // Dark Grey
+    "Industri": { header: [255, 165, 0], text: 0 },   // Orange
+    "Sipil": { header: [0, 128, 0], text: 255 },       // Green
+    "Arsitektur": { header: [128, 0, 128], text: 255 },  // Purple
+    "Elektro": { header: [0, 0, 255], text: 255 },     // Blue
+    "Informatika": { header: [255, 0, 0], text: 255 }, // Red
     "Default": { header: [44, 62, 80], text: 255 } 
 };
 
-// Fungsi exportAllToPdf sudah aman
 function exportAllToPdf() {
     if (allJadwalData.length === 0) return alert("Tidak ada data jadwal untuk diekspor.");
     if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet, hard refresh.");
@@ -601,7 +576,7 @@ function exportAllToPdf() {
 
     const headers = ["#", "Prodi", "Smstr", "Kode", "Mata Kuliah", "Kelas", "SKS", "Dosen", "Hari", "Mulai", "Selesai", "Ruangan"];
     
-    // Definisikan lebar kolom
+    // Definisikan lebar kolom yang lebih ketat untuk Landscape A4
     const columnStyles = {
         0: { halign: 'center', cellWidth: 7 }, 
         1: { halign: 'center', cellWidth: 20 }, 
@@ -635,24 +610,22 @@ function exportAllToPdf() {
         ]);
 
         const prodiColor = prodiColors[prodi] || prodiColors.Default;
-        let startY = finalY + 5;
+        const startY = finalY + 5;
 
         // Tambahkan halaman baru jika tidak cukup ruang
         if (startY > doc.internal.pageSize.height - 30 && index > 0) {
             doc.addPage('a4', 'l');
             finalY = 10;
-            startY = finalY + 5;
         }
 
         // Judul Prodi
         doc.setFontSize(14);
         doc.setTextColor(prodiColor.header[0], prodiColor.header[1], prodiColor.header[2]);
         doc.text(`JADWAL KULIAH - PRODI ${prodi.toUpperCase()}`, pageMargin, finalY += 10);
-        finalY += 3; // Tambah jarak sebelum tabel
 
         // Tabel
         doc.autoTable({
-            startY: finalY,
+            startY: finalY + 3,
             head: [headers],
             body: rows,
             theme: 'striped',
@@ -664,22 +637,18 @@ function exportAllToPdf() {
                 fontStyle: 'bold', 
                 halign: 'center' 
             },
-            columnStyles: columnStyles
+            columnStyles: columnStyles,
+            didDrawPage: function(data) {
+                // Header halaman
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text("Jadwal Kuliah Fakultas Teknik", 280, 5, null, null, "right");
+            }
         });
 
         // Update finalY untuk memulai tabel berikutnya
         finalY = doc.autoTable.previous.finalY;
     });
-    
-    // Penambahan Header/Footer Halaman (Dilakukan secara manual di akhir)
-    const pageCount = doc.internal.pages.length;
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(100);
-        doc.text(`Halaman ${i} dari ${pageCount}`, pageMargin, doc.internal.pageSize.height - 5);
-        doc.text("Jadwal Kuliah Fakultas Teknik", doc.internal.pageSize.width - pageMargin, doc.internal.pageSize.height - 5, null, null, "right");
-    }
 
     doc.save("Jadwal_Kuliah_Fakultas_Teknik.pdf");
 }
