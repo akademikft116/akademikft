@@ -13,55 +13,75 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
   <style>
-    /* Style Layout dan Sidebar Konsisten (Gelap) */
-    .main-wrapper {
-        min-height: 100vh; 
-        padding-left: 20rem; /* Sesuaikan dengan lebar sidebar Anda */
-        padding-top: 4rem; 
+    /* PENTING: RESET DEFAULT BROWSER UNTUK MENGHINDARI MARGIN/PADDING PADA BODY/HTML */
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow-x: hidden; /* Mencegah scroll horizontal */
     }
+
+    /* Style Layout dan Sidebar Konsisten (Gelap) */
     .custom-sidebar {
-        width: 20rem; 
+        width: 20rem; /* Lebar Sidebar */
         background-color: #1a202c; /* Background Sidebar Gelap */
         color: white;
-        position: fixed;
-        height: 100%;
+        position: fixed; /* Sidebar tetap */
+        height: 100vh; /* Tinggi 100% viewport */
         top: 0;
         left: 0;
-        padding-top: 4rem; 
-        z-index: 10;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        padding-top: 4rem; /* Sesuaikan dengan tinggi header jika header ikut fixed */
+        z-index: 20; /* Lebih tinggi dari konten */
+        box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+        /* Menambahkan flex-direction: column; untuk menampung logo dan nav */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* HEADER (Navbar Atas) Dibuat fixed */
+    .custom-header {
+        height: 4rem; 
+        position: fixed;
+        top: 0;
+        left: 0; 
+        right: 0; 
+        z-index: 30; /* Paling tinggi */
+        background-color: white; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding-left: 20rem; /* RUANG KOSONG UNTUK SIDEBAR */
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; /* Konten ke kanan */
+    }
+    
+    /* MAIN CONTENT WRAPPER */
+    .main-wrapper {
+        min-height: 100vh; 
+        padding-left: 20rem; /* PADDING SAMA DENGAN LEBAR SIDEBAR */
+        padding-top: 5rem; /* PADDING UNTUK MENGHINDARI HEADER */
+        background-color: #f3f4f6; /* bg-gray-100 */
     }
     
     /* Style untuk Link Aktif (Highlight Biru Konsisten) */
-    /* Pastikan class ini juga ada di dosen.html, mahasiswa.html, dll. */
     .active-link { 
-        background-color: #3b82f6; /* Warna biru terang/highlight */
+        background-color: #3b82f6; 
         color: white; 
         font-weight: 600;
         border-radius: 0.375rem;
     }
     
-    /* Style untuk form dan tabel */
+    /* Style Tom Select dan Aksi */
     .ts-control {
-        border-radius: 0.375rem !important;
-        border: 1px solid #d1d5db !important;
-        padding: 0.5rem 0.75rem !important;
-        min-height: 2.75rem !important; 
-        box-shadow: none !important;
+        border-radius: 0.375rem !important; border: 1px solid #d1d5db !important; padding: 0.5rem 0.75rem !important; min-height: 2.75rem !important; box-shadow: none !important;
     }
     .action-cell {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.25rem;
+        display: flex; justify-content: center; align-items: center; gap: 0.25rem;
     }
   </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-<header class="bg-white shadow h-16 fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6">
-    <div class="hidden"></div> 
-    
+<header class="custom-header px-6">
     <div class="flex items-center space-x-4 ml-auto">
         <span id="user-info" class="text-gray-700 text-sm">Halo, AkademikFT</span>
         <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-150">
@@ -71,8 +91,8 @@
 </header>
 
 
-<aside class="custom-sidebar flex flex-col pt-16">
-    <div class="p-4 flex items-center space-x-3 mb-4">
+<aside class="custom-sidebar">
+    <div class="p-4 flex items-center space-x-3 mb-4 mt-2">
         <img src="logo.jpeg" alt="Logo" class="h-8 w-auto rounded-full">
         <span class="text-white text-xl font-bold tracking-wider">AKADEMIK FT</span>
     </div>
@@ -103,7 +123,7 @@
     </nav>
 </aside>
 
-<main class="main-wrapper p-8 bg-gray-100">
+<main class="main-wrapper p-8">
     <div class="container mx-auto">
       <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b-4 border-blue-600 pb-2">
         Manajemen Penjadwalan Aktif
@@ -209,7 +229,6 @@
   let prodiSelect, matkulSelect, dosenSelect;
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // Cek Autentikasi
     await checkAuth();
     
     // Inisialisasi Tom Select
@@ -217,11 +236,9 @@
     matkulSelect = new TomSelect('#matkul', { create: false, sortField: { field: "text", direction: "asc" } });
     dosenSelect = new TomSelect('#dosen', { create: false, sortField: { field: "text", direction: "asc" } });
 
-    // Muat data referensi dan jadwal
     await loadReferences();
     await loadJadwal();
 
-    // Event Listener Form
     document.getElementById('jadwal-form').addEventListener('submit', handleFormSubmit);
   });
 
@@ -231,7 +248,6 @@
       window.location.href = "index.html";
       return;
     }
-    // document.getElementById('user-info').textContent = `Halo, ${user.email.split('@')[0]}`;
   }
 
   function logout() {
@@ -242,7 +258,6 @@
 
   // --- Fungsi Muat Data Referensi (Diperlukan Tom Select) ---
   async function loadReferences() {
-    // Logika memuat data Prodi, Matkul, Dosen ke Tom Select
     try {
       // 1. Prodi
       const { data: prodiData } = await supabaseClient.from('prodi').select('id, nama_prodi');
@@ -268,7 +283,7 @@
     jadwalBody.innerHTML = '';
 
     try {
-      // PERHATIAN: Query ini membutuhkan relasi Foreign Key di Supabase (jadwal->prodi, jadwal->matakuliah, jadwal->dosen)
+      // PERHATIAN: Query ini membutuhkan relasi Foreign Key di Supabase
       const { data, error } = await supabaseClient
         .from('jadwal')
         .select(`
@@ -291,7 +306,6 @@
       }
     } catch (error) {
       console.error('Error loading jadwal:', error.message);
-      // Pesan error yang relevan
       jadwalBody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-red-500">Gagal memuat jadwal. Pesan Error: ${error.message}</td></tr>`;
     } finally {
       document.getElementById('loading-message').classList.add('hidden');
@@ -328,7 +342,7 @@
     `;
   }
 
-  // --- Fungsi CRUD (Tambahkan kembali jika sebelumnya hilang) ---
+  // --- Fungsi CRUD (HandleFormSubmit, resetForm, editJadwal, hapusJadwal) ---
   async function handleFormSubmit(event) {
     event.preventDefault();
     const id = document.getElementById('jadwal-id').value;
@@ -345,18 +359,14 @@
     };
 
     if (id) {
-      // Update data
       const { error } = await supabaseClient.from('jadwal').update(data).eq('id', id);
       if (error) { alert('Gagal mengubah jadwal: ' + error.message); } else {
-        alert('Jadwal berhasil diubah!');
-        resetForm(); loadJadwal();
+        alert('Jadwal berhasil diubah!'); resetForm(); loadJadwal();
       }
     } else {
-      // Insert data
       const { error } = await supabaseClient.from('jadwal').insert([data]);
       if (error) { alert('Gagal menambah jadwal: ' + error.message); } else {
-        alert('Jadwal berhasil ditambahkan!');
-        resetForm(); loadJadwal();
+        alert('Jadwal berhasil ditambahkan!'); resetForm(); loadJadwal();
       }
     }
   }
@@ -394,9 +404,7 @@
     if (!confirm('Anda yakin ingin menghapus jadwal ini?')) return;
     const { error } = await supabaseClient.from('jadwal').delete().eq('id', id);
     if (error) { alert('Gagal menghapus jadwal: ' + error.message); } else {
-      alert('Jadwal berhasil dihapus!');
-      loadJadwal();
-      resetForm();
+      alert('Jadwal berhasil dihapus!'); loadJadwal(); resetForm();
     }
   }
 </script>
