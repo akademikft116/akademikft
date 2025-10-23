@@ -5,1080 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Biodata & Pencarian Mahasiswa - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
-  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <!-- jsPDF & autoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  
-  <style>
-    /* STYLE UNTUK MEMASTIKAN LAYOUT FULL-SCREEN SEPERTI DASHBOARD */
-    .active-link {
-        background-color: #1d4ed8; /* blue-700 */
-        color: white;
-        border-left: 4px solid #f97316; /* orange-500 */
-    }
-    .main-content {
-        height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
-    }
-    .container {
-        max-width: 1300px;
-        margin: auto;
-    }
-    /* Style untuk Tom Select agar sesuai dengan input Tailwind */
-    .ts-wrapper.form-control, .ts-control {
-        border-radius: 0.25rem !important;
-        border: 1px solid #d1d5db !important;
-    }
-    .modal {
-        transition: opacity 0.3s ease-out;
-    }
-    .modal-active {
-        opacity: 1;
-    }
-    /* Tambahkan style untuk menyembunyikan form saat tidak dibutuhkan */
-    #mahasiswa-container.hidden {
-        display: none;
-    }
-    #mahasiswa-list-container.hidden {
-        display: none;
-    }
-    /* Styling khusus untuk tombol tab */
-    .tab-button {
-        transition: all 0.15s ease-in-out;
-    }
-  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body class="bg-gray-100">
 
-<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
-    <div class="flex items-center space-x-3">
-        <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
-        <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
-    </div>
-    <div class="flex items-center space-x-4">
-        <span id="userNameNav" class="text-white text-sm">Halo, Pengguna</span>
-        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-150">
-            <i class="fas fa-sign-out-alt mr-1"></i> Ganti Akun
-        </button>
-    </div>
-</nav>
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Daftar Mahasiswa Fakultas Teknik</h1>
 
-<div class="flex pt-16 main-content">
-
-    <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
-        <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-            <a href="dashboard.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-tachometer-alt w-5"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-calendar-alt w-5"></i>
-                <span>Penjadwalan</span>
-            </a>
+    <!-- Tombol navigasi & aksi -->
+    <div class="flex justify-between mb-4">
+        <div class="flex items-center space-x-3">
+            <button onclick="downloadTemplate()"
+               class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
+               <i class="fas fa-download mr-2"></i> Download Template
+            </button>
             
-            <a href="mahasiswa.html" class="active-link w-full text-left flex items-center space-x-3 p-3 rounded-lg transition duration-150">
-                <i class="fas fa-address-card w-5"></i>
-                <span>Data Mahasiswa</span>
-            </a>
-            
-            <a href="dashboard.html#dosen" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-user-tie w-5"></i>
-                <span>Data Dosen</span>
-            </a>
-            <a href="dashboard.html#matkul" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-book w-5"></i>
-                <span>Data Mata Kuliah</span>
-            </a>
-            <a href="dashboard.html#pengaturan" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                <i class="fas fa-cog w-5"></i>
-                <span>Pengaturan</span>
-            </a>
-        </nav>
-
-        <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
-            <p>&copy; 2024 Akademik FT</p>
-            <p>Designed by Rifqi & Alfi</p>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
+            <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
+                <i class="fas fa-file-excel mr-2"></i> Import File
+            </label>
+            <span id="importStatus" class="text-sm text-gray-600"></span>
         </div>
-    </aside>
 
+        <div class="flex space-x-2 items-center">
+            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
+            <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            </button>
+            <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
+            </button>
 
-    <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
-        <div class="container mx-auto p-0">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Biodata & Pencarian Mahasiswa</h1>
-
-            <div id="mahasiswa-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="formTitle">Tambah Data Mahasiswa Baru</h2>
-                <form id="mahasiswaForm" onsubmit="event.preventDefault(); saveMahasiswa();">
-                    
-                    <div class="border-b border-gray-200 mb-4">
-                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                            <button type="button" id="tab-akademik" onclick="switchTab('akademik')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
-                                <i class="fas fa-user-graduate mr-2"></i> Data Akademik & Identitas
-                            </button>
-                            <button type="button" id="tab-personal" onclick="switchTab('personal')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                <i class="fas fa-id-card mr-2"></i> Data Personal & Orang Tua
-                            </button>
-                        </nav>
-                    </div>
-
-                    <div id="content-akademik" class="tab-content">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="npm" class="block text-sm font-medium text-gray-700">NPM <span class="text-red-500">*</span></label>
-                                <input type="text" id="npm" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
-                                <input type="text" id="nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="prodi" class="block text-sm font-medium text-gray-700">Program Studi <span class="text-red-500">*</span></label>
-                                <select id="prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                    <option value="">Pilih Prodi</option>
-                                    <option value="Industri">Teknik Industri</option>
-                                    <option value="Sipil">Teknik Sipil</option>
-                                    <option value="Informatika">Teknik Informatika</option>
-                                    <option value="Arsitektur">Arsitektur</option>
-                                </select>
-                            </div>
-        
-                            <div>
-                                <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas (A/B/C)</label>
-                                <input type="text" id="kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="jenisKelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
-                                <select id="jenisKelamin" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                    <option value="">Pilih J. Kelamin</option>
-                                    <option value="Laki-laki">Laki-laki</option>
-                                    <option value="Perempuan">Perempuan</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
-                                <select id="tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                    <option value="">Pilih Tahun</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
-                                <input type="text" id="nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="nohp" class="block text-sm font-medium text-gray-700">No. HP</label>
-                                <input type="text" id="nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700">Status Mahasiswa <span class="text-red-500">*</span></label>
-                                <select id="status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Mengundurkan diri">Mengundurkan diri</option>
-                                    <option value="Nonaktif">Nonaktif</option>
-                                    <option value="Lulus">Lulus</option>
-                                    <option value="Drop Out">Drop Out</option>
-                                    <option value="Meninggal">Meninggal Dunia</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label for="nomorIjazah" class="block text-sm font-medium text-gray-700">Nomor Ijazah (Opsional)</label>
-                                <input type="text" id="nomorIjazah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div></div> 
-                            <div></div> 
-
-                        </div>
-                        
-                        <div class="mt-4">
-                            <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
-                            <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                    </div>
-
-                    <div id="content-personal" class="tab-content hidden">
-                        <p class="text-sm text-gray-600 mb-4">Lengkapi data personal dan orang tua (dapat dikosongkan).</p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="namaayah" class="block text-sm font-medium text-gray-700">Nama Ayah</label>
-                                <input type="text" id="namaayah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="namaibu" class="block text-sm font-medium text-gray-700">Nama Ibu</label>
-                                <input type="text" id="namaibu" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="ttl" class="block text-sm font-medium text-gray-700">TTL</label>
-                                <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-
-                            <div>
-                                <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
-                                <input type="text" id="kelurahan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
-                                <input type="text" id="kecamatan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div></div>
-                        </div>
-
-                        <div class="mt-4">
-                            <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap (Jalan, RT/RW)</label>
-                            <textarea id="alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-                        </div>
-                    </div>
-
-
-                    <input type="hidden" id="mahasiswaId" value="">
-                    <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
-                        <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-save mr-2"></i> Simpan Data
-                        </button>
-                        <button type="button" onclick="resetForm()" id="reset-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-times mr-2"></i> Batalkan & Tutup
-                        </button>
-                    </div>
-                </form>
-            </div>
-            
-            <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
-                
-                <div class="mb-6 border p-4 rounded-lg bg-gray-50">
-                    <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <div>
-                            <label for="searchNama" class="block text-sm font-medium text-gray-700">Nama</label>
-                            <input type="text" id="searchNama" placeholder="Ketik Nama Mahasiswa" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="searchNpm" class="block text-sm font-medium text-gray-700">NPM</label>
-                            <input type="text" id="searchNpm" placeholder="Ketik NPM" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div>
-                            <label for="searchTahun" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
-                            <select id="searchTahun" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="">Semua Tahun</option>
-                            </select>
-                        </div>
-                        
-                        <div class="flex space-x-2">
-                            <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
-                                <i class="fas fa-search mr-1"></i> Cari
-                            </button>
-                            <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <button onclick="downloadTemplate()"
-                           class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
-                           <i class="fas fa-download mr-2"></i> Download Template
-                        </button>
-                        
-                        <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
-                        <label for="excelFileInput" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer text-sm">
-                            <i class="fas fa-file-excel mr-2"></i> Import File
-                        </label>
-                        <span id="importStatus" class="text-sm text-gray-600"></span>
-                    </div>
-
-                    <div class="flex space-x-2">
-                        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-file-excel mr-2"></i> Export Excel
-                        </button>
-                        <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-file-pdf mr-2"></i> Export PDF
-                        </button>
-                        <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                            <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPM</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
-                            </tbody>
-                    </table>
+            <!-- NAVIGASI BUTTON TAMBAHAN -->
+            <div class="relative">
+                <button id="navButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex items-center space-x-1">
+                    <i class="fas fa-bars"></i><span>Menu</span>
+                </button>
+                <div id="navDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50">
+                    <button onclick="filterLulusan()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-graduation-cap mr-2"></i> Lulusan Mahasiswa
+                    </button>
                 </div>
             </div>
-
         </div>
-    </main>
+    </div>
 
-</div>
+    <!-- Filter Pencarian -->
+    <div class="flex space-x-3 mb-4">
+        <input type="text" id="searchNama" placeholder="Cari Nama" class="border rounded-md px-3 py-2 w-1/3">
+        <input type="text" id="searchNpm" placeholder="Cari NPM" class="border rounded-md px-3 py-2 w-1/3">
+        <select id="searchTahunSelect" class="border rounded-md px-3 py-2 w-1/3">
+            <option value="">Pilih Tahun Masuk</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+        </select>
+    </div>
 
-
-<div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-        <h3 class="text-xl font-bold mb-4 border-b pb-2">Detail Biodata Mahasiswa</h3>
-        <div id="modalContent" class="text-sm space-y-2">
-            </div>
-        <button onclick="document.getElementById('detailModal').classList.add('hidden')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Tutup</button>
+    <!-- Tabel Mahasiswa -->
+    <div class="overflow-x-auto bg-white rounded-md shadow-md">
+        <table class="min-w-full divide-y divide-gray-200" id="mahasiswaTable">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase">No</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase">NPM</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase">Nama</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase">Jurusan</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase">Tahun Masuk</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase">Status</th>
+                </tr>
+            </thead>
+            <tbody id="mahasiswaBody" class="divide-y divide-gray-200">
+                <!-- Data akan dimuat di sini -->
+            </tbody>
+        </table>
     </div>
 </div>
-
 
 <script>
-    // Konfigurasi Supabase
-    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Toggle dropdown navigasi
+    const navButton = document.getElementById('navButton');
+    const navDropdown = document.getElementById('navDropdown');
 
-    let isEditMode = false;
-    let currentMahasiswaId = null;
-    let currentMahasiswaData = []; // Global variable for current table data
-    
-    let prodiSelect;
-    let tahunMasukSelect;
-    let searchTahunSelect; 
-    let statusSelect; 
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select untuk Form Tambah/Edit
-        prodiSelect = new TomSelect("#prodi", { create: false });
-        tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-        statusSelect = new TomSelect("#status", { create: false }); 
-        
-        populateYearSelect(tahunMasukSelect);
-        
-        // Inisialisasi Tom Select untuk Pencarian
-        searchTahunSelect = new TomSelect("#searchTahun", { 
-            create: false,
-            placeholder: "Pilih Tahun",
-        });
-        populateYearSelect(searchTahunSelect, true); 
+    navButton.addEventListener('click', () => {
+        navDropdown.classList.toggle('hidden');
     });
 
-    // --- FUNGSI BANTUAN TAMPILAN ---
+    // Dummy data mahasiswa (contoh)
+    let mahasiswaData = [
+        { npm: '12345', nama: 'Alfiansyah', jurusan: 'Teknik Informatika', tahun: '2021', status: 'Aktif' },
+        { npm: '12346', nama: 'Budi', jurusan: 'Teknik Sipil', tahun: '2020', status: 'Lulus' },
+        { npm: '12347', nama: 'Citra', jurusan: 'Teknik Elektro', tahun: '2022', status: 'Aktif' },
+    ];
 
-    function hideForm() {
-        document.getElementById('mahasiswa-container').classList.add('hidden');
-    }
+    // Fungsi menampilkan data ke tabel
+    function loadMahasiswaData(filter={}) {
+        const tbody = document.getElementById('mahasiswaBody');
+        tbody.innerHTML = '';
+        let data = mahasiswaData;
 
-    function showList() {
-        document.getElementById('mahasiswa-list-container').classList.remove('hidden');
-    }
-    
-    function hideList() {
-        document.getElementById('mahasiswa-list-container').classList.add('hidden');
-    }
-
-
-    // Fungsi untuk menampilkan form Tambah/Edit dan melakukan reset
-    function showForm() {
-        resetForm(); // Reset form, tapi jangan panggil showList di dalam resetForm saat ini
-        hideList(); // SEMBUNYIKAN LIST DAN PENCARIAN
-        document.getElementById('mahasiswa-container').classList.remove('hidden');
-        document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
-        switchTab('akademik');
-    }
-
-    // Fungsi untuk menyembunyikan form (Dipanggil saat Batal atau Selesai Simpan)
-    function hideFormAndShowList() {
-        document.getElementById('mahasiswa-container').classList.add('hidden');
-        showList(); // TAMPILKAN KEMBALI LIST DAN PENCARIAN
-        // Opsional: Gulir ke atas list
-        document.getElementById('mahasiswa-list-container').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Fungsi Reset Form
-    function resetForm() {
-        document.getElementById('mahasiswaForm').reset();
-        prodiSelect.clear();
-        tahunMasukSelect.clear();
-        document.getElementById('jenisKelamin').value = ''; 
-        statusSelect.setValue('Aktif'); 
-        isEditMode = false;
-        currentMahasiswaId = null;
-        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
-        document.getElementById('mahasiswaId').value = '';
-        
-        hideFormAndShowList(); // Menutup form dan menampilkan list
-    }
-
-
-    // --- FUNGSI BANTUAN DATA ---
-
-    function populateYearSelect(selectInstance, includeAllOption = false) {
-        selectInstance.clear(true); 
-
-        const currentYear = new Date().getFullYear();
-        for (let i = currentYear; i >= 2018; i--) {
-            selectInstance.addOption({ value: i, text: i });
+        if(filter.status) {
+            data = data.filter(m => m.status === filter.status);
         }
-        
-        if(includeAllOption) {
-            selectInstance.addOption({ value: '', text: 'Semua Tahun' });
-        }
-        
-        selectInstance.refreshOptions(false);
-        if(includeAllOption) {
-             selectInstance.setValue('');
-        } else if (selectInstance.options.length > 0) {
-            selectInstance.setValue(currentYear);
-        }
-    }
-    
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      window.location.href = "index.html";
-    }
-    
-    // Fungsi untuk mengelola perpindahan tab di formulir
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.add('hidden');
+
+        data.forEach((mhs, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-4 py-2">${idx + 1}</td>
+                <td class="px-4 py-2">${mhs.npm}</td>
+                <td class="px-4 py-2">${mhs.nama}</td>
+                <td class="px-4 py-2">${mhs.jurusan}</td>
+                <td class="px-4 py-2">${mhs.tahun}</td>
+                <td class="px-4 py-2">${mhs.status}</td>
+            `;
+            tbody.appendChild(tr);
         });
-
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.classList.remove('text-blue-600', 'border-blue-600');
-            button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-        });
-
-        document.getElementById(`content-${tabName}`).classList.remove('hidden');
-
-        const activeBtn = document.getElementById(`tab-${tabName}`);
-        activeBtn.classList.add('text-blue-600', 'border-blue-600');
-        activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
     }
 
+    loadMahasiswaData();
 
-    // --- FUNGSI PENCARIAN ---
-    function performSearch() {
-        const searchNama = document.getElementById('searchNama').value.trim();
-        const searchNpm = document.getElementById('searchNpm').value.trim();
-        const searchTahun = searchTahunSelect.getValue(); 
-
-        loadMahasiswaData({ nama: searchNama, npm: searchNpm, tahun: searchTahun });
-    }
-
-    function resetSearch() {
+    // Fungsi filter Lulusan Mahasiswa
+    function filterLulusan() {
+        navDropdown.classList.add('hidden');
         document.getElementById('searchNama').value = '';
         document.getElementById('searchNpm').value = '';
-        searchTahunSelect.setValue(''); 
-        loadMahasiswaData(); 
+        document.getElementById('searchTahunSelect').value = '';
+        loadMahasiswaData({ status: 'Lulus' });
     }
 
-    // --- FUNGSI DOWNLOAD TEMPLATE EXCEL ---
-    function downloadTemplate() {
-        // Kolom sesuai permintaan user, ditambah kolom wajib di akhir
-        const headers = [
-            "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
-            "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
-            "KELAS", "JUDUL_SKRIPSI",
-            // Kolom wajib di database:
-            "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS" 
-        ];
-        
-        const wsData = [
-            headers,
-            // Baris contoh untuk panduan (pastikan kolom wajib terisi)
-            ["12345678", "Contoh Nama", "3210123456789012", "Jakarta, 01-01-2000", "081234567890", "Jl. Contoh No. 1", "Kelurahan Contoh", "Kecamatan Contoh", "Nama Ibu", "Nama Ayah", "A", "Skripsi Contoh", "Industri", "Laki-laki", 2023, "Aktif"]
-        ];
-
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        
-        // Sesuaikan lebar kolom
-        ws['!cols'] = [
-            { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 25 }, { wch: 15 }, 
-            { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 25 }, 
-            { wch: 8 }, { wch: 40 }, 
-            { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 10 }
-        ];
-
-        XLSX.utils.book_append_sheet(wb, ws, "BiodataMahasiswa");
-        XLSX.writeFile(wb, "mahasiswa_template_ft.xlsx");
-    }
-
-    // --- FUNGSI IMPORT EXCEL ---
-    async function importFromExcel(event) {
-        const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
-
-        const importStatus = document.getElementById('importStatus');
-        importStatus.textContent = 'Membaca file...';
-
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                
-                let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                if (excelData.length < 2) {
-                    importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
-                    return;
-                }
-
-                const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
-                const rawData = excelData.slice(1);
-                
-                // Peta kolom Supabase
-                const columnMapping = {
-                    'NPM': 'npm',
-                    'NAMA': 'nama',
-                    'PRODI': 'prodi',
-                    'JENIS_KELAMIN': 'jenis_kelamin', 
-                    'TAHUN_MASUK': 'tahun_masuk',
-                    'STATUS': 'status',
-                    'KELAS': 'kelas',
-                    'NIK': 'nik_mahasiswa', 
-                    'NO_HP': 'no_hp',
-                    'NOMOR_IJAZAH': 'nomor_ijazah', 
-                    'JUDUL_SKRIPSI': 'judul_skripsi',
-                    'NAMA_AYAH': 'nama_ayah',
-                    'NAMA_IBU': 'nama_ibu',
-                    'TTL': 'ttl',
-                    'ALAMAT': 'alamat',
-                    'KELURAHAN': 'kelurahan',
-                    'KECAMATAN': 'kecamatan',
-                };
-
-                const studentsToInsert = [];
-                
-                for (const row of rawData) {
-                    let student = {};
-                    let isValidRow = true;
-                    
-                    for (let i = 0; i < headers.length; i++) {
-                        const excelHeader = headers[i];
-                        const supabaseColumn = columnMapping[excelHeader];
-                        
-                        if (supabaseColumn) {
-                             let value = row[i] === undefined ? null : row[i];
-                             
-                             if (supabaseColumn === 'tahun_masuk') {
-                                 if (typeof value === 'number') {
-                                     value = Math.floor(value);
-                                 } else {
-                                     value = parseInt(String(value).trim()) || null;
-                                 }
-                             } else if (value !== null) {
-                                 value = String(value).trim() || null;
-                             }
-                             
-                             student[supabaseColumn] = value;
-                        }
-                    }
-                    
-                    // Validasi minimal (kolom wajib)
-                    if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
-                         console.warn('Baris diabaikan karena data wajib tidak lengkap (NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk):', student);
-                         isValidRow = false; 
-                    }
-                    
-                    // Set default jika kosong
-                    student.semester = null; 
-                    student.status = student.status || 'Aktif'; 
-
-
-                    if (isValidRow) {
-                        studentsToInsert.push(student);
-                    }
-                }
-                
-                if (studentsToInsert.length === 0) {
-                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib terisi.';
-                    return;
-                }
-
-                importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
-
-                const { error: insertError } = await supabaseClient
-                    .from('mahasiswa')
-                    .upsert(studentsToInsert, { onConflict: 'npm' }); 
-
-                if (insertError) {
-                    alert('❌ Gagal mengimpor data. Pesan: ' + insertError.message);
-                    importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
-                    console.error(insertError);
-                } else {
-                    alert(`✅ Import Sukses! ${studentsToInsert.length} data mahasiswa berhasil disimpan/diperbarui.`);
-                    importStatus.textContent = `✅ Import Sukses. ${studentsToInsert.length} data disimpan/diperbarui.`;
-                    loadMahasiswaData(); // Reload tabel utama
-                }
-
-
-            } catch (err) {
-                console.error('Error saat memproses file Excel:', err);
-                importStatus.textContent = '❌ Terjadi kesalahan saat memproses file. Pastikan format file .xlsx/.xls benar.';
-            } finally {
-                event.target.value = '';
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-
-    // --- FUNGSI EXPORT DATA (SUDAH DIPERBAIKI AGAR SESUAI TEMPLATE DAN TIDAK PUTIH) ---
-    
-    // 1. Export ke Excel
-    function exportToExcel() {
-        if (currentMahasiswaData.length === 0) {
-            alert('❌ Tidak ada data mahasiswa yang tersedia untuk diekspor. Silakan cari data terlebih dahulu.');
-            return;
-        }
-
-        // Kolom sesuai urutan template yang diminta pengguna, diikuti kolom wajib/tambahan DB
-        const headers = [
-            "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
-            "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
-            "KELAS", "JUDUL_SKRIPSI",
-            // Kolom Tambahan/Wajib Database
-            "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS", "NOMOR_IJAZAH"
-        ];
-        
-        const dataForExport = currentMahasiswaData.map(mhs => [
-            // 12 KOLOM TEMPLATE UTAMA
-            mhs.npm,
-            mhs.nama,
-            mhs.nik_mahasiswa || '-', // NIK
-            mhs.ttl || '-', // TTL
-            mhs.no_hp || '-', // NO_HP
-            mhs.alamat || '-', // ALAMAT
-            mhs.kelurahan || '-', // KELURAHAN
-            mhs.kecamatan || '-', // KECAMATAN
-            mhs.nama_ibu || '-', // NAMA_IBU
-            mhs.nama_ayah || '-', // NAMA_AYAH
-            mhs.kelas || '-', // KELAS
-            mhs.judul_skripsi || '-', // JUDUL_SKRIPSI
-            // KOLOM TAMBAHAN/WAJIB DATABASE
-            mhs.prodi,
-            mhs.jenis_kelamin || '-',
-            mhs.tahun_masuk,
-            mhs.status,
-            mhs.nomor_ijazah || '-'
-        ]);
-
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(dataForExport, { header: headers, skipHeader: true }); // Membuat sheet dari data dan header
-
-        // Opsi: Tambahkan judul sebagai baris pertama, dan gabungkan sel
-        const title = ["DATA BIODATA MAHASISWA FAKULTAS TEKNIK"];
-        
-        // Tambahkan baris Judul di A1
-        XLSX.utils.sheet_add_aoa(ws, [title], { origin: "A1" });
-        
-        // Pindahkan Header ke baris 2
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" }); 
-        
-        // Pindahkan Data ke baris 3 (DataForExport sudah dimapping di awal, tinggal di-apply)
-        XLSX.utils.sheet_add_aoa(ws, dataForExport, { origin: "A3" });
-
-
-        // Gabungkan sel untuk judul (A1 hingga kolom terakhir)
-        if (ws['A1']) {
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            range.e.c = headers.length - 1; // Gabungkan hingga kolom terakhir
-            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
-            
-            // Tambahkan sedikit styling ke judul (mungkin diabaikan oleh Excel, tapi untuk kebersihan kode)
-            ws['A1'].s = { 
-                font: { bold: true, sz: 14 },
-                alignment: { horizontal: 'center' }
-            };
-        }
-
-
-        XLSX.utils.book_append_sheet(wb, ws, "DataMahasiswaFT");
-        XLSX.writeFile(wb, "data_mahasiswa_ft.xlsx");
-    }
-    
-    // 2. Export ke PDF
-    function exportToPDF() {
-        if (currentMahasiswaData.length === 0) {
-            alert('❌ Tidak ada data mahasiswa yang tersedia untuk diekspor. Silakan cari data terlebih dahulu.');
-            return;
-        }
-        
-        // Mendapatkan objek jsPDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Menggunakan orientasi landscape untuk banyak kolom
-
-        // Header Tabel PDF (Menggunakan 12 kolom template utama)
-        const head = [[
-            'NPM', 'NAMA', 'NIK', 'TTL', 'NO. HP', 'ALAMAT', 
-            'KELURAHAN', 'KECAMATAN', 'NAMA IBU', 'NAMA AYAH', 
-            'KELAS', 'JUDUL SKRIPSI'
-        ]];
-        
-        // Body Tabel PDF (Mengikuti urutan header)
-        const body = currentMahasiswaData.map(mhs => [
-            mhs.npm,
-            mhs.nama,
-            mhs.nik_mahasiswa || '-',
-            mhs.ttl || '-',
-            mhs.no_hp || '-',
-            mhs.alamat || '-',
-            mhs.kelurahan || '-',
-            mhs.kecamatan || '-',
-            mhs.nama_ibu || '-',
-            mhs.nama_ayah || '-',
-            mhs.kelas || '-',
-            mhs.judul_skripsi || '-'
-        ]);
-        
-        const date = new Date().toLocaleDateString('id-ID');
-        
-        doc.setFontSize(14);
-        doc.text("Data Mahasiswa Fakultas Teknik (Export PDF)", 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Tanggal Export: ${date}`, 14, 20);
-
-        doc.autoTable({
-            head: head,
-            body: body,
-            startY: 25,
-            theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1, halign: 'center' }, // Font lebih kecil agar 12 kolom muat
-            columnStyles: {
-                0: { cellWidth: 15 }, // NPM
-                1: { halign: 'left', cellWidth: 35 }, // NAMA
-                2: { cellWidth: 20 }, // NIK
-                3: { cellWidth: 20 }, // TTL
-                4: { cellWidth: 15 }, // NO_HP
-                5: { halign: 'left', cellWidth: 30 }, // ALAMAT
-                6: { cellWidth: 15 }, // KELURAHAN
-                7: { cellWidth: 15 }, // KECAMATAN
-                8: { halign: 'left', cellWidth: 25 }, // NAMA_IBU
-                9: { halign: 'left', cellWidth: 25 }, // NAMA_AYAH
-                10: { cellWidth: 10 }, // KELAS
-                11: { halign: 'left', cellWidth: 40 }, // JUDUL SKRIPSI
-            },
-            didDrawPage: function(data) {
-                // Footer
-                doc.setFontSize(8);
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.text('Halaman ' + data.pageNumber + ' dari ' + pageCount, data.settings.margin.left, doc.internal.pageSize.height - 10);
-            }
-        });
-
-        doc.save('data_mahasiswa_ft.pdf');
-    }
-
-
-    // --- FUNGSI CRUD ---
-
-    // 1. Memuat Data Mahasiswa
-    async function loadMahasiswaData(filters = {}) {
-        const { nama, npm, tahun } = filters;
-
-        const tableBody = document.getElementById('mahasiswa-table-body');
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-        
-        let query = supabaseClient.from('mahasiswa').select('*');
-        
-        // Buat filter menggunakan operator OR untuk Nama dan NPM
-        if (nama || npm) {
-            let or_filters = [];
-            // Menggunakan .ilike untuk pencarian sebagian (case-insensitive)
-            if (nama) or_filters.push(`nama.ilike.%${nama}%`);
-            if (npm) or_filters.push(`npm.ilike.%${npm}%`);
-            
-            if (or_filters.length > 0) {
-                 query = query.or(or_filters.join(','));
-            }
-        }
-        
-        // Filter Tahun Masuk menggunakan operator EQ 
-        if (tahun) {
-            query = query.eq('tahun_masuk', tahun);
-        }
-
-        const { data: mahasiswaData, error } = await query.order('npm', { ascending: true });
-
-        if (error) {
-            console.error('Error saat memuat data:', error);
-            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-            currentMahasiswaData = []; // Clear data on error
-            return;
-        }
-
-        currentMahasiswaData = mahasiswaData; // SAVE DATA for export functions
-
-        tableBody.innerHTML = '';
-        if (mahasiswaData.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data mahasiswa yang ditemukan.</td></tr>';
-            return;
-        }
-
-        mahasiswaData.forEach(mhs => {
-            const statusBadge = mhs.status === 'Aktif' 
-                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>'
-                : mhs.status === 'Lulus' 
-                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Lulus</span>'
-                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">' + mhs.status + '</span>'; 
-
-            const row = `
-                <tr class="hover:bg-gray-100 transition duration-100">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${mhs.npm}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mhs.nama}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mhs.prodi}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${mhs.kelas || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${mhs.tahun_masuk}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">${statusBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                        <button onclick="showDetail(${mhs.id})" class="text-indigo-600 hover:text-indigo-900 transition duration-150"><i class="fas fa-eye"></i> Detail</button>
-                        <button onclick="editMahasiswa(${mhs.id})" class="text-yellow-600 hover:text-yellow-900 transition duration-150"><i class="fas fa-edit"></i> Edit</button>
-                        <button onclick="deleteMahasiswa(${mhs.id}, '${mhs.nama}')" class="text-red-600 hover:text-red-900 transition duration-150"><i class="fas fa-trash"></i> Hapus</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    // 2. Menyimpan/Memperbarui Data
-    async function saveMahasiswa() {
-        // Data Akademik (Wajib)
-        const npm = document.getElementById('npm').value;
-        const nama = document.getElementById('nama').value;
-        const prodi = prodiSelect.getValue();
-        const jenisKelamin = document.getElementById('jenisKelamin').value; 
-        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
-        const statusMhs = statusSelect.getValue(); 
-        
-        // Data Akademik (Opsional)
-        const kelas = document.getElementById('kelas').value || null;
-        const nik = document.getElementById('nik').value || null;
-        const nohp = document.getElementById('nohp').value || null;
-        const nomorIjazah = document.getElementById('nomorIjazah').value || null;
-        const judulskripsi = document.getElementById('judulskripsi').value || null;
-        
-        // Data Personal
-        const namaAyah = document.getElementById('namaayah').value || null;
-        const namaIbu = document.getElementById('namaibu').value || null;
-        const ttl = document.getElementById('ttl').value || null;
-        const alamat = document.getElementById('alamat').value || null;
-        const kelurahan = document.getElementById('kelurahan').value || null;
-        const kecamatan = document.getElementById('kecamatan').value || null;
-        
-        // Kolom lama yang diabaikan/di set null di sini:
-        const semester = null; 
-
-        // Validasi minimal
-        if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
-             alert('❌ Pastikan NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
-             switchTab('akademik');
-             return;
-        }
-
-        const mahasiswaData = {
-            npm: npm, 
-            nama: nama,
-            prodi: prodi,
-            jenis_kelamin: jenisKelamin, 
-            semester: semester, // Di set NULL
-            tahun_masuk: tahunmasuk,
-            kelas: kelas,
-            nik_mahasiswa: nik,
-            no_hp: nohp,
-            nomor_ijazah: nomorIjazah,
-            judul_skripsi: judulskripsi,
-            status: statusMhs,
-            
-            // Kolom Data Personal
-            nama_ayah: namaAyah, 
-            nama_ibu: namaIbu,
-            ttl: ttl, 
-            alamat: alamat,
-            kelurahan: kelurahan,
-            kecamatan: kecamatan,
-        };
-
-        if (isEditMode && currentMahasiswaId) {
-            const { error: updateError } = await supabaseClient
-                .from('mahasiswa')
-                .update(mahasiswaData)
-                .eq('id', currentMahasiswaId);
-
-            if (updateError) {
-                alert('❌ Gagal memperbarui data mahasiswa: ' + updateError.message);
-                console.error(updateError);
-            } else {
-                alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
-                resetForm(); // Memanggil resetForm yang kini menutup form dan menampilkan list
-                loadMahasiswaData();
-            }
-        } else {
-            const { error: insertError } = await supabaseClient
-                .from('mahasiswa')
-                .insert([mahasiswaData]);
-
-            if (insertError) {
-                alert('❌ Gagal menyimpan data mahasiswa. Kemungkinan: NPM sudah terdaftar, skema database tidak sesuai, atau RLS/NOT NULL kolom lama bermasalah. Pesan: ' + insertError.message);
-                console.error(insertError);
-            } else {
-                alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
-                resetForm(); // Memanggil resetForm yang kini menutup form dan menampilkan list
-                loadMahasiswaData(); 
-            }
-        }
-    }
-
-    // 3. Mengisi Form untuk Edit
-    async function editMahasiswa(mahasiswaId) {
-        const { data: mhs, error } = await supabaseClient
-            .from('mahasiswa')
-            .select('*')
-            .eq('id', mahasiswaId)
-            .single();
-
-        if (error || !mhs) {
-            alert('❌ Data tidak ditemukan untuk diedit.');
-            return;
-        }
-        
-        showForm(); // Menampilkan form dan menyembunyikan list
-
-        // Data Akademik
-        document.getElementById('mahasiswaId').value = mhs.id;
-        document.getElementById('npm').value = mhs.npm;
-        document.getElementById('nama').value = mhs.nama;
-        prodiSelect.setValue(mhs.prodi);
-        document.getElementById('kelas').value = mhs.kelas || '';
-        document.getElementById('jenisKelamin').value = mhs.jenis_kelamin || ''; 
-        tahunMasukSelect.setValue(mhs.tahun_masuk);
-        statusSelect.setValue(mhs.status); 
-        document.getElementById('nik').value = mhs.nik_mahasiswa || '';
-        document.getElementById('nohp').value = mhs.no_hp || '';
-        document.getElementById('nomorIjazah').value = mhs.nomor_ijazah || ''; 
-        document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
-        
-        // Data Personal
-        document.getElementById('namaayah').value = mhs.nama_ayah || '';
-        document.getElementById('namaibu').value = mhs.nama_ibu || '';
-        document.getElementById('ttl').value = mhs.ttl || '';
-        document.getElementById('alamat').value = mhs.alamat || '';
-        document.getElementById('kelurahan').value = mhs.kelurahan || '';
-        document.getElementById('kecamatan').value = mhs.kecamatan || '';
-        
-        isEditMode = true;
-        currentMahasiswaId = mhs.id;
-        document.getElementById('formTitle').textContent = `Edit Data Mahasiswa: ${mhs.nama}`;
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update Data';
-        
-        document.getElementById('mahasiswaForm').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // 4. Menghapus Data Mahasiswa
-    async function deleteMahasiswa(mahasiswaId, nama) {
-        if (!confirm(`Anda yakin ingin menghapus data mahasiswa ${nama} secara permanen?`)) {
-            return;
-        }
-
-        const { error } = await supabaseClient
-            .from('mahasiswa')
-            .delete()
-            .eq('id', mahasiswaId); 
-
-        if (error) {
-            alert('❌ Gagal menghapus data: ' + error.message);
-        } else {
-            alert(`✅ Data mahasiswa ${nama} berhasil dihapus.`);
-            loadMahasiswaData();
-        }
-    }
-
-    
-    // 6. Tampilkan Detail Modal
-    async function showDetail(mahasiswaId) {
-        const { data: mhs, error } = await supabaseClient
-            .from('mahasiswa')
-            .select('*')
-            .eq('id', mahasiswaId)
-            .single();
-
-        if (error || !mhs) {
-            alert('❌ Data tidak ditemukan.');
-            return;
-        }
-        
-        const statusText = mhs.status;
-        const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : mhs.status === 'Lulus' ? 'text-blue-600' : 'text-red-600';
-
-        const modalContent = `
-            <h4 class="font-bold text-lg text-blue-700 mb-2">Data Akademik & Identitas</h4>
-            <p><span class="font-bold w-32 inline-block">NPM</span>: ${mhs.npm}</p>
-            <p><span class="font-bold w-32 inline-block">Nama Lengkap</span>: ${mhs.nama}</p>
-            <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
-            <p><span class="font-bold w-32 inline-block">Kelas</span>: ${mhs.kelas || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Jenis Kelamin</span>: ${mhs.jenis_kelamin || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
-            <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${statusColor}">${statusText}</span></p>
-            <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Nomor Ijazah</span>: ${mhs.nomor_ijazah || '-'}</p> 
-            <hr class="my-3 border-gray-200">
-            <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
-            
-            <h4 class="font-bold text-lg text-blue-700 mt-4 mb-2">Data Personal & Orang Tua</h4>
-            <p><span class="font-bold w-32 inline-block">Nama Ayah</span>: ${mhs.nama_ayah || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Nama Ibu</span>: ${mhs.nama_ibu || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">TTL</span>: ${mhs.ttl || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Alamat</span>: ${mhs.alamat || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Kelurahan</span>: ${mhs.kelurahan || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Kecamatan</span>: ${mhs.kecamatan || '-'}</p>
-        `;
-
-        document.getElementById('modalContent').innerHTML = modalContent;
-        document.getElementById('detailModal').classList.remove('hidden');
-    }
-
-    // --- CEK AUTHENTIKASI ---
-    async function checkAuthAndLoad() {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-            window.location.href = "index.html";
-            return;
-        }
-        
-        const { data: userData } = await supabaseClient
-            .from('users_metadata')
-            .select('username')
-            .eq('user_id', user.id)
-            .single();
-
-        if (userData) {
-            document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
-        }
-
-        loadMahasiswaData(); 
-    }
-
-    window.onload = checkAuthAndLoad;
+    // Fungsi export/import/template (dummy)
+    function exportToExcel() { alert('Export Excel dijalankan!'); }
+    function exportToPDF() { alert('Export PDF dijalankan!'); }
+    function showForm() { alert('Form tambah data dibuka!'); }
+    function downloadTemplate() { alert('Download template dijalankan!'); }
+    function importFromExcel(event) { alert('Import file dijalankan!'); }
 </script>
+
 </body>
 </html>
