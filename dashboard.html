@@ -191,7 +191,7 @@
 
     let globalUserId = null;
 
-    // --- FUNGSI MENGHITUNG TOTAL DATA BARU ---
+    // --- FUNGSI MENGHITUNG TOTAL DATA DENGAN PERBAIKAN ---
     async function loadDashboardTotals() {
         console.log("Memuat total data dashboard...");
         
@@ -201,7 +201,7 @@
             .select('*', { count: 'exact', head: true });
 
         if (dosenError) {
-            console.error("Gagal ambil total Dosen:", dosenError.message);
+            console.error("DEBUG ERROR Dosen:", dosenError.message, "Code:", dosenError.code);
             document.getElementById('totalDosen').textContent = 'Error';
         } else {
             document.getElementById('totalDosen').textContent = totalDosen;
@@ -213,30 +213,31 @@
             .select('*', { count: 'exact', head: true });
 
         if (jadwalError) {
-            console.error("Gagal ambil total Jadwal:", jadwalError.message);
+            console.error("DEBUG ERROR Jadwal:", jadwalError.message, "Code:", jadwalError.code);
             document.getElementById('totalJadwal').textContent = 'Error';
         } else {
             document.getElementById('totalJadwal').textContent = totalJadwal;
         }
         
-        // 3. Hitung Total Mata Kuliah (Asumsi Tabel: mata_kuliah)
-        // Catatan: Jika Anda tidak punya tabel 'mata_kuliah' terpisah, ini akan gagal.
-        const { count: totalMataKuliah, error: mkError } = await supabaseClient
-            .from('matakuliah') 
-            .select('*', { count: 'exact', head: true });
+        // 3. HITUNG TOTAL MATA KULIAH UNIK (Menggunakan tabel Jadwal karena tabel 'mata_kuliah' tidak ada)
+        // Solusi ini HANYA akan berfungsi jika di tabel 'jadwal' Anda memiliki kolom yang menyimpan nama Mata Kuliah.
+        // Jika kode ini tetap error, ini berarti Anda harus membuat Fungsi (RPC) di Supabase atau membuat tabel terpisah.
+        const { data: mkData, error: mkError } = await supabaseClient
+            .from('jadwal')
+            .select('nama_mata_kuliah', { count: 'exact' }); // Mengasumsikan ada kolom 'nama_mata_kuliah'
 
-        if (mkError && mkError.code !== '42P01') { // 42P01: tabel tidak ada
-            // Tampilkan error umum jika bukan karena tabel tidak ada
-            console.error("Gagal ambil total Mata Kuliah:", mkError.message);
-            document.getElementById('totalMataKuliah').textContent = 'N/A';
-        } else if (mkError && mkError.code === '42P01') {
-             // Jika tabel 'mata_kuliah' tidak ditemukan, tampilkan 0 dan log info
+        if (mkError) {
+            console.error("DEBUG ERROR Mata Kuliah:", mkError.message, "Code:", mkError.code);
+            document.getElementById('totalMataKuliah').textContent = 'Error (RLS/Kolom)';
+        } else if (mkData && mkData.length > 0) {
+            // Filter untuk mendapatkan jumlah mata kuliah yang unik
+            const uniqueMataKuliah = [...new Set(mkData.map(item => item.nama_mata_kuliah))];
+            document.getElementById('totalMataKuliah').textContent = uniqueMataKuliah.length;
+        } else {
+            // Jika tidak ada data di jadwal
             document.getElementById('totalMataKuliah').textContent = 0;
-            console.info("Info: Tabel 'mata_kuliah' tidak ditemukan. Default ke 0.");
-        } 
-        else {
-            document.getElementById('totalMataKuliah').textContent = totalMataKuliah;
         }
+
     }
     // --- AKHIR FUNGSI TOTAL DATA BARU ---
 
@@ -261,7 +262,6 @@
 
         if (error || !userData) {
             console.error("Gagal memuat profil pengguna:", error?.message);
-            // Tetap izinkan masuk, tapi tampilkan nama default
             document.getElementById('userNameNav').textContent = `Halo, User`;
             document.getElementById('displayUsernameMain').textContent = `User`;
             document.getElementById('currentUsername').textContent = `User`;
