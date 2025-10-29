@@ -49,10 +49,10 @@
           <i class="fas fa-user-tie w-5"></i>
           <span>Data Dosen</span>
         </a>
-        <a href="matakuliah.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <button onclick="showContent('matkul', this)" id="matkulLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
           <i class="fas fa-book w-5"></i>
           <span>Mata Kuliah</span>
-        </a>
+        </button>
         <button onclick="showContent('pengaturan', this)" id="pengaturanLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
           <i class="fas fa-cog w-5"></i>
           <span>Pengaturan</span>
@@ -67,6 +67,7 @@
 
     <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
       <div id="contentArea" class="space-y-8">
+        <!-- DASHBOARD -->
         <div id="main" class="bg-white p-6 rounded-lg shadow-xl min-h-full">
           <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
           <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
@@ -89,6 +90,64 @@
             </div>
           </div>
         </div>
+
+        <!-- MATA KULIAH -->
+        <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode MK</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+                </tr>
+              </thead>
+              <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
+                <tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PENGATURAN -->
+        <div id="pengaturan" class="bg-white p-6 rounded-lg shadow-xl hidden max-w-2xl">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Akun</h2>
+          <div class="mb-8 border-b pb-6">
+            <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Ubah Username</h3>
+            <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">Admin</strong></p>
+            <div class="space-y-4 max-w-sm">
+              <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
+                Simpan Username Baru
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-8 pb-6">
+            <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Ubah Password</h3>
+            <div class="space-y-4 max-w-sm">
+              <div class="relative">
+                <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
+                  <i id="eyeIcon" class="fas fa-eye"></i>
+                </button>
+              </div>
+              <button onclick="updatePassword()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
+                Simpan Password Baru
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Opsi Ganti Akun</h3>
+            <p class="text-sm text-gray-500 mb-4">Anda akan keluar dari sesi ini dan diarahkan ke halaman login.</p>
+            <button onclick="logout()" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-150">
+              Ganti Akun / Logout
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -98,16 +157,18 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // 🔄 Navigasi
     function showContent(tabId, clickedButton) {
-      ['main', 'dosen', 'matkul', 'pengaturan'].forEach(id => {
+      ['main', 'matkul', 'pengaturan'].forEach(id => {
         document.getElementById(id)?.classList.add('hidden');
       });
       document.getElementById(tabId)?.classList.remove('hidden');
       document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
       clickedButton?.classList.add('active-link');
+      if (tabId === 'matkul') loadMatkulData();
     }
 
-    // 🔢 Ambil total dari tabel
+    // 📊 Ambil total dari tabel
     async function getTotalCount(table, elementId) {
       try {
         const { count, error } = await supabaseClient
@@ -121,13 +182,54 @@
       }
     }
 
-    // 🚀 Muat semua total
+    // 🚀 Muat total di dashboard
     async function loadDashboardTotals() {
       await getTotalCount('dosen', 'totalDosen');
       await getTotalCount('jadwal', 'totalJadwal');
       await getTotalCount('matakuliah', 'totalMataKuliah');
-      console.log('✅ Semua total berhasil dimuat.');
     }
+
+    // 📘 Load data mata kuliah
+    async function loadMatkulData() {
+      const tableBody = document.getElementById('matkulTableBody');
+      tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
+      const { data, error } = await supabaseClient
+        .from('matakuliah')
+        .select('kode_mk, nama_mata_kuliah, sks');
+      tableBody.innerHTML = '';
+      if (error) {
+        tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
+        return;
+      }
+      if (!data.length) {
+        tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Belum ada data.</td></tr>`;
+        return;
+      }
+      data.forEach((mk, i) => {
+        tableBody.innerHTML += `
+          <tr>
+            <td class="px-6 py-4 text-sm text-gray-500">${i + 1}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${mk.kode_mk}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${mk.nama_mata_kuliah}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">${mk.sks}</td>
+          </tr>`;
+      });
+    }
+
+    // ⚙️ Pengaturan akun
+    function togglePasswordVisibility() {
+      const input = document.getElementById('newPassword');
+      const eye = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text'; eye.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password'; eye.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+
+    function updateUsername() { alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); }
+    function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
+    function logout() { window.location.href = 'login.html'; }
 
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
   </script>
