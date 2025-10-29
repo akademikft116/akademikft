@@ -220,20 +220,19 @@
     // =======================================================
 
     function showContent(tabId, clickedButton) {
-        // 1. Sembunyikan semua tab konten (DITAMBAH 'mahasiswa')
+        // 1. Sembunyikan semua tab konten
         document.getElementById('main').classList.add('hidden');
         document.getElementById('dosen').classList.add('hidden');
         document.getElementById('matkul').classList.add('hidden');
         document.getElementById('pengaturan').classList.add('hidden');
-        document.getElementById('mahasiswa').classList.add('hidden'); // DITAMBAHKAN
-        
+        document.getElementById('mahasiswa').classList.add('hidden'); // Memastikan Mahasiswa tersembunyi
+
         // 2. Tampilkan tab yang diminta
         document.getElementById(tabId).classList.remove('hidden');
 
         // 3. Hapus kelas aktif dari semua item navigasi
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.classList.remove('active-link');
-            // Tambahkan kembali kelas default jika bukan link aktif
             if (btn.id !== clickedButton?.id) {
                 btn.classList.add('text-gray-300', 'hover:text-white');
             }
@@ -245,35 +244,37 @@
              clickedButton.classList.remove('text-gray-300', 'hover:text-white');
         }
 
-        // 5. Muat data jika itu adalah tab dosen, matkul, atau mahasiswa
+        // 5. Muat data
         if (tabId === 'dosen') {
             loadDosenData();
         } else if (tabId === 'matkul') {
             loadMatkulData();
-        } else if (tabId === 'mahasiswa') { // DITAMBAHKAN
+        } else if (tabId === 'mahasiswa') { 
             loadMahasiswaData();
         }
     }
 
     // =======================================================
-    // 📊 FUNGSI MEMUAT DATA TABEL
+    // 📊 FUNGSI MEMUAT DATA TABEL (Dengan penanganan RLS Error)
     // =======================================================
 
-    // FUNGSI BARU: Memuat Data Mahasiswa
+    // FUNGSI 1: Memuat Data Mahasiswa
     async function loadMahasiswaData() {
         const tableBody = document.getElementById('mahasiswaTableBody');
         tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
 
-        // ASUMSI nama tabel Mahasiswa adalah 'mahasiswa'. Ganti jika nama tabel Anda berbeda.
         const { data, error } = await supabaseClient
             .from('mahasiswa')
             .select('nim, nama_lengkap, prodi');
 
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // Kosongkan tabel
 
         if (error) {
             console.error("Gagal memuat data Mahasiswa:", error.message);
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS Policy atau Nama Tabel 'mahasiswa')</td></tr>`;
+            // Tampilkan pesan error RLS yang jelas
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">
+                ❌ GAGAL MUAT DATA: ${error.message}. Cek RLS Policy di Supabase untuk tabel 'mahasiswa'.
+            </td></tr>`;
             return;
         }
 
@@ -294,7 +295,7 @@
         }
     }
     
-    // FUNGSI UNTUK DOSEN
+    // FUNGSI 2: Memuat Data Dosen
     async function loadDosenData() {
         const tableBody = document.getElementById('dosenTableBody');
         tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
@@ -303,11 +304,13 @@
             .from('dosen')
             .select('id, nama, nidn, prodi');
 
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // Kosongkan tabel
 
         if (error) {
             console.error("Gagal memuat data Dosen:", error.message);
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS Policy atau Nama Tabel 'dosen')</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">
+                ❌ GAGAL MUAT DATA: ${error.message}. Cek RLS Policy di Supabase untuk tabel 'dosen'.
+            </td></tr>`;
             return;
         }
 
@@ -328,7 +331,7 @@
         }
     }
     
-    // FUNGSI UNTUK MATA KULIAH
+    // FUNGSI 3: Memuat Data Mata Kuliah
     async function loadMatkulData() {
         const tableBody = document.getElementById('matkulTableBody');
         tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
@@ -337,11 +340,13 @@
             .from('matakuliah') 
             .select('kode_mk, nama_mata_kuliah, sks'); 
 
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // Kosongkan tabel
 
         if (error) {
             console.error("Gagal memuat data Mata Kuliah:", error.message);
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS atau Nama Tabel 'matakuliah')</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">
+                ❌ GAGAL MUAT DATA: ${error.message}. Cek RLS Policy di Supabase untuk tabel 'matakuliah'.
+            </td></tr>`;
             return;
         }
 
@@ -363,9 +368,10 @@
     }
 
     // =======================================================
-    // 🔢 FUNGSI MENGHITUNG TOTAL
+    // 🔢 FUNGSI MENGHITUNG TOTAL & AUTENTIKASI (Tetap sama)
     // =======================================================
-    // ... (Fungsi getCount dan loadDashboardTotals tetap sama)
+    
+    // FUNGSI MENGHITUNG TOTAL
     async function getCount(tableName, elementId, isUniqueCount = false) {
         
         if (!isUniqueCount) {
@@ -410,11 +416,7 @@
         await getCount('jadwal', 'totalMataKuliah', true); 
     }
 
-    // =======================================================
-    // ⚙️ FUNGSI PENGATURAN DAN OTENTIKASI
-    // =======================================================
-
-    // ... (Fungsi togglePasswordVisibility, updateUsername, updatePassword, logout tetap sama)
+    // FUNGSI PENGATURAN & OTENTIKASI
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('newPassword');
         const eyeIcon = document.getElementById('eyeIcon');
@@ -510,7 +512,6 @@
         await loadUserProfile(user.id);
         await loadDashboardTotals(); 
         
-        // Pastikan tab Dashboard aktif saat dimuat
         showContent('main', document.getElementById('mainLink'));
     }
 
@@ -533,7 +534,6 @@
         document.getElementById('welcomeMessage').innerHTML = `Halo, <strong id="AkademikFT">${username}</strong>! Selamat bekerja.`;
         document.getElementById('currentUsername').textContent = username;
     }
-
 
     // --- WINDOW ONLOAD (PANGGILAN UTAMA) ---
     window.onload = async () => {
