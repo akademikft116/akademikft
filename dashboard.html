@@ -197,8 +197,8 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
         
         // Cek apakah tabel 'mata_kuliah' ada di kode (jika Anda tidak yakin dengan namanya, hapus saja baris di bawah)
-        if (tableName === 'mata_kuliah') {
-             console.log("INFO: Mengabaikan tabel 'mata_kuliah' karena error sebelumnya.");
+        if (tableName === 'matakuliah') {
+             console.log("INFO: Mengabaikan tabel 'matakuliah' karena error sebelumnya.");
              // Kita akan hitung dari tabel jadwal sebagai gantinya
              tableName = 'jadwal';
         }
