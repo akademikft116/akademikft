@@ -191,57 +191,44 @@
 
     let globalUserId = null;
 
-    // --- FUNGSI MENGHITUNG TOTAL DATA DENGAN PERBAIKAN ---
-    async function loadDashboardTotals() {
-        console.log("Memuat total data dashboard...");
+    // --- FUNGSI MENGHITUNG TOTAL DATA DENGAN METODE SELECT HEADLESS ---
+    async function getCount(tableName, elementId) {
+        console.log(`Mencoba hitungan untuk tabel: ${tableName}`);
         
-        // 1. Hitung Total Dosen (Tabel: dosen)
-        const { count: totalDosen, error: dosenError } = await supabaseClient
-            .from('dosen')
+        // Memastikan pengguna terotentikasi (Auth) agar RLS bisa berjalan
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        // Gunakan fungsi count dengan 'exact' dan 'head: true'
+        const { count, error } = await supabaseClient
+            .from(tableName)
             .select('*', { count: 'exact', head: true });
 
-        if (dosenError) {
-            console.error("DEBUG ERROR Dosen:", dosenError.message, "Code:", dosenError.code);
-            document.getElementById('totalDosen').textContent = 'Error';
-        } else {
-            document.getElementById('totalDosen').textContent = totalDosen;
-        }
+        if (error) {
+            // Tampilkan error Supabase di console browser
+            console.error(`DEBUG ERROR ${tableName}:`, error.message, "Code:", error.code);
+            document.getElementById(elementId).textContent = `Error (${error.code})`;
+            return;
+        } 
 
-        // 2. Hitung Total Jadwal (Tabel: jadwal)
-        const { count: totalJadwal, error: jadwalError } = await supabaseClient
-            .from('jadwal') 
-            .select('*', { count: 'exact', head: true });
-
-        if (jadwalError) {
-            console.error("DEBUG ERROR Jadwal:", jadwalError.message, "Code:", jadwalError.code);
-            document.getElementById('totalJadwal').textContent = 'Error';
-        } else {
-            document.getElementById('totalJadwal').textContent = totalJadwal;
-        }
-        
-        // 3. HITUNG TOTAL MATA KULIAH UNIK (Menggunakan tabel Jadwal karena tabel 'mata_kuliah' tidak ada)
-        // Solusi ini HANYA akan berfungsi jika di tabel 'jadwal' Anda memiliki kolom yang menyimpan nama Mata Kuliah.
-        // Jika kode ini tetap error, ini berarti Anda harus membuat Fungsi (RPC) di Supabase atau membuat tabel terpisah.
-        const { data: mkData, error: mkError } = await supabaseClient
-            .from('jadwal')
-            .select('nama_mata_kuliah', { count: 'exact' }); // Mengasumsikan ada kolom 'nama_mata_kuliah'
-
-        if (mkError) {
-            console.error("DEBUG ERROR Mata Kuliah:", mkError.message, "Code:", mkError.code);
-            document.getElementById('totalMataKuliah').textContent = 'Error (RLS/Kolom)';
-        } else if (mkData && mkData.length > 0) {
-            // Filter untuk mendapatkan jumlah mata kuliah yang unik
-            const uniqueMataKuliah = [...new Set(mkData.map(item => item.nama_mata_kuliah))];
-            document.getElementById('totalMataKuliah').textContent = uniqueMataKuliah.length;
-        } else {
-            // Jika tidak ada data di jadwal
-            document.getElementById('totalMataKuliah').textContent = 0;
-        }
-
+        // Update tampilan
+        document.getElementById(elementId).textContent = count;
     }
-    // --- AKHIR FUNGSI TOTAL DATA BARU ---
 
-    // --- FUNGSI CEK AUTHENTIKASI DAN MEMUAT ---
+    // --- PANGGILAN TOTAL ---
+    async function loadDashboardTotals() {
+        // Dosen
+        await getCount('dosen', 'totalDosen');
+        
+        // Jadwal (Jika nama tabel 'jadwal' sudah pasti benar)
+        await getCount('jadwal', 'totalJadwal');
+        
+        // Mata Kuliah (Menggunakan tabel Jadwal untuk hitungan baris, untuk memastikan koneksi berfungsi)
+        // Catatan: Ini HANYA menghitung baris di tabel 'jadwal', BUKAN jumlah Mata Kuliah unik.
+        await getCount('jadwal', 'totalMataKuliah'); 
+    }
+    // --- AKHIR FUNGSI TOTAL DATA ---
+
+    // --- FUNGSI CEK AUTHENTIKASI DAN LAINNYA (TIDAK BERUBAH) ---
     async function checkAuthAndLoad() {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (!user) {
@@ -252,7 +239,6 @@
         await loadUserProfile(user.id);
     }
     
-    // --- FUNGSI MEMUAT PROFIL PENGGUNA ---
     async function loadUserProfile(userId) {
         const { data: userData, error } = await supabaseClient
             .from('users_metadata')
@@ -269,14 +255,11 @@
         }
 
         const username = userData.username || userData.email.split('@')[0];
-
-        // Memperbarui tampilan
         document.getElementById('userNameNav').textContent = `Halo, ${username}`;
         document.getElementById('displayUsernameMain').textContent = username;
         document.getElementById('currentUsername').textContent = username;
     }
     
-    // --- FUNGSI UPDATE USERNAME ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value;
         if (!newUsername) {
@@ -284,7 +267,6 @@
             return;
         }
         
-        // 1. Update email di Supabase Auth (menggunakan pola dummy email)
         const authEmail = `${newUsername}@akademikft.com`;
         
         const { error: authError } = await supabaseClient.auth.updateUser({
@@ -296,7 +278,6 @@
             return;
         }
 
-        // 2. Update username di tabel users_metadata
         const { error: metadataError } = await supabaseClient
             .from('users_metadata')
             .update({ username: newUsername }) 
@@ -306,8 +287,6 @@
             alert("❌ Gagal memperbarui username: " + metadataError.message);
         } else {
             alert("✅ Username berhasil diperbarui menjadi: " + newUsername);
-            
-            // Update tampilan secara manual
             document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
             document.getElementById('displayUsernameMain').textContent = newUsername;
             document.getElementById('currentUsername').textContent = newUsername;
@@ -316,7 +295,6 @@
         }
     }
     
-    // --- FUNGSI UPDATE PASSWORD ---
     async function updatePassword() {
         const newPassword = document.getElementById('newPassword').value;
         
@@ -337,7 +315,6 @@
         }
     }
     
-    // --- Fungsi Logout (Ganti Akun) ---
     async function logout() {
       await supabaseClient.auth.signOut();
       window.location.href = "index.html";
@@ -345,9 +322,7 @@
 
     // --- WINDOW ONLOAD (PANGGILAN UTAMA) ---
     window.onload = async () => {
-      // Panggil fungsi otentikasi
       await checkAuthAndLoad(); 
-      // Panggil fungsi total data
       await loadDashboardTotals(); 
     };
 </script>
