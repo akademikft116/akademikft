@@ -169,7 +169,7 @@
       console.log("🔄 Memuat total data dari Supabase...");
       await getCount('dosen', 'totalDosen');
       await getCount('jadwal', 'totalJadwal');
-      await getCount('jadwal', 'totalMataKuliah', true);
+      await getCount('matakuliah', 'totalMataKuliah', true);
       console.log("✅ Data dashboard selesai dimuat.");
     }
 
