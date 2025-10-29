@@ -222,7 +222,7 @@
         // 3. Hitung Total Mata Kuliah (Asumsi Tabel: mata_kuliah)
         // Catatan: Jika Anda tidak punya tabel 'mata_kuliah' terpisah, ini akan gagal.
         const { count: totalMataKuliah, error: mkError } = await supabaseClient
-            .from('mata_kuliah') 
+            .from('matakuliah') 
             .select('*', { count: 'exact', head: true });
 
         if (mkError && mkError.code !== '42P01') { // 42P01: tabel tidak ada
