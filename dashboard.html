@@ -191,46 +191,49 @@
 
     let globalUserId = null;
 
-    // --- FUNGSI UTAMA PENGAMBIL DATA ---
+    // --- FUNGSI UTAMA PENGAMBIL DATA DENGAN VERIFIKASI SESI ---
     async function getCount(tableName, elementId) {
-        // Cek sesi (penting untuk RLS)
+        
+        // 1. Dapatkan Sesi Pengguna
         const { data: { session } } = await supabaseClient.auth.getSession();
         
-        // Cek apakah tabel 'mata_kuliah' ada di kode (jika Anda tidak yakin dengan namanya, hapus saja baris di bawah)
-        if (tableName === 'matakuliah') {
-             console.log("INFO: Mengabaikan tabel 'matakuliah' karena error sebelumnya.");
-             // Kita akan hitung dari tabel jadwal sebagai gantinya
-             tableName = 'jadwal';
+        if (!session) {
+             console.error(`DEBUG ERROR: Sesi pengguna TIDAK DITEMUKAN. Tidak dapat mengambil data ${tableName}.`);
+             document.getElementById(elementId).textContent = `Login Gagal`;
+             return;
         }
 
+        console.log(`INFO: Sesi ditemukan. Role Supabase: ${session.user.role}. Mencoba hitungan ${tableName}.`);
+
+        // 2. Lakukan Panggilan Count
         const { count, error } = await supabaseClient
             .from(tableName)
             .select('*', { count: 'exact', head: true });
 
         if (error) {
-            // Tampilkan error Supabase di console browser
-            console.error(`DEBUG ERROR ${tableName}:`, error.message, "Code:", error.code, "Tindakan:", "RLS atau Nama Tabel Salah");
+            console.error(`DEBUG ERROR ${tableName}:`, error.message, "Code:", error.code);
             document.getElementById(elementId).textContent = `Error (${error.code || 'API'})`;
             return;
         } 
         
-        // Pastikan hasilnya bukan nol jika ada baris
+        // 3. Tampilkan Hitungan
         document.getElementById(elementId).textContent = count;
+        console.log(`INFO: Total ${tableName} berhasil diambil: ${count}`);
     }
 
     // --- PANGGILAN TOTAL ---
     async function loadDashboardTotals() {
-        // Catatan: Anda harus memiliki data di tabel 'dosen' dan 'jadwal'
-        await getCount('dosen', 'totalDosen');
-        await getCount('jadwal', 'totalJadwal');
+        // Hitungan Dosen
+        await getCount('dosen', 'totaldosen');
         
-        // Untuk total Mata Kuliah, kita asumsikan hitungan dari tabel jadwal untuk saat ini.
-        // Jika Anda memiliki tabel 'mata_kuliah', ganti baris di bawah.
-        // Jika tidak, Anda perlu membuat fungsi RPC seperti yang saya jelaskan sebelumnya.
-        await getCount('jadwal', 'totalMataKuliah'); 
+        // Hitungan Jadwal
+        await getCount('jadwal', 'totaljadwal');
+        
+        // Hitungan Mata Kuliah (Menggunakan tabel 'jadwal' sebagai pengganti)
+        await getCount('jadwal', 'totalmatakuliah'); 
     }
     // --- AKHIR FUNGSI TOTAL DATA ---
-    
+
     // --- FUNGSI OTENTIKASI (TIDAK BERUBAH) ---
     async function checkAuthAndLoad() {
         const { data: { user } } = await supabaseClient.auth.getUser();
@@ -242,8 +245,7 @@
         await loadUserProfile(user.id);
     }
     
-    // FUNGSI LAINNYA (loadUserProfile, updateUsername, updatePassword, logout) SAMA SEPERTI SEBELUMNYA.
-    // ... (LANJUTKAN DENGAN FUNGSI YANG ADA DI FILE ANDA) ...
+    // (FUNGSI loadUserProfile, updateUsername, updatePassword, dan logout DITEMPATKAN DI SINI)
 
     async function loadUserProfile(userId) {
         const { data: userData, error } = await supabaseClient
@@ -325,7 +327,6 @@
       await supabaseClient.auth.signOut();
       window.location.href = "index.html";
     }
-
 
     // --- WINDOW ONLOAD (PANGGILAN UTAMA) ---
     window.onload = async () => {
