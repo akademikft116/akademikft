@@ -186,100 +186,181 @@
 <script>
     // Konfigurasi Supabase Anda (JANGAN UBAH INI)
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsInR5cCI6IkpXVCJ9.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalUserId = null;
 
-    // --- FUNGSI PENGAMBIL DATA (CLEAN) ---
+    // =======================================================
+    // 🚀 FUNGSI NAVIGASI DAN TAMPILAN (YANG HILANG)
+    // =======================================================
+
+    function showContent(tabId, clickedButton) {
+        // 1. Sembunyikan semua tab konten
+        document.getElementById('main').classList.add('hidden');
+        document.getElementById('dosen').classList.add('hidden');
+        document.getElementById('matkul').classList.add('hidden');
+        document.getElementById('pengaturan').classList.add('hidden');
+
+        // 2. Tampilkan tab yang diminta
+        document.getElementById(tabId).classList.remove('hidden');
+
+        // 3. Hapus kelas aktif dari semua item navigasi
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.classList.remove('active-link');
+            btn.classList.add('text-gray-300', 'hover:text-white');
+            btn.classList.remove('bg-blue-700', 'text-white'); // Tambahan perbaikan kelas
+        });
+
+        // 4. Tambahkan kelas aktif ke tombol yang diklik
+        if (clickedButton) {
+             clickedButton.classList.add('active-link');
+             clickedButton.classList.remove('text-gray-300', 'hover:text-white');
+        }
+
+        // 5. Muat data jika itu adalah tab dosen atau matkul
+        if (tabId === 'dosen') {
+            loadDosenData();
+        } else if (tabId === 'matkul') {
+            loadMatkulData();
+        }
+    }
+
+    // =======================================================
+    // 📊 FUNGSI MEMUAT DATA TABEL
+    // =======================================================
+
+    async function loadDosenData() {
+        // Karena ada masalah RLS, kita coba ambil data tanpa filter
+        const { data, error } = await supabaseClient
+            .from('dosen')
+            .select('id, nama, nidn, prodi');
+
+        const tableBody = document.getElementById('dosenTableBody');
+        tableBody.innerHTML = '';
+
+        if (error) {
+            console.error("Gagal memuat data Dosen:", error.message);
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS Policy Anda)</td></tr>`;
+            return;
+        }
+
+        if (data && data.length > 0) {
+            data.forEach((dosen, index) => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${dosen.nama}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dosen.nidn}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dosen.prodi}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        } else {
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Belum ada data dosen.</td></tr>`;
+        }
+    }
+
+    async function loadMatkulData() {
+        // Ganti 'matakuliah' jika nama tabel Anda berbeda
+        const { data, error } = await supabaseClient
+            .from('matakuliah') // ASUMSI nama tabel Mata Kuliah adalah 'matakuliah'
+            .select('kode_mk, nama_mata_kuliah, sks'); 
+
+        const tableBody = document.getElementById('matkulTableBody');
+        tableBody.innerHTML = '';
+
+        if (error) {
+            console.error("Gagal memuat data Mata Kuliah:", error.message);
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS atau Nama Tabel: matakuliah)</td></tr>`;
+            return;
+        }
+
+        if (data && data.length > 0) {
+            data.forEach((mk, index) => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${mk.kode_mk || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${mk.nama_mata_kuliah}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mk.sks}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        } else {
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Belum ada data mata kuliah (Tabel matakuliah kosong).</td></tr>`;
+        }
+    }
+
+    // =======================================================
+    // 🔢 FUNGSI MENGHITUNG TOTAL (SAMA DENGAN SEBELUMNYA)
+    // =======================================================
     async function getCount(tableName, elementId, isUniqueCount = false) {
         
         if (!isUniqueCount) {
-             // Metode Standar: Mengambil total baris (Count Exact)
              const { count, error } = await supabaseClient
                 .from(tableName)
                 .select('*', { count: 'exact', head: true });
 
             if (error) {
-                console.error(`ERROR ${tableName}: ${error.message}`, error.code);
+                console.error(`ERROR COUNT ${tableName}: ${error.message}`, error.code);
                 document.getElementById(elementId).textContent = `Error: ${error.code}`;
                 return;
             } 
             document.getElementById(elementId).textContent = count;
             
         } else {
-             // Metode Unik: Mengambil Mata Kuliah Unik dari tabel jadwal
              try {
+                // Mengambil Mata Kuliah Unik dari tabel jadwal
                 const { data: mkData, error: mkError } = await supabaseClient
                     .from(tableName)
-                    .select('nama_mata_kuliah'); // ASUMSI kolom Mata Kuliah bernama 'nama_mata_kuliah'
+                    .select('nama_mata_kuliah'); 
 
                 if (mkError) {
-                    console.error(`ERROR Mata Kuliah Unik: ${mkError.message}`, mkError.code);
                     document.getElementById(elementId).textContent = `Error: ${mkError.code}`;
                     return;
                 }
 
-                // Hitung jumlah unik dari data yang diambil
-                const uniqueMataKuliah = [...new Set(mkData.map(item => item.nama_mata_kuliah))];
-                document.getElementById(elementId).textContent = uniqueMataKuliah.length;
+                if (mkData.length > 0) {
+                    const uniqueMataKuliah = [...new Set(mkData.map(item => item.nama_mata_kuliah))];
+                    document.getElementById(elementId).textContent = uniqueMataKuliah.length;
+                } else {
+                    document.getElementById(elementId).textContent = 0;
+                }
                 
              } catch(err) {
-                 console.error(`ERROR CRITICAL Mata Kuliah Unik: ${err.message}`);
                  document.getElementById(elementId).textContent = `Error: CRITICAL`;
              }
         }
     }
 
-    // --- PANGGILAN TOTAL ---
     async function loadDashboardTotals() {
-        // Hitungan Dosen
         await getCount('dosen', 'totalDosen');
-        
-        // Hitungan Jadwal
         await getCount('jadwal', 'totalJadwal');
-        
-        // Hitungan Mata Kuliah Unik (Ambil dari tabel jadwal)
-        // Parameter ketiga 'true' mengaktifkan logika hitungan unik
         await getCount('jadwal', 'totalMataKuliah', true); 
     }
-    // --- AKHIR FUNGSI TOTAL DATA ---
 
-    // --- FUNGSI OTENTIKASI & LAINNYA (TIDAK BERUBAH) ---
-    async function checkAuthAndLoad() {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-            window.location.href = "index.html";
-            return;
+    // =======================================================
+    // ⚙️ FUNGSI PENGATURAN (TAMBAHAN YANG HILANG)
+    // =======================================================
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('newPassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
         }
-        globalUserId = user.id;
-        await loadUserProfile(user.id);
     }
     
-    // ... (LANJUTKAN DENGAN FUNGSI loadUserProfile, updateUsername, updatePassword, dan logout ANDA) ...
-    // Pastikan Anda menempelkan semua fungsi tersebut di sini
-
-    async function loadUserProfile(userId) {
-        const { data: userData, error } = await supabaseClient
-            .from('users_metadata')
-            .select('username, email')
-            .eq('user_id', userId)
-            .single();
-
-        if (error || !userData) {
-            console.error("Gagal memuat profil pengguna:", error?.message);
-            document.getElementById('userNameNav').textContent = `Halo, User`;
-            document.getElementById('displayUsernameMain').textContent = `User`;
-            document.getElementById('currentUsername').textContent = `User`;
-            return;
-        }
-
-        const username = userData.username || userData.email.split('@')[0];
-        document.getElementById('userNameNav').textContent = `Halo, ${username}`;
-        document.getElementById('displayUsernameMain').textContent = username;
-        document.getElementById('currentUsername').textContent = username;
-    }
-    
+    // --- FUNGSI UPDATE USERNAME ---
     async function updateUsername() {
         const newUsername = document.getElementById('newUsername').value;
         if (!newUsername) {
@@ -315,6 +396,7 @@
         }
     }
     
+    // --- FUNGSI UPDATE PASSWORD ---
     async function updatePassword() {
         const newPassword = document.getElementById('newPassword').value;
         
@@ -335,16 +417,49 @@
         }
     }
     
+    // --- FUNGSI LOGOUT ---
     async function logout() {
       await supabaseClient.auth.signOut();
       window.location.href = "index.html";
     }
 
+    // =======================================================
+    // 👤 FUNGSI OTENTIKASI (SAMA DENGAN SEBELUMNYA)
+    // =======================================================
+    async function checkAuthAndLoad() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+            window.location.href = "index.html";
+            return;
+        }
+        globalUserId = user.id;
+        await loadUserProfile(user.id);
+    }
+    
+    async function loadUserProfile(userId) {
+        const { data: userData, error } = await supabaseClient
+            .from('users_metadata')
+            .select('username, email')
+            .eq('user_id', userId)
+            .single();
+
+        if (error || !userData) {
+            document.getElementById('userNameNav').textContent = `Halo, User`;
+            document.getElementById('welcomeMessage').innerHTML = `Halo, <strong id="AkademikFT">User</strong>! Selamat bekerja.`;
+            document.getElementById('currentUsername').textContent = `User`;
+            return;
+        }
+
+        const username = userData.username || userData.email.split('@')[0];
+        document.getElementById('userNameNav').textContent = `Halo, ${username}`;
+        document.getElementById('welcomeMessage').innerHTML = `Halo, <strong id="AkademikFT">${username}</strong>! Selamat bekerja.`;
+        document.getElementById('currentUsername').textContent = username;
+    }
+
+
     // --- WINDOW ONLOAD (PANGGILAN UTAMA) ---
     window.onload = async () => {
-      // Tunggu hingga otentikasi selesai
       await checkAuthAndLoad(); 
-      // Ambil data total
       await loadDashboardTotals(); 
     };
 </script>
