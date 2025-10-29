@@ -9,15 +9,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <style>
-        /* Styling untuk menandai menu aktif di sidebar */
         .active-link {
-            background-color: #1d4ed8; /* blue-700 */
+            background-color: #1d4ed8;
             color: white;
-            border-left: 4px solid #f97316; /* orange-500 */
+            border-left: 4px solid #f97316;
         }
-        /* Tinggi layar penuh diatur untuk konten utama */
         .main-content {
-            height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
+            height: calc(100vh - 4rem);
         }
     </style>
 </head>
@@ -103,283 +101,80 @@
                         </div>
                     </div>
                 </div>
-                
-                <div id="dosen" class="bg-white p-6 rounded-lg shadow-xl hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Dosen</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Dosen</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIDN</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dosenTableBody" class="bg-white divide-y divide-gray-200">
-                                <tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode MK</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
-                                <tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="pengaturan" class="bg-white p-6 rounded-lg shadow-xl hidden max-w-2xl">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Akun</h2>
-                    
-                    <div class="mb-8 border-b pb-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Ubah Username</h3>
-                        <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">...</strong></p>
-                        <div class="space-y-4 max-w-sm">
-                            <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
-                                Simpan Username Baru
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-8 pb-6">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Ubah Password</h3>
-                        <div class="space-y-4 max-w-sm">
-                            <div class="relative">
-                                <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
-                                    <i id="eyeIcon" class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <button onclick="updatePassword()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
-                                Simpan Password Baru
-                            </button>
-                        </div>
-                    </div>
-                    
-                     <div class="mt-8 pt-6 border-t border-gray-200">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Opsi Ganti Akun</h3>
-                        <p class="text-sm text-gray-500 mb-4">Anda akan keluar dari sesi ini dan diarahkan ke halaman login.</p>
-                        <button onclick="logout()" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-150">
-                            Ganti Akun / Logout
-                        </button>
-                    </div>
-
-                </div>
-
             </div>
         </main>
     </div>
 
 <script>
-    // Konfigurasi Supabase Anda (JANGAN UBAH INI)
+    // Konfigurasi Supabase Anda
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let globalUserId = null;
-
-    // =======================================================
-    // 🚀 FUNGSI NAVIGASI DAN TAMPILAN (showContent)
-    // =======================================================
-
+    // Fungsi untuk navigasi antar konten
     function showContent(tabId, clickedButton) {
-        // 1. Sembunyikan semua tab konten
-        document.getElementById('main').classList.add('hidden');
-        document.getElementById('dosen').classList.add('hidden');
-        document.getElementById('matkul').classList.add('hidden');
-        document.getElementById('pengaturan').classList.add('hidden');
-
-        // 2. Tampilkan tab yang diminta
-        document.getElementById(tabId).classList.remove('hidden');
-
-        // 3. Hapus kelas aktif dari semua item navigasi
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.classList.remove('active-link');
-            // Tambahkan kembali kelas default jika bukan link aktif
-            if (btn.id !== clickedButton?.id) {
-                btn.classList.add('text-gray-300', 'hover:text-white');
-            }
+        ['main', 'dosen', 'matkul', 'pengaturan'].forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
         });
+        document.getElementById(tabId)?.classList.remove('hidden');
 
-        // 4. Tambahkan kelas aktif ke tombol yang diklik (jika ada)
-        if (clickedButton) {
-             clickedButton.classList.add('active-link');
-             clickedButton.classList.remove('text-gray-300', 'hover:text-white');
-        }
-
-        // 5. Muat data jika itu adalah tab dosen atau matkul
-        if (tabId === 'dosen') {
-            loadDosenData();
-        } else if (tabId === 'matkul') {
-            loadMatkulData();
-        }
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
+        clickedButton?.classList.add('active-link');
     }
 
     // =======================================================
-    // 📊 FUNGSI MEMUAT DATA TABEL
-    // =======================================================
-
-    async function loadDosenData() {
-        const tableBody = document.getElementById('dosenTableBody');
-        tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
-
-        const { data, error } = await supabaseClient
-            .from('dosen')
-            .select('id, nama, nidn, prodi');
-
-        tableBody.innerHTML = '';
-
-        if (error) {
-            console.error("Gagal memuat data Dosen:", error.message);
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS Policy atau Nama Tabel 'dosen')</td></tr>`;
-            return;
-        }
-
-        if (data && data.length > 0) {
-            data.forEach((dosen, index) => {
-                const row = `
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${dosen.nama}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dosen.nidn || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dosen.prodi || '-'}</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        } else {
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Belum ada data dosen.</td></tr>`;
-        }
-    }
-
-    async function loadMatkulData() {
-        const tableBody = document.getElementById('matkulTableBody');
-        tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
-        
-        // ASUMSI nama tabel Mata Kuliah adalah 'matakuliah'. Ganti jika nama tabel Anda 'jadwal' atau yang lain.
-        const { data, error } = await supabaseClient
-            .from('matakuliah') 
-            .select('kode_mk, nama_mata_kuliah, sks'); 
-
-        tableBody.innerHTML = '';
-
-        if (error) {
-            console.error("Gagal memuat data Mata Kuliah:", error.message);
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">❌ ${error.message} (Cek RLS atau Nama Tabel 'matakuliah')</td></tr>`;
-            return;
-        }
-
-        if (data && data.length > 0) {
-            data.forEach((mk, index) => {
-                const row = `
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${mk.kode_mk || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${mk.nama_mata_kuliah || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mk.sks || 0}</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        } else {
-            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Belum ada data mata kuliah (Tabel matakuliah kosong).</td></tr>`;
-        }
-    }
-
-    // =======================================================
-    // 🔢 FUNGSI MENGHITUNG TOTAL
+    // 🔢 FUNGSI MENGHITUNG TOTAL (Versi Aman untuk GitHub Pages)
     // =======================================================
     async function getCount(tableName, elementId, isUniqueCount = false) {
-        
+      try {
         if (!isUniqueCount) {
-             const { count, error } = await supabaseClient
-                .from(tableName)
-                .select('*', { count: 'exact', head: true });
+          const { count, error } = await supabaseClient
+            .from(tableName)
+            .select('*', { count: 'exact', head: true });
 
-            if (error) {
-                document.getElementById(elementId).textContent = `Error`;
-                return;
-            } 
-            document.getElementById(elementId).textContent = count;
-            
+          if (error) {
+            console.warn(`⚠️ Gagal mengambil data dari tabel '${tableName}':`, error.message);
+            document.getElementById(elementId).textContent = 0;
+            return;
+          }
+          document.getElementById(elementId).textContent = count || 0;
         } else {
-             try {
-                // Mengambil Mata Kuliah Unik dari tabel jadwal
-                const { data: mkData, error: mkError } = await supabaseClient
-                    .from(tableName)
-                    .select('nama_mata_kuliah'); 
+          const { data, error } = await supabaseClient
+            .from(tableName)
+            .select('nama_mata_kuliah');
 
-                if (mkError) {
-                    document.getElementById(elementId).textContent = `Error`;
-                    return;
-                }
+          if (error) {
+            console.warn(`⚠️ Gagal mengambil data unik dari '${tableName}':`, error.message);
+            document.getElementById(elementId).textContent = 0;
+            return;
+          }
 
-                if (mkData.length > 0) {
-                    const uniqueMataKuliah = [...new Set(mkData.map(item => item.nama_mata_kuliah))];
-                    document.getElementById(elementId).textContent = uniqueMataKuliah.length;
-                } else {
-                    document.getElementById(elementId).textContent = 0;
-                }
-                
-             } catch(err) {
-                 document.getElementById(elementId).textContent = `Error`;
-             }
+          if (data && data.length > 0) {
+            const unique = [...new Set(data.map(item => item.nama_mata_kuliah))];
+            document.getElementById(elementId).textContent = unique.length;
+          } else {
+            document.getElementById(elementId).textContent = 0;
+          }
         }
+      } catch (err) {
+        console.error(`❌ Error koneksi Supabase untuk tabel '${tableName}':`, err);
+        document.getElementById(elementId).textContent = 0;
+      }
     }
 
+    // =======================================================
+    // 🚀 FUNGSI MEMUAT TOTAL DI DASHBOARD
+    // =======================================================
     async function loadDashboardTotals() {
-        await getCount('dosen', 'totalDosen');
-        await getCount('jadwal', 'totalJadwal');
-        await getCount('jadwal', 'totalMataKuliah', true); 
+      console.log("🔄 Memuat total data dari Supabase...");
+      await getCount('dosen', 'totalDosen');
+      await getCount('jadwal', 'totalJadwal');
+      await getCount('jadwal', 'totalMataKuliah', true);
+      console.log("✅ Data dashboard selesai dimuat.");
     }
 
-    // =======================================================
-    // ⚙️ FUNGSI PENGATURAN DAN OTENTIKASI
-    // =======================================================
+    document.addEventListener("DOMContentLoaded", loadDashboardTotals);
+</script>
 
-    function togglePasswordVisibility() {
-        const passwordInput = document.getElementById('newPassword');
-        const eyeIcon = document.getElementById('eyeIcon');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeIcon.classList.remove('fa-eye');
-            eyeIcon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            eyeIcon.classList.remove('fa-eye-slash');
-            eyeIcon.classList.add('fa-eye');
-        }
-    }
-    
-    async function updateUsername() {
-        const newUsername = document.getElementById('newUsername').value;
-        if (!newUsername) {
-            alert("❌ Username tidak boleh kosong.");
-            return;
-        }
-        
-        const authEmail = `${newUsername}@akademikft.com`;
-        
-        const { error: authError } = await supabaseClient.auth.updateUser({
-            email: authEmail
-        });
-
-        if (authError) {
-            alert("❌ Gagal memperbarui email/username di Auth: " + authError.message);
-            return;
-        }
+</body>
+</html>
