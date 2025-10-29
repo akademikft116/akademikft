@@ -178,7 +178,7 @@
 
       const { data, error } = await supabaseClient
         .from("matakuliah")
-        .select("kode, nama, prodi, sks")
+        .select('kode, nama, "prodi", sks')
         .order("kode", { ascending: true });
 
       if (error) {
