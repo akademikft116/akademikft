@@ -1,180 +1,135 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Fakultas Teknik</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <style>
-        .active-link {
-            background-color: #1d4ed8;
-            color: white;
-            border-left: 4px solid #f97316;
-        }
-        .main-content {
-            height: calc(100vh - 4rem);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Fakultas Teknik</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    .active-link {
+      background-color: #1d4ed8;
+      color: white;
+      border-left: 4px solid #f97316;
+    }
+    .main-content {
+      height: calc(100vh - 4rem);
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
 
-    <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
-        <div class="flex items-center space-x-3">
-            <img src="logo.jpeg" class="h-10 w-auto"> 
-            <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
-        </div>
-        <div class="flex items-center space-x-4">
-           <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
-        </div>
-    </nav>
-    
-    <div class="flex pt-16 main-content">
-        
-        <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
-            <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-                
-                <button onclick="showContent('main', this)" id="mainLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 active-link">
-                    <i class="fas fa-chart-bar w-5"></i>
-                    <span>Dashboard</span>
-                </button>
-                
-                <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                    <i class="fas fa-calendar-alt w-5"></i>
-                    <span>Penjadwalan</span>
-                </a>
-
-               <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300"><i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
-                
-               <a href="dosen.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                    <i class="fas fa-user-tie w-5"></i>
-                    <span>Data Dosen</span>
-                </a>
-                  
-                <button onclick="showContent('matkul', this)" id="matkulLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                    <i class="fas fa-book w-5"></i>
-                    <span>Mata Kuliah</span>
-                </button>
-
-                <button onclick="showContent('pengaturan', this)" id="pengaturanLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
-                    <i class="fas fa-cog w-5"></i>
-                    <span>Pengaturan</span>
-                </button>
-                
-            </nav>
-            
-            <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
-                <p>&copy; 2025 Akademik FT</p>
-                <p>Designed by Rifqi & Alfi</p>
-                <p>ABD</p>
-            </div>
-        </aside>
-        
-        <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
-            
-            <div id="contentArea" class="space-y-8">
-                
-                <div id="main" class="bg-white p-6 rounded-lg shadow-xl min-h-full">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
-                    <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
-                        Halo, <strong id="AkademikFT">Admin</strong>! Selamat bekerja.
-                    </p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                        <div class="bg-blue-100 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                            <p class="text-sm font-medium text-blue-600">Total Jadwal (Anda)</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalJadwal">0</p>
-                        </div>
-                        
-                        <div class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                            <p class="text-sm font-medium text-green-600">Total Dosen</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalDosen">0</p>
-                            <span class="text-xs text-green-700 mt-2 block">Lihat detail di navigasi Dosen.</span>
-                        </div>
-                        
-                        <div class="bg-yellow-100 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
-                            <p class="text-sm font-medium text-yellow-600">Total Mata Kuliah</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1" id="totalMataKuliah">0</p>
-                            <span class="text-xs text-yellow-700 mt-2 block">Lihat detail di navigasi Mata Kuliah.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+  <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+    <div class="flex items-center space-x-3">
+      <img src="logo.jpeg" class="h-10 w-auto"> 
+      <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
     </div>
+    <div class="flex items-center space-x-4">
+      <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+    </div>
+  </nav>
+  
+  <div class="flex pt-16 main-content">
+    <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 z-0 shadow-xl">
+      <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+        <button onclick="showContent('main', this)" id="mainLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 active-link">
+          <i class="fas fa-chart-bar w-5"></i>
+          <span>Dashboard</span>
+        </button>
+        <a href="main.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+          <i class="fas fa-calendar-alt w-5"></i>
+          <span>Penjadwalan</span>
+        </a>
+        <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+          <i class="fas fa-address-card w-5"></i>
+          <span>Data Mahasiswa</span>
+        </a>
+        <a href="dosen.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+          <i class="fas fa-user-tie w-5"></i>
+          <span>Data Dosen</span>
+        </a>
+        <a href="matakuliah.html" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+          <i class="fas fa-book w-5"></i>
+          <span>Mata Kuliah</span>
+        </a>
+        <button onclick="showContent('pengaturan', this)" id="pengaturanLink" class="nav-item w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+          <i class="fas fa-cog w-5"></i>
+          <span>Pengaturan</span>
+        </button>
+      </nav>
+      <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+        <p>&copy; 2025 Akademik FT</p>
+        <p>Designed by Rifqi & Alfi</p>
+        <p>ABD</p>
+      </div>
+    </aside>
 
-<script>
-    // Konfigurasi Supabase Anda
+    <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
+      <div id="contentArea" class="space-y-8">
+        <div id="main" class="bg-white p-6 rounded-lg shadow-xl min-h-full">
+          <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
+          <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
+            Halo, <strong id="AkademikFT">Admin</strong>! Selamat bekerja.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="bg-blue-100 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+              <p class="text-sm font-medium text-blue-600">Total Jadwal (Anda)</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1" id="totalJadwal">0</p>
+            </div>
+            <div class="bg-green-100 p-6 rounded-lg shadow-md border-l-4 border-green-500">
+              <p class="text-sm font-medium text-green-600">Total Dosen</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1" id="totalDosen">0</p>
+              <span class="text-xs text-green-700 mt-2 block">Lihat detail di navigasi Dosen.</span>
+            </div>
+            <div class="bg-yellow-100 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+              <p class="text-sm font-medium text-yellow-600">Total Mata Kuliah</p>
+              <p class="text-3xl font-bold text-gray-900 mt-1" id="totalMataKuliah">0</p>
+              <span class="text-xs text-yellow-700 mt-2 block">Lihat detail di navigasi Mata Kuliah.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Fungsi untuk navigasi antar konten
     function showContent(tabId, clickedButton) {
-        ['main', 'dosen', 'matkul', 'pengaturan'].forEach(id => {
-            document.getElementById(id)?.classList.add('hidden');
-        });
-        document.getElementById(tabId)?.classList.remove('hidden');
-
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
-        clickedButton?.classList.add('active-link');
+      ['main', 'dosen', 'matkul', 'pengaturan'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
+      });
+      document.getElementById(tabId)?.classList.remove('hidden');
+      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
+      clickedButton?.classList.add('active-link');
     }
 
-    // =======================================================
-    // 🔢 FUNGSI MENGHITUNG TOTAL (Versi Aman untuk GitHub Pages)
-    // =======================================================
-    async function getCount(tableName, elementId, isUniqueCount = false) {
+    // 🔢 Ambil total dari tabel
+    async function getTotalCount(table, elementId) {
       try {
-        if (!isUniqueCount) {
-          const { count, error } = await supabaseClient
-            .from(tableName)
-            .select('*', { count: 'exact', head: true });
-
-          if (error) {
-            console.warn(`⚠️ Gagal mengambil data dari tabel '${tableName}':`, error.message);
-            document.getElementById(elementId).textContent = 0;
-            return;
-          }
-          document.getElementById(elementId).textContent = count || 0;
-        } else {
-          const { data, error } = await supabaseClient
-            .from(tableName)
-            .select('nama');
-
-          if (error) {
-            console.warn(`⚠️ Gagal mengambil data unik dari '${tableName}':`, error.message);
-            document.getElementById(elementId).textContent = 0;
-            return;
-          }
-
-          if (data && data.length > 0) {
-            const unique = [...new Set(data.map(item => item.nama_mata_kuliah))];
-            document.getElementById(elementId).textContent = unique.length;
-          } else {
-            document.getElementById(elementId).textContent = 0;
-          }
-        }
+        const { count, error } = await supabaseClient
+          .from(table)
+          .select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        document.getElementById(elementId).textContent = count ?? 0;
       } catch (err) {
-        console.error(`❌ Error koneksi Supabase untuk tabel '${tableName}':`, err);
+        console.error(`Error ambil total dari ${table}:`, err.message);
         document.getElementById(elementId).textContent = 0;
       }
     }
 
-    // =======================================================
-    // 🚀 FUNGSI MEMUAT TOTAL DI DASHBOARD
-    // =======================================================
+    // 🚀 Muat semua total
     async function loadDashboardTotals() {
-      console.log("🔄 Memuat total data dari Supabase...");
-      await getCount('dosen', 'totalDosen');
-      await getCount('jadwal', 'totalJadwal');
-      await getCount('matakuliah', 'totalMataKuliah', true);
-      console.log("✅ Data dashboard selesai dimuat.");
+      await getTotalCount('dosen', 'totalDosen');
+      await getTotalCount('jadwal', 'totalJadwal');
+      await getTotalCount('matakuliah', 'totalMataKuliah');
+      console.log('✅ Semua total berhasil dimuat.');
     }
 
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
-</script>
-
+  </script>
 </body>
 </html>
