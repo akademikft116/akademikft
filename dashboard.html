@@ -141,7 +141,7 @@
         } else {
           const { data, error } = await supabaseClient
             .from(tableName)
-            .select('nama_mata_kuliah');
+            .select('matakuliah');
 
           if (error) {
             console.warn(`⚠️ Gagal mengambil data unik dari '${tableName}':`, error.message);
