@@ -191,50 +191,61 @@
 
     let globalUserId = null;
 
-    // --- FUNGSI UTAMA PENGAMBIL DATA DENGAN VERIFIKASI SESI ---
-    async function getCount(tableName, elementId) {
+    // --- FUNGSI PENGAMBIL DATA (CLEAN) ---
+    async function getCount(tableName, elementId, isUniqueCount = false) {
         
-        // 1. Dapatkan Sesi Pengguna
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        
-        if (!session) {
-             console.error(`DEBUG ERROR: Sesi pengguna TIDAK DITEMUKAN. Tidak dapat mengambil data ${tableName}.`);
-             document.getElementById(elementId).textContent = `Login Gagal`;
-             return;
+        if (!isUniqueCount) {
+             // Metode Standar: Mengambil total baris (Count Exact)
+             const { count, error } = await supabaseClient
+                .from(tableName)
+                .select('*', { count: 'exact', head: true });
+
+            if (error) {
+                console.error(`ERROR ${tableName}: ${error.message}`, error.code);
+                document.getElementById(elementId).textContent = `Error: ${error.code}`;
+                return;
+            } 
+            document.getElementById(elementId).textContent = count;
+            
+        } else {
+             // Metode Unik: Mengambil Mata Kuliah Unik dari tabel jadwal
+             try {
+                const { data: mkData, error: mkError } = await supabaseClient
+                    .from(tableName)
+                    .select('nama_mata_kuliah'); // ASUMSI kolom Mata Kuliah bernama 'nama_mata_kuliah'
+
+                if (mkError) {
+                    console.error(`ERROR Mata Kuliah Unik: ${mkError.message}`, mkError.code);
+                    document.getElementById(elementId).textContent = `Error: ${mkError.code}`;
+                    return;
+                }
+
+                // Hitung jumlah unik dari data yang diambil
+                const uniqueMataKuliah = [...new Set(mkData.map(item => item.nama_mata_kuliah))];
+                document.getElementById(elementId).textContent = uniqueMataKuliah.length;
+                
+             } catch(err) {
+                 console.error(`ERROR CRITICAL Mata Kuliah Unik: ${err.message}`);
+                 document.getElementById(elementId).textContent = `Error: CRITICAL`;
+             }
         }
-
-        console.log(`INFO: Sesi ditemukan. Role Supabase: ${session.user.role}. Mencoba hitungan ${tableName}.`);
-
-        // 2. Lakukan Panggilan Count
-        const { count, error } = await supabaseClient
-            .from(tableName)
-            .select('*', { count: 'exact', head: true });
-
-        if (error) {
-            console.error(`DEBUG ERROR ${tableName}:`, error.message, "Code:", error.code);
-            document.getElementById(elementId).textContent = `Error (${error.code || 'API'})`;
-            return;
-        } 
-        
-        // 3. Tampilkan Hitungan
-        document.getElementById(elementId).textContent = count;
-        console.log(`INFO: Total ${tableName} berhasil diambil: ${count}`);
     }
 
     // --- PANGGILAN TOTAL ---
     async function loadDashboardTotals() {
         // Hitungan Dosen
-        await getCount('dosen', 'totaldosen');
+        await getCount('dosen', 'totalDosen');
         
         // Hitungan Jadwal
-        await getCount('jadwal', 'totaljadwal');
+        await getCount('jadwal', 'totalJadwal');
         
-        // Hitungan Mata Kuliah (Menggunakan tabel 'jadwal' sebagai pengganti)
-        await getCount('jadwal', 'totalmatakuliah'); 
+        // Hitungan Mata Kuliah Unik (Ambil dari tabel jadwal)
+        // Parameter ketiga 'true' mengaktifkan logika hitungan unik
+        await getCount('jadwal', 'totalMataKuliah', true); 
     }
     // --- AKHIR FUNGSI TOTAL DATA ---
 
-    // --- FUNGSI OTENTIKASI (TIDAK BERUBAH) ---
+    // --- FUNGSI OTENTIKASI & LAINNYA (TIDAK BERUBAH) ---
     async function checkAuthAndLoad() {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (!user) {
@@ -245,7 +256,8 @@
         await loadUserProfile(user.id);
     }
     
-    // (FUNGSI loadUserProfile, updateUsername, updatePassword, dan logout DITEMPATKAN DI SINI)
+    // ... (LANJUTKAN DENGAN FUNGSI loadUserProfile, updateUsername, updatePassword, dan logout ANDA) ...
+    // Pastikan Anda menempelkan semua fungsi tersebut di sini
 
     async function loadUserProfile(userId) {
         const { data: userData, error } = await supabaseClient
@@ -330,7 +342,9 @@
 
     // --- WINDOW ONLOAD (PANGGILAN UTAMA) ---
     window.onload = async () => {
+      // Tunggu hingga otentikasi selesai
       await checkAuthAndLoad(); 
+      // Ambil data total
       await loadDashboardTotals(); 
     };
 </script>
