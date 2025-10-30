@@ -1,63 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manajemen Penjadwalan - Fakultas Teknik</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <style>
-    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
-    .main-content { height: calc(100vh - 4rem); }
-  </style>
-</head>
-<body class="bg-gray-100">
-
-<!-- 🔹 Navbar -->
-<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
-  <div class="flex items-center space-x-3">
-    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
-    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
-  </div>
-  <div class="flex items-center space-x-4">
-    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
-  </div>
-</nav>
-
-<div class="flex pt-16 main-content">
-  <!-- 🔹 Sidebar -->
-  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
-    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-       <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span></a>
-      <a href="main.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
-        <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
-      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
-      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
-      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-book w-5"></i><span>Mata Kuliah</span></a>
-      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
-    </nav>
-    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
-      <p>&copy; 2025 Akademik FT</p>
-      <p>Designed by Rifqi & Alfi</p>
-    </div>
-  </aside>
-
-  <!-- 🔹 Main Content -->
-  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
-    <div class="container mx-auto">
-<!DOCTYPE html>
-<html lang="id">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jadwal Kuliah</title>
+  <title>Manajemen Penjadwalan - Fakultas Teknik</title>
+  
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5CM41vzapQJoB1MvJkPQE03o" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
@@ -68,7 +17,12 @@
   <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
 
   <style>
-    /* ... (Style yang sudah ada) ... */
+    /* Styling Dasar Layout */
+    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
+    .main-content { height: calc(100vh - 4rem); }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); justify-content: center; align-items: center; z-index: 50; }
+    
+    /* Styling Khusus Jadwal */
     body {
         background-image: url('kosong.jpeg'); 
         background-size: cover; 
@@ -99,248 +53,293 @@
         min-height: 2.5rem !important; 
     }
   </style>
-  </head>
+</head>
+
 <body class="bg-gray-100">
 
-<div class="max-w-6xl mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
-    <h1 class="text-2xl font-bold mb-4">Manajemen Jadwal Kuliah</h1>
-    
-    <div class="mb-6 border p-4 rounded bg-gray-50">
-      <h2 class="font-semibold mb-2">Tambah Jadwal</h2>
-      <div class="grid grid-cols-3 gap-2"> 
-        
-        <select id="kode_matkul_search" placeholder="Cari Kode / Mata Kuliah" class="border p-2 rounded col-span-1">
-            <option value="">Cari Kode / Mata Kuliah</option> 
-        </select>
-        
-        <select id="prodi" class="border p-2 rounded">
-          <option value="" disabled selected>Pilih Prodi</option>
-          <option value="Industri">Industri</option>
-          <option value="Sipil">Sipil</option>
-          <option value="Arsitektur">Arsitektur</option>
-          <option value="Elektro">Elektro</option>
-          <option value="Informatika">Informatika</option>
-        </select>
-        
-        <select id="hari" class="border p-2 rounded">
-          <option value="" disabled selected>Pilih Hari</option>
-           <option value="-">-</option>
-          <option value="Senin">Senin</option>
-          <option value="Selasa">Selasa</option>
-          <option value="Rabu">Rabu</option>
-          <option value="Kamis">Kamis</option>
-          <option value="Jumat">Jumat</option>
-           <option value="Sabtu">Sabtu</option>
-        </select>
-
-        <input id="jam_mulai" type="time" placeholder="Jam Mulai" class="border p-2 rounded">
-        <input id="jam_akhir" type="time" placeholder="Jam Akhir" class="border p-2 rounded">
-        
-        <input id="sks" type="number" placeholder="SKS" class="border p-2 rounded">
-
-        <select id="dosen" class="border p-2 rounded">
-            <option value="" disabled selected>Pilih Dosen</option>
-        </select>
-
-        <select id="asisten" class="border p-2 rounded">
-            <option value="" disabled selected>Pilih Asisten</option>
-        </select>
-
-        <select id="semester" class="border p-2 rounded">
-          <option value="" disabled selected>Pilih Semester</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-        </select>
-
-        <select id="kelas" class="border p-2 rounded">
-            <option value="" disabled selected>Pilih Kelas</option>
-        </select>
-
-        <select id="ruangan" class="border p-2 rounded">
-            <option value="" disabled selected>Pilih Ruangan</option>
-        </select>
-        
-        <select id="tahun_akademik" class="border p-2 rounded col-span-1">
-            <option value="" disabled selected>Pilih Tahun Akademik</option>
-        </select>
-      </div>
-      <button onclick="simpanJadwal()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded">Tambah</button>
-    </div>
-    
-    <div class="flex items-center mb-3 space-x-2 flex-wrap">
-      <select id="filterProdi" class="border p-2 rounded min-w-min">
-        <option value="">Semua Prodi</option>
-         <option value="Industri">Industri</option>
-          <option value="Sipil">Sipil</option>
-          <option value="Arsitektur">Arsitektur</option>
-          <option value="Elektro">Elektro</option>
-          <option value="Informatika">Informatika</option>
-      </select>
-       <select id="filterSemester" class="border p-2 rounded min-w-min">
-        <option value="">Semua Semester</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-      </select>
-      
-      <select id="filterKelas" class="border p-2 rounded min-w-min">
-        <option value="">Semua Kelas</option>
-      </select>
-      
-      <select id="filterMataKuliah" class="border p-2 rounded min-w-min">
-        <option value="">Memuat Mata Kuliah...</option>
-      </select>
-      
-      <select id="filterDosen" class="border p-2 rounded min-w-min">
-        <option value="">Memuat Dosen...</option>
-      </select>
-      
-       <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
-        <option value="">Semua Tahun Akademik</option>
-      </select>
-      
-      <button onclick="filterData()" class="bg-blue-500 text-white rounded icon-btn" title="Terapkan Filter (Pencarian)">
-        <i class="fas fa-magnifying-glass"></i> 
-      </button>
-      <button onclick="exportExcel()" class="bg-green-500 text-white rounded icon-btn" title="Export ke Excel">
-        <i class="fas fa-file-excel"></i>
-      </button>
-      <button onclick="exportPDF()" class="bg-red-500 text-white rounded icon-btn" title="Export ke PDF">
-        <i class="fas fa-file-pdf"></i>
-      </button>
-      </div>
-    <div class="overflow-x-auto">
-      <table id="tabelJadwal" class="min-w-full border border-gray-400 text-sm">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="border px-2 py-1 text-center">No</th>
-            <th class="border px-2 py-1 text-center">Tahun Akademik</th> <th class="border px-2 py-1 text-center">Kode</th>
-            <th class="border px-2 py-1 text-left">Prodi</th>
-            <th class="border px-2 py-1 text-center">Hari</th>
-            <th class="border px-2 py-1 text-center">Jam Mulai</th>
-            <th class="border px-2 py-1 text-center">Jam Akhir</th>
-            <th class="border px-2 py-1 text-left">Mata Kuliah</th>
-            <th class="border px-2 py-1 text-center">SKS</th>
-            <th class="border px-2 py-1 text-left">Dosen</th>
-            <th class="border px-2 py-1 text-left">Asisten</th>
-            <th class="border px-2 py-1 text-center">Semester</th>
-            <th class="border px-2 py-1 text-center">Kelas</th>
-            <th class="border px-2 py-1 text-center">Ruangan</th>
-            <th class="border px-2 py-1 text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+  <div class="flex items-center space-x-3">
+    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
   </div>
+  <div class="flex items-center space-x-4">
+    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+    <button onclick="logout()" class="text-white hover:text-red-300 transition duration-150">
+        <i class="fas fa-sign-out-alt"></i> Keluar
+    </button>
+  </div>
+</nav>
 
+<div class="flex pt-16 main-content">
+  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
+    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+       <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span></a>
+      <a href="main.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
+        <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
+      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
+      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
+      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-book w-5"></i><span>Mata Kuliah</span></a>
+      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
+    </nav>
+    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+      <p>&copy; 2025 Akademik FT</p>
+      <p>Designed by Rifqi & Alfi</p>
+    </div>
+  </aside>
 
-  <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-          <div class="p-6">
-              <h2 class="text-xl font-bold mb-4">Edit Detail Jadwal</h2>
-              <form id="editForm" onsubmit="return false;">
-                  <input type="hidden" id="edit_id">
-                  <div class="grid grid-cols-3 gap-3 mb-4">
-                      
-                      <select id="edit_kode_matkul_search" class="mt-1 block w-full border p-2 rounded">
-                          <option value="" disabled selected>Cari Kode / Mata Kuliah</option>
-                      </select>
-                      
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Prodi</label>
-                          <select id="edit_prodi" class="mt-1 block w-full border p-2 rounded">
-                             <option value="Industri">Industri</option>
-                             <option value="Sipil">Sipil</option>
-                             <option value="Arsitektur">Arsitektur</option>
-                             <option value="Elektro">Elektro</option>
-                             <option value="Informatika">Informatika</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Hari</label>
-                          <select id="edit_hari" class="mt-1 block w-full border p-2 rounded">
-                              <option value="-">-</option><option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option>
-                              <option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
-                          <input id="edit_jam_mulai" type="time" class="mt-1 block w-full border p-2 rounded">
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Jam Akhir</label>
-                          <input id="edit_jam_akhir" type="time" class="mt-1 block w-full border p-2 rounded">
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">SKS</label>
-                          <input id="edit_sks" type="number" class="mt-1 block w-full border p-2 rounded">
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Dosen</label>
-                          <select id="edit_dosen" class="mt-1 block w-full border p-2 rounded">
-                              <option value="" disabled selected>Memuat...</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Asisten</label>
-                          <select id="edit_asisten" class="mt-1 block w-full border p-2 rounded">
-                              <option value="" disabled selected>Memuat...</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Semester</label>
-                          <select id="edit_semester" class="mt-1 block w-full border p-2 rounded">
-                              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                              <option value="7">7</option><option value="8">8</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Kelas</label>
-                          <select id="edit_kelas" class="mt-1 block w-full border p-2 rounded">
-                              <option value="" disabled selected>Memuat...</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-sm font-medium text-gray-700">Ruangan</label>
-                          <select id="edit_ruangan" class="mt-1 block w-full border p-2 rounded">
-                              <option value="" disabled selected>Memuat...</option>
-                          </select>
-                      </div>
-                       <div>
-                          <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label> 
-                          <select id="edit_tahun_akademik" class="mt-1 block w-full border p-2 rounded">
-                              <option value="" disabled selected>Memuat...</option>
-                          </select>
-                      </div>
-                  </div>
+  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+    <div class="container mx-auto">
+        
+        <div class="max-w-full mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
+            <h1 class="text-2xl font-bold mb-4">Manajemen Jadwal Kuliah</h1>
+            
+            <div class="mb-6 border p-4 rounded bg-gray-50">
+              <h2 class="font-semibold mb-2">Tambah Jadwal</h2>
+              <div class="grid grid-cols-3 gap-2"> 
+                
+                <select id="kode_matkul_search" placeholder="Cari Kode / Mata Kuliah" class="border p-2 rounded col-span-1">
+                    <option value="">Cari Kode / Mata Kuliah</option> 
+                </select>
+                
+                <select id="prodi" class="border p-2 rounded">
+                  <option value="" disabled selected>Pilih Prodi</option>
+                  <option value="Industri">Industri</option>
+                  <option value="Sipil">Sipil</option>
+                  <option value="Arsitektur">Arsitektur</option>
+                  <option value="Elektro">Elektro</option>
+                  <option value="Informatika">Informatika</option>
+                </select>
+                
+                <select id="hari" class="border p-2 rounded">
+                  <option value="" disabled selected>Pilih Hari</option>
+                   <option value="-">-</option>
+                  <option value="Senin">Senin</option>
+                  <option value="Selasa">Selasa</option>
+                  <option value="Rabu">Rabu</option>
+                  <option value="Kamis">Kamis</option>
+                  <option value="Jumat">Jumat</option>
+                   <option value="Sabtu">Sabtu</option>
+                </select>
 
-                  <div class="flex justify-end space-x-2 mt-4">
-                      <button type="button" onclick="document.getElementById('editModal').classList.add('hidden'); document.getElementById('editModal').classList.remove('flex');" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-                      <button type="button" onclick="updateJadwal()" class="bg-green-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
-                  </div>
-              </form>
+                <input id="jam_mulai" type="time" placeholder="Jam Mulai" class="border p-2 rounded">
+                <input id="jam_akhir" type="time" placeholder="Jam Akhir" class="border p-2 rounded">
+                
+                <input id="sks" type="number" placeholder="SKS" class="border p-2 rounded">
+
+                <select id="dosen" class="border p-2 rounded">
+                    <option value="" disabled selected>Pilih Dosen</option>
+                </select>
+
+                <select id="asisten" class="border p-2 rounded">
+                    <option value="" disabled selected>Pilih Asisten</option>
+                </select>
+
+                <select id="semester" class="border p-2 rounded">
+                  <option value="" disabled selected>Pilih Semester</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+
+                <select id="kelas" class="border p-2 rounded">
+                    <option value="" disabled selected>Pilih Kelas</option>
+                </select>
+
+                <select id="ruangan" class="border p-2 rounded">
+                    <option value="" disabled selected>Pilih Ruangan</option>
+                </select>
+                
+                <select id="tahun_akademik" class="border p-2 rounded col-span-1">
+                    <option value="" disabled selected>Pilih Tahun Akademik</option>
+                </select>
+              </div>
+              <button onclick="simpanJadwal()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded">Tambah</button>
+            </div>
+            
+            <div class="flex items-center mb-3 space-x-2 flex-wrap">
+              <select id="filterProdi" class="border p-2 rounded min-w-min">
+                <option value="">Semua Prodi</option>
+                 <option value="Industri">Industri</option>
+                  <option value="Sipil">Sipil</option>
+                  <option value="Arsitektur">Arsitektur</option>
+                  <option value="Elektro">Elektro</option>
+                  <option value="Informatika">Informatika</option>
+              </select>
+               <select id="filterSemester" class="border p-2 rounded min-w-min">
+                <option value="">Semua Semester</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+              </select>
+              
+              <select id="filterKelas" class="border p-2 rounded min-w-min">
+                <option value="">Semua Kelas</option>
+              </select>
+              
+              <select id="filterMataKuliah" class="border p-2 rounded min-w-min">
+                <option value="">Memuat Mata Kuliah...</option>
+              </select>
+              
+              <select id="filterDosen" class="border p-2 rounded min-w-min">
+                <option value="">Memuat Dosen...</option>
+              </select>
+              
+               <select id="filterTahunAkademik" class="border p-2 rounded min-w-min">
+                <option value="">Semua Tahun Akademik</option>
+              </select>
+              
+              <button onclick="filterData()" class="bg-blue-500 text-white rounded icon-btn" title="Terapkan Filter (Pencarian)">
+                <i class="fas fa-magnifying-glass"></i> 
+              </button>
+              <button onclick="exportExcel()" class="bg-green-500 text-white rounded icon-btn" title="Export ke Excel">
+                <i class="fas fa-file-excel"></i>
+              </button>
+              <button onclick="exportPDF()" class="bg-red-500 text-white rounded icon-btn" title="Export ke PDF">
+                <i class="fas fa-file-pdf"></i>
+              </button>
+              </div>
+            <div class="overflow-x-auto">
+              <table id="tabelJadwal" class="min-w-full border border-gray-400 text-sm">
+                <thead class="bg-gray-200">
+                  <tr>
+                    <th class="border px-2 py-1 text-center">No</th>
+                    <th class="border px-2 py-1 text-center">Tahun Akademik</th> <th class="border px-2 py-1 text-center">Kode</th>
+                    <th class="border px-2 py-1 text-left">Prodi</th>
+                    <th class="border px-2 py-1 text-center">Hari</th>
+                    <th class="border px-2 py-1 text-center">Jam Mulai</th>
+                    <th class="border px-2 py-1 text-center">Jam Akhir</th>
+                    <th class="border px-2 py-1 text-left">Mata Kuliah</th>
+                    <th class="border px-2 py-1 text-center">SKS</th>
+                    <th class="border px-2 py-1 text-left">Dosen</th>
+                    <th class="border px-2 py-1 text-left">Asisten</th>
+                    <th class="border px-2 py-1 text-center">Semester</th>
+                    <th class="border px-2 py-1 text-center">Kelas</th>
+                    <th class="border px-2 py-1 text-center">Ruangan</th>
+                    <th class="border px-2 py-1 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
-      </div>
-  </div>
-
-  <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-50">
-  </div>
 
 
-  <script>
+          <div id="editModal" class="modal">
+              <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+                  <div class="p-6">
+                      <h2 class="text-xl font-bold mb-4">Edit Detail Jadwal</h2>
+                      <form id="editForm" onsubmit="return false;">
+                          <input type="hidden" id="edit_id">
+                          <div class="grid grid-cols-3 gap-3 mb-4">
+                              
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Mata Kuliah</label>
+                                  <select id="edit_kode_matkul_search" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="" disabled selected>Cari Kode / Mata Kuliah</option>
+                                  </select>
+                              </div>
+                              
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Prodi</label>
+                                  <select id="edit_prodi" class="mt-1 block w-full border p-2 rounded">
+                                     <option value="Industri">Industri</option>
+                                     <option value="Sipil">Sipil</option>
+                                     <option value="Arsitektur">Arsitektur</option>
+                                     <option value="Elektro">Elektro</option>
+                                     <option value="Informatika">Informatika</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Hari</label>
+                                  <select id="edit_hari" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="-">-</option><option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option>
+                                      <option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
+                                  <input id="edit_jam_mulai" type="time" class="mt-1 block w-full border p-2 rounded">
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Jam Akhir</label>
+                                  <input id="edit_jam_akhir" type="time" class="mt-1 block w-full border p-2 rounded">
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">SKS</label>
+                                  <input id="edit_sks" type="number" class="mt-1 block w-full border p-2 rounded">
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Dosen</label>
+                                  <select id="edit_dosen" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="" disabled selected>Memuat...</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Asisten</label>
+                                  <select id="edit_asisten" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="" disabled selected>Memuat...</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Semester</label>
+                                  <select id="edit_semester" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                                      <option value="7">7</option><option value="8">8</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Kelas</label>
+                                  <select id="edit_kelas" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="" disabled selected>Memuat...</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label class="block text-sm font-medium text-gray-700">Ruangan</label>
+                                  <select id="edit_ruangan" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="" disabled selected>Memuat...</option>
+                                  </select>
+                              </div>
+                               <div>
+                                  <label class="block text-sm font-medium text-gray-700">Tahun Akademik</label> 
+                                  <select id="edit_tahun_akademik" class="mt-1 block w-full border p-2 rounded">
+                                      <option value="" disabled selected>Memuat...</option>
+                                  </select>
+                              </div>
+                          </div>
+
+                          <div class="flex justify-end space-x-2 mt-4">
+                              <button type="button" onclick="document.getElementById('editModal').classList.add('hidden'); document.getElementById('editModal').classList.remove('flex');" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+                              <button type="button" onclick="updateJadwal()" class="bg-green-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
+          
+          <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-50">
+          </div>
+        
+    </div>
+  </main>
+</div>
+
+<script>
     // --- Variabel Global TomSelect ---
     let tsMataKuliah;
     let tsEditMataKuliah;
@@ -395,7 +394,7 @@
     }
 
 
-    // --- Supabase setup ---
+    // --- Supabase setup (Gunakan Kunci Anda) ---
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -582,16 +581,33 @@
 
     // --- Cek login user ---
     window.onload = async () => {
-      const { data: userData } = await supabaseClient.auth.getUser();
-      const user = userData.user;
-      if (!user) {
-        alert("Silakan login dulu!"); 
-        window.location.href = "index.html";
-        return;
-      }
+      await checkAuthAndLoad();
       await loadReferences(); 
       loadData();
     };
+    
+    // --- Autentikasi dan Load Username ---
+    async function checkAuthAndLoad() {
+        const { data: userData } = await supabaseClient.auth.getUser();
+        const user = userData.user;
+        
+        if (!user) {
+            window.location.href = "index.html"; 
+            return;
+        }
+        
+        // Ambil username dari metadata
+        const { data: metadata, error: metaError } = await supabaseClient
+            .from('users_metadata')
+            .select('username')
+            .eq('user_id', user.id)
+            .single();
+
+        if (metadata && metadata.username) {
+            document.getElementById('userNameNav').textContent = `Halo, ${metadata.username}`;
+        }
+    }
+
 
     async function logout() {
       await supabaseClient.auth.signOut();
@@ -602,10 +618,15 @@
     async function loadData() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData.user;
+      
+      // Ambil user_id dari user yang sedang login
+      const userId = user ? user.id : null;
+
       const { data, error } = await supabaseClient
         .from("jadwal")
         .select("*")
-        .eq("user_id", user.id)
+        // Filter berdasarkan user_id hanya jika user login (Asumsi ini adalah data spesifik user)
+        .eq("user_id", userId) 
         .order("id", { ascending: true });
 
       if (error) {
@@ -622,6 +643,11 @@
       dataYangDitampilkan = data; 
       
       tabelBody.innerHTML = "";
+      if (data.length === 0) {
+          tabelBody.innerHTML = `<tr><td colspan="15" class="border px-2 py-3 text-center text-gray-500">Belum ada data jadwal.</td></tr>`;
+          return;
+      }
+      
       data.forEach((row, index) => {
         const prodiClass = row.prodi ? `row-${row.prodi.replace(/\s/g, '')}` : ''; 
         const tr = document.createElement("tr");
@@ -642,8 +668,8 @@
           <td class="border px-2 py-1 text-center">${row.kelas || "-"}</td>
           <td class="border px-2 py-1 text-center">${row.ruangan || "-"}</td>
           <td class="border px-2 py-1 text-center">
-            <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded text-gray-800">Edit</button>
-            <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1">Hapus</button>
+            <button onclick="editJadwal(${row.id})" class="bg-yellow-400 px-2 py-1 rounded text-gray-800 hover:bg-yellow-500 text-sm"><i class="fas fa-edit"></i> Edit</button>
+            <button onclick="hapusJadwal(${row.id})" class="bg-red-500 text-white px-2 py-1 rounded ml-1 hover:bg-red-600 text-sm"><i class="fas fa-trash-alt"></i> Hapus</button>
           </td>
         `;
         tabelBody.appendChild(tr);
@@ -661,7 +687,6 @@
         return;
       }
       
-      // Ambil nilai dari TomSelect Mata Kuliah
       const mkValue = tsMataKuliah.getValue();
       
       if (!mkValue) {
@@ -674,7 +699,7 @@
       const prodi = document.getElementById("prodi").value;
       const hari = document.getElementById("hari").value;
       
-      // AMBIL NILAI DARI TOMSELECT Dosen & Asisten
+      // Ambil nilai dari TomSelect Dosen & Asisten (harus menggunakan .tomselect)
       const dosen = document.getElementById("dosen").tomselect.getValue(); 
       const asisten = document.getElementById("asisten").tomselect.getValue();
       
@@ -713,7 +738,7 @@
       } else {
         showToast("Jadwal berhasil ditambahkan!", 'success'); 
         
-        // Reset form
+        // Reset form fields
         tsMataKuliah.setValue(''); 
         document.getElementById("dosen").tomselect.setValue(''); 
         document.getElementById("asisten").tomselect.setValue('');
@@ -736,56 +761,40 @@
         const row = semuaData.find(r => r.id === id);
         if (!row) return showToast("Data tidak ditemukan.", 'error'); 
 
-        // Nilai yang harus dipilih di TomSelect Mata Kuliah
         const mkValueToSelect = (row.kode_matkul && row.mata_kuliah) 
                                 ? `${row.kode_matkul} | ${row.mata_kuliah}` 
                                 : '';
         
-        // Ambil instance Tom-Select Mata Kuliah (menggunakan ID di modal edit)
-        const tsEditMataKuliah = document.getElementById('edit_kode_matkul_search').tomselect;
-        
-        // Ambil instance Tom-Select Dosen dan Asisten (menggunakan ID di modal edit)
+        const tsEditMataKuliahInstance = document.getElementById('edit_kode_matkul_search').tomselect;
         const tsEditDosen = document.getElementById('edit_dosen').tomselect;
         const tsEditAsisten = document.getElementById('edit_asisten').tomselect;
         
-        // **********************************************
-        // PERBAIKAN UNTUK MATA KULIAH (Sama seperti Dosen)
-        // **********************************************
-        if (tsEditMataKuliah) {
-            tsEditMataKuliah.clear(true); 
-            
-            // 1. Tambahkan Opsi Mata Kuliah jika belum ada di daftar options
-            if (mkValueToSelect && !tsEditMataKuliah.options[mkValueToSelect]) {
-                 tsEditMataKuliah.addOption({ 
+        // Mata Kuliah
+        if (tsEditMataKuliahInstance) {
+            tsEditMataKuliahInstance.clear(true); 
+            if (mkValueToSelect && !tsEditMataKuliahInstance.options[mkValueToSelect]) {
+                 tsEditMataKuliahInstance.addOption({ 
                      value: mkValueToSelect, 
                      text: mkValueToSelect,
                      kode: row.kode_matkul, 
                      nama: row.mata_kuliah 
                  });
             }
-            
-            // 2. Tetapkan nilai Mata Kuliah yang lama
-            tsEditMataKuliah.setValue(mkValueToSelect, true); 
+            tsEditMataKuliahInstance.setValue(mkValueToSelect, true); 
         }
 
-        // **********************************************
-        // PERBAIKAN UNTUK DOSEN
-        // **********************************************
+        // Dosen
         if (tsEditDosen) {
             tsEditDosen.clear(true);
-            // Tambahkan opsi Dosen jika belum ada di daftar options
             if (row.dosen && !tsEditDosen.options[row.dosen]) {
                  tsEditDosen.addOption({ value: row.dosen, text: row.dosen });
             }
             tsEditDosen.setValue(row.dosen || '', true); 
         }
         
-        // **********************************************
-        // PERBAIKAN UNTUK ASISTEN
-        // **********************************************
+        // Asisten
         if (tsEditAsisten) {
             tsEditAsisten.clear(true);
-            // Tambahkan opsi Asisten jika belum ada di daftar options
             if (row.asisten && !tsEditAsisten.options[row.asisten]) {
                  tsEditAsisten.addOption({ value: row.asisten, text: row.asisten });
             }
@@ -813,8 +822,9 @@
     async function updateJadwal() {
         const id = document.getElementById('edit_id').value;
         
-        // Ambil nilai dari TomSelect Edit Mata Kuliah
-        const mkValue = tsEditMataKuliah.getValue();
+        const tsEditMataKuliahInstance = document.getElementById('edit_kode_matkul_search').tomselect;
+        const mkValue = tsEditMataKuliahInstance.getValue();
+        
         if (!mkValue) {
              showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
              return;
@@ -888,7 +898,6 @@
         const filterDosenRaw = tsFilterDosen.getValue();
         
         let filterMataKuliah = "";
-        // Jika nilai yang dipilih bukan "Semua Mata Kuliah" (yaitu kosong), ambil NAMA mata kuliah (nama ada di indeks 1)
         if(filterMataKuliahRaw !== "") {
             // Karena format value adalah "KODE | NAMA", kita ambil NAMAnya untuk filter
             filterMataKuliah = filterMataKuliahRaw.split(' | ')[1].trim(); 
@@ -1049,12 +1058,6 @@
       doc.save(`jadwal_kuliah_${prodiJudul.replace(/\s/g, '_')}_${tahunAkademikJudul.replace(/\s/g, '_')}.pdf`);
       showToast("File PDF berhasil dibuat!", 'success'); 
     }
-  </script>
-</body>
-</html>
-
-    </div>
-  </main>
-</div>
+</script>
 </body>
 </html>
