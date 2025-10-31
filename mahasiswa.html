@@ -16,7 +16,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   
   <style>
-    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
+    /* 🚨 Definisi Style Active Anda */
+    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; } 
+    
+    /* 💡 Style Khusus untuk Sub-link Aktif (opsional, tapi disarankan untuk membedakan) */
+    .active-link-sub { background-color: #1e40af; color: white; } 
+    
+    /* 💡 Style Khusus untuk Tombol Main Link */
+    .active-link-main { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
+    
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; }
     .modal-content { max-width: 90%; max-height: 90vh; overflow-y: auto; }
   </style>
@@ -51,7 +59,7 @@
       </a>
 
       <div class="space-y-1">
-          <button id="mahasiswa-toggle" class="w-full text-left p-3 flex items-center space-x-3 text-white bg-blue-700 active-link focus:outline-none">
+          <button id="mahasiswa-toggle" class="w-full text-left p-3 flex items-center space-x-3 text-white active-link-main focus:outline-none">
               <i class="fas fa-users w-5"></i>
               <span>Data Mahasiswa</span>
               <i class="fas fa-chevron-down ml-auto transition-transform duration-300 transform" id="mahasiswa-chevron"></i>
@@ -59,7 +67,7 @@
           
           <div id="mahasiswa-submenu" class="ml-4 space-y-1 hidden">
               
-              <a href="mahasiswa.html" class="block p-3 text-sm text-white hover:bg-blue-600 transition-colors duration-150 rounded-lg active-link"> 
+              <a href="mahasiswa.html" class="block p-3 text-sm text-white hover:bg-blue-600 transition-colors duration-150 rounded-lg active-link-sub"> 
                   <i class="fas fa-user-graduate w-5 mr-2"></i>
                   <span>Biodata Mahasiswa</span>
               </a>
@@ -294,18 +302,16 @@
         const submenu = document.getElementById('mahasiswa-submenu');
         const chevron = document.getElementById('mahasiswa-chevron');
 
-        // Di halaman mahasiswa.html, submenu otomatis terbuka
-        // Jika Anda ingin submenu TIDAK terbuka otomatis, hapus 3 baris kode di bawah ini.
+        // Di halaman mahasiswa.html, submenu OTOMATIS terbuka dan chevron diputar
         submenu.classList.remove('hidden'); 
         chevron.classList.add('rotate-180');
 
-        // Event listener untuk tombol toggle
+        // Event listener untuk tombol toggle (mengizinkan tombol untuk menyembunyikan/menampilkan submenu)
         toggleButton.addEventListener('click', () => {
             submenu.classList.toggle('hidden');
             chevron.classList.toggle('rotate-180');
         });
         
-        // Memastikan sidebar terbuka pada saat load jika menggunakan Tom Select
         checkAuthAndLoad(); 
     });
     
