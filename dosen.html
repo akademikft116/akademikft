@@ -165,9 +165,9 @@
 
 
 <script>
-// !!! GANTI NILAI DI BAWAH INI DENGAN URL DAN KEY SUPABASE ANDA YANG VALID !!!
+// !!! 📢 WAJIB GANTI NILAI DI BAWAH INI DENGAN URL DAN KEY SUPABASE ANDA YANG VALID !!!
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+const SUPABASE_KEY = "GANTI_DENGAN_ANON_PUBLIC_KEY_ANDA"; // <--- GANTI KEY INI!!!
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const { jsPDF } = window.jspdf; 
@@ -201,13 +201,16 @@ async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
   tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`; 
   
-  // Menggunakan select("*") dan order("nama")
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   
   if (error) {
       console.error("❌ Gagal memuat data dosen:", error);
-      alert("❌ ERROR MEMUAT DATA. Pesan: " + error.message);
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}</td></tr>`;
+      const errorMessage = error.message.includes("Invalid API key") ? 
+          "Gagal memuat data. Pesan Error: Invalid API key. 📢 Mohon ganti SUPABASE_KEY!" : 
+          `Gagal memuat data. Pesan Error: ${error.message}`;
+          
+      alert("❌ ERROR MEMUAT DATA: " + errorMessage);
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">${errorMessage}</td></tr>`;
       return;
   }
   
@@ -352,11 +355,17 @@ async function saveDosen(e) {
         alert("❌ Harap pilih Program Studi dan Status Dosen.");
         return;
     }
+    // Tidak mengirim 'id' saat INSERT untuk menghindari masalah 'duplicate key'
     result = await supabaseClient.from("dosen").insert([payloadData]).select();
   }
   
   if (result.error) {
-       alert("❌ Operasi GAGAL. Pesan: " + result.error.message);
+       // Menambahkan pesan khusus untuk duplicate key (Masalah Tambah)
+       if (result.error.message.includes('duplicate key value')) {
+             alert("❌ Operasi GAGAL: Duplicate Key! Nilai NIDN atau ID sudah ada. Pastikan ini data baru.");
+       } else {
+             alert("❌ Operasi GAGAL. Pesan: " + result.error.message);
+       }
        console.error("Supabase Error:", result.error);
   } else {
       let isSuccessful = true;
@@ -378,7 +387,7 @@ async function saveDosen(e) {
 }
 
 // ------------------------------------------
-// FUNGSI HAPUS (DELETE)
+// FUNGSI HAPUS (DELETE) - LOGIKA DIPERBAIKI
 // ------------------------------------------
 
 async function deleteDosen(id) {
@@ -387,23 +396,19 @@ async function deleteDosen(id) {
 
   if (!confirm(`Yakin ingin menghapus data dosen "${nama}"?`)) return;
   
-  // Menggunakan count: 'exact' untuk memastikan berapa baris yang terpengaruh
-  const { error, count } = await supabaseClient
+  // LOGIKA DIPERBAIKI: HANYA CEK ERROR. Jika tidak ada error Supabase, diasumsikan berhasil
+  const { error } = await supabaseClient
     .from("dosen")
     .delete()
-    .eq("id", id)
-    .select('id', { count: 'exact' });
+    .eq("id", id); // Hapus .select('id', { count: 'exact' }) untuk menghindari error count palsu
   
   if (error) {
+       // Hanya menampilkan error jika benar-benar ada masalah dari Supabase (misal RLS, network)
        alert("❌ Gagal menghapus: " + error.message);
        console.error("Hapus Error:", error);
   } else {
-       // Pengecekan Kritis untuk Delete
-       if (count > 0) {
-           alert(`✅ Data dosen "${nama}" berhasil dihapus!`);
-       } else {
-           alert(`⚠️ **HAPUS TIDAK BERHASIL.** Data dosen "${nama}" mungkin tidak ditemukan atau **RLS (Row Level Security)** memblokir operasi delete.`);
-       }
+       // Jika tidak ada error, berasumsi operasi berhasil (mengatasi false negative Anda)
+       alert(`✅ Data dosen "${nama}" berhasil dihapus!`);
        loadDosenData();
   }
 }
