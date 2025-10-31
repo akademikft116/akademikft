@@ -195,9 +195,9 @@ function closeModal(modalId = 'dosenModal') {
 
 async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
-  // UPDATE colspan 6 -> 7
   tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`; 
   
+  // Memuat data dari Supabase
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   
   if (error) {
@@ -207,6 +207,7 @@ async function loadDosenData() {
       return;
   }
   
+  // Data berhasil dimuat, simpan ke global variable dan tampilkan
   allDosenData = data;
   renderTable(data);
 }
@@ -214,7 +215,6 @@ async function loadDosenData() {
 function renderTable(data) {
   const tbody = document.getElementById("dosen-table-body");
   if (data.length === 0) {
-      // UPDATE colspan 6 -> 7
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Data dosen tidak ditemukan.</td></tr>`;
       return;
   }
@@ -252,7 +252,7 @@ function applyFilter() {
 function resetFilter() {
     document.getElementById('filterNidn').value = '';
     document.getElementById('filterNama').value = '';
-    renderTable(allDosenData);
+    renderTable(allDosenData); // Tampilkan semua data
 }
 
 
@@ -424,5 +424,4 @@ function exportAllToPdf() {
         head: [headers],
         body: data,
         theme: 'striped',
-        styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
-        headSty
+        styles: { fontS
