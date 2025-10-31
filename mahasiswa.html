@@ -22,6 +22,11 @@
         color: white;
         border-left: 4px solid #f97316; /* orange-500 */
     }
+    /* Style untuk dropdown aktif di sidebar */
+    .active-dropdown {
+        background-color: #1f2937; /* gray-800 */
+        border-left: 4px solid #f97316; /* orange-500 */
+    }
     .main-content {
         height: calc(100vh - 4rem); /* 100vh minus tinggi header/navbar */
     }
@@ -76,11 +81,28 @@
                 <span>Penjadwalan</span>
             </a>
             
-            <a href="mahasiswa.html" class="active-link w-full text-left flex items-center space-x-3 p-3 rounded-lg transition duration-150">
-                <i class="fas fa-address-card w-5"></i>
-                <span>Data Mahasiswa</span>
-            </a>
-            
+            <div class="space-y-1">
+                <button 
+                    type="button" 
+                    id="dataMahasiswaToggle"
+                    onclick="toggleSubmenu(event)" 
+                    class="active-link w-full text-left flex items-center justify-between p-3 rounded-lg transition duration-150 cursor-pointer">
+                    <span class="flex items-center space-x-3">
+                        <i class="fas fa-address-card w-5"></i>
+                        <span>**Data Mahasiswa**</span>
+                    </span>
+                    <i class="fas fa-chevron-down text-xs transform transition-transform duration-200" id="dataMahasiswaIcon"></i>
+                </button>
+                
+                <div id="dataMahasiswaSubmenu" class="hidden pl-8 space-y-1">
+                    <a href="status_mahasiswa.html" class="w-full text-left block p-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition duration-150">
+                        <i class="fas fa-user-check mr-2"></i> **Status Mahasiswa**
+                    </a>
+                    <a href="mahasiswa.html" class="w-full text-left block p-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition duration-150">
+                        <i class="fas fa-list-alt mr-2"></i> Biodata Mahasiswa
+                    </a>
+                </div>
+            </div>
             <a href="dashboard.html#dosen" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition duration-150">
                 <i class="fas fa-user-tie w-5"></i>
                 <span>Data Dosen</span>
@@ -368,6 +390,29 @@
         });
         populateYearSelect(searchTahunSelect, true); 
     });
+
+    // --- FUNGSI BARU UNTUK NAVIGASI DROPDOWN SIDEBAR ---
+    function toggleSubmenu(event) {
+        event.preventDefault(); 
+        
+        const submenu = document.getElementById('dataMahasiswaSubmenu');
+        const icon = document.getElementById('dataMahasiswaIcon');
+        const toggleButton = document.getElementById('dataMahasiswaToggle');
+
+        if (submenu.classList.contains('hidden')) {
+            // Buka submenu
+            submenu.classList.remove('hidden');
+            icon.classList.add('rotate-180'); 
+            toggleButton.classList.add('active-dropdown');
+        } else {
+            // Tutup submenu
+            submenu.classList.add('hidden');
+            icon.classList.remove('rotate-180'); 
+            toggleButton.classList.remove('active-dropdown');
+        }
+    }
+    // --- AKHIR FUNGSI BARU UNTUK NAVIGASI DROPDOWN SIDEBAR ---
+
 
     // --- FUNGSI BANTUAN TAMPILAN ---
 
@@ -1069,6 +1114,24 @@
         if (userData) {
             document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
         }
+        
+        // Tambahkan logika untuk mempertahankan status dropdown saat reload halaman
+        const currentPath = window.location.pathname;
+        const submenu = document.getElementById('dataMahasiswaSubmenu');
+        const icon = document.getElementById('dataMahasiswaIcon');
+        const toggleButton = document.getElementById('dataMahasiswaToggle');
+        
+        // Contoh: jika URL saat ini adalah mahasiswa.html atau status_mahasiswa.html, buka dropdown
+        if (currentPath.includes('mahasiswa.html') || currentPath.includes('status_mahasiswa.html')) {
+             submenu.classList.remove('hidden');
+             icon.classList.add('rotate-180');
+             toggleButton.classList.add('active-dropdown');
+        } else {
+             submenu.classList.add('hidden');
+             icon.classList.remove('rotate-180');
+             toggleButton.classList.remove('active-dropdown');
+        }
+
 
         loadMahasiswaData(); 
     }
