@@ -113,9 +113,7 @@
         <input id="nidu" class="border p-2 rounded" placeholder="NIDU"> 
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         <input id="nama_lengkap" class="border p-2 rounded" placeholder="Nama Lengkap">
-        <input id="tgl_lahir" type="date" class="border p-2 rounded">
-        
-        <select id="prodi" class="border p-2 rounded">
+        <input id="tgl_lahir" type="date" class="border p-2 rounded"> <select id="prodi" class="border p-2 rounded">
             <option value="" disabled selected>Pilih Program Studi</option>
             <option value="Industri">Industri</option>
             <option value="Sipil">Sipil</option>
@@ -167,8 +165,9 @@
 
 
 <script>
-const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTg4OTIxMywiZXhwIjoyMDc1NDY1MjEzfQ.Ir_dG9ARBdOAwJjjHuaUDTsEK-VG4tu3O-KAsim3Hyo";
+// !!! GANTI NILAI DI BAWAH INI DENGAN URL DAN KEY SUPABASE ANDA YANG VALID !!!
+const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImexccCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const { jsPDF } = window.jspdf; 
@@ -183,7 +182,6 @@ document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 const toNullIfEmpty = (val) => {
     if (typeof val === 'string') {
         const trimmedVal = val.trim();
-        // Nilai default dari select option (nilai kosong) akan diubah menjadi null
         const isDefaultSelectValue = trimmedVal === "" || trimmedVal === "Pilih Program Studi" || trimmedVal === "Pilih Status";
         return isDefaultSelectValue ? null : trimmedVal; 
     }
@@ -198,11 +196,12 @@ async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
   tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`; 
   
+  // Menggunakan select("*") dan order("nama")
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   
   if (error) {
       console.error("❌ Gagal memuat data dosen:", error);
-      alert("❌ ERROR MEMUAT DATA. Pesan: " + error.message);
+      alert("❌ ERROR MEMUAT DATA. Pastikan CORS dan RLS di Supabase sudah diatur. Pesan: " + error.message);
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}</td></tr>`;
       return;
   }
@@ -254,17 +253,19 @@ function resetFilter() {
 }
 
 
-// FUNGSI OPEN MODAL TERBARU
+// FUNGSI OPEN MODAL TERBAIK UNTUK MENGATASI DUPLICATE KEY DAN MASALAH EDIT
 function openModal(dosen = null) {
+  // 1. Reset ID dan Form untuk mencegah Duplicate Key saat 'Tambah'
   document.getElementById("dosenForm").reset();
-  document.getElementById("dosenId").value = "";
+  document.getElementById("dosenId").value = ""; 
   document.getElementById("modalTitle").textContent = "Tambah Dosen";
   document.getElementById("prodi").value = ""; 
   document.getElementById("status").value = ""; 
   editMode = false;
   
   if (dosen) {
-    document.getElementById("dosenId").value = dosen.id;
+    // 2. Jika ada data dosen (Mode Edit), isi data
+    document.getElementById("dosenId").value = dosen.id; 
     document.getElementById("modalTitle").textContent = "Edit Dosen: " + (dosen.nama || dosen.nidn);
     document.getElementById("nidn").value = dosen.nidn || '';
     document.getElementById("nidu").value = dosen.nidu || '';
@@ -284,7 +285,7 @@ function openModal(dosen = null) {
   document.getElementById("dosenModal").style.display = "flex";
 }
 
-
+// ------------------------------------------
 // FUNGSI DETAIL & EKSPOR 
 
 function showDetail(id) {
@@ -454,7 +455,7 @@ function exportAllToExcel() {
   XLSX.writeFile(wb, "data_dosen_all.xlsx");
 }
 
-// FUNGSI SAVEDOSEN YANG DILENGKAPI UNTUK TAMBAH/EDIT
+// FUNGSI SAVEDOSEN FINAL UNTUK TAMBAH/EDIT
 async function saveDosen(e) {
   e.preventDefault();
   
@@ -507,7 +508,7 @@ async function saveDosen(e) {
   }
 }
 
-// FUNGSI EDITDOSEN YANG DIPERBAIKI UNTUK MEMANGGIL OPENMODAL DENGAN DATA
+// FUNGSI EDITDOSEN YANG MEMANGGIL OPENMODAL DENGAN DATA
 function editDosen(id) {
     const dosen = allDosenData.find(d => d.id == id);
     if (!dosen) {
@@ -517,7 +518,7 @@ function editDosen(id) {
     openModal(dosen); 
 }
 
-// FUNGSI DELETEDOSEN YANG DILENGKAPI
+// FUNGSI DELETEDOSEN FINAL
 async function deleteDosen(id) {
   const dosen = allDosenData.find(d => d.id == id);
   const nama = dosen ? dosen.nama || dosen.nidn : 'ini';
