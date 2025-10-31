@@ -110,7 +110,8 @@
       <input type="hidden" id="dosenId">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <input id="nidn" class="border p-2 rounded" placeholder="NIDN">
-        <input id="nidu" class="border p-2 rounded" placeholder="NIDU"> <input id="nik" class="border p-2 rounded" placeholder="NIK">
+        <input id="nidu" class="border p-2 rounded" placeholder="NIDU"> 
+        <input id="nik" class="border p-2 rounded" placeholder="NIK">
         <input id="nama_lengkap" class="border p-2 rounded" placeholder="Nama Lengkap">
         <input id="tgl_lahir" type="date" class="border p-2 rounded">
         
@@ -167,7 +168,7 @@
 
 <script>
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImexccCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const { jsPDF } = window.jspdf; 
@@ -182,7 +183,7 @@ document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 const toNullIfEmpty = (val) => {
     if (typeof val === 'string') {
         const trimmedVal = val.trim();
-        // Cek input text kosong atau nilai default dari select option
+        // Nilai default dari select option (nilai kosong) akan diubah menjadi null
         const isDefaultSelectValue = trimmedVal === "" || trimmedVal === "Pilih Program Studi" || trimmedVal === "Pilih Status";
         return isDefaultSelectValue ? null : trimmedVal; 
     }
@@ -197,7 +198,6 @@ async function loadDosenData() {
   const tbody = document.getElementById("dosen-table-body");
   tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`; 
   
-  // Memuat data dari Supabase
   const { data, error } = await supabaseClient.from("dosen").select("*").order("nama");
   
   if (error) {
@@ -207,7 +207,6 @@ async function loadDosenData() {
       return;
   }
   
-  // Data berhasil dimuat, simpan ke global variable dan tampilkan
   allDosenData = data;
   renderTable(data);
 }
@@ -229,13 +228,12 @@ function renderTable(data) {
       <td class="px-6 py-4 text-center space-x-2">
         <button class="text-blue-600 hover:text-blue-800" onclick="showDetail('${d.id}')" title="Detail"><i class="fas fa-eye"></i></button>
         <button class="text-yellow-600 hover:text-yellow-800" onclick="editDosen('${d.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-        <button class="text-red-600 hover:text-red-800" onclick="deleteDosen('${d.id}', '${d.nama || d.nidn}')" title="Hapus"><i class="fas fa-trash"></i></button>
+        <button class="text-red-600 hover:text-red-800" onclick="deleteDosen('${d.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
       </td>
     </tr>`).join('');
 }
 
 
-// --- FUNGSI FILTERING ---
 function applyFilter() {
     const filterNidn = document.getElementById('filterNidn').value.toLowerCase();
     const filterNama = document.getElementById('filterNama').value.toLowerCase();
@@ -252,10 +250,11 @@ function applyFilter() {
 function resetFilter() {
     document.getElementById('filterNidn').value = '';
     document.getElementById('filterNama').value = '';
-    renderTable(allDosenData); // Tampilkan semua data
+    renderTable(allDosenData); 
 }
 
 
+// FUNGSI OPEN MODAL TERBARU
 function openModal(dosen = null) {
   document.getElementById("dosenForm").reset();
   document.getElementById("dosenId").value = "";
@@ -270,8 +269,8 @@ function openModal(dosen = null) {
     document.getElementById("nidn").value = dosen.nidn || '';
     document.getElementById("nidu").value = dosen.nidu || '';
     document.getElementById("nik").value = dosen.nik || '';
-    document.getElementById("nama_lengkap").value = dosen.nama || ''; // Menggunakan 'nama' di DB, 'nama_lengkap' di form
-    document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || '';
+    document.getElementById("nama_lengkap").value = dosen.nama || ''; 
+    document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ''; 
     document.getElementById("prodi").value = dosen.prodi || '';
     document.getElementById("pangkat").value = dosen.pangkat_golongan || '';
     document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || '';
@@ -285,7 +284,7 @@ function openModal(dosen = null) {
   document.getElementById("dosenModal").style.display = "flex";
 }
 
-// ------------------------------------------
+
 // FUNGSI DETAIL & EKSPOR 
 
 function showDetail(id) {
@@ -344,11 +343,10 @@ function getDetailDataForExport() {
     ];
 }
 
-// FUNGSI EKSPOR PDF DARI DETAIL
 function exportDetailToPdf() {
     if (!currentDosenDetail) return alert("Tidak ada data detail untuk diekspor.");
     
-    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet, hard refresh, atau deklarasi variabel.");
+    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat.");
 
     const doc = new jsPDF();
     const data = getDetailDataForExport();
@@ -373,7 +371,6 @@ function exportDetailToPdf() {
     doc.save(namaFile);
 }
 
-// FUNGSI EKSPOR EXCEL DARI DETAIL
 function exportDetailToExcel() {
     if (!currentDosenDetail) return alert("Tidak ada data detail untuk diekspor.");
     
@@ -390,20 +387,17 @@ function exportDetailToExcel() {
     XLSX.writeFile(wb, `Detail Dosen - ${currentDosenDetail.nama || 'Data'}.xlsx`);
 }
 
-// FUNGSI EKSPOR SEMUA DATA KE PDF
 function exportAllToPdf() {
     if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
-    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat. Cek koneksi internet, hard refresh, atau deklarasi variabel.");
+    if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat.");
 
-    const doc = new jsPDF('l', 'mm', 'a4'); // 'l' untuk Landscape
+    const doc = new jsPDF('l', 'mm', 'a4'); 
     
-    // UPDATE: Tambahkan NIDU di index 1
     const headers = ["NIDN","NIDU","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"]; 
     
-    // UPDATE: Tambahkan d.nidu di data mapping
     const data = allDosenData.map(d => [
         d.nidn || '-', 
-        d.nidu || '-', // BARU
+        d.nidu || '-', 
         d.nik || '-', 
         d.nama || '-', 
         d.tanggal_lahir || '-', 
@@ -424,4 +418,128 @@ function exportAllToPdf() {
         head: [headers],
         body: data,
         theme: 'striped',
-        styles: { fontS
+        styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
+        headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' }, 
+        columnStyles: {
+            0: { cellWidth: 14 }, 
+            1: { cellWidth: 14 }, 
+            2: { cellWidth: 20 }, 
+            3: { cellWidth: 35 }, 
+            4: { cellWidth: 18 }, 
+            5: { cellWidth: 25 }, 
+            6: { cellWidth: 25 }, 
+            7: { cellWidth: 25 }, 
+            8: { cellWidth: 20 }, 
+            9: { cellWidth: 15 }, 
+            10: { cellWidth: 20 }, 
+            11: { cellWidth: 50 }, 
+        }
+    });
+
+    doc.save("data_dosen_all.pdf");
+}
+
+function exportAllToExcel() {
+  if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
+  
+  const headers = ["NIDN","NIDU","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
+  
+  const rows = allDosenData.map(d=>[
+    d.nidn, d.nidu, d.nik, d.nama, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status
+  ]);
+  
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, "Dosen");
+  XLSX.writeFile(wb, "data_dosen_all.xlsx");
+}
+
+// FUNGSI SAVEDOSEN YANG DILENGKAPI UNTUK TAMBAH/EDIT
+async function saveDosen(e) {
+  e.preventDefault();
+  
+  const dosenData = {
+    nidn: toNullIfEmpty(document.getElementById("nidn").value), 
+    nidu: toNullIfEmpty(document.getElementById("nidu").value), 
+    nik: toNullIfEmpty(document.getElementById("nik").value),
+    nama: toNullIfEmpty(document.getElementById("nama_lengkap").value), 
+    tanggal_lahir: toNullIfEmpty(document.getElementById("tgl_lahir").value), 
+    prodi: toNullIfEmpty(document.getElementById("prodi").value),
+    pangkat_golongan: toNullIfEmpty(document.getElementById("pangkat").value),
+    jabatan_fungsional: toNullIfEmpty(document.getElementById("jabatan_fungsional").value),
+    pendidikan_terakhir: toNullIfEmpty(document.getElementById("pendidikan_terakhir").value),
+    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
+    status: toNullIfEmpty(document.getElementById("status").value),
+    alamat: toNullIfEmpty(document.getElementById("alamat").value),
+  };
+  
+  if (!dosenData.nidn && !dosenData.nama) {
+      alert("❌ Mohon isi setidaknya NIDN atau Nama Dosen.");
+      return;
+  }
+
+  const payloadData = Object.fromEntries(
+    Object.entries(dosenData).filter(([k, v]) => v !== undefined)
+  );
+
+  let result;
+  if (editMode) {
+    result = await supabaseClient
+      .from("dosen")
+      .update(payloadData)
+      .eq("id", document.getElementById("dosenId").value)
+      .select();
+  } else {
+    if (!payloadData.prodi || !payloadData.status) {
+        alert("❌ Harap pilih Program Studi dan Status Dosen.");
+        return;
+    }
+    result = await supabaseClient.from("dosen").insert([payloadData]).select();
+  }
+  
+  if (result.error) {
+       alert("❌ Operasi GAGAL. Pesan: " + result.error.message);
+       console.error("Supabase Error:", result.error);
+  } else {
+      alert(editMode ? "✅ Data dosen berhasil diperbarui!" : "✅ Dosen baru berhasil ditambahkan!");
+      closeModal('dosenModal');
+      loadDosenData(); 
+  }
+}
+
+// FUNGSI EDITDOSEN YANG DIPERBAIKI UNTUK MEMANGGIL OPENMODAL DENGAN DATA
+function editDosen(id) {
+    const dosen = allDosenData.find(d => d.id == id);
+    if (!dosen) {
+        alert("Data dosen tidak ditemukan.");
+        return;
+    }
+    openModal(dosen); 
+}
+
+// FUNGSI DELETEDOSEN YANG DILENGKAPI
+async function deleteDosen(id) {
+  const dosen = allDosenData.find(d => d.id == id);
+  const nama = dosen ? dosen.nama || dosen.nidn : 'ini';
+
+  if (!confirm(`Yakin ingin menghapus data dosen "${nama}"?`)) return;
+  
+  const { error } = await supabaseClient.from("dosen").delete().eq("id", id);
+  
+  if (error) {
+       alert("❌ Gagal menghapus: " + error.message);
+       console.error("Hapus Error:", error);
+  } else {
+       alert(`✅ Data dosen "${nama}" berhasil dihapus!`);
+       loadDosenData();
+  }
+}
+
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
