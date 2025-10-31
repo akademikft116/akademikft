@@ -182,6 +182,7 @@ document.getElementById("dosenForm").addEventListener("submit", saveDosen);
 const toNullIfEmpty = (val) => {
     if (typeof val === 'string') {
         const trimmedVal = val.trim();
+        // Cek jika string kosong atau masih mengandung nilai default dari select
         const isDefaultSelectValue = trimmedVal === "" || trimmedVal === "Pilih Program Studi" || trimmedVal === "Pilih Status";
         return isDefaultSelectValue ? null : trimmedVal; 
     }
@@ -201,7 +202,7 @@ async function loadDosenData() {
   
   if (error) {
       console.error("❌ Gagal memuat data dosen:", error);
-      alert("❌ ERROR MEMUAT DATA. Pastikan CORS dan RLS di Supabase sudah diatur. Pesan: " + error.message);
+      alert("❌ ERROR MEMUAT DATA. Pesan: " + error.message);
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data. Pesan Error: ${error.message}</td></tr>`;
       return;
   }
@@ -253,7 +254,12 @@ function resetFilter() {
 }
 
 
-// FUNGSI OPEN MODAL TERBAIK UNTUK MENGATASI DUPLICATE KEY DAN MASALAH EDIT
+/**
+ * FUNGSI OPEN MODAL TERBAIK UNTUK MENGATASI DUPLICATE KEY DAN MASALAH EDIT
+ * Dosen yang diload:
+ * - Memastikan dosenId direset saat mode Tambah
+ * - Menggunakan 'dosen.kolom || ""' untuk menangani nilai NULL/Undefined dari database
+ */
 function openModal(dosen = null) {
   // 1. Reset ID dan Form untuk mencegah Duplicate Key saat 'Tambah'
   document.getElementById("dosenForm").reset();
@@ -267,18 +273,25 @@ function openModal(dosen = null) {
     // 2. Jika ada data dosen (Mode Edit), isi data
     document.getElementById("dosenId").value = dosen.id; 
     document.getElementById("modalTitle").textContent = "Edit Dosen: " + (dosen.nama || dosen.nidn);
+    
+    // Memuat data ke input form, menggunakan fallback string kosong ('')
     document.getElementById("nidn").value = dosen.nidn || '';
     document.getElementById("nidu").value = dosen.nidu || '';
     document.getElementById("nik").value = dosen.nik || '';
     document.getElementById("nama_lengkap").value = dosen.nama || ''; 
+    // PENTING: tgl_lahir HARUS dalam format YYYY-MM-DD
     document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ''; 
+    
+    // PENTING: Select/Dropdown harus diisi dengan nilai yang SAMA PERSIS dengan option value
     document.getElementById("prodi").value = dosen.prodi || '';
+    document.getElementById("status").value = dosen.status || '';
+    
     document.getElementById("pangkat").value = dosen.pangkat_golongan || '';
     document.getElementById("jabatan_fungsional").value = dosen.jabatan_fungsional || '';
     document.getElementById("pendidikan_terakhir").value = dosen.pendidikan_terakhir || '';
     document.getElementById("no_telp").value = dosen.no_telp || '';
-    document.getElementById("status").value = dosen.status || '';
     document.getElementById("alamat").value = dosen.alamat || '';
+    
     editMode = true;
   }
   
@@ -479,6 +492,7 @@ async function saveDosen(e) {
       return;
   }
 
+  // Filter data untuk menghapus nilai undefined (yang tidak seharusnya terjadi jika toNullIfEmpty bekerja)
   const payloadData = Object.fromEntries(
     Object.entries(dosenData).filter(([k, v]) => v !== undefined)
   );
@@ -491,6 +505,7 @@ async function saveDosen(e) {
       .eq("id", document.getElementById("dosenId").value)
       .select();
   } else {
+    // Validasi dasar saat mode tambah
     if (!payloadData.prodi || !payloadData.status) {
         alert("❌ Harap pilih Program Studi dan Status Dosen.");
         return;
