@@ -443,7 +443,7 @@
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // WAJIB DIGANTI: Dapatkan URL dan ANON KEY dari Dashboard Supabase Anda (Settings > API)
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; // <-- GANTI INI
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; // <-- GANTI INI
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -859,69 +859,6 @@
         if (tahun) {
             query = query.eq('tahun_masuk', tahun);
         }
-      
-async function editMahasiswa(mahasiswaId) {
-    const { data: mhs, error } = await supabaseClient
-        .from('mahasiswa')
-        .select('*')
-        .eq('id', mahasiswaId)
-        .single();
-
-    if (error || !mhs) {
-        alert('❌ Data tidak ditemukan untuk diedit. Pastikan koneksi Supabase benar dan RLS SELECT diizinkan.');
-        console.error("Error fetching data for edit:", error);
-        return;
-    }
-    
-    showMainTab('crud'); 
-    hideList(); 
-    document.getElementById('mahasiswa-container').classList.remove('hidden'); 
-    
-    // --- PENGISIAN FORM EDIT ---
-    document.getElementById('mahasiswaId').value = mhs.id || '';
-    document.getElementById('npm').value = mhs.npm || '';
-    document.getElementById('nama').value = mhs.nama || '';
-    
-    // Tom Selects (Menggunakan try...catch untuk menangani jika Tom Select belum sepenuhnya siap)
-    try {
-        prodiSelect.setValue(mhs.prodi || '');
-        // Pastikan tahun masuk diubah menjadi string karena Tom Select butuh string/angka sesuai opsi value
-        tahunMasukSelect.setValue(mhs.tahun_masuk ? String(mhs.tahun_masuk) : '');
-        statusSelect.setValue(mhs.status || ''); 
-    } catch (e) {
-        console.warn("Gagal mengisi Tom Select, mungkin karena data null atau inisialisasi belum selesai:", e);
-        // Fallback untuk standard select jika Tom Select gagal
-        document.getElementById('prodi').value = mhs.prodi || '';
-        document.getElementById('tahunmasuk').value = mhs.tahun_masuk || '';
-        document.getElementById('status').value = mhs.status || '';
-    }
-
-    // Standard inputs (Menggunakan operator OR || untuk default string kosong)
-    document.getElementById('kelas').value = mhs.kelas || '';
-    document.getElementById('jenisKelamin').value = mhs.jenis_kelamin || ''; 
-    document.getElementById('nik').value = mhs.nik_mahasiswa || '';
-    document.getElementById('nohp').value = mhs.no_hp || '';
-    document.getElementById('nomorIjazah').value = mhs.nomor_ijazah || ''; 
-    document.getElementById('judulskripsi').value = mhs.judul_skripsi || '';
-    
-    // Personal data
-    document.getElementById('namaayah').value = mhs.nama_ayah || '';
-    document.getElementById('namaibu').value = mhs.nama_ibu || '';
-    document.getElementById('ttl').value = mhs.ttl || '';
-    document.getElementById('alamat').value = mhs.alamat || '';
-    document.getElementById('kelurahan').value = mhs.kelurahan || '';
-    document.getElementById('kecamatan').value = mhs.kecamatan || '';
-    
-    // UBAH MODE KE EDIT
-    isEditMode = true;
-    currentMahasiswaId = mhs.id;
-    document.getElementById('formTitle').textContent = `Edit Data Mahasiswa: ${mhs.nama}`;
-    document.getElementById('submit-btn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update Data';
-    
-    // Pindah ke tab Akademik dan scroll
-    switchFormTab('akademik');
-    document.getElementById('mahasiswaForm').scrollIntoView({ behavior: 'smooth' });
-}
 
         const { data: mahasiswaData, error } = await query.order('npm', { ascending: true });
 
@@ -1071,8 +1008,8 @@ async function editMahasiswa(mahasiswaId) {
         document.getElementById('kelurahan').value = mhs.kelurahan || '';
         document.getElementById('kecamatan').value = mhs.kecamatan || '';
         
-       // UBAH MODE KE EDIT
-        isEditMode = true; 
+        // UBAH MODE KE EDIT
+        isEditMode = true;
         currentMahasiswaId = mhs.id;
         document.getElementById('formTitle').textContent = `Edit Data Mahasiswa: ${mhs.nama}`;
         document.getElementById('submit-btn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update Data';
