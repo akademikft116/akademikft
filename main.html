@@ -11,6 +11,7 @@
   <style>
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
     .main-content { height: calc(100vh - 4rem); }
+    
     /* Tambahan Style dari blok tengah */
     body {
         background-image: url('kosong.jpeg'); 
@@ -41,6 +42,56 @@
         padding: 0.5rem !important;
         min-height: 2.5rem !important; 
     }
+
+    /* 🚨 CSS UTAMA UNTUK MEMADATKAN TABEL DATA DI LAYAR KECIL 🚨 */
+    
+    /* Media Query untuk Tampilan Mobile/Kecil (Lebar layar <= 768px) */
+    @media screen and (max-width: 768px) {
+        /* Sembunyikan elemen scroll utama pada tabel di layar kecil */
+        .overflow-x-auto {
+            overflow-x: hidden !important; /* Mencegah scroll horizontal */
+        }
+
+        /* Terapkan font yang sangat kecil dan padding minimal untuk tabel data */
+        #tabelJadwal {
+            font-size: 0.65rem !important; /* Font size sangat kecil (sekitar 10-11px) */
+            table-layout: fixed; /* Memastikan lebar kolom ditetapkan */
+            width: 100%;
+        }
+
+        /* Kurangi padding dan pastikan teks tidak memakan banyak ruang */
+        #tabelJadwal th, 
+        #tabelJadwal td {
+            padding: 2px 1px !important; /* Padding sangat tipis */
+            white-space: normal !important; /* Izinkan teks wrap */
+            word-wrap: break-word; 
+            overflow: hidden; 
+        }
+        
+        /* Mengatur lebar kolom agar pas di layar (Total harus 100%) */
+        #tabelJadwal th:nth-child(1), #tabelJadwal td:nth-child(1) { width: 4%; } /* No */
+        #tabelJadwal th:nth-child(2), #tabelJadwal td:nth-child(2) { width: 10%; } /* TA */
+        #tabelJadwal th:nth-child(3), #tabelJadwal td:nth-child(3) { width: 8%; } /* Kode */
+        #tabelJadwal th:nth-child(4), #tabelJadwal td:nth-child(4) { width: 8%; } /* Prodi */
+        #tabelJadwal th:nth-child(5), #tabelJadwal td:nth-child(5) { width: 5%; } /* Hari */
+        #tabelJadwal th:nth-child(6), #tabelJadwal td:nth-child(6) { width: 5%; } /* Mulai */
+        #tabelJadwal th:nth-child(7), #tabelJadwal td:nth-child(7) { width: 5%; } /* Akhir */
+        #tabelJadwal th:nth-child(8), #tabelJadwal td:nth-child(8) { width: 18%; } /* Mata Kuliah */
+        #tabelJadwal th:nth-child(9), #tabelJadwal td:nth-child(9) { width: 4%; } /* SKS */
+        #tabelJadwal th:nth-child(10), #tabelJadwal td:nth-child(10) { width: 10%; } /* Dosen */
+        #tabelJadwal th:nth-child(11), #tabelJadwal td:nth-child(11) { width: 7%; } /* Asisten */
+        #tabelJadwal th:nth-child(12), #tabelJadwal td:nth-child(12) { width: 4%; } /* Semester */
+        #tabelJadwal th:nth-child(13), #tabelJadwal td:nth-child(13) { width: 4%; } /* Kelas */
+        #tabelJadwal th:nth-child(14), #tabelJadwal td:nth-child(14) { width: 6%; } /* Ruangan */
+        #tabelJadwal th:nth-child(15), #tabelJadwal td:nth-child(15) { width: 8%; } /* Aksi */
+        
+        /* Tombol Aksi juga dikecilkan */
+        #tabelJadwal td button {
+            padding: 1px 3px !important;
+            font-size: 0.6rem !important;
+        }
+    }
+
   </style>
 </head>
 <body class="bg-gray-100">
@@ -51,7 +102,7 @@
     <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
   </div>
   <div class="flex items-center space-x-4">
-    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT">Halo, AkademikFT</span>
   </div>
 </nav>
 
@@ -576,6 +627,16 @@
         window.location.href = "index.html";
         return;
       }
+      // Cek apakah ada placeholder untuk user name dan update
+      const userNameElement = document.getElementById('userNameNav');
+      if (userNameElement && user.email) {
+          // Asumsi nama pengguna adalah bagian sebelum '@' di email
+          const defaultUsername = 'AkademikFT'; 
+          const namePart = user.email.split('@')[0];
+          const displayUsername = namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase(); // Kapitalisasi huruf pertama
+          userNameElement.textContent = `Halo, ${displayUsername}`;
+      }
+      
       await loadReferences(); 
       loadData();
     };
@@ -619,8 +680,8 @@
           <td class="border px-2 py-1 text-center">${row.kode_matkul || "-"}</td>
           <td class="border px-2 py-1 text-left">${row.prodi || "-"}</td>
           <td class="border px-2 py-1 text-center">${row.hari || "-"}</td>
-          <td class="border px-2 py-1 text-center">${row.jam_mulai || "-"}</td>
-          <td class="border px-2 py-1 text-center">${row.jam_akhir || "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.jam_mulai ? row.jam_mulai.slice(0, 5) : "-"}</td>
+          <td class="border px-2 py-1 text-center">${row.jam_akhir ? row.jam_akhir.slice(0, 5) : "-"}</td>
           <td class="border px-2 py-1 text-left">${row.mata_kuliah || "-"}</td>
           <td class="border px-2 py-1 text-center">${row.sks || "-"}</td>
           <td class="border px-2 py-1 text-left">${row.dosen || "-"}</td>
@@ -669,11 +730,18 @@
       const kelas = document.getElementById("kelas").value;
       const ruangan = document.getElementById("ruangan").value;
       const sks = document.getElementById("sks").value;
+      const jam_mulai = document.getElementById("jam_mulai").value;
+      const jam_akhir = document.getElementById("jam_akhir").value;
       const tahun_akademik = document.getElementById("tahun_akademik").value; 
 
-      if (!prodi || !hari || !semester || !dosen || !kelas || !ruangan || !sks || !tahun_akademik) {
+      if (!prodi || !hari || !semester || !dosen || !kelas || !ruangan || !sks || !tahun_akademik || !jam_mulai || !jam_akhir) {
         showToast("Semua kolom wajib diisi!", 'warning'); 
         return;
+      }
+      
+      if (jam_mulai >= jam_akhir) {
+          showToast("Jam Mulai harus lebih awal dari Jam Akhir!", 'error');
+          return;
       }
 
       const jadwal = {
@@ -682,8 +750,8 @@
         mata_kuliah: nama, 
         prodi: prodi,
         hari: hari,
-        jam_mulai: document.getElementById("jam_mulai").value,
-        jam_akhir: document.getElementById("jam_akhir").value,
+        jam_mulai: jam_mulai,
+        jam_akhir: jam_akhir,
         sks: parseInt(sks), 
         dosen: dosen,
         asisten: asisten || "-", // Asisten bisa kosong
@@ -693,17 +761,16 @@
         tahun_akademik: tahun_akademik
       };
 
-      // Cek apakah ada duplikasi jadwal
+      // Cek apakah ada duplikasi jadwal (Konflik)
       const isConflict = semuaData.some(item => {
         // Logika sederhana: hari, ruangan, dan jam yang sama
-        if (item.hari === jadwal.hari && item.ruangan === jadwal.ruangan) {
-            // Cek jika jam berpotongan
+        if (item.hari === jadwal.hari && item.ruangan === jadwal.ruangan && item.tahun_akademik === jadwal.tahun_akademik) {
+            // Cek jika jam berpotongan: (Start1 < End2) AND (End1 > Start2)
             const start1 = jadwal.jam_mulai;
             const end1 = jadwal.jam_akhir;
             const start2 = item.jam_mulai;
             const end2 = item.jam_akhir;
 
-            // Jika (Start1 < End2) AND (End1 > Start2) maka ada konflik
             if (start1 < end2 && end1 > start2) {
                 return true; 
             }
@@ -712,11 +779,11 @@
       });
 
       if (isConflict) {
-         showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama.", 'error');
+         showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama di Tahun Akademik yang sama.", 'error');
          return; 
       }
       
-      const { data, error } = await supabaseClient
+      const { error } = await supabaseClient
         .from("jadwal")
         .insert([jadwal]);
 
@@ -728,7 +795,7 @@
       
       showToast("Jadwal berhasil ditambahkan!", 'success'); 
       
-      // Kosongkan form
+      // Kosongkan form setelah sukses
       tsMataKuliah.setValue('');
       document.getElementById("prodi").value = "";
       document.getElementById("hari").value = "";
@@ -807,13 +874,21 @@
         }
         const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
         
+        const jam_mulai = document.getElementById("edit_jam_mulai").value;
+        const jam_akhir = document.getElementById("edit_jam_akhir").value;
+        
+        if (jam_mulai >= jam_akhir) {
+            showToast("Jam Mulai harus lebih awal dari Jam Akhir!", 'error');
+            return;
+        }
+        
         const updatedJadwal = {
             kode_matkul: kode, 
             mata_kuliah: nama, 
             prodi: document.getElementById("edit_prodi").value,
             hari: document.getElementById("edit_hari").value,
-            jam_mulai: document.getElementById("edit_jam_mulai").value,
-            jam_akhir: document.getElementById("edit_jam_akhir").value,
+            jam_mulai: jam_mulai,
+            jam_akhir: jam_akhir,
             sks: parseInt(document.getElementById("edit_sks").value),
             dosen: document.getElementById("edit_dosen").tomselect.getValue(), 
             asisten: document.getElementById("edit_asisten").tomselect.getValue() || "-",
@@ -822,17 +897,18 @@
             ruangan: document.getElementById("edit_ruangan").value,
             tahun_akademik: document.getElementById("edit_tahun_akademik").value
         };
-
+        
         // Cek Konflik (dengan mengecualikan data yang sedang di-edit)
         const isConflict = semuaData.some(item => {
             if (item.id === parseInt(id)) return false; // Abaikan data saat ini
             
-            if (item.hari === updatedJadwal.hari && item.ruangan === updatedJadwal.ruangan) {
+            if (item.hari === updatedJadwal.hari && item.ruangan === updatedJadwal.ruangan && item.tahun_akademik === updatedJadwal.tahun_akademik) {
                 const start1 = updatedJadwal.jam_mulai;
                 const end1 = updatedJadwal.jam_akhir;
                 const start2 = item.jam_mulai;
                 const end2 = item.jam_akhir;
 
+                // Cek jika jam berpotongan: (Start1 < End2) AND (End1 > Start2)
                 if (start1 < end2 && end1 > start2) {
                     return true; 
                 }
@@ -841,7 +917,7 @@
         });
 
         if (isConflict) {
-            showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama.", 'error');
+            showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama di Tahun Akademik yang sama.", 'error');
             return; 
         }
 
@@ -881,7 +957,7 @@
             
             // Filter Mata Kuliah
             if (mkValue) {
-                const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
+                const [kode] = mkValue.split(' | ').map(s => s.trim());
                 if (item.kode_matkul !== kode) passes = false;
             }
             
@@ -917,8 +993,8 @@
             item.kode_matkul,
             item.prodi,
             item.hari,
-            item.jam_mulai,
-            item.jam_akhir,
+            item.jam_mulai ? item.jam_mulai.slice(0, 5) : "-",
+            item.jam_akhir ? item.jam_akhir.slice(0, 5) : "-",
             item.mata_kuliah,
             item.sks,
             item.dosen,
@@ -973,8 +1049,8 @@
             kode_matkul: item.kode_matkul,
             prodi: item.prodi,
             hari: item.hari,
-            jam_mulai: item.jam_mulai,
-            jam_akhir: item.jam_akhir,
+            jam_mulai: item.jam_mulai ? item.jam_mulai.slice(0, 5) : "-",
+            jam_akhir: item.jam_akhir ? item.jam_akhir.slice(0, 5) : "-",
             mata_kuliah: item.mata_kuliah,
             sks: item.sks,
             dosen: item.dosen,
