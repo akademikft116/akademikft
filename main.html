@@ -6,70 +6,12 @@
   <title>Manajemen Penjadwalan - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+  
   <style>
     .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
     .main-content { height: calc(100vh - 4rem); }
-  </style>
-</head>
-<body class="bg-gray-100">
-
-<!-- 🔹 Navbar -->
-<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
-  <div class="flex items-center space-x-3">
-    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
-    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
-  </div>
-  <div class="flex items-center space-x-4">
-    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
-  </div>
-</nav>
-
-<div class="flex pt-16 main-content">
-  <!-- 🔹 Sidebar -->
-  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
-    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-       <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span></a>
-      <a href="main.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
-        <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
-      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
-      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
-      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-book w-5"></i><span>Mata Kuliah</span></a>
-      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
-    </nav>
-    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
-      <p>&copy; 2025 Akademik FT</p>
-      <p>Designed by Rifqi & Alfi</p>
-       <p>ABD</p>
-    </div>
-  </aside>
-
-  <!-- 🔹 Main Content -->
-  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
-    <div class="container mx-auto">
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jadwal Kuliah</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/cd8kF+5p9j0z9/bW5gB5zU1l4f5k8qC3Z5E9Qy6A5CM41vzapQJoB1MvJkPQE03o" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  
-  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
-
-  <style>
-    /* ... (Style yang sudah ada) ... */
+    /* Tambahan Style dari blok tengah */
     body {
         background-image: url('kosong.jpeg'); 
         background-size: cover; 
@@ -100,8 +42,44 @@
         min-height: 2.5rem !important; 
     }
   </style>
-  </head>
+</head>
 <body class="bg-gray-100">
+
+<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+  <div class="flex items-center space-x-3">
+    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
+  </div>
+  <div class="flex items-center space-x-4">
+    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+  </div>
+</nav>
+
+<div class="flex pt-16 main-content">
+  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
+    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+       <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span></a>
+      <a href="main.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
+        <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
+      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
+      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
+      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-book w-5"></i><span>Mata Kuliah</span></a>
+      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
+    </nav>
+    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+      <p>&copy; 2025 Akademik FT</p>
+      <p>Designed by Rifqi & Alfi</p>
+       <p>ABD</p>
+    </div>
+  </aside>
+
+  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+    <div class="container mx-auto">
 
 <div class="max-w-6xl mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
     <h1 class="text-2xl font-bold mb-4">Manajemen Jadwal Kuliah</h1>
@@ -339,9 +317,17 @@
 
   <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-50">
   </div>
+</div>
+  </main>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.js"></script> 
 
-  <script>
+<script>
     // --- Variabel Global TomSelect ---
     let tsMataKuliah;
     let tsEditMataKuliah;
@@ -698,364 +684,334 @@
         hari: hari,
         jam_mulai: document.getElementById("jam_mulai").value,
         jam_akhir: document.getElementById("jam_akhir").value,
-        sks: parseInt(sks),
+        sks: parseInt(sks), 
         dosen: dosen,
-        asisten: asisten,
-        semester: semester,
+        asisten: asisten || "-", // Asisten bisa kosong
+        semester: parseInt(semester),
         kelas: kelas,
         ruangan: ruangan,
-        tahun_akademik: tahun_akademik,
+        tahun_akademik: tahun_akademik
       };
 
-      const { error } = await supabaseClient.from("jadwal").insert([jadwal]);
-      if (error) {
-        console.error(error);
-        showToast("Gagal menambah jadwal: " + error.message, 'error'); 
-      } else {
-        showToast("Jadwal berhasil ditambahkan!", 'success'); 
-        
-        // Reset form
-        tsMataKuliah.setValue(''); 
-        document.getElementById("dosen").tomselect.setValue(''); 
-        document.getElementById("asisten").tomselect.setValue('');
+      // Cek apakah ada duplikasi jadwal
+      const isConflict = semuaData.some(item => {
+        // Logika sederhana: hari, ruangan, dan jam yang sama
+        if (item.hari === jadwal.hari && item.ruangan === jadwal.ruangan) {
+            // Cek jika jam berpotongan
+            const start1 = jadwal.jam_mulai;
+            const end1 = jadwal.jam_akhir;
+            const start2 = item.jam_mulai;
+            const end2 = item.jam_akhir;
 
-        document.getElementById("sks").value = '';
-        document.getElementById("jam_mulai").value = '';
-        document.getElementById("jam_akhir").value = '';
-        document.getElementById("prodi").value = '';
-        document.getElementById("hari").value = '';
-        document.getElementById("semester").value = '';
-        document.getElementById("kelas").value = '';
-        document.getElementById("ruangan").value = '';
-        document.getElementById("tahun_akademik").value = '';
-        loadData();
+            // Jika (Start1 < End2) AND (End1 > Start2) maka ada konflik
+            if (start1 < end2 && end1 > start2) {
+                return true; 
+            }
+        }
+        return false;
+      });
+
+      if (isConflict) {
+         showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama.", 'error');
+         return; 
       }
-    }
+      
+      const { data, error } = await supabaseClient
+        .from("jadwal")
+        .insert([jadwal]);
 
-    // --- FUNGSI Edit Jadwal (Modal) ---
-    function editJadwal(id) {
-        const row = semuaData.find(r => r.id === id);
-        if (!row) return showToast("Data tidak ditemukan.", 'error'); 
-
-        // Nilai yang harus dipilih di TomSelect Mata Kuliah
-        const mkValueToSelect = (row.kode_matkul && row.mata_kuliah) 
-                                ? `${row.kode_matkul} | ${row.mata_kuliah}` 
-                                : '';
-        
-        // Ambil instance Tom-Select Mata Kuliah (menggunakan ID di modal edit)
-        const tsEditMataKuliah = document.getElementById('edit_kode_matkul_search').tomselect;
-        
-        // Ambil instance Tom-Select Dosen dan Asisten (menggunakan ID di modal edit)
-        const tsEditDosen = document.getElementById('edit_dosen').tomselect;
-        const tsEditAsisten = document.getElementById('edit_asisten').tomselect;
-        
-        // **********************************************
-        // PERBAIKAN UNTUK MATA KULIAH (Sama seperti Dosen)
-        // **********************************************
-        if (tsEditMataKuliah) {
-            tsEditMataKuliah.clear(true); 
-            
-            // 1. Tambahkan Opsi Mata Kuliah jika belum ada di daftar options
-            if (mkValueToSelect && !tsEditMataKuliah.options[mkValueToSelect]) {
-                 tsEditMataKuliah.addOption({ 
-                     value: mkValueToSelect, 
-                     text: mkValueToSelect,
-                     kode: row.kode_matkul, 
-                     nama: row.mata_kuliah 
-                 });
-            }
-            
-            // 2. Tetapkan nilai Mata Kuliah yang lama
-            tsEditMataKuliah.setValue(mkValueToSelect, true); 
-        }
-
-        // **********************************************
-        // PERBAIKAN UNTUK DOSEN
-        // **********************************************
-        if (tsEditDosen) {
-            tsEditDosen.clear(true);
-            // Tambahkan opsi Dosen jika belum ada di daftar options
-            if (row.dosen && !tsEditDosen.options[row.dosen]) {
-                 tsEditDosen.addOption({ value: row.dosen, text: row.dosen });
-            }
-            tsEditDosen.setValue(row.dosen || '', true); 
-        }
-        
-        // **********************************************
-        // PERBAIKAN UNTUK ASISTEN
-        // **********************************************
-        if (tsEditAsisten) {
-            tsEditAsisten.clear(true);
-            // Tambahkan opsi Asisten jika belum ada di daftar options
-            if (row.asisten && !tsEditAsisten.options[row.asisten]) {
-                 tsEditAsisten.addOption({ value: row.asisten, text: row.asisten });
-            }
-            tsEditAsisten.setValue(row.asisten || '', true); 
-        }
-        
-        // --- PENGISIAN DATA KE FIELD LAIN (Non-TomSelect) ---
-        document.getElementById('edit_id').value = row.id;
-        document.getElementById('edit_prodi').value = row.prodi || '';
-        document.getElementById('edit_hari').value = row.hari || '';
-        document.getElementById('edit_jam_mulai').value = row.jam_mulai || '';
-        document.getElementById('edit_jam_akhir').value = row.jam_akhir || '';
-        document.getElementById('edit_sks').value = row.sks || '';
-        document.getElementById('edit_semester').value = row.semester || '';
-        document.getElementById('edit_kelas').value = row.kelas || '';
-        document.getElementById('edit_ruangan').value = row.ruangan || '';
-        document.getElementById('edit_tahun_akademik').value = row.tahun_akademik || '';
-
-        // Menampilkan Modal
-        document.getElementById('editModal').classList.remove('hidden');
-        document.getElementById('editModal').classList.add('flex'); 
-    }
-    
-    // --- FUNGSI Update Jadwal ---
-    async function updateJadwal() {
-        const id = document.getElementById('edit_id').value;
-        
-        // Ambil nilai dari TomSelect Edit Mata Kuliah
-        const mkValue = tsEditMataKuliah.getValue();
-        if (!mkValue) {
-             showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
-             return;
-        }
-        const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
-        
-        // Ambil nilai dari TomSelect Edit Dosen dan Asisten
-        const dosen_baru = document.getElementById('edit_dosen').tomselect.getValue();
-        const asisten_baru = document.getElementById('edit_asisten').tomselect.getValue();
-
-
-        const updatedJadwal = {
-            kode_matkul: kode, 
-            mata_kuliah: nama, 
-            prodi: document.getElementById('edit_prodi').value,
-            hari: document.getElementById('edit_hari').value,
-            jam_mulai: document.getElementById('edit_jam_mulai').value,
-            jam_akhir: document.getElementById('edit_jam_akhir').value,
-            sks: parseInt(document.getElementById('edit_sks').value) || 0,
-            dosen: dosen_baru,       
-            asisten: asisten_baru,   
-            semester: document.getElementById('edit_semester').value,
-            kelas: document.getElementById('edit_kelas').value,
-            ruangan: document.getElementById('edit_ruangan').value,
-            tahun_akademik: document.getElementById('edit_tahun_akademik').value, 
-        };
-        
-        if (!updatedJadwal.prodi || !updatedJadwal.hari || !updatedJadwal.mata_kuliah || !updatedJadwal.tahun_akademik) {
-            showToast("Kolom Prodi, Hari, Mata Kuliah, dan Tahun Akademik wajib diisi!", 'warning'); 
-            return;
-        }
-
-
-        const { error } = await supabaseClient
-            .from("jadwal")
-            .update(updatedJadwal)
-            .eq("id", id);
-            
-        if (error) {
-            console.error("Error update:", error);
-            showToast("Gagal memperbarui jadwal: " + error.message, 'error'); 
-        } else {
-            showToast("Jadwal berhasil diperbarui!", 'success'); 
-            
-            document.getElementById('editModal').classList.add('hidden');
-            document.getElementById('editModal').classList.remove('flex');
-            loadData();
-        }
+      if (error) {
+        console.error("Gagal menyimpan jadwal:", error);
+        showToast("Gagal menyimpan jadwal", 'error'); 
+        return;
+      }
+      
+      showToast("Jadwal berhasil ditambahkan!", 'success'); 
+      
+      // Kosongkan form
+      tsMataKuliah.setValue('');
+      document.getElementById("prodi").value = "";
+      document.getElementById("hari").value = "";
+      document.getElementById("jam_mulai").value = "";
+      document.getElementById("jam_akhir").value = "";
+      document.getElementById("sks").value = "";
+      document.getElementById("dosen").tomselect.setValue("");
+      document.getElementById("asisten").tomselect.setValue("");
+      document.getElementById("semester").value = "";
+      document.getElementById("kelas").value = "";
+      document.getElementById("ruangan").value = "";
+      document.getElementById("tahun_akademik").value = ""; 
+      
+      loadData(); // Muat ulang data untuk menampilkan yang baru
     }
 
     // --- Hapus Jadwal ---
     async function hapusJadwal(id) {
-      if (!confirm("Yakin ingin menghapus jadwal ini?")) return; 
-      
-      const { error } = await supabaseClient.from("jadwal").delete().eq("id", id);
-      if (error) showToast("Gagal menghapus jadwal", 'error'); 
-      else {
-        showToast("Jadwal berhasil dihapus!", 'success'); 
-        loadData();
+      if (!confirm("Apakah Anda yakin ingin menghapus jadwal ini?")) {
+        return;
       }
+      
+      const { error } = await supabaseClient
+        .from("jadwal")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Gagal menghapus jadwal:", error);
+        showToast("Gagal menghapus jadwal", 'error'); 
+        return;
+      }
+
+      showToast("Jadwal berhasil dihapus!", 'success'); 
+      loadData();
+    }
+    
+    // --- Edit Jadwal (Mengisi Modal) ---
+    async function editJadwal(id) {
+      const dataToEdit = semuaData.find(d => d.id === id);
+      if (!dataToEdit) return;
+
+      document.getElementById("edit_id").value = id;
+      
+      // Mengisi TomSelect Mata Kuliah
+      const mkValue = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
+      tsEditMataKuliah.setValue(mkValue);
+      
+      document.getElementById("edit_prodi").value = dataToEdit.prodi;
+      document.getElementById("edit_hari").value = dataToEdit.hari;
+      document.getElementById("edit_jam_mulai").value = dataToEdit.jam_mulai;
+      document.getElementById("edit_jam_akhir").value = dataToEdit.jam_akhir;
+      document.getElementById("edit_sks").value = dataToEdit.sks;
+      
+      // Mengisi TomSelect Dosen & Asisten
+      document.getElementById("edit_dosen").tomselect.setValue(dataToEdit.dosen || '');
+      document.getElementById("edit_asisten").tomselect.setValue(dataToEdit.asisten || '');
+      
+      document.getElementById("edit_semester").value = dataToEdit.semester;
+      document.getElementById("edit_kelas").value = dataToEdit.kelas;
+      document.getElementById("edit_ruangan").value = dataToEdit.ruangan;
+      document.getElementById("edit_tahun_akademik").value = dataToEdit.tahun_akademik; 
+
+      document.getElementById('editModal').classList.remove('hidden');
+      document.getElementById('editModal').classList.add('flex');
     }
 
-    // --- FUNGSI Filter Data ---
-    function filterData() {
-        const filterProdi = document.getElementById("filterProdi").value;
-        const filterSemester = document.getElementById("filterSemester").value;
-        const filterKelas = document.getElementById("filterKelas").value;
+    // --- Update Jadwal (Simpan Perubahan dari Modal) ---
+    async function updateJadwal() {
+        const id = document.getElementById("edit_id").value;
+
+        const mkValue = tsEditMataKuliah.getValue();
+        if (!mkValue) {
+            showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
+            return;
+        }
+        const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
         
-        // Ambil nilai filter dari TomSelect Mata Kuliah & Dosen
-        const filterMataKuliahRaw = tsFilterMataKuliah.getValue();
-        const filterDosenRaw = tsFilterDosen.getValue();
-        
-        let filterMataKuliah = "";
-        // Jika nilai yang dipilih bukan "Semua Mata Kuliah" (yaitu kosong), ambil NAMA mata kuliah (nama ada di indeks 1)
-        if(filterMataKuliahRaw !== "") {
-            // Karena format value adalah "KODE | NAMA", kita ambil NAMAnya untuk filter
-            filterMataKuliah = filterMataKuliahRaw.split(' | ')[1].trim(); 
+        const updatedJadwal = {
+            kode_matkul: kode, 
+            mata_kuliah: nama, 
+            prodi: document.getElementById("edit_prodi").value,
+            hari: document.getElementById("edit_hari").value,
+            jam_mulai: document.getElementById("edit_jam_mulai").value,
+            jam_akhir: document.getElementById("edit_jam_akhir").value,
+            sks: parseInt(document.getElementById("edit_sks").value),
+            dosen: document.getElementById("edit_dosen").tomselect.getValue(), 
+            asisten: document.getElementById("edit_asisten").tomselect.getValue() || "-",
+            semester: parseInt(document.getElementById("edit_semester").value),
+            kelas: document.getElementById("edit_kelas").value,
+            ruangan: document.getElementById("edit_ruangan").value,
+            tahun_akademik: document.getElementById("edit_tahun_akademik").value
+        };
+
+        // Cek Konflik (dengan mengecualikan data yang sedang di-edit)
+        const isConflict = semuaData.some(item => {
+            if (item.id === parseInt(id)) return false; // Abaikan data saat ini
+            
+            if (item.hari === updatedJadwal.hari && item.ruangan === updatedJadwal.ruangan) {
+                const start1 = updatedJadwal.jam_mulai;
+                const end1 = updatedJadwal.jam_akhir;
+                const start2 = item.jam_mulai;
+                const end2 = item.jam_akhir;
+
+                if (start1 < end2 && end1 > start2) {
+                    return true; 
+                }
+            }
+            return false;
+        });
+
+        if (isConflict) {
+            showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama.", 'error');
+            return; 
         }
 
-        const filterDosen = filterDosenRaw; 
-        
-        const filterTahunAkademik = document.getElementById("filterTahunAkademik").value;
+        const { error } = await supabaseClient
+            .from('jadwal')
+            .update(updatedJadwal)
+            .eq('id', id);
 
-        let hasilFilter = semuaData.filter(row => {
-            const rowProdi = String(row.prodi || '');
-            const rowSemester = String(row.semester || '');
-            const rowKelas = String(row.kelas || '');
-            const rowMataKuliah = String(row.mata_kuliah || ''); 
-            const rowDosen = String(row.dosen || '');             
-            const rowTahunAkademik = String(row.tahun_akademik || '');
+        if (error) {
+            console.error("Gagal mengupdate jadwal:", error);
+            showToast("Gagal menyimpan perubahan", 'error'); 
+            return;
+        }
 
-            const matchProdi = !filterProdi || rowProdi === filterProdi;
-            const matchSemester = !filterSemester || rowSemester === filterSemester; 
-            const matchKelas = !filterKelas || rowKelas === filterKelas; 
-            const matchMataKuliah = !filterMataKuliah || rowMataKuliah === filterMataKuliah; 
-            const matchDosen = !filterDosen || rowDosen === filterDosen;                     
-            const matchTahunAkademik = !filterTahunAkademik || rowTahunAkademik === filterTahunAkademik;
-
-            return matchProdi && matchSemester && matchKelas && matchTahunAkademik && matchMataKuliah && matchDosen;
-        });
-        
-        tampilkanData(hasilFilter);
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').classList.remove('flex');
+        showToast("Jadwal berhasil diperbarui!", 'success'); 
+        loadData();
     }
+    
+    // --- Filter Data ---
+    function filterData() {
+        const prodi = document.getElementById('filterProdi').value;
+        const semester = document.getElementById('filterSemester').value;
+        const kelas = document.getElementById('filterKelas').value;
+        const mkValue = tsFilterMataKuliah.getValue(); 
+        const dosen = tsFilterDosen.getValue();
+        const tahun_akademik = document.getElementById('filterTahunAkademik').value;
 
-    // --- FUNGSI Export Excel ---
-    function exportExcel() {
-      const dataBersih = dataYangDitampilkan.map(row => ({
-        "Tahun Akademik": row.tahun_akademik || '-',
-        "Kode Matkul": row.kode_matkul || '-',
-        "Prodi": row.prodi || '-',
-        "Hari": row.hari || '-',
-        "Jam Mulai": row.jam_mulai || '-',
-        "Jam Akhir": row.jam_akhir || '-',
-        "Mata Kuliah": row.mata_kuliah || '-',
-        "SKS": row.sks || 0,
-        "Dosen": row.dosen || '-',
-        "Asisten": row.asisten || '-',
-        "Semester": row.semester || '-',
-        "Kelas": row.kelas || '-',
-        "Ruangan": row.ruangan || '-',
-      }));
-      
-      const ws = XLSX.utils.json_to_sheet(dataBersih); 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Jadwal_Terfilter");
-      XLSX.writeFile(wb, "jadwal_kuliah.xlsx");
-      showToast("Data berhasil diexport ke Excel!", 'info');
-    }
-
-    // --- FUNGSI Export PDF (Judul dan Tabel Rata Tengah) ---
-    function exportPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4'); 
-      const docWidth = doc.internal.pageSize.getWidth(); 
-
-      if (dataYangDitampilkan.length === 0) {
-          showToast("Tidak ada data terfilter untuk diekspor!", 'info'); 
-          return;
-      }
-      
-      // Ambil filter yang tersisa dari SELECT biasa
-      const filterProdi = document.getElementById("filterProdi").value;
-      const filterKelas = document.getElementById("filterKelas").value;
-      const filterTahunAkademik = document.getElementById("filterTahunAkademik").value;
-      
-      let prodiJudul = filterProdi || "SEMUA PRODI";
-      let kelasJudul = filterKelas || "MULTIPLE KELAS";
-      let tahunAkademikJudul = filterTahunAkademik || "SEMUA TAHUN AKADEMIK"; 
-
-      function getProdiColors(prodi) {
-          switch (prodi) {
-              case 'Industri': return { header: [231, 76, 60], text: [255, 255, 255], background: [252, 235, 235] }; 
-              case 'Sipil': return { header: [52, 152, 219], text: [255, 255, 255], background: [235, 245, 251] }; 
-              case 'Arsitektur': return { header: [39, 174, 96], text: [255, 255, 255], background: [234, 247, 238] }; 
-              case 'Elektro': return { header: [180, 100, 50], text: [255, 255, 255], background: [250, 235, 215] }; 
-              case 'Informatika': return { header: [241, 196, 15], text: [0, 0, 0], background: [255, 251, 230] }; 
-              default: return { header: [52, 73, 94], text: [255, 255, 255], background: [240, 240, 240] };
-          }
-      }
-      
-      const prodiColor = getProdiColors(filterProdi || null);
-
-      const dataPDF = dataYangDitampilkan.map((row, index) => [
-        index + 1, row.tahun_akademik || '-', row.kode_matkul || '-', row.prodi || '-', row.hari || '-', 
-        row.jam_mulai || '-', row.jam_akhir || '-', row.mata_kuliah || '-', row.sks || 0, row.dosen || '-', 
-        row.asisten || '-', row.semester || '-', row.kelas || '-', row.ruangan || '-',
-      ]);
-      
-      const headers = [
-          "No", "Tahun Akademik", "Kode", "Prodi", "Hari", "Mulai", "Akhir", "Mata Kuliah", 
-          "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
-      ];
-
-      const lineHeight = 5; 
-      let currentY = 15; 
-      
-      const mainTitle = "JADWAL PERKULIAHAN";
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      const mainTitleWidth = doc.getStringUnitWidth(mainTitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-      const mainTitleX = (docWidth - mainTitleWidth) / 2; 
-      doc.text(mainTitle, mainTitleX, currentY); 
-      currentY += lineHeight;
-
-      const subTitle1 = `TAHUN AKADEMIK: ${tahunAkademikJudul.toUpperCase()}`;
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const subTitle1Width = doc.getStringUnitWidth(subTitle1) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-      const subTitle1X = (docWidth - subTitle1Width) / 2; 
-      doc.text(subTitle1, subTitle1X, currentY); 
-      currentY += lineHeight;
-
-      const subTitle2 = `PROGRAM STUDI : ${prodiJudul.toUpperCase()} (${kelasJudul.toUpperCase()})`;
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      const subTitle2Width = doc.getStringUnitWidth(subTitle2) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-      const subTitle2X = (docWidth - subTitle2Width) / 2;
-      doc.text(subTitle2, subTitle2X, currentY); 
-      currentY += lineHeight + 3; 
-
-      doc.autoTable({
-        head: [headers],
-        body: dataPDF,
-        startY: currentY, 
-        theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 1.5, halign: 'left' },
-        margin: { left: 5, right: 5 }, 
-        headStyles: { 
-            fillColor: prodiColor.header, 
-            textColor: prodiColor.text, 
-            fontStyle: 'bold', 
-            halign: 'center' 
-        },
-        columnStyles: {
-            0: { halign: 'center', cellWidth: 7 }, 1: { halign: 'center', cellWidth: 20 }, 
-            2: { halign: 'center', cellWidth: 15 }, 4: { halign: 'center', cellWidth: 15 }, 
-            5: { halign: 'center', cellWidth: 15 }, 6: { halign: 'center', cellWidth: 15 }, 
-            8: { halign: 'center', cellWidth: 10 }, 11: { halign: 'center', cellWidth: 15 }, 
-            12: { halign: 'center', cellWidth: 15 }, 13: { halign: 'center', cellWidth: 15 }, 
-            3: { halign: 'left', cellWidth: 25 }, 7: { halign: 'left', cellWidth: 40 }, 
-            9: { halign: 'left', cellWidth: 30 }, 10: { halign: 'left', cellWidth: 30 }, 
-        },
-        didParseCell: function (data) {
-            if (data.section === 'body') { 
-                const prodi = data.row.raw[3]; 
-                const rowColors = getProdiColors(prodi);
-                data.cell.styles.fillColor = rowColors.background;
+        const filtered = semuaData.filter(item => {
+            let passes = true;
+            
+            if (prodi && item.prodi !== prodi) passes = false;
+            if (semester && item.semester !== parseInt(semester)) passes = false;
+            if (kelas && item.kelas !== kelas) passes = false;
+            if (tahun_akademik && item.tahun_akademik !== tahun_akademik) passes = false;
+            
+            // Filter Mata Kuliah
+            if (mkValue) {
+                const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
+                if (item.kode_matkul !== kode) passes = false;
             }
-        },
-      });
-      
-      doc.save(`jadwal_kuliah_${prodiJudul.replace(/\s/g, '_')}_${tahunAkademikJudul.replace(/\s/g, '_')}.pdf`);
-      showToast("File PDF berhasil dibuat!", 'success'); 
-    }
-  </script>
-</body>
-</html>
+            
+            // Filter Dosen
+            if (dosen && item.dosen !== dosen) passes = false;
 
-    </div>
-  </main>
-</div>
+            return passes;
+        });
+
+        tampilkanData(filtered);
+        showToast(`Menampilkan ${filtered.length} hasil.`, 'info');
+    }
+
+    // --- Export ke Excel ---
+    function exportExcel() {
+        if (dataYangDitampilkan.length === 0) {
+            showToast("Tidak ada data untuk diekspor!", 'warning');
+            return;
+        }
+        
+        // Buat data ekspor, hapus kolom 'user_id'
+        const exportData = dataYangDitampilkan.map(({ user_id, ...rest }) => rest);
+
+        // Ubah nama kolom (header)
+        const headers = [
+            "id", "Tahun Akademik", "Kode", "Prodi", "Hari", "Jam Mulai", "Jam Akhir", 
+            "Mata Kuliah", "SKS", "Dosen", "Asisten", "Semester", "Kelas", "Ruangan"
+        ];
+        
+        const dataForSheet = exportData.map(item => [
+            item.id,
+            item.tahun_akademik,
+            item.kode_matkul,
+            item.prodi,
+            item.hari,
+            item.jam_mulai,
+            item.jam_akhir,
+            item.mata_kuliah,
+            item.sks,
+            item.dosen,
+            item.asisten,
+            item.semester,
+            item.kelas,
+            item.ruangan
+        ]);
+        
+        dataForSheet.unshift(headers); // Tambahkan header di baris pertama
+
+        const ws = XLSX.utils.aoa_to_sheet(dataForSheet);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "JadwalKuliah");
+
+        const fileName = `JadwalKuliah_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        showToast("Data berhasil diekspor ke Excel!", 'success');
+    }
+    
+    // --- Export ke PDF ---
+    function exportPDF() {
+        if (dataYangDitampilkan.length === 0) {
+            showToast("Tidak ada data untuk diekspor!", 'warning');
+            return;
+        }
+        
+        // Buat instance jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); 
+        
+        // Persiapan data
+        const columns = [
+             { header: 'No', dataKey: 'no' },
+             { header: 'TA', dataKey: 'tahun_akademik' },
+             { header: 'Kode', dataKey: 'kode_matkul' },
+             { header: 'Prodi', dataKey: 'prodi' },
+             { header: 'Hari', dataKey: 'hari' },
+             { header: 'Mulai', dataKey: 'jam_mulai' },
+             { header: 'Akhir', dataKey: 'jam_akhir' },
+             { header: 'Mata Kuliah', dataKey: 'mata_kuliah' },
+             { header: 'SKS', dataKey: 'sks' },
+             { header: 'Dosen', dataKey: 'dosen' },
+             { header: 'Sem', dataKey: 'semester' },
+             { header: 'Kelas', dataKey: 'kelas' },
+             { header: 'Ruangan', dataKey: 'ruangan' },
+        ];
+        
+        const rows = dataYangDitampilkan.map((item, index) => ({
+            no: index + 1,
+            tahun_akademik: item.tahun_akademik,
+            kode_matkul: item.kode_matkul,
+            prodi: item.prodi,
+            hari: item.hari,
+            jam_mulai: item.jam_mulai,
+            jam_akhir: item.jam_akhir,
+            mata_kuliah: item.mata_kuliah,
+            sks: item.sks,
+            dosen: item.dosen,
+            semester: item.semester,
+            kelas: item.kelas,
+            ruangan: item.ruangan
+        }));
+
+        // Judul
+        doc.setFontSize(14);
+        doc.text("Daftar Jadwal Kuliah", 148.5, 15, null, null, "center");
+        
+        // Gunakan autoTable
+        doc.autoTable({
+            startY: 20, 
+            head: [columns.map(c => c.header)], 
+            body: rows.map(r => columns.map(c => r[c.dataKey])),
+            theme: 'striped',
+            headStyles: { fillColor: [30, 144, 255] },
+            styles: { fontSize: 8, cellPadding: 1.5 },
+            columnStyles: {
+                 0: { cellWidth: 8 }, // No
+                 1: { cellWidth: 22 }, // TA
+                 5: { cellWidth: 15 }, // Mulai
+                 6: { cellWidth: 15 }, // Akhir
+                 7: { cellWidth: 40 }, // Mata Kuliah
+                 9: { cellWidth: 35 }, // Dosen
+                 10: { cellWidth: 10 }, // Sem
+            },
+        });
+
+        // Simpan file
+        const fileName = `JadwalKuliah_${new Date().toISOString().slice(0, 10)}.pdf`;
+        doc.save(fileName);
+        showToast("Data berhasil diekspor ke PDF!", 'success');
+    }
+    
+  </script>
 </body>
 </html>
