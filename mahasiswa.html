@@ -1199,3 +1199,152 @@
     // Fungsi Export Rekap
     function getRecapDataForExport() {
         const data = [];
+        const sortedProdis = Object.keys(recapData).sort();
+        const finalProdis = sortedProdis.filter(p => p !== 'Lainnya').concat(sortedProdis.includes('Lainnya') ? ['Lainnya'] : []);
+        
+        finalProdis.forEach(prodi => {
+            const tahunEntries = Object.entries(recapData[prodi])
+                .sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA)); 
+            
+            let prodiTotal = 0;
+            let prodiRecap = { Aktif: 0, Lulus: 0, Nonaktif: 0, MundurDO: 0, Meninggal: 0 };
+
+            tahunEntries.forEach(([tahun, d]) => {
+                data.push([
+                    prodi, tahun, d.Total, d.Aktif, d.Lulus, d.Nonaktif, d.MundurDO, d.Meninggal
+                ]);
+                prodiTotal += d.Total;
+                prodiRecap.Aktif += d.Aktif;
+                prodiRecap.Lulus += d.Lulus;
+                prodiRecap.Nonaktif += d.Nonaktif;
+                prodiRecap.MundurDO += d.MundurDO;
+                prodiRecap.Meninggal += d.Meninggal;
+            });
+            
+            data.push([
+                `SUB-TOTAL ${prodi}`, '', prodiTotal, prodiRecap.Aktif, prodiRecap.Lulus, 
+                prodiRecap.Nonaktif, prodiRecap.MundurDO, prodiRecap.Meninggal
+            ]);
+            data.push(['']);
+        });
+        
+        const globalTotal = document.getElementById('footerTotal').textContent;
+        const globalAktif = document.getElementById('footerAktif').textContent;
+        const globalLulus = document.getElementById('footerLulus').textContent;
+        const globalNonaktif = document.getElementById('footerNonaktif').textContent;
+        const globalMundurDO = document.getElementById('footerMundurDO').textContent;
+        const globalMeninggal = document.getElementById('footerMeninggal').textContent;
+        
+        data.push(['TOTAL KESELURUHAN', '', globalTotal, globalAktif, globalLulus, globalNonaktif, globalMundurDO, globalMeninggal]);
+        
+        return data;
+    }
+
+
+    function exportRecapToExcel() {
+        if (Object.keys(recapData).length === 0) {
+            alert('❌ Tidak ada data rekapitulasi untuk diekspor.');
+            return;
+        }
+
+        const headers = ["Prodi", "Tahun Masuk", "Total", "Aktif", "Lulus", "Nonaktif", "Mundur/DO", "Meninggal"];
+        const data = getRecapDataForExport();
+        
+        const wsData = [
+            ["REKAPITULASI STATUS AKTIVITAS MAHASISWA FAKULTAS TEKNIK"],
+            ["Tanggal Export: " + new Date().toLocaleDateString('id-ID')],
+            [],
+            headers,
+            ...data
+        ];
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+
+        XLSX.utils.book_append_sheet(wb, ws, "RekapStatusMhs");
+        XLSX.writeFile(wb, "rekap_status_mahasiswa_ft.xlsx");
+    }
+
+    function exportRecapToPDF() {
+        if (Object.keys(recapData).length === 0) {
+            alert('❌ Tidak ada data rekapitulasi untuk diekspor.');
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); 
+
+        const head = [["Prodi", "Tahun Masuk", "Total", "Aktif", "Lulus", "Nonaktif", "Mundur/DO", "Meninggal"]];
+        const body = [];
+        const foot = [];
+
+        const rawData = getRecapDataForExport().filter(row => row.length > 1);
+
+        const totalRow = rawData.pop();
+        if (totalRow && totalRow[0] && totalRow[0].includes("TOTAL KESELURUHAN")) {
+            foot.push(totalRow);
+        }
+
+        rawData.forEach(row => {
+            body.push(row);
+        });
+
+        doc.setFontSize(14);
+        doc.text("Rekapitulasi Status Aktivitas Mahasiswa", 14, 15);
+        doc.setFontSize(10);
+        doc.text(`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`, 14, 20);
+
+        doc.autoTable({
+            head: head, body: body, foot: foot.length > 0 ? foot : undefined,
+            startY: 25, theme: 'grid', styles: { fontSize: 8, cellPadding: 1, halign: 'center' },
+            headStyles: { fillColor: [30, 64, 175] }, 
+            footStyles: { fillColor: [209, 213, 219], textColor: [0,0,0], fontStyle: 'bold' },
+            columnStyles: {
+                0: { halign: 'left', cellWidth: 35 }, 1: { cellWidth: 15 }, 2: { cellWidth: 15 }, 
+                3: { cellWidth: 15 }, 4: { cellWidth: 15 }, 5: { cellWidth: 15 }, 
+                6: { cellWidth: 15 }, 7: { cellWidth: 15 },
+            },
+        });
+
+        doc.save('rekap_status_mahasiswa_ft.pdf');
+    }
+
+    // --- CEK AUTHENTIKASI & INITIAL LOAD ---
+    async function checkAuthAndLoad() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+            window.location.href = "index.html";
+            return;
+        }
+        
+        const { data: userData } = await supabaseClient
+            .from('users_metadata')
+            .select('username')
+            .eq('user_id', user.id)
+            .single();
+
+        if (userData) {
+            document.getElementById('userNameNav').textContent = `Halo, ${userData.username}`;
+        }
+        
+        // Atur tampilan awal ke tab CRUD
+        showMainTab('crud');
+        
+        // Muat data mahasiswa untuk tab CRUD
+        loadMahasiswaData(); 
+        
+        // Pastikan submenu Data Mahasiswa terbuka saat halaman dimuat
+        const submenu = document.getElementById('dataMahasiswaSubmenu');
+        const icon = document.getElementById('dataMahasiswaIcon');
+        if (submenu.classList.contains('hidden')) {
+            submenu.classList.remove('hidden');
+            icon.classList.add('rotate-180'); 
+        }
+    }
+
+    window.onload = checkAuthAndLoad;
+</script>
+</body>
+</html>
