@@ -458,11 +458,25 @@
     let statusSelect; 
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select untuk Form Tambah/Edit
-        prodiSelect = new TomSelect("#prodi", { create: false });
-        tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-        statusSelect = new TomSelect("#status", { create: false }); 
-        
+let prodiSelect, tahunMasukSelect, statusSelect;
+
+function initTomSelect() {
+    if (prodiSelect) prodiSelect.destroy();
+    if (tahunMasukSelect) tahunMasukSelect.destroy();
+    if (statusSelect) statusSelect.destroy();
+
+    prodiSelect = new TomSelect("#prodi", { create: false });
+    tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
+    statusSelect = new TomSelect("#status", { create: false });
+}
+
+$('#btnEdit').on('click', function() {
+    initTomSelect();
+    prodiSelect.setValue(data.prodi);
+    tahunMasukSelect.setValue(data.tahunmasuk);
+    statusSelect.setValue(data.status);
+});
+
         populateYearSelect(tahunMasukSelect);
         
         // Inisialisasi Tom Select untuk Pencarian
