@@ -458,8 +458,10 @@
     let statusSelect; 
 
     document.addEventListener('DOMContentLoaded', () => {
+// === GANTI SEMUA BAGIAN INI ===
 let prodiSelect, tahunMasukSelect, statusSelect;
 
+// Fungsi untuk inisialisasi TomSelect
 function initTomSelect() {
     if (prodiSelect) prodiSelect.destroy();
     if (tahunMasukSelect) tahunMasukSelect.destroy();
@@ -470,11 +472,39 @@ function initTomSelect() {
     statusSelect = new TomSelect("#status", { create: false });
 }
 
-$('#btnEdit').on('click', function() {
-    initTomSelect();
-    prodiSelect.setValue(data.prodi);
-    tahunMasukSelect.setValue(data.tahunmasuk);
-    statusSelect.setValue(data.status);
+// Event tombol edit
+$(document).on('click', '.btnEdit', async function () {
+    const id = $(this).data('id'); // Ambil id dari tombol edit
+
+    // Ambil data mahasiswa dari Supabase
+    const { data, error } = await supabaseClient
+        .from('mahasiswa')      // <-- ganti sesuai nama tabel kamu di Supabase
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) {
+        console.error('Gagal ambil data:', error);
+        alert('Gagal memuat data mahasiswa.');
+        return;
+    }
+
+    // Tampilkan modal edit
+    $('#modalEdit').modal('show');
+
+    // Setelah modal muncul, isi form dan inisialisasi TomSelect
+    $('#modalEdit').on('shown.bs.modal', function () {
+        initTomSelect();
+
+        // Isi field biasa
+        $('#nama').val(data.nama);
+        $('#nim').val(data.nim);
+
+        // Isi TomSelect dengan value dari database
+        prodiSelect.setValue(data.prodi);
+        tahunMasukSelect.setValue(data.tahunmasuk);
+        statusSelect.setValue(data.status);
+    });
 });
 
         populateYearSelect(tahunMasukSelect);
