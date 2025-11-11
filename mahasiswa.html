@@ -484,10 +484,13 @@
         }
 
         // Tampilkan/Sembunyikan Konten
-        document.querySelectorAll('.main-content-section').forEach(content => {
-            content.classList.add('hidden');
-        });
-        document.getElementById(`content-${tabName}`).classList.remove('hidden');
+document.querySelectorAll('.main-tab-content-section').forEach(content => {
+    content.classList.add('hidden');
+});
+const targetContent = document.getElementById(`content-${tabName}`);
+if (targetContent) {
+    targetContent.classList.remove('hidden');
+}
 
         // Atur Tombol Tab
         document.querySelectorAll('.main-tab-button').forEach(button => {
@@ -495,9 +498,9 @@
             button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
         });
         const activeBtn = document.getElementById(`tab-${tabName}`);
-        activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
-        activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-
+if (activeBtn) {
+    activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
+}
         // Jika pindah ke tab Rekap, muat data rekap
         if (tabName === 'rekap') {
             loadRecapData();
