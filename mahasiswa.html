@@ -443,35 +443,132 @@
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // WAJIB DIGANTI: Dapatkan URL dan ANON KEY dari Dashboard Supabase Anda (Settings > API)
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; // <-- GANTI INI
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; // <-- GANTI INI
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let isEditMode = false;
     let currentMahasiswaId = null;
-    let currentMahasiswaData = []; 
-    let recapData = {}; 
+    let currentMahasiswaData = [];
+    let recapData = {};
 
     let prodiSelect;
     let tahunMasukSelect;
-    let searchTahunSelect; 
-    let statusSelect; 
+    let searchTahunSelect;
+    let statusSelect;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select untuk Form Tambah/Edit
+        // Inisialisasi TomSelect untuk Form Tambah/Edit
         prodiSelect = new TomSelect("#prodi", { create: false });
         tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-        statusSelect = new TomSelect("#status", { create: false }); 
-        
+        statusSelect = new TomSelect("#status", { create: false });
+
         populateYearSelect(tahunMasukSelect);
-        
-        // Inisialisasi Tom Select untuk Pencarian
-        searchTahunSelect = new TomSelect("#searchTahun", { 
+
+        // Inisialisasi TomSelect untuk Pencarian
+        searchTahunSelect = new TomSelect("#searchTahun", {
             create: false,
             placeholder: "Pilih Tahun",
         });
-        populateYearSelect(searchTahunSelect, true); 
+        populateYearSelect(searchTahunSelect, true);
+
+        // Listener tombol simpan
+        document.getElementById("btnSimpan").addEventListener("click", async () => {
+            await handleSave();
+        });
     });
+
+    // Fungsi isi pilihan tahun otomatis
+    function populateYearSelect(selectInstance, includeAllOption = false) {
+        const currentYear = new Date().getFullYear();
+        const startYear = 2010;
+        const years = [];
+        if (includeAllOption) {
+            years.push({ value: "", text: "Semua Tahun" });
+        }
+        for (let year = currentYear; year >= startYear; year--) {
+            years.push({ value: year, text: year.toString() });
+        }
+        selectInstance.addOptions(years);
+    }
+
+    // Fungsi untuk mengisi form saat klik edit
+    async function editMahasiswa(id) {
+        const { data, error } = await supabase
+            .from("mahasiswa")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error) {
+            console.error("Gagal ambil data mahasiswa:", error);
+            alert("Gagal mengambil data mahasiswa.");
+            return;
+        }
+
+        isEditMode = true;
+        currentMahasiswaId = id;
+
+        // Isi form
+        document.getElementById("nama").value = data.nama;
+        prodiSelect.setValue(data.prodi);
+        tahunMasukSelect.setValue(data.tahun_masuk);
+        statusSelect.setValue(data.status);
+    }
+
+    // Fungsi simpan (tambah atau edit)
+    async function handleSave() {
+        const nama = document.getElementById("nama").value;
+        const prodi = prodiSelect.getValue();
+        const tahun_masuk = tahunMasukSelect.getValue();
+        const status = statusSelect.getValue();
+
+        if (!nama || !prodi || !tahun_masuk || !status) {
+            alert("Semua field wajib diisi!");
+            return;
+        }
+
+        if (isEditMode && currentMahasiswaId) {
+            const { error } = await supabase
+                .from("mahasiswa")
+                .update({ nama, prodi, tahun_masuk, status })
+                .eq("id", currentMahasiswaId);
+
+            if (error) {
+                console.error("Gagal update data:", error);
+                alert("Gagal mengupdate data mahasiswa.");
+            } else {
+                alert("Data mahasiswa berhasil diperbarui!");
+                resetForm();
+            }
+        } else {
+            const { error } = await supabase
+                .from("mahasiswa")
+                .insert([{ nama, prodi, tahun_masuk, status }]);
+
+            if (error) {
+                console.error("Gagal tambah data:", error);
+                alert("Gagal menambah data mahasiswa.");
+            } else {
+                alert("Data mahasiswa berhasil ditambahkan!");
+                resetForm();
+            }
+        }
+    }
+
+    // Reset form ke mode tambah
+    function resetForm() {
+        document.getElementById("nama").value = "";
+        prodiSelect.clear();
+        tahunMasukSelect.clear();
+        statusSelect.clear();
+        isEditMode = false;
+        currentMahasiswaId = null;
+    }
+</script>
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
     function showMainTab(tabName) {
