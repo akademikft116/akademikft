@@ -932,6 +932,14 @@
              return;
         }
 
+      // ✅ Tambahkan baris ini untuk memastikan ID mahasiswa tetap terbaca
+if (!currentMahasiswaId) {
+    const hiddenId = document.getElementById('mahasiswaId');
+    if (hiddenId && hiddenId.value) {
+        currentMahasiswaId = hiddenId.value;
+    }
+}
+
         const mahasiswaData = {
             npm: npm, nama: nama, prodi: prodi, jenis_kelamin: jenisKelamin, semester: semester, 
             tahun_masuk: tahunmasuk, kelas: kelas, nik_mahasiswa: nik, no_hp: nohp,
@@ -939,6 +947,14 @@
             nama_ayah: namaAyah, nama_ibu: namaIbu, ttl: ttl, alamat: alamat,
             kelurahan: kelurahan, kecamatan: kecamatan,
         };
+
+      // ✅ Tambahkan baris ini untuk memastikan ID mahasiswa tetap terbaca
+if (!currentMahasiswaId) {
+    const hiddenId = document.getElementById('mahasiswaId');
+    if (hiddenId && hiddenId.value) {
+        currentMahasiswaId = hiddenId.value;
+    }
+}
 
         if (isEditMode && currentMahasiswaId) {
             const { error: updateError } = await supabaseClient
