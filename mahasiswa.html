@@ -219,6 +219,7 @@
                                 <label for="judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
                                 <input type="text" id="judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                             </div>
+                          <hr class="my-8 border-t-2 border-gray-200">
                         </div>
 
                         <div id="content-personal" class="tab-content hidden">
@@ -483,16 +484,10 @@
             mainTitle.textContent = "Status Aktivitas Mahasiswa";
         }
 
-      /*
+      
         // Tampilkan/Sembunyikan Konten
-document.querySelectorAll('.main-tab-content-section').forEach(content => {
-    content.classList.add('hidden');
-});
-const targetContent = document.getElementById(`content-${tabName}`);
-if (targetContent) {
-    targetContent.classList.remove('hidden');
-}
-/*
+  
+
         // Atur Tombol Tab
         document.querySelectorAll('.main-tab-button').forEach(button => {
             button.classList.remove('active', 'text-blue-600', 'border-blue-600');
