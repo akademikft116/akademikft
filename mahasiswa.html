@@ -906,10 +906,17 @@
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
-        const prodi = prodiSelect.getValue();
+        const prodi = prodiSelect.getValue ? prodiSelect.getValue() : document.getElementById('prodi').value;
         const jenisKelamin = document.getElementById('jenisKelamin').value; 
-        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
-        const statusMhs = statusSelect.getValue(); 
+        // Try multiple ways to get tahun masuk (TomSelect or regular select)
+        let tahunmasuk = null;
+        try {
+            tahunmasuk = parseInt(tahunMasukSelect.getValue());
+        } catch (e) {
+            const el = document.getElementById('tahunmasuk');
+            tahunmasuk = el ? parseInt(el.value) : NaN;
+        }
+        const statusMhs = statusSelect.getValue ? statusSelect.getValue() : document.getElementById('status').value; 
         
         const kelas = document.getElementById('kelas').value || null;
         const nik = document.getElementById('nik').value || null;
@@ -940,11 +947,15 @@
             kelurahan: kelurahan, kecamatan: kecamatan,
         };
 
-        if (isEditMode && currentMahasiswaId) {
+        // Fallback: if currentMahasiswaId is not set, try hidden field
+        const hiddenId = document.getElementById('mahasiswaId') ? document.getElementById('mahasiswaId').value : null;
+        const editId = currentMahasiswaId || (hiddenId ? hiddenId : null);
+
+        if (isEditMode && editId) {
             const { error: updateError } = await supabaseClient
                 .from('mahasiswa')
                 .update(mahasiswaData)
-                .eq('id', currentMahasiswaId);
+                .eq('id', editId);
 
             if (updateError) {
                 alert('❌ Gagal memperbarui data mahasiswa: ' + updateError.message);
