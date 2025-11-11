@@ -475,40 +475,13 @@
     });
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
-   function showMainTab(tabName) {
-    const mainTitle = document.getElementById('mainTitle');
-    if (tabName === 'crud') {
-        mainTitle.textContent = "Manajemen Biodata & Pencarian Mahasiswa";
-    } else {
-        mainTitle.textContent = "Status Aktivitas Mahasiswa";
-    }
-
-    // Tampilkan/Sembunyikan konten
-    document.querySelectorAll('.main-tab-content-section').forEach(content => {
-        if (content.id !== 'content-rekap') content.classList.add('hidden');
-    });
-
-    document.querySelectorAll('.main-tab-button').forEach(button => {
-        button.classList.remove('active', 'text-blue-600', 'border-blue-600');
-        button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-    });
-    const activeBtn = document.getElementById(`tab-${tabName}`);
-    if (activeBtn) activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
-
-    // Jika tab rekap dibuka
-    if (tabName === 'rekap') {
-        loadRecapData();
-
-        // Tambahkan scroll otomatis
-        setTimeout(() => {
-            const target = document.getElementById('rekapitulasi-status');
-            if (target) {
-                const yOffset = -120; // sesuaikan jika header menutupi konten
-                const y = target.getBoundingClientRect().top + window.scrollY + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
-            }
-        }, 600);
-    }
+if (tabName === 'rekap') {
+    setTimeout(() => {
+        window.scrollTo({
+            top: document.body.scrollHeight - 200,
+            behavior: 'smooth'
+        });
+    }, 500);
 }
 
 
