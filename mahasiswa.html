@@ -486,7 +486,13 @@
 
       
         // Tampilkan/Sembunyikan Konten
-  
+    document.querySelectorAll('.main-tab-content-section').forEach(content => {
+    // Jangan sembunyikan rekap agar tetap tampil di bawah
+    if (content.id !== 'content-rekap') {
+        content.classList.add('hidden');
+    }
+});
+
 
         // Atur Tombol Tab
         document.querySelectorAll('.main-tab-button').forEach(button => {
