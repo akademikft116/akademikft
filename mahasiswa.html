@@ -506,6 +506,17 @@ if (activeBtn) {
             loadRecapData();
         }
     }
+
+    // ✅ Scroll otomatis ke bagian bawah saat membuka Status Aktivitas Mahasiswa
+if (tabName === 'rekap') {
+    setTimeout(() => {
+        window.scrollTo({
+            top: document.body.scrollHeight - 200, // bisa ubah -200 jadi -100 atau 0 kalau mau lebih jauh ke bawah
+            behavior: 'smooth'
+        });
+    }, 500);
+}
+
     
     // --- FUNGSI NAVIGASI DROPDOWN SIDEBAR ---
     function toggleSubmenu(event) {
