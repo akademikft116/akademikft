@@ -447,7 +447,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; // <-- GANTI INI
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let isEditMode = false;
+    let EditMode = false;
     let currentMahasiswaId = null;
     let currentMahasiswaData = []; 
     let recapData = {}; 
@@ -1020,7 +1020,7 @@
         document.getElementById('kecamatan').value = mhs.kecamatan || '';
         
         // UBAH MODE KE EDIT
-        isEditMode = true;
+        EditMode = true;
         currentMahasiswaId = mhs.id;
         document.getElementById('formTitle').textContent = `Edit Data Mahasiswa: ${mhs.nama}`;
         document.getElementById('submit-btn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update Data';
