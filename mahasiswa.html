@@ -370,18 +370,18 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-semibold text-gray-700">Rekapitulasi Status Mahasiswa</h2>
-                        <div class="flex space-x-2">
-                            <button onclick="exportRecapToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                                <i class="fas fa-file-excel mr-2"></i> Export Excel
-                            </button>
-                            <button onclick="exportRecapToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                                <i class="fas fa-file-pdf mr-2"></i> Export PDF
-                            </button>
-                        </div>
-                    </div>
+<div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-700">Rekapitulasi Status Mahasiswa</h2>
+        <div class="flex space-x-2">
+            <button onclick="exportRecapToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
+            <button onclick="exportRecapToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            </button>
+        </div>
+    </div>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -1377,6 +1377,29 @@ if (!currentMahasiswaId) {
     }
 
     window.onload = checkAuthAndLoad;
+  
+    // =====================================================
+// SCROLL OTOMATIS SAAT KLIK "STATUS AKTIVITAS MAHASISWA"
+// =====================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const statusMenu = document.querySelector('a[href*="status"], a:contains("Status Aktivitas Mahasiswa")');
+    
+    // Jika elemen ditemukan
+    if (statusMenu) {
+        statusMenu.addEventListener('click', (e) => {
+            // Tunggu konten tampil dulu
+            setTimeout(() => {
+                const target = document.getElementById('rekapitulasi-status-mahasiswa');
+                if (target) {
+                    const yOffset = -100; // jarak dari atas navbar
+                    const y = target.getBoundingClientRect().top + window.scrollY + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, 800); // 0.8 detik delay agar konten sempat muncul
+        });
+    }
+});
+
 </script>
 </body>
 </html>
