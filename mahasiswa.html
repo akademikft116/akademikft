@@ -475,15 +475,14 @@
     });
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
-if (tabName === 'rekap') {
-    setTimeout(() => {
-        window.scrollTo({
-            top: document.body.scrollHeight - 200,
-            behavior: 'smooth'
-        });
-    }, 500);
-}
-
+    function showMainTab(tabName) {
+    // Atur Judul Halaman
+    const mainTitle = document.getElementById('mainTitle');
+    if (tabName === 'crud') {
+        mainTitle.textContent = "Manajemen Biodata & Pencarian Mahasiswa";
+    } else {
+        mainTitle.textContent = "Status Aktivitas Mahasiswa";
+    }
 
     // Tampilkan/Sembunyikan Konten
     document.querySelectorAll('.main-tab-content-section').forEach(content => {
