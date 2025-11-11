@@ -1382,7 +1382,7 @@ if (!currentMahasiswaId) {
 // SCROLL OTOMATIS SAAT KLIK "STATUS AKTIVITAS MAHASISWA"
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {
-    const statusMenu = document.querySelector('a[href*="status"], a:contains("Status Aktivitas Mahasiswa")');
+    const statusMenu = document.querySelector('#dataMahasiswaSubmenu button, #dataMahasiswaSubmenu a');
     
     // Jika elemen ditemukan
     if (statusMenu) {
