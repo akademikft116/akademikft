@@ -340,7 +340,7 @@
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                           <tbody id="mahasiswaTableBody">
                                 </tbody>
                         </table>
                     </div>
@@ -1386,6 +1386,57 @@ async function editMahasiswa(id) {
     }
 
     window.onload = checkAuthAndLoad;
+
+  // ===========================================
+//  FUNGSI MEMUAT DATA MAHASISWA DARI SUPABASE
+// ===========================================
+async function loadMahasiswaData() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('mahasiswa')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) throw error;
+
+        const tableBody = document.getElementById('mahasiswaTableBody');
+        if (!tableBody) {
+            console.warn('Elemen tabel mahasiswa tidak ditemukan.');
+            return;
+        }
+
+        tableBody.innerHTML = '';
+
+        data.forEach((mhs) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="border px-2 py-1 text-center">${mhs.npm || '-'}</td>
+                <td class="border px-2 py-1">${mhs.nama || '-'}</td>
+                <td class="border px-2 py-1">${mhs.prodi || '-'}</td>
+                <td class="border px-2 py-1 text-center">${mhs.tahun_masuk || '-'}</td>
+                <td class="border px-2 py-1 text-center">${mhs.status || '-'}</td>
+                <td class="border px-2 py-1 text-center">
+                    <button onclick="editMahasiswa(${mhs.id})" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded mr-1">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="hapusMahasiswa(${mhs.id})" 
+                        class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (err) {
+        console.error('Gagal memuat data mahasiswa:', err.message);
+        alert('❌ Gagal memuat data dari database.');
+    }
+}
+
+// Jalankan otomatis saat halaman dimuat
+document.addEventListener('DOMContentLoaded', loadMahasiswaData);
+
 </script>
 </body>
 </html>
