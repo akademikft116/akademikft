@@ -509,15 +509,15 @@ function showMainTab(tabName) {
         setTimeout(() => {
             const target = document.getElementById('rekapitulasi-status-mahasiswa');
             if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                target.scrollIntoView({ behavior: 'auto', block: 'start' });
             }
-        }, 600);
+        }, 1000);
     } 
     else if (tabName === 'crud') {
         // Scroll ke atas ke bagian atas halaman
         setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 200);
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 1000);
     }
 }
     
