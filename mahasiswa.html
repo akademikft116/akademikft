@@ -475,9 +475,8 @@
     });
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
-   
 function showMainTab(tabName) {
-    // Ganti judul halaman
+    // Ubah judul halaman
     const mainTitle = document.getElementById('mainTitle');
     if (tabName === 'crud') {
         mainTitle.textContent = "Manajemen Biodata & Pencarian Mahasiswa";
@@ -485,38 +484,42 @@ function showMainTab(tabName) {
         mainTitle.textContent = "Status Aktivitas Mahasiswa";
     }
 
-    // Tampilkan konten sesuai tab
+    // Sembunyikan semua section tab
     document.querySelectorAll('.main-tab-content-section').forEach(section => {
         section.classList.add('hidden');
     });
+
+    // Tampilkan tab yang aktif
     const activeSection = document.getElementById(`content-${tabName}`);
     if (activeSection) activeSection.classList.remove('hidden');
 
-    // Atur tampilan tombol tab aktif
+    // Ubah tampilan tombol tab aktif
     document.querySelectorAll('.main-tab-button').forEach(button => {
         button.classList.remove('active', 'text-blue-600', 'border-blue-600');
         button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
     });
     const activeBtn = document.getElementById(`tab-${tabName}`);
-    if (activeBtn) {
-        activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
-    }
+    if (activeBtn) activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
 
-    // --- Efek Scroll Otomatis ---
+    // --- Efek dan aksi otomatis berdasarkan tab ---
     if (tabName === 'rekap') {
-        // Scroll ke bawah ke bagian Rekapitulasi
+        // Panggil fungsi rekap data
         loadRecapData();
+        // Scroll halus ke bawah ke tabel rekap
         setTimeout(() => {
             const target = document.getElementById('rekapitulasi-status-mahasiswa');
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 600);
     } 
     else if (tabName === 'crud') {
-        // Scroll ke atas ke bagian atas halaman
+        // Panggil fungsi untuk memuat data mahasiswa
+        loadMahasiswaData();
+        // Scroll halus ke atas ke header
         setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.documentElement.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }, 200);
     }
 }
