@@ -514,12 +514,15 @@ function showMainTab(tabName) {
         }, 1000);
     } 
     else if (tabName === 'crud') {
-        // Scroll ke atas ke bagian atas halaman
-        setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'auto' });
-        }, 1500);
-    }
+    // Scroll benar-benar ke atas halaman (termasuk header biru)
+    setTimeout(() => {
+        document.documentElement.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }, 200);
 }
+
     
     // --- FUNGSI NAVIGASI DROPDOWN SIDEBAR ---
     function toggleSubmenu(event) {
