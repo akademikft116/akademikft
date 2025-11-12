@@ -475,7 +475,8 @@
     });
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
-    function showMainTab(tabName) {
+    <script>
+function showMainTab(tabName) {
     // Atur Judul Halaman
     const mainTitle = document.getElementById('mainTitle');
     if (tabName === 'crud') {
@@ -486,7 +487,6 @@
 
     // Tampilkan/Sembunyikan Konten
     document.querySelectorAll('.main-tab-content-section').forEach(content => {
-        // Jangan sembunyikan rekap agar tetap tampil di bawah
         if (content.id !== 'content-rekap') {
             content.classList.add('hidden');
         }
@@ -497,36 +497,26 @@
         button.classList.remove('active', 'text-blue-600', 'border-blue-600');
         button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
     });
+
     const activeBtn = document.getElementById(`tab-${tabName}`);
     if (activeBtn) {
         activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
     }
 
-    // Jika pindah ke tab Rekap, muat data rekap
+    // Jika pindah ke tab Rekap, muat data dan scroll otomatis
     if (tabName === 'rekap') {
         loadRecapData();
 
-        // === Tambahan kode scroll otomatis ke tabel Rekapitulasi ===
+        // Scroll halus ke bagian tabel rekapitulasi
         setTimeout(() => {
-            const target = document.getElementById('rekapitulasi-status'); // Pastikan id ini ada di elemen <h2> atau div rekap
+            const target = document.getElementById('rekapitulasi-status-mahasiswa');
             if (target) {
-                const yOffset = -120; // ubah jika header menutupi konten
-                const y = target.getBoundingClientRect().top + window.scrollY + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-        }, 500); // delay sedikit supaya datanya sudah dimuat
+        }, 600);
     }
 }
-
-    // ✅ Scroll otomatis ke bagian bawah saat membuka Status Aktivitas Mahasiswa
-if (tabName === 'rekap') {
-    setTimeout(() => {
-        window.scrollTo({
-            top: document.body.scrollHeight - 200, // bisa ubah -200 jadi -100 atau 0 kalau mau lebih jauh ke bawah
-            behavior: 'smooth'
-        });
-    }, 500);
-}
+</script>
 
     
     // --- FUNGSI NAVIGASI DROPDOWN SIDEBAR ---
