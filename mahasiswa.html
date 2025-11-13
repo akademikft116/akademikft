@@ -272,8 +272,9 @@
                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
                     
                     <div class="mb-6 border p-4 rounded-lg bg-gray-50">
-                        <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                      <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+
   <div>
     <label for="searchProdi" class="block text-sm font-medium text-gray-700">Program Studi</label>
     <select id="searchProdi" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -660,15 +661,17 @@ function showMainTab(tabName) {
   const status = document.getElementById('searchStatus').value.trim();
   const tahun = document.getElementById('searchTahun').value.trim();
 
+  console.log("Filter aktif:", { prodi, kelas, status, tahun }); // Debug
   loadMahasiswaData({ prodi, kelas, status, tahun });
 }
 
     function resetSearch() {
-        document.getElementById('searchNama').value = '';
-        document.getElementById('searchNpm').value = '';
-        searchTahunSelect.setValue(''); 
-        loadMahasiswaData(); 
-    }
+  document.getElementById('searchProdi').value = '';
+  document.getElementById('searchKelas').value = '';
+  document.getElementById('searchStatus').value = '';
+  document.getElementById('searchTahun').value = '';
+  loadMahasiswaData(); // reload semua data
+}
 
     function downloadTemplate() {
         const headers = [
@@ -892,14 +895,14 @@ function showMainTab(tabName) {
         
         let query = supabaseClient.from('mahasiswa').select('*');
 
-        if (filters.prodi) query = query.eq('prodi', filters.prodi);
-        if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
-        if (filters.status) query = query.eq('status', filters.status);
-        if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
-            }
-        }
-  
-        const { data: mahasiswaData, error } = await query.order('npm', { ascending: true });
+          // 🔧 Filter baru
+          if (filters.prodi) query = query.eq('prodi', filters.prodi);
+          if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+          if (filters.status) query = query.eq('status', filters.status);
+          if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
+          
+          const { data, error } = await query;
+          console.log("Data hasil filter:", data, error);
 
         if (error) {
             console.error('Error saat memuat data:', error);
