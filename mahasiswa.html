@@ -274,21 +274,45 @@
                     <div class="mb-6 border p-4 rounded-lg bg-gray-50">
                         <h3 class="text-lg font-medium mb-3 text-gray-700"><i class="fas fa-filter mr-2"></i> Filter Pencarian</h3>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                            <div>
-                                <label for="searchNama" class="block text-sm font-medium text-gray-700">Nama</label>
-                                <input type="text" id="searchNama" placeholder="Ketik Nama Mahasiswa" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="searchNpm" class="block text-sm font-medium text-gray-700">NPM</label>
-                                <input type="text" id="searchNpm" placeholder="Ketik NPM" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            </div>
-                            <div>
-                                <label for="searchTahun" class="block text-sm font-medium text-gray-700">Tahun Masuk</label>
-                                <select id="searchTahun" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                    <option value="">Semua Tahun</option>
-                                </select>
-                            </div>
-                            
+  <div>
+    <label for="searchProdi" class="block text-sm font-medium text-gray-700">Program Studi</label>
+    <select id="searchProdi" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+      <option value="">Semua Prodi</option>
+      <option value="Industri">Teknik Industri</option>
+      <option value="Sipil">Teknik Sipil</option>
+      <option value="Informatika">Teknik Informatika</option>
+      <option value="Arsitektur">Arsitektur</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="searchKelas" class="block text-sm font-medium text-gray-700">Kelas</label>
+    <input type="text" id="searchKelas" placeholder="Ketik Kelas (A/B/C)" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+  </div>
+
+  <div>
+    <label for="searchStatus" class="block text-sm font-medium text-gray-700">Jenis Aktivitas / Status</label>
+    <select id="searchStatus" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+      <option value="">Semua Status</option>
+      <option value="Aktif">Aktif</option>
+      <option value="Lulus">Lulus</option>
+      <option value="Nonaktif">Nonaktif</option>
+      <option value="Mengundurkan diri">Mengundurkan diri</option>
+      <option value="Drop Out">Drop Out</option>
+      <option value="Meninggal Dunia">Meninggal Dunia</option>
+    </select>
+  </div>
+
+  <div class="flex space-x-2">
+    <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
+      <i class="fas fa-search mr-1"></i> Cari
+    </button>
+    <button onclick="resetSearch()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+      <i class="fas fa-undo"></i>
+    </button>
+  </div>
+
+</div>                      
                             <div class="flex space-x-2">
                                 <button onclick="performSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
                                     <i class="fas fa-search mr-1"></i> Cari
@@ -631,12 +655,13 @@ function showMainTab(tabName) {
     // --- FUNGSI CRUD & EXPORT ---
 
     function performSearch() {
-        const searchNama = document.getElementById('searchNama').value.trim();
-        const searchNpm = document.getElementById('searchNpm').value.trim();
-        const searchTahun = searchTahunSelect.getValue(); 
+  const prodi = document.getElementById('searchProdi').value.trim();
+  const kelas = document.getElementById('searchKelas').value.trim();
+  const status = document.getElementById('searchStatus').value.trim();
+  const tahun = document.getElementById('searchTahun').value.trim();
 
-        loadMahasiswaData({ nama: searchNama, npm: searchNpm, tahun: searchTahun });
-    }
+  loadMahasiswaData({ prodi, kelas, status, tahun });
+}
 
     function resetSearch() {
         document.getElementById('searchNama').value = '';
@@ -866,21 +891,14 @@ function showMainTab(tabName) {
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
         
         let query = supabaseClient.from('mahasiswa').select('*');
-        
-        if (nama || npm) {
-            let or_filters = [];
-            if (nama) or_filters.push(`nama.ilike.%${nama}%`);
-            if (npm) or_filters.push(`npm.ilike.%${npm}%`);
-            
-            if (or_filters.length > 0) {
-                 query = query.or(or_filters.join(','));
+
+        if (filters.prodi) query = query.eq('prodi', filters.prodi);
+        if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+        if (filters.status) query = query.eq('status', filters.status);
+        if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
             }
         }
-        
-        if (tahun) {
-            query = query.eq('tahun_masuk', tahun);
-        }
-
+  
         const { data: mahasiswaData, error } = await query.order('npm', { ascending: true });
 
         if (error) {
