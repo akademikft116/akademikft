@@ -383,6 +383,54 @@
         </div>
     </div>
 
+            <!-- 🔍 Filter Pencarian Rekap Mahasiswa -->
+<div class="mb-6 border p-4 rounded-lg bg-gray-50">
+  <h3 class="text-lg font-medium mb-3 text-gray-700">
+    <i class="fas fa-filter mr-2"></i> Filter Pencarian
+  </h3>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+
+    <div>
+      <label for="filterProdi" class="block text-sm font-medium text-gray-700">Program Studi</label>
+      <select id="filterProdi" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+        <option value="">Semua Prodi</option>
+        <option value="Industri">Teknik Industri</option>
+        <option value="Sipil">Teknik Sipil</option>
+        <option value="Informatika">Teknik Informatika</option>
+        <option value="Arsitektur">Arsitektur</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="filterKelas" class="block text-sm font-medium text-gray-700">Kelas</label>
+      <input type="text" id="filterKelas" placeholder="Ketik Kelas (A/B/C)" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+    </div>
+
+    <div>
+      <label for="filterStatus" class="block text-sm font-medium text-gray-700">Jenis Aktivitas / Status</label>
+      <select id="filterStatus" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+        <option value="">Semua Status</option>
+        <option value="Aktif">Aktif</option>
+        <option value="Lulus">Lulus</option>
+        <option value="Nonaktif">Nonaktif</option>
+        <option value="Mengundurkan diri">Mengundurkan diri</option>
+        <option value="Drop Out">Drop Out</option>
+        <option value="Meninggal Dunia">Meninggal Dunia</option>
+      </select>
+    </div>
+
+    <div class="flex space-x-2">
+      <button onclick="applyRekapFilter()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex-grow">
+        <i class="fas fa-search mr-1"></i> Cari
+      </button>
+      <button onclick="resetRekapFilter()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+        <i class="fas fa-undo"></i>
+      </button>
+    </div>
+
+  </div>
+</div>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -1180,6 +1228,62 @@ if (!currentMahasiswaId) {
         renderRecapTable(recaps, globalRecap, globalTotal);
         recapData = recaps; // Simpan untuk export
     }
+
+    // --- FILTER UNTUK REKAP STATUS MAHASISWA ---
+async function applyRekapFilter() {
+  const prodi = document.getElementById('filterProdi').value.trim();
+  const kelas = document.getElementById('filterKelas').value.trim();
+  const status = document.getElementById('filterStatus').value.trim();
+
+  const tableBody = document.getElementById('recap-table-body');
+  tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
+
+  let query = supabaseClient.from('mahasiswa').select('prodi, tahun_masuk, status, kelas');
+
+  if (prodi) query = query.eq('prodi', prodi);
+  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
+  if (status) query = query.eq('status', status);
+
+  const { data: filteredData, error } = await query;
+
+  if (error) {
+    console.error('Error filter:', error);
+    tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
+    return;
+  }
+
+  if (!filteredData || filteredData.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data yang cocok dengan filter.</td></tr>';
+    return;
+  }
+
+  const recaps = {};
+  filteredData.forEach(mhs => {
+    const prodiKey = mhs.prodi || 'Lainnya';
+    const tahun = mhs.tahun_masuk || 'Lainnya';
+    const statusKey =
+      mhs.status === 'Aktif' ? 'Aktif' :
+      mhs.status === 'Lulus' ? 'Lulus' :
+      ['Mengundurkan diri', 'Drop Out'].includes(mhs.status) ? 'MundurDO' :
+      ['Nonaktif', 'Non-Aktif'].includes(mhs.status) ? 'Nonaktif' :
+      mhs.status.includes('Meninggal') ? 'Meninggal' : 'Nonaktif';
+
+    if (!recaps[prodiKey]) recaps[prodiKey] = {};
+    if (!recaps[prodiKey][tahun]) recaps[prodiKey][tahun] = { Total: 0, Aktif: 0, Lulus: 0, Nonaktif: 0, MundurDO: 0, Meninggal: 0 };
+
+    recaps[prodiKey][tahun].Total++;
+    recaps[prodiKey][tahun][statusKey]++;
+  });
+
+  renderRecapTable(recaps, { Aktif: 0, Lulus: 0, Nonaktif: 0, MundurDO: 0, Meninggal: 0 }, filteredData.length);
+}
+
+function resetRekapFilter() {
+  document.getElementById('filterProdi').value = '';
+  document.getElementById('filterKelas').value = '';
+  document.getElementById('filterStatus').value = '';
+  loadRecapData();
+}
 
     function renderRecapTable(recaps, globalRecap, globalTotal) {
         const tableBody = document.getElementById('recap-table-body');
