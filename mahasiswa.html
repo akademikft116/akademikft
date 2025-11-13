@@ -916,15 +916,23 @@ function resetSearch() {
     }
 
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
+// ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
   const tableBody = document.getElementById('mahasiswaTableBody');
   if (!tableBody) return;
-  tableBody.innerHTML =
-    '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
 
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="8" class="text-center py-4 text-gray-500">
+        <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
+      </td>
+    </tr>
+  `;
+
+  // Ambil semua data mahasiswa
   let query = supabaseClient.from('mahasiswa').select('*');
 
-  // 🔧 Terapkan filter pencarian baru
+  // Terapkan filter (Prodi, Kelas, Status, Tahun)
   if (filters.prodi && filters.prodi.trim() !== '') {
     query = query.ilike('prodi', `%${filters.prodi}%`);
   }
@@ -938,23 +946,24 @@ async function loadMahasiswaData(filters = {}) {
     query = query.eq('tahun_masuk', filters.tahun);
   }
 
-  // 🔍 Ambil data dari Supabase
   const { data, error } = await query;
 
   if (error) {
-    console.error('Gagal memuat data mahasiswa:', error);
-    tableBody.innerHTML =
-      '<tr><td colspan="7" class="text-center text-red-500 py-4">Gagal memuat data mahasiswa.</td></tr>';
+    console.error('Gagal memuat data:', error);
+    tableBody.innerHTML = `
+      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>
+    `;
     return;
   }
 
   if (!data || data.length === 0) {
-    tableBody.innerHTML =
-      '<tr><td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>';
+    tableBody.innerHTML = `
+      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>
+    `;
     return;
   }
 
-  // 🔄 Render hasil ke tabel
+  // Render hasil ke tabel
   let rows = '';
   data.forEach((mhs, index) => {
     rows += `
@@ -966,62 +975,20 @@ async function loadMahasiswaData(filters = {}) {
         <td class="border px-4 py-2">${mhs.kelas || '-'}</td>
         <td class="border px-4 py-2">${mhs.tahun_masuk || '-'}</td>
         <td class="border px-4 py-2">${mhs.status || '-'}</td>
-      </tr>`;
+        <td class="border px-4 py-2 text-center">
+          <button class="text-blue-600 hover:underline" onclick="showDetail('${mhs.id}')">Detail</button> |
+          <button class="text-yellow-600 hover:underline" onclick="editMahasiswa('${mhs.id}')">Edit</button> |
+          <button class="text-red-600 hover:underline" onclick="deleteMahasiswa('${mhs.id}')">Hapus</button>
+        </td>
+      </tr>
+    `;
   });
+
   tableBody.innerHTML = rows;
+
+  // ✅ Update total rekap otomatis
+  updateRekapitulasi(data);
 }
-
-async function loadMahasiswaData(filters = {}) {
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  // 🔧 Terapkan filter pencarian baru
-  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
-  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
-  if (filters.status) query = query.eq('status', filters.status);
-  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('Gagal memuat data mahasiswa:', error);
-    alert('Terjadi kesalahan saat memuat data.');
-    return;
-  }
-
-  renderMahasiswaTable(data); // pastikan fungsi ini sudah ada untuk menampilkan tabel
-}
-
-        tableBody.innerHTML = '';
-        if (mahasiswaData.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data mahasiswa yang ditemukan.</td></tr>';
-            return;
-        }
-
-        mahasiswaData.forEach(mhs => {
-            const statusBadge = mhs.status === 'Aktif' 
-                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>'
-                : mhs.status === 'Lulus' 
-                ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Lulus</span>'
-                : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">' + mhs.status + '</span>'; 
-
-            const row = `
-                <tr class="hover:bg-gray-100 transition duration-100">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${mhs.npm}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mhs.nama}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mhs.prodi}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${mhs.kelas || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${mhs.tahun_masuk}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">${statusBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                        <button onclick="showDetail(${mhs.id})" class="text-indigo-600 hover:text-indigo-900 transition duration-150"><i class="fas fa-eye"></i> Detail</button>
-                        <button onclick="editMahasiswa(${mhs.id})" class="text-yellow-600 hover:text-yellow-900 transition duration-150"><i class="fas fa-edit"></i> Edit</button>
-                        <button onclick="deleteMahasiswa(${mhs.id}, '${mhs.nama}')" class="text-red-600 hover:text-red-900 transition duration-150"><i class="fas fa-trash"></i> Hapus</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
 
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
