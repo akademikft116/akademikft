@@ -436,226 +436,186 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 
-// --- 🔍 FILTER UNTUK STATUS AKTIVITAS MAHASISWA ---
+// --- 🔧 AKTIFKAN FILTER BARU DI STATUS AKTIVITAS MAHASISWA ---
 async function filterMahasiswaRekap() {
-  const prodi = document.getElementById('filterProdi').value.trim();
-  const kelas = document.getElementById('filterKelas').value.trim();
-  const status = document.getElementById('filterStatus').value.trim();
-  const tahun = document.getElementById('filterTahun').value.trim();
+  const prodi = document.getElementById('filterProdi')?.value.trim() || '';
+  const kelas = document.getElementById('filterKelas')?.value.trim() || '';
+  const status = document.getElementById('filterStatus')?.value.trim() || '';
+  const tahun = document.getElementById('filterTahun')?.value.trim() || '';
 
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  if (prodi) query = query.eq('prodi', prodi);
-  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
-  if (status) query = query.eq('status', status);
-  if (tahun) query = query.eq('tahun_masuk', tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error load data:", error);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
+  // Pastikan fungsi utama loadMahasiswaData ada
+  if (typeof loadMahasiswaData === "function") {
+    await loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+    alert("Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan.");
   }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  renderMahasiswaTable(data);
 }
 
 function resetFilterRekap() {
-  document.getElementById('filterProdi').value = '';
-  document.getElementById('filterKelas').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterTahun').value = '';
-  loadMahasiswaData();
+  const prodi = document.getElementById('filterProdi');
+  const kelas = document.getElementById('filterKelas');
+  const status = document.getElementById('filterStatus');
+  const tahun = document.getElementById('filterTahun');
+
+  if (prodi) prodi.value = '';
+  if (kelas) kelas.value = '';
+  if (status) status.value = '';
+  if (tahun) tahun.value = '';
+
+  if (typeof loadMahasiswaData === "function") {
+    loadMahasiswaData();
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+  }
 }
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js">
 
-// --- 🔍 FILTER UNTUK STATUS AKTIVITAS MAHASISWA ---
+// --- 🔧 AKTIFKAN FILTER BARU DI STATUS AKTIVITAS MAHASISWA ---
 async function filterMahasiswaRekap() {
-  const prodi = document.getElementById('filterProdi').value.trim();
-  const kelas = document.getElementById('filterKelas').value.trim();
-  const status = document.getElementById('filterStatus').value.trim();
-  const tahun = document.getElementById('filterTahun').value.trim();
+  const prodi = document.getElementById('filterProdi')?.value.trim() || '';
+  const kelas = document.getElementById('filterKelas')?.value.trim() || '';
+  const status = document.getElementById('filterStatus')?.value.trim() || '';
+  const tahun = document.getElementById('filterTahun')?.value.trim() || '';
 
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  if (prodi) query = query.eq('prodi', prodi);
-  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
-  if (status) query = query.eq('status', status);
-  if (tahun) query = query.eq('tahun_masuk', tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error load data:", error);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
+  // Pastikan fungsi utama loadMahasiswaData ada
+  if (typeof loadMahasiswaData === "function") {
+    await loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+    alert("Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan.");
   }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  renderMahasiswaTable(data);
 }
 
 function resetFilterRekap() {
-  document.getElementById('filterProdi').value = '';
-  document.getElementById('filterKelas').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterTahun').value = '';
-  loadMahasiswaData();
+  const prodi = document.getElementById('filterProdi');
+  const kelas = document.getElementById('filterKelas');
+  const status = document.getElementById('filterStatus');
+  const tahun = document.getElementById('filterTahun');
+
+  if (prodi) prodi.value = '';
+  if (kelas) kelas.value = '';
+  if (status) status.value = '';
+  if (tahun) tahun.value = '';
+
+  if (typeof loadMahasiswaData === "function") {
+    loadMahasiswaData();
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+  }
 }
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
 
-// --- 🔍 FILTER UNTUK STATUS AKTIVITAS MAHASISWA ---
+// --- 🔧 AKTIFKAN FILTER BARU DI STATUS AKTIVITAS MAHASISWA ---
 async function filterMahasiswaRekap() {
-  const prodi = document.getElementById('filterProdi').value.trim();
-  const kelas = document.getElementById('filterKelas').value.trim();
-  const status = document.getElementById('filterStatus').value.trim();
-  const tahun = document.getElementById('filterTahun').value.trim();
+  const prodi = document.getElementById('filterProdi')?.value.trim() || '';
+  const kelas = document.getElementById('filterKelas')?.value.trim() || '';
+  const status = document.getElementById('filterStatus')?.value.trim() || '';
+  const tahun = document.getElementById('filterTahun')?.value.trim() || '';
 
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  if (prodi) query = query.eq('prodi', prodi);
-  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
-  if (status) query = query.eq('status', status);
-  if (tahun) query = query.eq('tahun_masuk', tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error load data:", error);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
+  // Pastikan fungsi utama loadMahasiswaData ada
+  if (typeof loadMahasiswaData === "function") {
+    await loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+    alert("Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan.");
   }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  renderMahasiswaTable(data);
 }
 
 function resetFilterRekap() {
-  document.getElementById('filterProdi').value = '';
-  document.getElementById('filterKelas').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterTahun').value = '';
-  loadMahasiswaData();
+  const prodi = document.getElementById('filterProdi');
+  const kelas = document.getElementById('filterKelas');
+  const status = document.getElementById('filterStatus');
+  const tahun = document.getElementById('filterTahun');
+
+  if (prodi) prodi.value = '';
+  if (kelas) kelas.value = '';
+  if (status) status.value = '';
+  if (tahun) tahun.value = '';
+
+  if (typeof loadMahasiswaData === "function") {
+    loadMahasiswaData();
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+  }
 }
 
 </script> 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
 
-// --- 🔍 FILTER UNTUK STATUS AKTIVITAS MAHASISWA ---
+// --- 🔧 AKTIFKAN FILTER BARU DI STATUS AKTIVITAS MAHASISWA ---
 async function filterMahasiswaRekap() {
-  const prodi = document.getElementById('filterProdi').value.trim();
-  const kelas = document.getElementById('filterKelas').value.trim();
-  const status = document.getElementById('filterStatus').value.trim();
-  const tahun = document.getElementById('filterTahun').value.trim();
+  const prodi = document.getElementById('filterProdi')?.value.trim() || '';
+  const kelas = document.getElementById('filterKelas')?.value.trim() || '';
+  const status = document.getElementById('filterStatus')?.value.trim() || '';
+  const tahun = document.getElementById('filterTahun')?.value.trim() || '';
 
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  if (prodi) query = query.eq('prodi', prodi);
-  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
-  if (status) query = query.eq('status', status);
-  if (tahun) query = query.eq('tahun_masuk', tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error load data:", error);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
+  // Pastikan fungsi utama loadMahasiswaData ada
+  if (typeof loadMahasiswaData === "function") {
+    await loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+    alert("Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan.");
   }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  renderMahasiswaTable(data);
 }
 
 function resetFilterRekap() {
-  document.getElementById('filterProdi').value = '';
-  document.getElementById('filterKelas').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterTahun').value = '';
-  loadMahasiswaData();
+  const prodi = document.getElementById('filterProdi');
+  const kelas = document.getElementById('filterKelas');
+  const status = document.getElementById('filterStatus');
+  const tahun = document.getElementById('filterTahun');
+
+  if (prodi) prodi.value = '';
+  if (kelas) kelas.value = '';
+  if (status) status.value = '';
+  if (tahun) tahun.value = '';
+
+  if (typeof loadMahasiswaData === "function") {
+    loadMahasiswaData();
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+  }
 }
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js">
 
-// --- 🔍 FILTER UNTUK STATUS AKTIVITAS MAHASISWA ---
+// --- 🔧 AKTIFKAN FILTER BARU DI STATUS AKTIVITAS MAHASISWA ---
 async function filterMahasiswaRekap() {
-  const prodi = document.getElementById('filterProdi').value.trim();
-  const kelas = document.getElementById('filterKelas').value.trim();
-  const status = document.getElementById('filterStatus').value.trim();
-  const tahun = document.getElementById('filterTahun').value.trim();
+  const prodi = document.getElementById('filterProdi')?.value.trim() || '';
+  const kelas = document.getElementById('filterKelas')?.value.trim() || '';
+  const status = document.getElementById('filterStatus')?.value.trim() || '';
+  const tahun = document.getElementById('filterTahun')?.value.trim() || '';
 
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  if (prodi) query = query.eq('prodi', prodi);
-  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
-  if (status) query = query.eq('status', status);
-  if (tahun) query = query.eq('tahun_masuk', tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error load data:", error);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
+  // Pastikan fungsi utama loadMahasiswaData ada
+  if (typeof loadMahasiswaData === "function") {
+    await loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+    alert("Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan.");
   }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  renderMahasiswaTable(data);
 }
 
 function resetFilterRekap() {
-  document.getElementById('filterProdi').value = '';
-  document.getElementById('filterKelas').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterTahun').value = '';
-  loadMahasiswaData();
+  const prodi = document.getElementById('filterProdi');
+  const kelas = document.getElementById('filterKelas');
+  const status = document.getElementById('filterStatus');
+  const tahun = document.getElementById('filterTahun');
+
+  if (prodi) prodi.value = '';
+  if (kelas) kelas.value = '';
+  if (status) status.value = '';
+  if (tahun) tahun.value = '';
+
+  if (typeof loadMahasiswaData === "function") {
+    loadMahasiswaData();
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+  }
 }
 
 </script>
@@ -1627,46 +1587,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// --- 🔍 FILTER UNTUK STATUS AKTIVITAS MAHASISWA ---
+// --- 🔧 AKTIFKAN FILTER BARU DI STATUS AKTIVITAS MAHASISWA ---
 async function filterMahasiswaRekap() {
-  const prodi = document.getElementById('filterProdi').value.trim();
-  const kelas = document.getElementById('filterKelas').value.trim();
-  const status = document.getElementById('filterStatus').value.trim();
-  const tahun = document.getElementById('filterTahun').value.trim();
+  const prodi = document.getElementById('filterProdi')?.value.trim() || '';
+  const kelas = document.getElementById('filterKelas')?.value.trim() || '';
+  const status = document.getElementById('filterStatus')?.value.trim() || '';
+  const tahun = document.getElementById('filterTahun')?.value.trim() || '';
 
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  if (prodi) query = query.eq('prodi', prodi);
-  if (kelas) query = query.ilike('kelas', `%${kelas}%`);
-  if (status) query = query.eq('status', status);
-  if (tahun) query = query.eq('tahun_masuk', tahun);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error load data:", error);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
+  // Pastikan fungsi utama loadMahasiswaData ada
+  if (typeof loadMahasiswaData === "function") {
+    await loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+    alert("Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan.");
   }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  renderMahasiswaTable(data);
 }
 
 function resetFilterRekap() {
-  document.getElementById('filterProdi').value = '';
-  document.getElementById('filterKelas').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterTahun').value = '';
-  loadMahasiswaData();
+  const prodi = document.getElementById('filterProdi');
+  const kelas = document.getElementById('filterKelas');
+  const status = document.getElementById('filterStatus');
+  const tahun = document.getElementById('filterTahun');
+
+  if (prodi) prodi.value = '';
+  if (kelas) kelas.value = '';
+  if (status) status.value = '';
+  if (tahun) tahun.value = '';
+
+  if (typeof loadMahasiswaData === "function") {
+    loadMahasiswaData();
+  } else {
+    console.error("⚠️ Fungsi loadMahasiswaData() tidak ditemukan!");
+  }
 }
 
 </script>
