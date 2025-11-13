@@ -915,15 +915,61 @@ function resetSearch() {
         doc.save('data_mahasiswa_ft.pdf');
     }
 
-    async function loadMahasiswaData(filters = {}) {
-        const { nama, npm, tahun } = filters;
+    // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
+async function loadMahasiswaData(filters = {}) {
+  const tableBody = document.getElementById('mahasiswaTableBody');
+  if (!tableBody) return;
+  tableBody.innerHTML =
+    '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
 
-        const tableBody = document.getElementById('mahasiswa-table-body');
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</td></tr>';
-        
-        // pastikan signature: async function loadMahasiswaData(filters = {}) { ... }
+  let query = supabaseClient.from('mahasiswa').select('*');
 
-let query = supabaseClient.from('mahasiswa').select('*');
+  // 🔧 Terapkan filter pencarian baru
+  if (filters.prodi && filters.prodi.trim() !== '') {
+    query = query.ilike('prodi', `%${filters.prodi}%`);
+  }
+  if (filters.kelas && filters.kelas.trim() !== '') {
+    query = query.ilike('kelas', `%${filters.kelas}%`);
+  }
+  if (filters.status && filters.status.trim() !== '') {
+    query = query.eq('status', filters.status);
+  }
+  if (filters.tahun && filters.tahun.trim() !== '') {
+    query = query.eq('tahun_masuk', filters.tahun);
+  }
+
+  // 🔍 Ambil data dari Supabase
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Gagal memuat data mahasiswa:', error);
+    tableBody.innerHTML =
+      '<tr><td colspan="7" class="text-center text-red-500 py-4">Gagal memuat data mahasiswa.</td></tr>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    tableBody.innerHTML =
+      '<tr><td colspan="7" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>';
+    return;
+  }
+
+  // 🔄 Render hasil ke tabel
+  let rows = '';
+  data.forEach((mhs, index) => {
+    rows += `
+      <tr class="hover:bg-gray-50">
+        <td class="border px-4 py-2">${index + 1}</td>
+        <td class="border px-4 py-2">${mhs.npm || '-'}</td>
+        <td class="border px-4 py-2">${mhs.nama || '-'}</td>
+        <td class="border px-4 py-2">${mhs.prodi || '-'}</td>
+        <td class="border px-4 py-2">${mhs.kelas || '-'}</td>
+        <td class="border px-4 py-2">${mhs.tahun_masuk || '-'}</td>
+        <td class="border px-4 py-2">${mhs.status || '-'}</td>
+      </tr>`;
+  });
+  tableBody.innerHTML = rows;
+}
 
 async function loadMahasiswaData(filters = {}) {
   let query = supabaseClient.from('mahasiswa').select('*');
