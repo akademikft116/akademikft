@@ -925,25 +925,25 @@ function resetSearch() {
 
 let query = supabaseClient.from('mahasiswa').select('*');
 
-// gunakan filters dari performSearch()
-if (filters) {
-  if (filters.prodi) query = query.eq('prodi', filters.prodi);
+async function loadMahasiswaData(filters = {}) {
+  let query = supabaseClient.from('mahasiswa').select('*');
+
+  // 🔧 Terapkan filter pencarian baru
+  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
   if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
   if (filters.status) query = query.eq('status', filters.status);
   if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Gagal memuat data mahasiswa:', error);
+    alert('Terjadi kesalahan saat memuat data.');
+    return;
+  }
+
+  renderMahasiswaTable(data); // pastikan fungsi ini sudah ada untuk menampilkan tabel
 }
-
-const { data, error } = await query;
-// ...lanjutkan seperti semula: cek error, lalu renderMahasiswaTable(data)
-      
-        if (error) {
-            console.error('Error saat memuat data:', error);
-            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}. Cek kembali URL dan Key Supabase Anda di kode!</td></tr>`;
-            currentMahasiswaData = [];
-            return;
-        }
-
-        currentMahasiswaData = mahasiswaData;
 
         tableBody.innerHTML = '';
         if (mahasiswaData.length === 0) {
