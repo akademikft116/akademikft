@@ -918,6 +918,8 @@ function resetSearch() {
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
   const mahasiswaTableBody = document.querySelector('#mahasiswa-table-body');
+  mahasiswaTableBody.innerHTML = rows;
+
   if (!tableBody) return;
 
   TableBody.innerHTML =
