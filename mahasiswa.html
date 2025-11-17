@@ -493,22 +493,22 @@
     let statusSelect; 
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi Tom Select untuk Form Tambah/Edit
-        prodiSelect = new TomSelect("#prodi", { create: false });
-        tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-        statusSelect = new TomSelect("#status", { create: false }); 
-        
-        populateYearSelect(tahunMasukSelect);
-        
-        // Inisialisasi Tom Select untuk Pencarian
-        searchTahunSelect = new TomSelect("#searchTahun", { 
-            create: false,
-            placeholder: "Pilih Tahun",
-        });
+    prodiSelect = new TomSelect("#prodi", { create: false });
+    tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
+    statusSelect = new TomSelect("#status", { create: false }); 
 
-        populateYearSelect(searchTahunSelect, true);
-        loadMahasiswaData();
+    populateYearSelect(tahunMasukSelect);
+
+    searchTahunSelect = new TomSelect("#searchTahun", { 
+        create: false,
+        placeholder: "Pilih Tahun",
     });
+    populateYearSelect(searchTahunSelect, true);
+
+    // 👉 Tambahkan ini
+    showMainTab('crud');   
+    loadMahasiswaData();
+});
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
 function showMainTab(tabName) {
