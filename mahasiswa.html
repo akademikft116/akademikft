@@ -918,10 +918,9 @@ function resetSearch() {
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
   const mahasiswaTableBody = document.querySelector('#mahasiswa-table-body');
-  mahasiswaTableBody.innerHTML = rows;
   if (!tableBody) return;
 
-  tableBody.innerHTML = `
+  mahasiswaTableBody.innerHTML = rows;
     <tr>
       <td colspan="8" class="text-center py-4 text-gray-500">
         <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
