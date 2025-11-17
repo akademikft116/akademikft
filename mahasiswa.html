@@ -378,7 +378,7 @@
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                            <tbody class="bg-white divide-y divide-gray-200" #mahasiswa-table-body>
                                 </tbody>
                         </table>
                     </div>
@@ -917,7 +917,8 @@ function resetSearch() {
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
-  const tableBody = document.getElementById('mahasiswaTableBody');
+  const mahasiswaTableBody = document.querySelector('#mahasiswa-table-body');
+  mahasiswaTableBody.innerHTML = rows;
   if (!tableBody) return;
 
   tableBody.innerHTML = `
