@@ -1470,30 +1470,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-  // =============================
-// FIX AGAR DATA MAHASISWA MUNCUL
-// =============================
-
-// Saat halaman pertama kali dibuka, TAMPILKAN CRUD secara default
+  // =====================================================
+// SCROLL OTOMATIS SAAT KLIK "STATUS AKTIVITAS MAHASISWA"
+// =====================================================
 document.addEventListener('DOMContentLoaded', () => {
-
-    // 1. Paksa tampilkan bagian CRUD (Daftar Mahasiswa)
-    const crudContent = document.getElementById("content-crud");
-    if (crudContent) {
-        crudContent.classList.remove("hidden");
+    const statusMenu = document.querySelector('#dataMahasiswaSubmenu button, #dataMahasiswaSubmenu a');
+    
+    if (statusMenu) {
+        statusMenu.addEventListener('click', (e) => {
+            setTimeout(() => {
+                const target = document.getElementById('rekapitulasi-status-mahasiswa');
+                if (target) {
+                    const yOffset = -100;
+                    const y = target.getBoundingClientRect().top + window.scrollY + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, 800);
+        });
     }
-
-    // 2. Sembunyikan tab Rekap supaya tidak menutupi CRUD
-    const rekapContent = document.getElementById("content-rekap");
-    if (rekapContent) {
-        rekapContent.classList.add("hidden");
-    }
-
-    // 3. Muat data mahasiswa dari Supabase
-    loadMahasiswaData();
-
-    // 4. Scroll ke atas supaya tampilan langsung fokus ke daftar mahasiswa
-    window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 </script>
