@@ -1470,6 +1470,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+  // =============================
+// FIX AGAR DATA MAHASISWA MUNCUL
+// =============================
+
+// Saat halaman pertama kali dibuka, TAMPILKAN CRUD secara default
+document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. Paksa tampilkan bagian CRUD (Daftar Mahasiswa)
+    const crudContent = document.getElementById("content-crud");
+    if (crudContent) {
+        crudContent.classList.remove("hidden");
+    }
+
+    // 2. Sembunyikan tab Rekap supaya tidak menutupi CRUD
+    const rekapContent = document.getElementById("content-rekap");
+    if (rekapContent) {
+        rekapContent.classList.add("hidden");
+    }
+
+    // 3. Muat data mahasiswa dari Supabase
+    loadMahasiswaData();
+
+    // 4. Scroll ke atas supaya tampilan langsung fokus ke daftar mahasiswa
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 </script>
 </body>
 </html>
