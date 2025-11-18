@@ -997,11 +997,7 @@ async function loadMahasiswaData(filters = {}) {
   });
 
   tableBody.innerHTML = rows;
-
-  // ✅ Update total rekap otomatis
-  updateRekapitulasi(data);
-}
-
+  
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
