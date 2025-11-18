@@ -965,16 +965,16 @@ async function loadMahasiswaData(filters = {}) {
   // Render hasil ke tabel
   let rows = '';
   data.forEach((mhs, index) => {
-rows += `
-  <tr class="hover:bg-gray-50">
-    <td class="border px-4 py-2">${mhs.npm || '-'}</td>
-    <td class="border px-4 py-2">${mhs.nama || '-'}</td>
-    <td class="border px-4 py-2">${mhs.prodi || '-'}</td>
-    <td class="border px-4 py-2 text-center">${mhs.kelas || '-'}</td>
-    <td class="border px-4 py-2 text-center">${mhs.tahun_masuk || '-'}</td>
-    <td class="border px-4 py-2 text-center">${mhs.status || '-'}</td>
-
-    <td class="border px-4 py-2 text-center space-x-3">
+    rows += `
+      <tr class="hover:bg-gray-50">
+        <td class="border px-4 py-2">${index + 1}</td>
+        <td class="border px-4 py-2">${mhs.npm || '-'}</td>
+        <td class="border px-4 py-2">${mhs.nama || '-'}</td>
+        <td class="border px-4 py-2">${mhs.prodi || '-'}</td>
+        <td class="border px-4 py-2">${mhs.kelas || '-'}</td>
+        <td class="border px-4 py-2">${mhs.tahun_masuk || '-'}</td>
+        <td class="border px-4 py-2">${mhs.status || '-'}</td>
+<td class="border px-4 py-2 text-center space-x-3">
 
   <button onclick="showDetail('${mhs.id}')" 
     class="text-blue-600 hover:text-blue-800">
@@ -987,13 +987,13 @@ rows += `
   </button>
 
   <button onclick="deleteMahasiswa('${mhs.id}', '${mhs.nama}')"
-  class="text-red-600 hover:text-red-800">
-  <i class="fas fa-trash"></i>
-</button>
+    class="text-red-600 hover:text-red-800">
+    <i class="fas fa-trash"></i>
+  </button>
 
 </td>
-  </tr>
-`;
+      </tr>
+    `;
   });
 
   tableBody.innerHTML = rows;
@@ -1097,36 +1097,7 @@ if (!currentMahasiswaId) {
             console.error("Error fetching data for edit:", error);
             return;
         }
-
-        let deleteId = null;
-
-function deleteMahasiswa(id, nama) {
-  deleteId = id;
-  document.getElementById('deleteMessage').innerHTML =
-    `Apakah Anda yakin ingin menghapus mahasiswa <b>${nama}</b> secara permanen?`;
-  
-  document.getElementById('deleteModal').classList.remove('hidden');
-}
-
-function closeDeleteModal() {
-  document.getElementById('deleteModal').classList.add('hidden');
-}
-
-document.getElementById('confirmDeleteBtn').onclick = async function () {
-  if (!deleteId) return;
-
-  const { error } = await supabase
-    .from('mahasiswa')
-    .delete()
-    .eq('id', deleteId);
-
-  if (!error) {
-    loadMahasiswaData(); // refresh tabel
-    closeDeleteModal();
-  } else {
-    alert("Gagal menghapus data.");
-  }
-};
+        
         showMainTab('crud'); // Pastikan tab CRUD aktif
         hideList(); // Sembunyikan List
         document.getElementById('mahasiswa-container').classList.remove('hidden'); // Tampilkan Form
@@ -1532,26 +1503,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-  <!-- Modal Konfirmasi Hapus -->
-<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-  <div class="bg-white rounded-lg shadow-md w-96 p-6">
-    <h2 class="text-xl font-semibold mb-4 text-red-600"><i class="fas fa-trash"></i> Hapus Data Mahasiswa</h2>
-    <p id="deleteMessage" class="text-gray-700 mb-6"></p>
-
-    <div class="flex justify-end space-x-3">
-      <button onclick="closeDeleteModal()" 
-        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded">
-        Batal
-      </button>
-
-      <button id="confirmDeleteBtn"
-        class="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded">
-        Hapus
-      </button>
-    </div>
-  </div>
-</div>
-  
 </script>
 </body>
 </html>
