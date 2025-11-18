@@ -6,7 +6,6 @@
   <title>Biodata & Pencarian Mahasiswa - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
   <style>
@@ -831,30 +830,10 @@ function resetSearch() {
     }
 
     function exportToExcel() {
-    supabase.from('mahasiswa').select('*')
-        .then(({ data, error }) => {
-            if (error) {
-                alert('Gagal mengambil data!');
-                return;
-            }
-
-            let csv = "NPM,NAMA,PRODI,KELAS,TAHUN MASUK,STATUS\n";
-
-            data.forEach(m => {
-                csv += `${m.npm},${m.nama},${m.prodi},${m.kelas},${m.tahun_masuk},${m.status}\n`;
-            })
-          
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'data_mahasiswa.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-}
+        if (currentMahasiswaData.length === 0) {
+            alert('❌ Tidak ada data mahasiswa yang tersedia untuk diekspor.');
+            return;
+        }
 
         const headers = [
             "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
@@ -1019,6 +998,10 @@ async function loadMahasiswaData(filters = {}) {
 
   tableBody.innerHTML = rows;
 
+  // ✅ Update total rekap otomatis
+  updateRekapitulasi(data);
+}
+
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
@@ -1180,32 +1163,6 @@ if (!currentMahasiswaId) {
             alert('❌ Data tidak ditemukan.');
             return;
         }
-
-        function exportToExcel() {
-    supabase.from('mahasiswa').select('*')
-        .then(({ data, error }) => {
-            if (error) {
-                alert('Gagal mengambil data!');
-                return;
-            }
-
-            let csv = "NPM,NAMA,PRODI,KELAS,TAHUN MASUK,STATUS\n";
-
-            data.forEach(m => {
-                csv += `${m.npm},${m.nama},${m.prodi},${m.kelas},${m.tahun_masuk},${m.status}\n`;
-            })
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'data_mahasiswa.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-}
         
         const statusText = mhs.status;
         const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : mhs.status === 'Lulus' ? 'text-blue-600' : 'text-red-600';
@@ -1544,31 +1501,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 800);
         });
     }
-});
-
-  document.getElementById('exportExcelBtn').addEventListener('click', async function () {
-    const { data, error } = await supabase.from('mahasiswa').select('*');
-
-    if (error) {
-        alert('Gagal mengambil data!');
-        return;
-    }
-
-    let csv = "NPM,NAMA,PRODI,KELAS,TAHUN MASUK,STATUS\n";
-
-    data.forEach(m => {
-        csv += `${m.npm},${m.nama},${m.prodi},${m.kelas},${m.tahun_masuk},${m.status}\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'data_mahasiswa.xlsx');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 });
 
 </script>
