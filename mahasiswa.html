@@ -965,21 +965,29 @@ async function loadMahasiswaData(filters = {}) {
   // Render hasil ke tabel
   let rows = '';
   data.forEach((mhs, index) => {
-    rows += `
-      <tr class="hover:bg-gray-50">
-        <td class="border px-4 py-2">${index + 1}</td>
-        <td class="border px-4 py-2">${mhs.npm || '-'}</td>
-        <td class="border px-4 py-2">${mhs.nama || '-'}</td>
-        <td class="border px-4 py-2">${mhs.prodi || '-'}</td>
-        <td class="border px-4 py-2">${mhs.kelas || '-'}</td>
-        <td class="border px-4 py-2">${mhs.tahun_masuk || '-'}</td>
-        <td class="border px-4 py-2">${mhs.status || '-'}</td>
-        <td class="border px-4 py-2 text-center">
-          <button class="text-blue-600 hover:underline" onclick="showDetail('${mhs.id}')">Detail</button> |
-          <button class="text-yellow-600 hover:underline" onclick="editMahasiswa('${mhs.id}')">Edit</button> |
-          <button class="text-red-600 hover:underline" onclick="deleteMahasiswa('${mhs.id}')">Hapus</button>
-        </td>
-      </tr>
+rows += `
+  <tr class="hover:bg-gray-50">
+    <td class="border px-4 py-2">${mhs.npm || '-'}</td>
+    <td class="border px-4 py-2">${mhs.nama || '-'}</td>
+    <td class="border px-4 py-2">${mhs.prodi || '-'}</td>
+    <td class="border px-4 py-2 text-center">${mhs.kelas || '-'}</td>
+    <td class="border px-4 py-2 text-center">${mhs.tahun_masuk || '-'}</td>
+    <td class="border px-4 py-2 text-center">${mhs.status || '-'}</td>
+
+    <td class="border px-4 py-2 text-center space-x-2">
+      <button class="text-blue-600 hover:underline" onclick="showDetail('${mhs.id}')">
+        Detail
+      </button>
+
+      <button class="text-yellow-600 hover:underline" onclick="editMahasiswa('${mhs.id}')">
+        Edit
+      </button>
+
+      <button class="text-red-600 hover:underline" onclick="deleteMahasiswa('${mhs.id}', '${mhs.nama}')">
+        Hapus
+      </button>
+    </td>
+  </tr>
     `;
   });
 
