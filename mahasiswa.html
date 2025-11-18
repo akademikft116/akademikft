@@ -352,21 +352,18 @@
                         </div>
 
                         <div class="flex space-x-2">
-    <button onclick="exportToExcel()" 
-        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-        <i class="fas fa-file-excel mr-2"></i> Export Excel
-    </button>
+                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                                <i class="fas fa-file-excel mr-2"></i> Export Excel
+                            </button>
+                            <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                            </button>
+                            <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                                <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
+                            </button>
+                        </div>
+                    </div>
 
-    <button onclick="exportToPDF()" 
-        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-        <i class="fas fa-file-pdf mr-2"></i> Export PDF
-    </button>
-
-    <button onclick="showForm()" 
-        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-        <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
-    </button>
-</div>
 
                     <div id="mahasiswa-list-container" class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -1000,8 +997,11 @@ async function loadMahasiswaData(filters = {}) {
   });
 
   tableBody.innerHTML = rows;
-  }
-  
+
+  // ✅ Update total rekap otomatis
+  updateRekapitulasi(data);
+}
+
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
         const nama = document.getElementById('nama').value;
@@ -1502,32 +1502,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-  function exportToExcel() {
-    supabaseClient.from('mahasiswa').select('*')
-        .then(({ data, error }) => {
-            if (error) {
-                alert('Gagal mengambil data!');
-                return;
-            }
-
-            let csv = "NPM,NAMA,PRODI,KELAS,TAHUN MASUK,STATUS\n";
-
-            data.forEach(m => {
-                csv += `${m.npm},${m.nama},${m.prodi},${m.kelas},${m.tahun_masuk},${m.status}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'data_mahasiswa.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-}
 
 </script>
 </body>
