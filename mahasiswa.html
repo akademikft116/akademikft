@@ -51,6 +51,14 @@
 </head>
 <body class="bg-gray-100">
 
+<div id="rekapitulasiContainer">
+    <div>Total: <span id="totalMahasiswa"></span></div>
+    <div>Aktif: <span id="aktifCount"></span></div>
+    <div>Lulus: <span id="lulusCount"></span></div>
+    <div>Cuti: <span id="cutiCount"></span></div>
+    <div>DPK: <span id="dpkCount"></span></div>
+</div>
+  
 <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
     <div class="flex items-center space-x-3">
         <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
@@ -278,6 +286,7 @@
   </h3>
   
   <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+
     
     <!-- 🔹 PRODI -->
     <div>
@@ -477,6 +486,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script>
+  function updateRekapitulasi(data) {
+    const total = data.length;
+    const aktif = data.filter(m => m.status === "Aktif").length;
+    const lulus = data.filter(m => m.status === "Lulus").length;
+    const cuti = data.filter(m => m.status === "Cuti").length;
+
+    document.getElementById("totalMahasiswa").textContent = total;
+    document.getElementById("aktifCount").textContent = aktif;
+    document.getElementById("lulusCount").textContent = lulus;
+    document.getElementById("cutiCount").textContent = cuti
+    
     // Konfigurasi Supabase
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; 
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o"; // <-- GANTI INI
