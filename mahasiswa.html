@@ -968,13 +968,12 @@ async function loadMahasiswaData(filters = {}) {
   data.forEach((mhs, index) => {
     rows += `
 <tr class="hover:bg-gray-50">
-    <td class="border px-4 py-2 text-center font-semibold">${index + 1}</td>
-    <td class="border px-4 py-2">${mhs.npm || '-'}</td>
-    <td class="border px-4 py-2">${mhs.nama || '-'}</td>
-    <td class="border px-4 py-2">${mhs.prodi || '-'}</td>
-    <td class="border px-4 py-2 text-center">${mhs.kelas || '-'}</td>
-    <td class="border px-4 py-2 text-center">${mhs.tahun_masuk || '-'}</td>
-    <td class="border px-4 py-2 text-center">${mhs.status || '-'}</td>
+    <td class="border px-4 py-2 text-sm">${mhs.npm}</td>
+    <td class="border px-4 py-2 text-sm">${mhs.nama}</td>
+    <td class="border px-4 py-2 text-sm">${mhs.prodi}</td>
+    <td class="border px-4 py-2 text-sm text-center">${mhs.kelas}</td>
+    <td class="border px-4 py-2 text-sm text-center">${mhs.tahun_masuk}</td>
+    <td class="border px-4 py-2 text-sm text-center">${mhs.status}</td>
 
     <td class="border px-4 py-2 text-center space-x-3">
         <button onclick="showDetail('${mhs.id}')" class="text-blue-600 hover:text-blue-800">
