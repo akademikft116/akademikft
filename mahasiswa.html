@@ -842,8 +842,8 @@ function resetSearch() {
 
             data.forEach(m => {
                 csv += `${m.npm},${m.nama},${m.prodi},${m.kelas},${m.tahun_masuk},${m.status}\n`;
-            });
-
+            })
+          
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
 
@@ -1193,7 +1193,7 @@ if (!currentMahasiswaId) {
 
             data.forEach(m => {
                 csv += `${m.npm},${m.nama},${m.prodi},${m.kelas},${m.tahun_masuk},${m.status}\n`;
-            });
+            })
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
