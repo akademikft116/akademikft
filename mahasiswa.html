@@ -942,6 +942,25 @@ async function loadMahasiswaData(filters = {}) {
 
   // Ambil semua data mahasiswa
   let query = supabaseClient.from('mahasiswa').select('*');
+
+  // Terapkan filter
+  if (filters.prodi && filters.prodi.trim() !== '') {
+    query = query.ilike('prodi', `%${filters.prodi}%`);
+  }
+  if (filters.kelas && filters.kelas.trim() !== '') {
+    query = query.ilike('kelas', `%${filters.kelas}%`);
+  }
+  if (filters.status && filters.status.trim() !== '') {
+    query = query.eq('status', filters.status);
+  }
+  if (filters.tahun && filters.tahun.trim() !== '') {
+    query = query.eq('tahun_masuk', filters.tahun);
+  }
+
+  // ⬇ BARU di sini data tersedia
+  const { data, error } = await query;
+
+  // Simpan data untuk Export PDF & Export Excel
   currentMahasiswaData = data;
 
   // Terapkan filter (Prodi, Kelas, Status, Tahun)
