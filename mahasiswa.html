@@ -352,11 +352,11 @@
                         </div>
 
                         <div class="flex space-x-2">
-                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                                <i class="fas fa-file-excel mr-2"></i> Export Excel
-                            </button>
                             <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
                                 <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                            </button>
+                            <button onclick="exportToExcel()" class="bg-green-500 text-white px-4 py-2 rounded-lg mr-2">
+                                <i class="fas fa-file-excel"></i> Export Excel
                             </button>
                             <button onclick="showForm()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
                                 <i class="fas fa-plus-circle mr-2"></i> Tambah Data Mahasiswa
@@ -831,10 +831,31 @@ function resetSearch() {
     }
 
     function exportToExcel() {
-        if (currentMahasiswaData.length === 0) {
-            alert('❌ Tidak ada data mahasiswa yang tersedia untuk diekspor.');
-            return;
-        }
+    supabase.from('mahasiswa').select('*')
+        .then(({ data, error }) => {
+            if (error) {
+                alert('Gagal mengambil data!');
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                alert("Tidak ada data mahasiswa untuk diekspor.");
+                return;
+            }
+
+            let csv = "NPM,NAMA,PRODI,KELAS,TAHUN MASUK,STATUS\n";
+
+            data.forEach(row => {
+                csv += `${row.npm},${row.nama},${row.prodi},${row.kelas},${row.tahun_masuk},${row.status}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "data_mahasiswa.csv";
+            link.click();
+        });
+}
 
         const headers = [
             "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
