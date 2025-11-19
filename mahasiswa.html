@@ -363,6 +363,29 @@
                             </button>
                         </div>
                     </div>
+
+
+                    <div id="rekap-table-container" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPM</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
             
             <div id="content-rekap" class="main-tab-content-section hidden mt-20">
                 
@@ -517,13 +540,6 @@ function showMainTab(tabName) {
 
     // --- Efek dan aksi otomatis berdasarkan tab ---
     if (tabName === 'rekap') {
-      // Sembunyikan tabel mahasiswa
-const list = document.getElementById('mahasiswa-list-container');
-if (list) list.classList.add('hidden');
-
-// Sembunyikan form mahasiswa
-const form = document.getElementById('mahasiswa-container');
-if (form) form.classList.add('hidden');
         // Panggil fungsi rekap data
         loadRecapData();
         // Scroll halus ke bawah ke tabel rekap
@@ -533,22 +549,6 @@ if (form) form.classList.add('hidden');
         }, 1000);
     } 
     else if (tabName === 'crud') {
-    // Muat ulang data mahasiswa
-    loadMahasiswaData();
-
-    // WAJIB: Tampilkan tabelnya
-    const list = document.getElementById('mahasiswa-list-container');
-    if (list) list.classList.remove('hidden');
-
-    // WAJIB: Sembunyikan form
-    const form = document.getElementById('mahasiswa-container');
-    if (form) form.classList.add('hidden');
-
-    // Scroll ke atas
-    setTimeout(() => {
-        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 200);
-}
         // Panggil fungsi untuk memuat data mahasiswa
         loadMahasiswaData();
         // Scroll halus ke atas ke header
