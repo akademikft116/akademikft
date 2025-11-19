@@ -831,64 +831,54 @@ function resetSearch() {
     }
 
     function exportToExcel() {
-    supabase.from('mahasiswa').select('*')
-        .then(({ data, error }) => {
-            if (error) {
-                alert('Gagal mengambil data!');
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                alert("Tidak ada data mahasiswa untuk diekspor.");
-                return;
-            }
-
-            let csv = "NPM,NAMA,PRODI,KELAS,TAHUN MASUK,STATUS\n";
-
-            data.forEach(row => {
-                csv += `${row.npm},${row.nama},${row.prodi},${row.kelas},${row.tahun_masuk},${row.status}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "data_mahasiswa.csv";
-            link.click();
-        });
-}
-
-        const headers = [
-            "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
-            "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
-            "KELAS", "JUDUL_SKRIPSI",
-            "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS", "NOMOR_IJAZAH"
-        ];
-        
-        const dataForExport = currentMahasiswaData.map(mhs => [
-            mhs.npm, mhs.nama, mhs.nik_mahasiswa || '-', mhs.ttl || '-', mhs.no_hp || '-',
-            mhs.alamat || '-', mhs.kelurahan || '-', mhs.kecamatan || '-', mhs.nama_ibu || '-', 
-            mhs.nama_ayah || '-', mhs.kelas || '-', mhs.judul_skripsi || '-',
-            mhs.prodi, mhs.jenis_kelamin || '-', mhs.tahun_masuk, mhs.status, mhs.nomor_ijazah || '-'
-        ]);
-
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(dataForExport, { header: headers, skipHeader: true }); 
-
-        const title = ["DATA BIODATA MAHASISWA FAKULTAS TEKNIK"];
-        XLSX.utils.sheet_add_aoa(ws, [title], { origin: "A1" });
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" }); 
-        XLSX.utils.sheet_add_aoa(ws, dataForExport, { origin: "A3" });
-
-        if (ws['A1']) {
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            range.e.c = headers.length - 1; 
-            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
-            ws['A1'].s = { font: { bold: true, sz: 14 }, alignment: { horizontal: 'center' } };
-        }
-
-        XLSX.utils.book_append_sheet(wb, ws, "DataMahasiswaFT");
-        XLSX.writeFile(wb, "data_mahasiswa_ft.xlsx");
+    if (!currentMahasiswaData || currentMahasiswaData.length === 0) {
+        alert("Tidak ada data mahasiswa untuk diekspor.");
+        return;
     }
+
+    const headers = [
+        "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
+        "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
+        "KELAS", "JUDUL_SKRIPSI",
+        "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS", "NOMOR_IJAZAH"
+    ];
+    
+    const dataForExport = currentMahasiswaData.map(mhs => ({
+        "NPM": mhs.npm,
+        "NAMA": mhs.nama,
+        "NIK": mhs.nik_mahasiswa || '-',
+        "TTL": mhs.ttl || '-',
+        "NO_HP": mhs.no_hp || '-',
+        "ALAMAT": mhs.alamat || '-',
+        "KELURAHAN": mhs.kelurahan || '-',
+        "KECAMATAN": mhs.kecamatan || '-',
+        "NAMA_IBU": mhs.nama_ibu || '-',
+        "NAMA_AYAH": mhs.nama_ayah || '-',
+        "KELAS": mhs.kelas || '-',
+        "JUDUL_SKRIPSI": mhs.judul_skripsi || '-',
+        "PRODI": mhs.prodi,
+        "JENIS_KELAMIN": mhs.jenis_kelamin || '-',
+        "TAHUN_MASUK": mhs.tahun_masuk,
+        "STATUS": mhs.status,
+        "NOMOR_IJAZAH": mhs.nomor_ijazah || '-'
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(dataForExport, { header: headers });
+
+    const title = ["DATA BIODATA MAHASISWA FAKULTAS TEKNIK"];
+    XLSX.utils.sheet_add_aoa(ws, [title], { origin: "A1" });
+    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: "A2" });
+
+    if (!ws['!merges']) ws['!merges'] = [];
+    ws['!merges'].push({
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: headers.length - 1 }
+    });
+
+    XLSX.utils.book_append_sheet(wb, ws, "DataMahasiswaFT");
+    XLSX.writeFile(wb, "data_mahasiswa_ft.xlsx");
+}
     
     function exportToPDF() {
         if (currentMahasiswaData.length === 0) {
