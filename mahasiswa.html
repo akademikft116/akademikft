@@ -269,6 +269,19 @@
                 </div>
                 
                 <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
+                  <div class="flex justify-between mb-4">
+    <div class="flex space-x-2">
+        <button onclick="handleExportList()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+            <i class="fas fa-file-excel mr-2"></i> Export Excel
+        </button>
+        <button onclick="handleImport()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+            <i class="fas fa-file-upload mr-2"></i> Import
+        </button>
+    </div>
+    <button onclick="openForm('add')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+        <i class="fas fa-plus mr-2"></i> Tambah Mahasiswa
+    </button>
+</div>
   <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
 
   <!-- 🔽 FILTER PENCARIAN BARU UNTUK STATUS AKTIVITAS MAHASISWA -->
