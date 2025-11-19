@@ -942,6 +942,7 @@ async function loadMahasiswaData(filters = {}) {
 
   // Ambil semua data mahasiswa
   let query = supabaseClient.from('mahasiswa').select('*');
+  currentMahasiswaData = data;
 
   // Terapkan filter (Prodi, Kelas, Status, Tahun)
   if (filters.prodi && filters.prodi.trim() !== '') {
