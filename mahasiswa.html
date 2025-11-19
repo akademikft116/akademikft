@@ -548,23 +548,19 @@ function showMainTab(tabName) {
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 1000);
     } 
-else if (tabName === 'crud') {
-    // Muat ulang data mahasiswa
-    loadMahasiswaData();
-
-    // WAJIB: Tampilkan tabelnya
-    const list = document.getElementById('mahasiswa-list-container');
-    if (list) list.classList.remove('hidden');
-
-    // WAJIB: Sembunyikan form
-    const form = document.getElementById('mahasiswa-container');
-    if (form) form.classList.add('hidden');
-
-    // Scroll ke atas
-    setTimeout(() => {
-        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 200);
+    else if (tabName === 'crud') {
+        // Panggil fungsi untuk memuat data mahasiswa
+        loadMahasiswaData();
+        // Scroll halus ke atas ke header
+        setTimeout(() => {
+            document.documentElement.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }, 200);
+    }
 }
+
     
     // --- FUNGSI NAVIGASI DROPDOWN SIDEBAR ---
     function toggleSubmenu(event) {
