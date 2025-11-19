@@ -940,94 +940,53 @@ async function loadMahasiswaData(filters = {}) {
     </tr>
   `;
 
-  // Ambil semua data mahasiswa
+  // Mulai query dasar
   let query = supabaseClient.from('mahasiswa').select('*');
 
-  // Terapkan filter
-  if (filters.prodi && filters.prodi.trim() !== '') {
-    query = query.ilike('prodi', `%${filters.prodi}%`);
-  }
-  if (filters.kelas && filters.kelas.trim() !== '') {
-    query = query.ilike('kelas', `%${filters.kelas}%`);
-  }
-  if (filters.status && filters.status.trim() !== '') {
-    query = query.eq('status', filters.status);
-  }
-  if (filters.tahun && filters.tahun.trim() !== '') {
-    query = query.eq('tahun_masuk', filters.tahun);
-  }
+  // Filter
+  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
+  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
 
-  // ⬇ BARU di sini data tersedia
-  const { data, error } = await query;
-
-  // Simpan data untuk Export PDF & Export Excel
-  currentMahasiswaData = data;
-
-  // Terapkan filter (Prodi, Kelas, Status, Tahun)
-  if (filters.prodi && filters.prodi.trim() !== '') {
-    query = query.ilike('prodi', `%${filters.prodi}%`);
-  }
-  if (filters.kelas && filters.kelas.trim() !== '') {
-    query = query.ilike('kelas', `%${filters.kelas}%`);
-  }
-  if (filters.status && filters.status.trim() !== '') {
-    query = query.eq('status', filters.status);
-  }
-  if (filters.tahun && filters.tahun.trim() !== '') {
-    query = query.eq('tahun_masuk', filters.tahun);
-  }
-
+  // Ambil data
   const { data, error } = await query;
 
   if (error) {
-    console.error('Gagal memuat data:', error);
+    console.error(error);
     tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>
-    `;
+      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
     return;
   }
+
+  // Simpan data untuk EXPORT PDF/EXCEL
+  currentMahasiswaData = data;
 
   if (!data || data.length === 0) {
     tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>
-    `;
+      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
     return;
   }
 
-  // Render hasil ke tabel
-  let rows = '';
+  // Render ke tabel
+  let rows = "";
   data.forEach((mhs, index) => {
-rows += `
-<tr class="hover:bg-gray-50">
-
-    <td class="border px-4 py-2 text-center font-semibold text-sm">${index + 1}</td>
-
-    <td class="border px-4 py-2 text-sm">${mhs.npm || '-'}</td>
-
-    <td class="border px-4 py-2 text-sm">${mhs.nama || '-'}</td>
-
-    <td class="border px-4 py-2 text-sm">${mhs.prodi || '-'}</td>
-
-    <td class="border px-4 py-2 text-center text-sm">${mhs.kelas || '-'}</td>
-
-    <td class="border px-4 py-2 text-center text-sm">${mhs.tahun_masuk || '-'}</td>
-
-    <td class="border px-4 py-2 text-center text-sm">${mhs.status || '-'}</td>
-
-    <td class="border px-4 py-2 text-center space-x-3">
-        <button onclick="showDetail('${mhs.id}')" class="text-blue-600 hover:text-blue-800">
-            <i class="fas fa-eye"></i>
-        </button>
-        <button onclick="editMahasiswa('${mhs.id}')" class="text-yellow-500 hover:text-yellow-700">
-            <i class="fas fa-edit"></i>
-        </button>
-        <button onclick="deleteMahasiswa('${mhs.id}', '${mhs.nama}')" class="text-red-600 hover:text-red-800">
-            <i class="fas fa-trash"></i>
-        </button>
-    </td>
-
-</tr>
-`;
+    rows += `
+      <tr class="hover:bg-gray-100">
+        <td class="border px-2 py-1 text-center">${index + 1}</td>
+        <td class="border px-2 py-1">${mhs.npm}</td>
+        <td class="border px-2 py-1">${mhs.nama}</td>
+        <td class="border px-2 py-1">${mhs.prodi}</td>
+        <td class="border px-2 py-1">${mhs.kelas}</td>
+        <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
+        <td class="border px-2 py-1">${mhs.status}</td>
+        <td class="border px-2 py-1 text-center">
+          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="viewMahasiswa('${mhs.id}')"></i>
+          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.id}')"></i>
+          <i class="fas fa-trash text-red-500 cursor-pointer ml-2" onclick="deleteMahasiswa('${mhs.id}')"></i>
+        </td>
+      </tr>
+    `;
   });
 
   tableBody.innerHTML = rows;
