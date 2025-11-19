@@ -517,6 +517,13 @@ function showMainTab(tabName) {
 
     // --- Efek dan aksi otomatis berdasarkan tab ---
     if (tabName === 'rekap') {
+      // Sembunyikan tabel mahasiswa
+const list = document.getElementById('mahasiswa-list-container');
+if (list) list.classList.add('hidden');
+
+// Sembunyikan form mahasiswa
+const form = document.getElementById('mahasiswa-container');
+if (form) form.classList.add('hidden');
         // Panggil fungsi rekap data
         loadRecapData();
         // Scroll halus ke bawah ke tabel rekap
@@ -526,6 +533,22 @@ function showMainTab(tabName) {
         }, 1000);
     } 
     else if (tabName === 'crud') {
+    // Muat ulang data mahasiswa
+    loadMahasiswaData();
+
+    // WAJIB: Tampilkan tabelnya
+    const list = document.getElementById('mahasiswa-list-container');
+    if (list) list.classList.remove('hidden');
+
+    // WAJIB: Sembunyikan form
+    const form = document.getElementById('mahasiswa-container');
+    if (form) form.classList.add('hidden');
+
+    // Scroll ke atas
+    setTimeout(() => {
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 200);
+}
         // Panggil fungsi untuk memuat data mahasiswa
         loadMahasiswaData();
         // Scroll halus ke atas ke header
