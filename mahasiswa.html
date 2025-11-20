@@ -282,13 +282,13 @@
     <!-- 🔹 PRODI -->
     <div>
   <label for="searchProdi" class="block text-sm font-medium text-gray-700">Prodi</label>
-  <select id="searchProdi" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-      <option value="">Semua Prodi</option>
-      <option value="Industri">Teknik Industri</option>
-      <option value="Sipil">Teknik Sipil</option>
-      <option value="Informatika">Teknik Informatika</option>
-      <option value="Arsitektur">Arsitektur</option>
-  </select>
+<select id="searchProdi" class="w-full">
+    <option value="">Semua Prodi</option>
+    <option value="Industri">Teknik Industri</option>
+    <option value="Sipil">Teknik Sipil</option>
+    <option value="Informatika">Teknik Informatika</option>
+    <option value="Arsitektur">Arsitektur</option>
+</select>
 </div>
 
     <!-- 🔹 KELAS -->
@@ -300,15 +300,15 @@
     <!-- 🔹 JENIS AKTIVITAS / STATUS -->
     <div>
       <label for="searchStatus" class="block text-sm font-medium text-gray-700">Jenis Aktivitas / Status</label>
-      <select id="searchStatus" class="w-full border border-gray-300 rounded-md shadow-sm p-2">
-        <option value="">Semua Status</option>
-        <option value="Aktif">Aktif</option>
-        <option value="Lulus">Lulus</option>
-        <option value="Nonaktif">Nonaktif</option>
-        <option value="Mengundurkan diri">Mengundurkan diri</option>
-        <option value="Drop Out">Drop Out</option>
-        <option value="Meninggal Dunia">Meninggal Dunia</option>
-      </select>
+      <select id="searchStatus" class="w-full">
+    <option value="">Semua Status</option>
+    <option value="Aktif">Aktif</option>
+    <option value="Lulus">Lulus</option>
+    <option value="Nonaktif">Nonaktif</option>
+    <option value="Mengundurkan diri">Mengundurkan diri</option>
+    <option value="Drop Out">Drop Out</option>
+    <option value="Meninggal Dunia">Meninggal Dunia</option>
+</select>
     </div>
 
     <!-- 🔹 TAHUN MASUK -->
@@ -533,7 +533,21 @@
     });
     populateYearSelect(searchTahunSelect, true);
 
-    // 👉 Tambahkan ini
+    // ⬇️ TAMBAHKAN DISINI
+    new TomSelect("#searchProdi", {
+        allowEmptyOption: true,
+        create: false,
+        placeholder: "Semua Prodi"
+    });
+
+    new TomSelect("#searchStatus", {
+        allowEmptyOption: true,
+        create: false,
+        placeholder: "Semua Status"
+    });
+    // ⬆️ SELESAI
+
+    // 👉 Sudah ada di file
     showMainTab('crud');   
     loadMahasiswaData();
 });
