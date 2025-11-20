@@ -1119,7 +1119,7 @@ if (!currentMahasiswaId) {
         const { data: mhs, error } = await supabaseClient
             .from('mahasiswa')
             .select('*')
-            .eq('id', mahasiswaId)
+            .eq('npm', mahasiswaId)
             .single();
 
         if (error || !mhs) {
@@ -1172,7 +1172,7 @@ if (!currentMahasiswaId) {
         const { error } = await supabaseClient
             .from('mahasiswa')
             .delete()
-            .eq('id', mahasiswaId); 
+            .eq('npm', mahasiswaId); 
 
         if (error) {
             alert('❌ Gagal menghapus data: ' + error.message);
