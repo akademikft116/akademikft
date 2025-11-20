@@ -1527,23 +1527,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
-  function showDeleteModal(id, npm, nama) {
-    document.getElementById('deleteModal').classList.remove('hidden');
-
-    document.getElementById('deleteInfo').innerHTML = `
-        <p><span class="font-bold">NPM:</span> ${npm}</p>
-        <p><span class="font-bold">Nama:</span> ${nama}</p>
-    `;
-
-    document.getElementById('confirmDeleteBtn').onclick = function () {
-        deleteMahasiswa(id);
-    };
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-}
-
 </script>
 </body>
 </html>
