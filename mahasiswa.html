@@ -409,9 +409,7 @@
                 </div>
 
 <div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
-    <div class="flex justify-between items-center mb-4">
-        <h2 id="rekapitulasi-status" class="text-2xl font-semibold text-gray-700">Rekapitulasi Status Mahasiswa</h2>
-        <div class="flex items-center space-x-3">
+    <div class="flex items-center space-x-3">
 
     <!-- EXPORT EXCEL (SAMA PERSIS SEPERTI DI ATAS) -->
     <button onclick="exportRecapToExcel()" 
@@ -424,7 +422,6 @@
         class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
         <i class="fas fa-file-pdf mr-2"></i> Export PDF
     </button>
-
 </div>
     </div>
 
@@ -470,12 +467,29 @@
 </div>
 
 
-<div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
-        <h3 class="text-xl font-bold mb-4 border-b pb-2">Detail Biodata Mahasiswa</h3>
-        <div id="modalContent" class="text-sm space-y-2">
-            </div>
-        <button onclick="document.getElementById('detailModal').classList.add('hidden')" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Tutup</button>
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2 text-red-600">Konfirmasi Hapus Data</h3>
+
+        <p class="text-gray-700 mb-4">
+            Apakah Anda yakin ingin menghapus data mahasiswa berikut?
+        </p>
+
+        <div id="deleteInfo" class="text-sm text-gray-800 space-y-1 mb-4">
+            <!-- NPM & Nama ditampilkan otomatis -->
+        </div>
+
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()" 
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+                Batal
+            </button>
+
+            <button id="confirmDeleteBtn"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
+                Hapus Permanen
+            </button>
+        </div>
     </div>
 </div>
 
@@ -979,7 +993,7 @@ async function loadMahasiswaData(filters = {}) {
   let rows = "";
   data.forEach((mhs, index) => {
     rows += `
-      <tr class="hover:bg-gray-100 text-sm">
+      <tr class="hover:bg-gray-100">
         <td class="border px-2 py-1 text-center">${index + 1}</td>
         <td class="border px-2 py-1">${mhs.npm}</td>
         <td class="border px-2 py-1">${mhs.nama}</td>
@@ -990,8 +1004,9 @@ async function loadMahasiswaData(filters = {}) {
         <td class="border px-2 py-1 text-center">
           <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="viewMahasiswa('${mhs.id}')"></i>
           <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.id}')"></i>
-          <i class="fas fa-trash text-red-500 cursor-pointer ml-2" 
-           onclick="showDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama}')"></i>
+          <i class="fas fa-trash text-red-500 cursor-pointer" 
+   onclick="openDeleteModal(${mhs.id}, '${mhs.npm}', '${mhs.nama}')">
+</i>
         </td>
       </tr>
     `;
@@ -1160,37 +1175,6 @@ if (!currentMahasiswaId) {
             alert('❌ Data tidak ditemukan.');
             return;
         }
-
-        async function showDetail(mahasiswaId) {
-    const { data: mhs, error } = await supabaseClient
-        .from('mahasiswa')
-        .select('*')
-        .eq('id', mahasiswaId)
-        .single();
-
-    if (error || !mhs) {
-        alert('❌ Data tidak ditemukan.');
-        return;
-    }
-
-    const statusText = mhs.status;
-    const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : 
-                        mhs.status === 'Lulus' ? 'text-blue-600' : 
-                        'text-red-600';
-
-    const modalContent = `
-        <p><span class="font-bold">NPM:</span> ${mhs.npm}</p>
-        <p><span class="font-bold">Nama:</span> ${mhs.nama}</p>
-        <p><span class="font-bold">Prodi:</span> ${mhs.prodi}</p>
-        <p><span class="font-bold">Kelas:</span> ${mhs.kelas}</p>
-        <p><span class="font-bold">Status:</span> 
-           <span class="${statusColor} font-bold">${statusText}</span>
-        </p>
-    `;
-
-    document.getElementById('modalContent').innerHTML = modalContent;
-    document.getElementById('detailModal').classList.remove('hidden');
-}
         
         const statusText = mhs.status;
         const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : mhs.status === 'Lulus' ? 'text-blue-600' : 'text-red-600';
@@ -1531,32 +1515,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-  <!-- MODAL HAPUS DATA MAHASISWA -->
-<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4 border-b pb-2 text-red-600">
-            Konfirmasi Hapus Data
-        </h3>
+  let deleteMahasiswaId = null;
 
-        <p class="text-gray-700 mb-4">
-            Apakah Anda yakin ingin menghapus data mahasiswa berikut?
-        </p>
+function openDeleteModal(id, npm, nama) {
+    deleteMahasiswaId = id;
 
-        <div id="deleteInfo" class="text-sm text-gray-800 space-y-1 mb-4"></div>
+    document.getElementById('deleteInfo').innerHTML = `
+        <p><span class="font-bold w-24 inline-block">NPM</span>: ${npm}</p>
+        <p><span class="font-bold w-24 inline-block">Nama</span>: ${nama}</p>
+    `;
 
-        <div class="flex justify-end space-x-3">
-            <button onclick="closeDeleteModal()" 
-                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
-                Batal
-            </button>
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
 
-            <button id="confirmDeleteBtn"
-                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
-                Hapus Permanen
-            </button>
-        </div>
-    </div>
-</div>
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+async function confirmDelete() {
+    if (!deleteMahasiswaId) return;
+
+    const { error } = await supabaseClient
+        .from('mahasiswa')
+        .delete()
+        .eq('id', deleteMahasiswaId);
+
+    if (error) {
+        alert('❌ Gagal menghapus data.');
+        return;
+    }
+
+    closeDeleteModal();
+    loadMahasiswaData();
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
 
 </script>
 </body>
