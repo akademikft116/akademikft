@@ -1043,7 +1043,7 @@ async function loadMahasiswaData(filters = {}) {
         <td class="border px-2 py-1">${mhs.status}</td>
         <td class="border px-2 py-1 text-center">
           <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="showDetail('${mhs.npm}')"></i>
-          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.id}')"></i>
+          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.npm}')"></i>
           <i class="fas fa-trash text-red-500 cursor-pointer" 
    onclick="openDeleteModal(${mhs.id}, '${mhs.npm}', '${mhs.nama}')">
 </i>
@@ -1137,12 +1137,12 @@ if (!currentMahasiswaId) {
         }
     }
 
-    async function editMahasiswa(mahasiswaId) {
-        const { data: mhs, error } = await supabaseClient
-            .from('mahasiswa')
-            .select('*')
-            .eq('npm', mahasiswaId)
-            .single();
+    async function editMahasiswa(npm) {
+    const { data, error } = await supabaseClient
+        .from("mahasiswa")
+        .select("*")
+        .eq("npm", npm)
+        .single();
 
         if (error || !mhs) {
             alert('❌ Data tidak ditemukan untuk diedit. Pastikan koneksi Supabase benar dan ID ada.');
