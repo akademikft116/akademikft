@@ -6,7 +6,6 @@
   <title>Biodata & Pencarian Mahasiswa - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
   <style>
@@ -410,18 +409,17 @@
                 </div>
 
 <div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
-    <div id="rekapitulasi-card" class="bg-gray-50 p-4 rounded-lg shadow-md">
     <div class="flex justify-between items-center mb-4">
-    <h2 id="rekapitulasi-status" class="text-2xl font-semibold text-gray-700">Rekapitulasi Status Mahasiswa</h2>
-    <div class="flex space-x-2">
-        <button onclick="exportRecapToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-            <i class="fas fa-file-pdf mr-2"></i> Export PDF
-        </button>
-        <button onclick="exportRecapToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-            <i class="fas fa-file-excel mr-2"></i> Export Excel
-        </button>
+        <h2 id="rekapitulasi-status" class="text-2xl font-semibold text-gray-700">Rekapitulasi Status Mahasiswa</h2>
+        <div class="flex space-x-2">
+            <button onclick="exportRecapToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
+            <button onclick="exportRecapToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            </button>
+        </div>
     </div>
-</div>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -1383,20 +1381,10 @@ if (!currentMahasiswaId) {
     }
 
     function exportRecapToPDF() {
-    const element = document.getElementById("rekapitulasi-card");
-
-    const opt = {
-        margin:       10,
-        filename:     'rekapitulasi_status_mahasiswa.pdf',
-        html2canvas:  {
-            scale: 2,
-            backgroundColor: "#f9fafb" // <-- WARNA BACKGROUND ABU2 SAMA KAYA DI TAMPILAN
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opt).from(element).save();
-}
+        if (Object.keys(recapData).length === 0) {
+            alert('❌ Tidak ada data rekapitulasi untuk diekspor.');
+            return;
+        }
         
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); 
@@ -1434,6 +1422,7 @@ if (!currentMahasiswaId) {
         });
 
         doc.save('rekap_status_mahasiswa_ft.pdf');
+    }
 
     // --- CEK AUTHENTIKASI & INITIAL LOAD ---
     async function checkAuthAndLoad() {
@@ -1457,6 +1446,7 @@ if (!currentMahasiswaId) {
             submenu.classList.remove('hidden');
             icon.classList.add('rotate-180'); 
         }
+    }
 
     window.onload = checkAuthAndLoad;
   
