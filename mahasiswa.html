@@ -990,7 +990,8 @@ async function loadMahasiswaData(filters = {}) {
         <td class="border px-2 py-1 text-center">
           <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="viewMahasiswa('${mhs.id}')"></i>
           <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.id}')"></i>
-          <i class="fas fa-trash text-red-500 cursor-pointer ml-2" onclick="deleteMahasiswa('${mhs.id}')"></i>
+          <i class="fas fa-trash text-red-500 cursor-pointer ml-2" 
+           onclick="showDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama}')"></i>
         </td>
       </tr>
     `;
@@ -1498,6 +1499,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+  <!-- MODAL HAPUS DATA MAHASISWA -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2 text-red-600">
+            Konfirmasi Hapus Data
+        </h3>
+
+        <p class="text-gray-700 mb-4">
+            Apakah Anda yakin ingin menghapus data mahasiswa berikut?
+        </p>
+
+        <div id="deleteInfo" class="text-sm text-gray-800 space-y-1 mb-4"></div>
+
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()" 
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+                Batal
+            </button>
+
+            <button id="confirmDeleteBtn"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
+                Hapus Permanen
+            </button>
+        </div>
+    </div>
+</div>
+
+  function showDeleteModal(id, npm, nama) {
+    document.getElementById('deleteModal').classList.remove('hidden');
+
+    document.getElementById('deleteInfo').innerHTML = `
+        <p><span class="font-bold">NPM:</span> ${npm}</p>
+        <p><span class="font-bold">Nama:</span> ${nama}</p>
+    `;
+
+    document.getElementById('confirmDeleteBtn').onclick = function () {
+        deleteMahasiswa(id);
+    };
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
 
 </script>
 </body>
