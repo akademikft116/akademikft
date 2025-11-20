@@ -523,8 +523,7 @@
     document.addEventListener('DOMContentLoaded', () => {
     prodiSelect = new TomSelect("#prodi", { create: false });
     tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-    statusSelect = new TomSelect("#status", { create: false }); 
-    });
+    statusSelect = new TomSelect("#status", { create: false });
 
     populateYearSelect(tahunMasukSelect);
 
@@ -534,7 +533,6 @@
     });
     populateYearSelect(searchTahunSelect, true);
 
-    // ⬇️ TAMBAHKAN DISINI
     new TomSelect("#searchProdi", {
         allowEmptyOption: true,
         create: false,
@@ -546,6 +544,11 @@
         create: false,
         placeholder: "Semua Status"
     });
+
+    showMainTab('crud');
+    loadMahasiswaData();
+});
+
     // ⬆️ SELESAI
 
     // 👉 Sudah ada di file
