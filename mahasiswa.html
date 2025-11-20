@@ -520,10 +520,10 @@
     let searchTahunSelect; 
     let statusSelect; 
 
-    document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     prodiSelect = new TomSelect("#prodi", { create: false });
     tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-    statusSelect = new TomSelect("#status", { create: false });
+    statusSelect = new TomSelect("#status", { create: false }); 
 
     populateYearSelect(tahunMasukSelect);
 
@@ -548,6 +548,7 @@
     showMainTab('crud');
     loadMahasiswaData();
 });
+
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
 function showMainTab(tabName) {
