@@ -988,7 +988,7 @@ async function loadMahasiswaData(filters = {}) {
         <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
         <td class="border px-2 py-1">${mhs.status}</td>
         <td class="border px-2 py-1 text-center">
-          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="viewMahasiswa('${mhs.id}')"></i>
+          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="showDetail(${mhs.id})"></i>
           <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.id}')"></i>
           <i class="fas fa-trash text-red-500 cursor-pointer ml-2" onclick="deleteMahasiswa('${mhs.id}')"></i>
         </td>
@@ -1149,47 +1149,49 @@ if (!currentMahasiswaId) {
     }
 
     async function showDetail(mahasiswaId) {
-        const { data: mhs, error } = await supabaseClient
-            .from('mahasiswa')
-            .select('*')
-            .eq('id', mahasiswaId)
-            .single();
+    const { data: mhs, error } = await supabaseClient
+        .from('mahasiswa')
+        .select('*')
+        .eq('id', mahasiswaId)
+        .single();
 
-        if (error || !mhs) {
-            alert('❌ Data tidak ditemukan.');
-            return;
-        }
-        
-        const statusText = mhs.status;
-        const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : mhs.status === 'Lulus' ? 'text-blue-600' : 'text-red-600';
-
-        const modalContent = `
-            <h4 class="font-bold text-lg text-blue-700 mb-2">Data Akademik & Identitas</h4>
-            <p><span class="font-bold w-32 inline-block">NPM</span>: ${mhs.npm}</p>
-            <p><span class="font-bold w-32 inline-block">Nama Lengkap</span>: ${mhs.nama}</p>
-            <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
-            <p><span class="font-bold w-32 inline-block">Kelas</span>: ${mhs.kelas || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Jenis Kelamin</span>: ${mhs.jenis_kelamin || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
-            <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${statusColor}">${statusText}</span></p>
-            <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Nomor Ijazah</span>: ${mhs.nomor_ijazah || '-'}</p> 
-            <hr class="my-3 border-gray-200">
-            <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
-            
-            <h4 class="font-bold text-lg text-blue-700 mt-4 mb-2">Data Personal & Orang Tua</h4>
-            <p><span class="font-bold w-32 inline-block">Nama Ayah</span>: ${mhs.nama_ayah || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Nama Ibu</span>: ${mhs.nama_ibu || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">TTL</span>: ${mhs.ttl || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Alamat</span>: ${mhs.alamat || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Kelurahan</span>: ${mhs.kelurahan || '-'}</p>
-            <p><span class="font-bold w-32 inline-block">Kecamatan</span>: ${mhs.kecamatan || '-'}</p>
-        `;
-
-        document.getElementById('modalContent').innerHTML = modalContent;
-        document.getElementById('detailModal').classList.remove('hidden');
+    if (error || !mhs) {
+        alert('❌ Data tidak ditemukan.');
+        return;
     }
+    
+    const statusText = mhs.status;
+    const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : 
+                        mhs.status === 'Lulus' ? 'text-blue-600' : 
+                        'text-red-600';
+
+    const modalContent = `
+        <h4 class="font-bold text-lg text-blue-700 mb-2">Data Akademik & Identitas</h4>
+        <p><span class="font-bold w-32 inline-block">NPM</span>: ${mhs.npm}</p>
+        <p><span class="font-bold w-32 inline-block">Nama Lengkap</span>: ${mhs.nama}</p>
+        <p><span class="font-bold w-32 inline-block">Prodi</span>: ${mhs.prodi}</p>
+        <p><span class="font-bold w-32 inline-block">Kelas</span>: ${mhs.kelas || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Jenis Kelamin</span>: ${mhs.jenis_kelamin || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Tahun Masuk</span>: ${mhs.tahun_masuk}</p>
+        <p><span class="font-bold w-32 inline-block">Status</span>: <span class="font-bold ${statusColor}">${statusText}</span></p>
+        <p><span class="font-bold w-32 inline-block">NIK</span>: ${mhs.nik_mahasiswa || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">No. HP</span>: ${mhs.no_hp || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Nomor Ijazah</span>: ${mhs.nomor_ijazah || '-'}</p>
+        <hr class="my-3 border-gray-200">
+        <p><span class="font-bold w-32 inline-block">Judul Skripsi</span>: ${mhs.judul_skripsi || 'Belum ada'}</p>
+        
+        <h4 class="font-bold text-lg text-blue-700 mt-4 mb-2">Data Personal & Orang Tua</h4>
+        <p><span class="font-bold w-32 inline-block">Nama Ayah</span>: ${mhs.nama_ayah || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Nama Ibu</span>: ${mhs.nama_ibu || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">TTL</span>: ${mhs.ttl || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Alamat</span>: ${mhs.alamat || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Kelurahan</span>: ${mhs.kelurahan || '-'}</p>
+        <p><span class="font-bold w-32 inline-block">Kecamatan</span>: ${mhs.kecamatan || '-'}</p>
+    `;
+
+    document.getElementById('modalContent').innerHTML = modalContent;
+    document.getElementById('detailModal').classList.remove('hidden');
+}
 
     // --- FUNGSI REKAPITULASI (BARU) ---
     async function loadRecapData() {
@@ -1498,15 +1500,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-  function viewMahasiswa(npm) {
-    // Arahkan ke halaman lain (atau modal detail)
-    alert("Detail mahasiswa NPM: " + npm);
-    
-    // Jika Anda punya halaman detail:
-    // window.location.href = `detailMahasiswa.html?npm=${npm}`;
-}
-
 </script>
 </body>
 </html>
