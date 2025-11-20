@@ -411,14 +411,21 @@
 <div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
     <div class="flex justify-between items-center mb-4">
         <h2 id="rekapitulasi-status" class="text-2xl font-semibold text-gray-700">Rekapitulasi Status Mahasiswa</h2>
-        <div class="flex space-x-2">
-            <button onclick="exportRecapToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                <i class="fas fa-file-excel mr-2"></i> Export Excel
-            </button>
-            <button onclick="exportRecapToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                <i class="fas fa-file-pdf mr-2"></i> Export PDF
-            </button>
-        </div>
+        <div class="flex items-center space-x-3">
+
+    <!-- EXPORT EXCEL (SAMA PERSIS SEPERTI DI ATAS) -->
+    <button onclick="exportRecapToExcel()" 
+        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
+        <i class="fas fa-file-excel mr-2"></i> Export Excel
+    </button>
+
+    <!-- EXPORT PDF -->
+    <button onclick="exportRecapToPDF()" 
+        class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
+        <i class="fas fa-file-pdf mr-2"></i> Export PDF
+    </button>
+
+</div>
     </div>
 
                     <div class="overflow-x-auto">
