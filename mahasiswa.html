@@ -1208,11 +1208,11 @@ if (!currentMahasiswaId) {
         }
     }
 
-    async function showDetail(npm) {
+    async function editMahasiswa(mahasiswaId) {
     const { data: mhs, error } = await supabaseClient
         .from('mahasiswa')
         .select('*')
-        .eq('npm', npm)
+        .eq('id', mahasiswaId)
         .single();
 
     if (error || !mhs) {
