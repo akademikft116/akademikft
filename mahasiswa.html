@@ -1160,6 +1160,37 @@ if (!currentMahasiswaId) {
             alert('❌ Data tidak ditemukan.');
             return;
         }
+
+        async function showDetail(mahasiswaId) {
+    const { data: mhs, error } = await supabaseClient
+        .from('mahasiswa')
+        .select('*')
+        .eq('id', mahasiswaId)
+        .single();
+
+    if (error || !mhs) {
+        alert('❌ Data tidak ditemukan.');
+        return;
+    }
+
+    const statusText = mhs.status;
+    const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : 
+                        mhs.status === 'Lulus' ? 'text-blue-600' : 
+                        'text-red-600';
+
+    const modalContent = `
+        <p><span class="font-bold">NPM:</span> ${mhs.npm}</p>
+        <p><span class="font-bold">Nama:</span> ${mhs.nama}</p>
+        <p><span class="font-bold">Prodi:</span> ${mhs.prodi}</p>
+        <p><span class="font-bold">Kelas:</span> ${mhs.kelas}</p>
+        <p><span class="font-bold">Status:</span> 
+           <span class="${statusColor} font-bold">${statusText}</span>
+        </p>
+    `;
+
+    document.getElementById('modalContent').innerHTML = modalContent;
+    document.getElementById('detailModal').classList.remove('hidden');
+}
         
         const statusText = mhs.status;
         const statusColor = mhs.status === 'Aktif' ? 'text-green-600' : mhs.status === 'Lulus' ? 'text-blue-600' : 'text-red-600';
