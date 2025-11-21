@@ -1744,6 +1744,12 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
     document.getElementById('editModal').classList.add('hidden');
 }
 
+  // Sembunyikan tabel mahasiswa saat berada di halaman Status Aktivitas Mahasiswa
+if (window.location.href.includes("status_aktivitas_mahasiswa.html")) {
+    const tbl = document.getElementById("mahasiswa-list-container");
+    if (tbl) tbl.style.display = "none";
+}
+
 </script>
 </body>
 </html>
