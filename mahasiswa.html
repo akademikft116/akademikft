@@ -1679,6 +1679,55 @@ async function confirmDelete() {
 
 document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
 
+  async function editMahasiswa(npm) {
+    // Ambil data mahasiswa berdasar NPM
+    const { data: mhs, error } = await supabaseClient
+        .from('mahasiswa')
+        .select('*')
+        .eq('npm', npm)
+        .single();
+
+    if (error || !mhs) {
+        alert("Data tidak ditemukan untuk diedit.");
+        return;
+    }
+
+    // Tampilkan data di modal edit yang sudah Anda buat
+    document.getElementById('editNama').value = mhs.nama;
+    document.getElementById('editProdi').value = mhs.prodi;
+    document.getElementById('editKelas').value = mhs.kelas || '';
+    document.getElementById('editStatus').value = mhs.status;
+
+    // Simpan ID mahasiswa agar bisa di-update
+    window.currentMahasiswaId = mhs.id;
+
+    // Tampilkan modal edit
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+  async function saveEditData() {
+    const updated = {
+        nama: document.getElementById('editNama').value,
+        prodi: document.getElementById('editProdi').value,
+        kelas: document.getElementById('editKelas').value,
+        status: document.getElementById('editStatus').value
+    };
+
+    const { error } = await supabaseClient
+        .from('mahasiswa')
+        .update(updated)
+        .eq('id', window.currentMahasiswaId);
+
+    if (error) {
+        alert("Gagal menyimpan data.");
+        return;
+    }
+
+    alert("Data berhasil diperbarui!");
+    document.getElementById('editModal').classList.add('hidden');
+    loadMahasiswaData();
+}
+
 </script>
 </body>
 </html>
