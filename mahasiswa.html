@@ -658,20 +658,6 @@ function showMainTab(tabName) {
     const activeSection = document.getElementById(`content-${tabName}`);
     if (activeSection) activeSection.classList.remove('hidden');
 
-    // -----------------------------
-    // Sembunyikan tabel mahasiswa di tab rekap
-    // -----------------------------
-    const daftarMhs = document.getElementById("mahasiswa-list-container");
-
-    if (daftarMhs) {
-        if (tabName === "rekap") {
-            daftarMhs.classList.add("hidden");   // Hilang di Status Aktivitas
-        } else {
-            daftarMhs.classList.remove("hidden"); // Muncul di Data Mahasiswa
-        }
-    }
-}
-
     // Ubah tampilan tombol tab aktif
     document.querySelectorAll('.main-tab-button').forEach(button => {
         button.classList.remove('active', 'text-blue-600', 'border-blue-600');
@@ -1756,12 +1742,6 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
 }
   function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');
-}
-
-  // Sembunyikan tabel mahasiswa saat berada di halaman Status Aktivitas Mahasiswa
-if (window.location.href.includes("status_aktivitas_mahasiswa.html")) {
-    const tbl = document.getElementById("mahasiswa-list-container");
-    if (tbl) tbl.style.display = "none";
 }
 
 </script>
