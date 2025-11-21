@@ -503,6 +503,11 @@
             Edit Data Mahasiswa
         </h2>
 
+          <div>
+        <label class="font-bold">NPM</label>
+        <input id="editNpm" class="w-full border rounded p-2" />
+          </div>
+
         <div class="text-sm space-y-3" id="editContent">
             <div>
                 <label class="font-bold">Nama</label>
@@ -512,6 +517,11 @@
             <div>
                 <label class="font-bold">Prodi</label>
                 <input id="editProdi" class="w-full border rounded p-2" />
+            </div>
+
+            <div>
+                <label class="font-bold">Tahun Masuk</label>
+                <input id="editTahunMasuk" type="number" class="w-full border rounded p-2" />
             </div>
 
             <div>
@@ -1680,7 +1690,6 @@ async function confirmDelete() {
 document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
 
   async function editMahasiswa(npm) {
-    // Ambil data mahasiswa berdasar NPM
     const { data: mhs, error } = await supabaseClient
         .from('mahasiswa')
         .select('*')
@@ -1692,24 +1701,28 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
         return;
     }
 
-    // Tampilkan data di modal edit yang sudah Anda buat
+    // Simpan ID untuk update
+    window.currentMahasiswaId = mhs.id;
+
+    // Isi modal dengan data mahasiswa
+    document.getElementById('editNpm').value = mhs.npm;
     document.getElementById('editNama').value = mhs.nama;
     document.getElementById('editProdi').value = mhs.prodi;
     document.getElementById('editKelas').value = mhs.kelas || '';
+    document.getElementById('editTahunMasuk').value = mhs.tahun_masuk;
     document.getElementById('editStatus').value = mhs.status;
 
-    // Simpan ID mahasiswa agar bisa di-update
-    window.currentMahasiswaId = mhs.id;
-
-    // Tampilkan modal edit
+    // Tampilkan modal
     document.getElementById('editModal').classList.remove('hidden');
 }
 
   async function saveEditData() {
     const updated = {
+        npm: document.getElementById('editNpm').value,
         nama: document.getElementById('editNama').value,
         prodi: document.getElementById('editProdi').value,
         kelas: document.getElementById('editKelas').value,
+        tahun_masuk: document.getElementById('editTahunMasuk').value,
         status: document.getElementById('editStatus').value
     };
 
