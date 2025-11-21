@@ -658,6 +658,20 @@ function showMainTab(tabName) {
     const activeSection = document.getElementById(`content-${tabName}`);
     if (activeSection) activeSection.classList.remove('hidden');
 
+    // -----------------------------
+    // Sembunyikan tabel mahasiswa di tab rekap
+    // -----------------------------
+    const daftarMhs = document.getElementById("mahasiswa-list-container");
+
+    if (daftarMhs) {
+        if (tabName === "rekap") {
+            daftarMhs.classList.add("hidden");   // Hilang di Status Aktivitas
+        } else {
+            daftarMhs.classList.remove("hidden"); // Muncul di Data Mahasiswa
+        }
+    }
+}
+
     // Ubah tampilan tombol tab aktif
     document.querySelectorAll('.main-tab-button').forEach(button => {
         button.classList.remove('active', 'text-blue-600', 'border-blue-600');
