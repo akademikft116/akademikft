@@ -4,6 +4,14 @@
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  async function getUserName() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        return user.email.split("@")[0].toUpperCase(); 
+    }
+    return "AkademikFT"; // default kalau tidak login
+}
+
   async function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
