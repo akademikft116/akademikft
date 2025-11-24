@@ -1778,6 +1778,64 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
     document.getElementById('editModal').classList.add('hidden');
 }
 
+  // =======================
+//    FUNGSI REKAP (FIX)
+// =======================
+async function loadRekapitulasi() {
+    const { data, error } = await supabaseClient
+        .from('mahasiswa')
+        .select('prodi, tahun_masuk, status');
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    // Struktur rekap → per prodi → per tahun masuk
+    const recap = {};
+
+    data.forEach(m => {
+        if (!recap[m.prodi]) recap[m.prodi] = {};
+        if (!recap[m.prodi][m.tahun_masuk]) {
+            recap[m.prodi][m.tahun_masuk] = {
+                total: 0,
+                Aktif: 0,
+                Lulus: 0,
+                Nonaktif: 0,
+                "Mundur/DO": 0,
+                Meninggal: 0,
+            };
+        }
+
+        recap[m.prodi][m.tahun_masuk].total++;
+        recap[m.prodi][m.tahun_masuk][m.status]++;
+    });
+
+    // Tampilkan ke tabel
+    const body = document.getElementById("rekap-body");
+    body.innerHTML = "";
+
+    let no = 1;
+
+    Object.keys(recap).forEach(prodi => {
+        Object.keys(recap[prodi]).forEach(thn => {
+            const r = recap[prodi][thn];
+            body.innerHTML += `
+                <tr>
+                    <td class="px-6 py-3 text-center">${no++}</td>
+                    <td class="px-6 py-3">${prodi} — ${thn}</td>
+                    <td class="px-6 py-3 text-center">${r.total}</td>
+                    <td class="px-6 py-3 text-center">${r.Aktif}</td>
+                    <td class="px-6 py-3 text-center">${r.Lulus}</td>
+                    <td class="px-6 py-3 text-center">${r.Nonaktif}</td>
+                    <td class="px-6 py-3 text-center">${r["Mundur/DO"]}</td>
+                    <td class="px-6 py-3 text-center">${r.Meninggal}</td>
+                </tr>
+            `;
+        });
+    });
+}
+
 </script>
 
   <script>
