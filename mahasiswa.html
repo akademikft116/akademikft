@@ -1780,5 +1780,24 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
 }
 
 </script>
+
+  <script>
+function showMainTab(tab) {
+    document.getElementById('content-crud').classList.add('hidden');
+    document.getElementById('content-rekap').classList.add('hidden');
+
+    if (tab === 'crud') {
+        document.getElementById('content-crud').classList.remove('hidden');
+        document.getElementById('mainTitle').textContent = "Manajemen Biodata & Pencarian Mahasiswa";
+        loadMahasiswa();
+    } 
+    else if (tab === 'rekap') {
+        document.getElementById('content-rekap').classList.remove('hidden');
+        document.getElementById('mainTitle').textContent = "Status Aktivitas Mahasiswa (Rekap)";
+        loadRekapitulasi();
+    }
+}
+</script>
+
 </body>
 </html>
