@@ -1783,59 +1783,141 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
 // =======================
 async function loadRekapitulasi() {
     const { data, error } = await supabaseClient
-        .from('mahasiswa')
-        .select('prodi, tahun_masuk, status');
+        .from("mahasiswa")
+        .select("*");
 
     if (error) {
         console.error(error);
         return;
     }
 
-    // Struktur rekap → per prodi → per tahun masuk
-    const recap = {};
+    // Struktur: rekap per prodi - per tahun masuk
+    const grouped = {};
 
     data.forEach(m => {
-        if (!recap[m.prodi]) recap[m.prodi] = {};
-        if (!recap[m.prodi][m.tahun_masuk]) {
-            recap[m.prodi][m.tahun_masuk] = {
+        const prodi = m.prodi;
+        const tahun = m.tahun_masuk;
+
+        if (!grouped[prodi]) grouped[prodi] = {};
+        if (!grouped[prodi][tahun]) {
+            grouped[prodi][tahun] = {
                 total: 0,
-                Aktif: 0,
-                Lulus: 0,
-                Nonaktif: 0,
-                "Mundur/DO": 0,
-                Meninggal: 0,
+                aktif: 0,
+                lulus: 0,
+                nonaktif: 0,
+                do: 0,
+                meninggal: 0
             };
         }
 
-        recap[m.prodi][m.tahun_masuk].total++;
-        recap[m.prodi][m.tahun_masuk][m.status]++;
+        const row = grouped[prodi][tahun];
+
+        row.total++;
+        switch (m.status.toLowerCase()) {
+            case "aktif": row.aktif++; break;
+            case "lulus": row.lulus++; break;
+            case "nonaktif": row.nonaktif++; break;
+            case "mundur":
+            case "do":
+            case "mundur/do":
+                row.do++; 
+                break;
+            case "meninggal": row.meninggal++; break;
+        }
     });
 
-    // Tampilkan ke tabel
-    const body = document.getElementById("rekap-body");
-    body.innerHTML = "";
+    // Siapkan tabel
+    const tbody = document.getElementById("rekap-body");
+    tbody.innerHTML = "";
 
     let no = 1;
 
-    Object.keys(recap).forEach(prodi => {
-        Object.keys(recap[prodi]).forEach(thn => {
-            const r = recap[prodi][thn];
-            body.innerHTML += `
-                <tr>
-                    <td class="px-6 py-3 text-center">${no++}</td>
-                    <td class="px-6 py-3">${prodi} — ${thn}</td>
-                    <td class="px-6 py-3 text-center">${r.total}</td>
-                    <td class="px-6 py-3 text-center">${r.Aktif}</td>
-                    <td class="px-6 py-3 text-center">${r.Lulus}</td>
-                    <td class="px-6 py-3 text-center">${r.Nonaktif}</td>
-                    <td class="px-6 py-3 text-center">${r["Mundur/DO"]}</td>
-                    <td class="px-6 py-3 text-center">${r.Meninggal}</td>
+    // TOTAL KESELURUHAN
+    let totalAll = {
+        total: 0,
+        aktif: 0,
+        lulus: 0,
+        nonaktif: 0,
+        do: 0,
+        meninggal: 0
+    };
+
+    // Render PER PRODI
+    Object.keys(grouped).forEach(prodi => {
+
+        // SUBTOTAL PRODI
+        let subtotal = {
+            total: 0,
+            aktif: 0,
+            lulus: 0,
+            nonaktif: 0,
+            do: 0,
+            meninggal: 0
+        };
+
+        Object.keys(grouped[prodi]).forEach(tahun => {
+            const r = grouped[prodi][tahun];
+
+            // Tambah ke subtotal prodi
+            subtotal.total += r.total;
+            subtotal.aktif += r.aktif;
+            subtotal.lulus += r.lulus;
+            subtotal.nonaktif += r.nonaktif;
+            subtotal.do += r.do;
+            subtotal.meninggal += r.meninggal;
+
+            // Tambah ke total keseluruhan
+            totalAll.total += r.total;
+            totalAll.aktif += r.aktif;
+            totalAll.lulus += r.lulus;
+            totalAll.nonaktif += r.nonaktif;
+            totalAll.do += r.do;
+            totalAll.meninggal += r.meninggal;
+
+            // Baris utama (contoh: Industri – 2019)
+            tbody.innerHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="border px-4 py-2 text-center">${no++}</td>
+                    <td class="border px-4 py-2">${prodi} - ${tahun}</td>
+                    <td class="border px-4 py-2 text-center">${r.total}</td>
+                    <td class="border px-4 py-2 text-center">${r.aktif}</td>
+                    <td class="border px-4 py-2 text-center">${r.lulus}</td>
+                    <td class="border px-4 py-2 text-center">${r.nonaktif}</td>
+                    <td class="border px-4 py-2 text-center">${r.do}</td>
+                    <td class="border px-4 py-2 text-center">${r.meninggal}</td>
                 </tr>
             `;
         });
-    });
-}
 
+        // BARIS SUBTOTAL (sama persis seperti screenshot kanan)
+        tbody.innerHTML += `
+            <tr class="bg-blue-50 font-bold">
+                <td class="border px-4 py-2 text-center"></td>
+                <td class="border px-4 py-2">Sub-Total ${prodi}</td>
+                <td class="border px-4 py-2 text-center">${subtotal.total}</td>
+                <td class="border px-4 py-2 text-center">${subtotal.aktif}</td>
+                <td class="border px-4 py-2 text-center">${subtotal.lulus}</td>
+                <td class="border px-4 py-2 text-center">${subtotal.nonaktif}</td>
+                <td class="border px-4 py-2 text-center">${subtotal.do}</td>
+                <td class="border px-4 py-2 text-center">${subtotal.meninggal}</td>
+            </tr>
+        `;
+    });
+
+    // BARIS TOTAL KESELURUHAN
+    tbody.innerHTML += `
+        <tr class="bg-gray-100 font-bold">
+            <td class="border px-4 py-2 text-center"></td>
+            <td class="border px-4 py-2">Total Keseluruhan</td>
+            <td class="border px-4 py-2 text-center">${totalAll.total}</td>
+            <td class="border px-4 py-2 text-center">${totalAll.aktif}</td>
+            <td class="border px-4 py-2 text-center">${totalAll.lulus}</td>
+            <td class="border px-4 py-2 text-center">${totalAll.nonaktif}</td>
+            <td class="border px-4 py-2 text-center">${totalAll.do}</td>
+            <td class="border px-4 py-2 text-center">${totalAll.meninggal}</td>
+        </tr>
+    `;
+}
 </script>
 
   <script>
