@@ -152,21 +152,23 @@
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ================================
 //  FETCH DATA & BUILD TABLE
 // ================================
 async function loadRekap() {
-    const { data, error } = await supabase
-        .from("mahasiswa")
-        .select("*");
+
+    const { data, error } = await db.from("mahasiswa").select("*");
 
     if (error) {
         console.error(error);
-        alert("Gagal memuat data mahasiswa!");
         return;
     }
+
+    console.log(data);
+}
 
     // Grup berdasarkan: prodi + tahunmasuk
     const grouped = {};
