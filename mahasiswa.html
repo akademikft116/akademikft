@@ -458,23 +458,27 @@
     </button>
 </div>
     </div>
-
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th rowspan="2" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r">Prodi / Tahun Masuk</th>
-                                    <th rowspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-r">Total</th>
-                                    <th colspan="5" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Status Aktivitas</th>
-                                </tr>
-                                <tr>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Aktif</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Lulus</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Nonaktif</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Mundur/DO</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Meninggal</th>
-                                </tr>
-                            </thead>
+                              <thead class="bg-gray-200">
+                                  <tr>
+                                      <th rowspan="2" class="border px-4 py-2 text-center">No</th>
+                                      <th rowspan="2" class="border px-4 py-2 text-center">Prodi & Tahun Masuk</th>
+                                      <th colspan="2" class="border px-4 py-2 text-center">Jumlah Mahasiswa</th>
+                                      <th colspan="4" class="border px-4 py-2 text-center">Status Akademik</th>
+                                      <th colspan="2" class="border px-4 py-2 text-center">Status Lain</th>
+                                  </tr>
+                                  <tr>
+                                      <th class="border px-4 py-2 text-center">Aktif</th>
+                                      <th class="border px-4 py-2 text-center">Total</th>
+                                      <th class="border px-4 py-2 text-center">Lulus</th>
+                                      <th class="border px-4 py-2 text-center">Non-Aktif</th>
+                                      <th class="border px-4 py-2 text-center">Cuti</th>
+                                      <th class="border px-4 py-2 text-center">DO</th>
+                                      <th class="border px-4 py-2 text-center">Meninggal</th>
+                                      <th class="border px-4 py-2 text-center">Lainnya</th>
+                                  </tr>
+                              </thead>
                             <tbody class="bg-white divide-y divide-gray-200" id="recap-table-body">
                                 <tr><td colspan="7" class="text-center py-4 text-gray-500">Data rekapitulasi akan dimuat saat tab diakses.</td></tr>
                             </tbody>
@@ -1868,32 +1872,53 @@ async function loadRekapitulasi() {
     data.forEach(m => {
         const key = `${m.prodi} - ${m.tahun_masuk}`;
 
-        if (!grouped[key]) {
-            grouped[key] = {
-                prodi_tahun: key,
-                total: 0,
-                aktif: 0,
-                lulus: 0,
-                nonaktif: 0,
-                do: 0,
-                meninggal: 0
-            };
-        }
+        // KODE BARU
+if (!grouped[key]) {
+    grouped[key] = {
+        prodi_tahun: key,
+        total: 0, // Total
+        aktif: 0, // Aktif
+        lulus: 0, // Lulus
+        nonaktif: 0, // Non-Aktif
+        cuti: 0, // Cuti
+        do: 0, // DO (termasuk Mundur/DO)
+        meninggal: 0, // Meninggal
+        lainnya: 0 // Lainnya
+    };
+}
 
         grouped[key].total++;
 
-        switch (m.status.toLowerCase()) {
-            case "aktif": grouped[key].aktif++; break;
-            case "lulus": grouped[key].lulus++; break;
-            case "nonaktif": grouped[key].nonaktif++; break;
-            case "mundur": 
-            case "do":
-            case "mundur/do":
-                grouped[key].do++; 
-                break;
-            case "meninggal": grouped[key].meninggal++; break;
-        }
-    });
+        // KODE BARU
+// Catatan: Asumsi nilai status dari data m.status adalah string seperti "Aktif", "Lulus", "Cuti", dll.
+const status = m.status ? m.status.toLowerCase().trim() : '';
+
+switch (status) {
+    case "aktif":
+        grouped[key].aktif++;
+        break;
+    case "lulus":
+        grouped[key].lulus++;
+        break;
+    case "nonaktif":
+        grouped[key].nonaktif++;
+        break;
+    case "cuti":
+        grouped[key].cuti++;
+        break;
+    case "mundur":
+    case "do":
+    case "mundur/do":
+        grouped[key].do++;
+        break;
+    case "meninggal":
+        grouped[key].meninggal++;
+        break;
+    default:
+        // Masukkan status yang tidak terdefinisi ke kategori 'lainnya'
+        grouped[key].lainnya++;
+        break;
+}
 
     // Tampilkan hasil ke tabel
     const tbody = document.getElementById("rekap-body");
@@ -1901,19 +1926,23 @@ async function loadRekapitulasi() {
 
     let index = 1;
 
-    Object.values(grouped).forEach(row => {
-        tbody.innerHTML += `
-        <tr class="hover:bg-gray-50">
-            <td class="border px-4 py-2 text-center">${index++}</td>
-            <td class="border px-4 py-2">${row.prodi_tahun}</td>
-            <td class="border px-4 py-2 text-center">${row.total}</td>
-            <td class="border px-4 py-2 text-center">${row.aktif}</td>
-            <td class="border px-4 py-2 text-center">${row.lulus}</td>
-            <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
-            <td class="border px-4 py-2 text-center">${row.do}</td>
-            <td class="border px-4 py-2 text-center">${row.meninggal}</td>
-        </tr>`;
-    });
+    // KODE BARU (Sesuai kolom baru)
+Object.values(grouped).forEach(row => {
+    tbody.innerHTML += `
+    <tr class="hover:bg-gray-50">
+        <td class="border px-4 py-2 text-center">${index++}</td>
+        <td class="border px-4 py-2">${row.prodi_tahun}</td>
+        <td class="border px-4 py-2 text-center">${row.aktif}</td>
+        <td class="border px-4 py-2 text-center">${row.total}</td>
+        <td class="border px-4 py-2 text-center">${row.lulus}</td>
+        <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
+        <td class="border px-4 py-2 text-center">${row.cuti}</td>
+        <td class="border px-4 py-2 text-center">${row.do}</td>
+        <td class="border px-4 py-2 text-center">${row.meninggal}</td>
+        <td class="border px-4 py-2 text-center">${row.lainnya}</td>
+    </tr>
+    `;
+});
 }
     
 </script>
