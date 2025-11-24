@@ -1796,7 +1796,68 @@ function showMainTab(tab) {
         loadRekapitulasi();
     }
 }
-</script>
 
+async function loadRekapitulasi() {
+    const { data, error } = await supabase.from("mahasiswa").select("*");
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    // Grouping berdasarkan prodi + tahun masuk
+    const grouped = {};
+
+    data.forEach(m => {
+        const key = `${m.prodi} - ${m.tahun_masuk}`;
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                prodi_tahun: key,
+                total: 0,
+                aktif: 0,
+                lulus: 0,
+                nonaktif: 0,
+                do: 0,
+                meninggal: 0
+            };
+        }
+
+        grouped[key].total++;
+
+        switch (m.status.toLowerCase()) {
+            case "aktif": grouped[key].aktif++; break;
+            case "lulus": grouped[key].lulus++; break;
+            case "nonaktif": grouped[key].nonaktif++; break;
+            case "mundur": 
+            case "do":
+            case "mundur/do":
+                grouped[key].do++; 
+                break;
+            case "meninggal": grouped[key].meninggal++; break;
+        }
+    });
+
+    // Tampilkan hasil ke tabel
+    const tbody = document.getElementById("rekap-body");
+    tbody.innerHTML = "";
+
+    let index = 1;
+
+    Object.values(grouped).forEach(row => {
+        tbody.innerHTML += `
+        <tr class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-center">${index++}</td>
+            <td class="border px-4 py-2">${row.prodi_tahun}</td>
+            <td class="border px-4 py-2 text-center">${row.total}</td>
+            <td class="border px-4 py-2 text-center">${row.aktif}</td>
+            <td class="border px-4 py-2 text-center">${row.lulus}</td>
+            <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
+            <td class="border px-4 py-2 text-center">${row.do}</td>
+            <td class="border px-4 py-2 text-center">${row.meninggal}</td>
+        </tr>`;
+    });
+}
+    
+</script>
 </body>
 </html>
