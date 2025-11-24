@@ -1856,7 +1856,7 @@ function showMainTab(tab) {
 }
 
 async function loadRekapitulasi() {
-    const { data, error } = await supabase.from("mahasiswa").select("*");
+    const { data, error } = await supabaseClient.from("mahasiswa").select("*");
     if (error) {
         console.error(error);
         return;
