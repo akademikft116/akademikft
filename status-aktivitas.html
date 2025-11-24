@@ -94,6 +94,56 @@
                         <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-user-times mr-2 text-red-500"></i> <span id="totalNonaktifCard">0</span></p>
                     </div>
                 </div>
+
+                    <div class="mt-10 bg-white shadow-md rounded-lg overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="px-6 py-4 border-b bg-gray-50">
+        <h2 class="text-xl font-bold text-gray-700">Rekap Status Aktivitas Mahasiswa</h2>
+    </div>
+
+    <!-- TABEL -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-gray-300">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                    <th class="border px-4 py-2 text-left">PRODI / TAHUN MASUK</th>
+                    <th class="border px-4 py-2 text-center">TOTAL</th>
+                    <th class="border px-4 py-2 text-center">AKTIF</th>
+                    <th class="border px-4 py-2 text-center">LULUS</th>
+                    <th class="border px-4 py-2 text-center">NONAKTIF</th>
+                    <th class="border px-4 py-2 text-center">MUNDUR/DO</th>
+                    <th class="border px-4 py-2 text-center">MENINGGAL</th>
+                </tr>
+            </thead>
+            <tbody id="rekapTableBody">
+                <!-- Baris data akan diisi otomatis via JavaScript -->
+            </tbody>
+
+            <!-- SUBTOTAL PRODI -->
+            <tbody id="rekapSubtotalBody"></tbody>
+
+            <!-- TOTAL KESELURUHAN -->
+            <tfoot>
+                <tr class="bg-gray-100 font-bold">
+                    <td class="border px-4 py-2 text-left">Total Keseluruhan</td>
+                    <td class="border px-4 py-2 text-center" id="totalAll">0</td>
+                    <td class="border px-4 py-2 text-center" id="totalAllAktif">0</td>
+                    <td class="border px-4 py-2 text-center" id="totalAllLulus">0</td>
+                    <td class="border px-4 py-2 text-center" id="totalAllNonaktif">0</td>
+                    <td class="border px-4 py-2 text-center" id="totalAllMundur">0</td>
+                    <td class="border px-4 py-2 text-center" id="totalAllMeninggal">0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="px-6 py-3 text-xs text-gray-500">
+        Data diambil berdasarkan rekap <span id="rekapTanggal"></span>.
+    </div>
+</div>
+    
 </div>
 </div>
 </main>
