@@ -47,52 +47,6 @@
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         cursor: default;
     }
-
-    /* === STYLE TABEL REKAP — SAMA PERSIS SEPERTI GAMBAR KANAN === */
-
-.rekap-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
-}
-
-.rekap-table thead tr {
-    background-color: #f8fafc;  /* abu muda */
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.rekap-table thead th {
-    padding: 14px 12px;
-    font-weight: 600;
-    text-align: center;
-}
-
-.rekap-table tbody tr {
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.rekap-table tbody td {
-    padding: 14px 12px;
-    text-align: center;
-}
-
-.rekap-table tbody tr:hover {
-    background-color: #f1f5f9;
-}
-
-/* SUBTOTAL */
-.rekap-subtotal {
-    background-color: #eef6ff !important;
-    font-weight: 700;
-}
-
-/* TOTAL KESELURUHAN */
-.rekap-total {
-    background-color: #f8fafc !important;
-    font-weight: 700;
-    border-top: 2px solid #cbd5e1;
-}
-    
   </style>
 </head>
 <body class="bg-gray-100">
@@ -444,56 +398,53 @@
                         </div>
                     </div>
 
-              <div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-xl font-bold mb-4">Status Aktivitas Mahasiswa (Rekap)</h2>
 
-    <table class="rekap-table w-full text-sm border border-gray-300">
-        <thead class="bg-gray-100">
-            <tr>
-                <th>No</th>
-                <th>Prodi / Tahun Masuk</th>
-                <th>Total</th>
-                <th>Aktif</th>
-                <th>Lulus</th>
-                <th>Nonaktif</th>
-                <th>Mundur/DO</th>
-                <th>Meninggal</th>
-            </tr>
-        </thead>
-        <tbody id="rekap-body"></tbody>
-    </table>
-</div>
-                   
-            <div id="content-rekap" class="main-tab-content-section hidden">
-              <div id="content-status" class="main-tab-content-section hidden">
+                    <div id="rekap-table-container" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPM</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prodi</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Masuk</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
 
-    <h2 class="text-xl font-semibold mb-4">Status Aktivitas Mahasiswa (Rekap)</h2>
+            </div>
+            
+            <div id="content-rekap" class="main-tab-content-section hidden mt-20">
+                
+                 <div id="recap-cards-container" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div id="card-total" class="recap-card bg-white p-6 rounded-lg shadow-md border-b-4 border-blue-500">
+                        <p class="text-sm font-medium text-gray-500">Total Mahasiswa</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-users mr-2 text-blue-500"></i> <span id="totalMhs">0</span></p>
+                    </div>
+                    <div id="card-aktif" class="recap-card bg-white p-6 rounded-lg shadow-md border-b-4 border-green-500">
+                        <p class="text-sm font-medium text-gray-500">Status Aktif</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-user-check mr-2 text-green-500"></i> <span id="totalAktif">0</span></p>
+                    </div>
+                    <div id="card-lulus" class="recap-card bg-white p-6 rounded-lg shadow-md border-b-4 border-yellow-500">
+                        <p class="text-sm font-medium text-gray-500">Status Lulus</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-graduation-cap mr-2 text-yellow-500"></i> <span id="totalLulus">0</span></p>
+                    </div>
+                    <div id="card-nonaktif" class="recap-card bg-white p-6 rounded-lg shadow-md border-b-4 border-red-500">
+                        <p class="text-sm font-medium text-gray-500">Nonaktif/Drop Out</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-user-times mr-2 text-red-500"></i> <span id="totalNonaktifCard">0</span></p>
+                    </div>
+                </div>
 
-    <<div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-xl font-bold mb-4">Status Aktivitas Mahasiswa (Rekap)</h2>
+<div id="rekapitulasi-status-mahasiswa" class="bg-white p-6 rounded-lg shadow-lg">
+    <div class="flex items-center space-x-3">
 
-    <table class="rekap-table w-full text-sm border border-gray-300">
-        <thead class="bg-gray-100">
-            <tr>
-                <th>No</th>
-                <th>Prodi / Tahun Masuk</th>
-                <th>Total</th>
-                <th>Aktif</th>
-                <th>Lulus</th>
-                <th>Nonaktif</th>
-                <th>Mundur/DO</th>
-                <th>Meninggal</th>
-            </tr>
-        </thead>
-        <tbody id="rekap-body"></tbody>
-    </table>
-</div>
-
-    <div class="bg-white shadow-md rounded-lg p-6 mt-4">
-        <h2 class="text-xl font-bold mb-4">Status Aktivitas Mahasiswa (Rekap)</h2>
-
-        <div class="overflow-x-auto">
-  
     <!-- EXPORT EXCEL (SAMA PERSIS SEPERTI DI ATAS) -->
     <button onclick="exportRecapToExcel()" 
         class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
@@ -1832,141 +1783,59 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDel
 // =======================
 async function loadRekapitulasi() {
     const { data, error } = await supabaseClient
-        .from("mahasiswa")
-        .select("*");
+        .from('mahasiswa')
+        .select('prodi, tahun_masuk, status');
 
     if (error) {
         console.error(error);
         return;
     }
 
-    // Struktur: rekap per prodi - per tahun masuk
-    const grouped = {};
+    // Struktur rekap → per prodi → per tahun masuk
+    const recap = {};
 
     data.forEach(m => {
-        const prodi = m.prodi;
-        const tahun = m.tahun_masuk;
-
-        if (!grouped[prodi]) grouped[prodi] = {};
-        if (!grouped[prodi][tahun]) {
-            grouped[prodi][tahun] = {
+        if (!recap[m.prodi]) recap[m.prodi] = {};
+        if (!recap[m.prodi][m.tahun_masuk]) {
+            recap[m.prodi][m.tahun_masuk] = {
                 total: 0,
-                aktif: 0,
-                lulus: 0,
-                nonaktif: 0,
-                do: 0,
-                meninggal: 0
+                Aktif: 0,
+                Lulus: 0,
+                Nonaktif: 0,
+                "Mundur/DO": 0,
+                Meninggal: 0,
             };
         }
 
-        const row = grouped[prodi][tahun];
-
-        row.total++;
-        switch (m.status.toLowerCase()) {
-            case "aktif": row.aktif++; break;
-            case "lulus": row.lulus++; break;
-            case "nonaktif": row.nonaktif++; break;
-            case "mundur":
-            case "do":
-            case "mundur/do":
-                row.do++; 
-                break;
-            case "meninggal": row.meninggal++; break;
-        }
+        recap[m.prodi][m.tahun_masuk].total++;
+        recap[m.prodi][m.tahun_masuk][m.status]++;
     });
 
-    // Siapkan tabel
-    const tbody = document.getElementById("rekap-body");
-    tbody.innerHTML = "";
+    // Tampilkan ke tabel
+    const body = document.getElementById("rekap-body");
+    body.innerHTML = "";
 
     let no = 1;
 
-    // TOTAL KESELURUHAN
-    let totalAll = {
-        total: 0,
-        aktif: 0,
-        lulus: 0,
-        nonaktif: 0,
-        do: 0,
-        meninggal: 0
-    };
-
-    // Render PER PRODI
-    Object.keys(grouped).forEach(prodi => {
-
-        // SUBTOTAL PRODI
-        let subtotal = {
-            total: 0,
-            aktif: 0,
-            lulus: 0,
-            nonaktif: 0,
-            do: 0,
-            meninggal: 0
-        };
-
-        Object.keys(grouped[prodi]).forEach(tahun => {
-            const r = grouped[prodi][tahun];
-
-            // Tambah ke subtotal prodi
-            subtotal.total += r.total;
-            subtotal.aktif += r.aktif;
-            subtotal.lulus += r.lulus;
-            subtotal.nonaktif += r.nonaktif;
-            subtotal.do += r.do;
-            subtotal.meninggal += r.meninggal;
-
-            // Tambah ke total keseluruhan
-            totalAll.total += r.total;
-            totalAll.aktif += r.aktif;
-            totalAll.lulus += r.lulus;
-            totalAll.nonaktif += r.nonaktif;
-            totalAll.do += r.do;
-            totalAll.meninggal += r.meninggal;
-
-            // Baris utama (contoh: Industri – 2019)
-            tbody.innerHTML += `
-                <tr class="hover:bg-gray-50">
-                    <td class="border px-4 py-2 text-center">${no++}</td>
-                    <td class="border px-4 py-2">${prodi} - ${tahun}</td>
-                    <td class="border px-4 py-2 text-center">${r.total}</td>
-                    <td class="border px-4 py-2 text-center">${r.aktif}</td>
-                    <td class="border px-4 py-2 text-center">${r.lulus}</td>
-                    <td class="border px-4 py-2 text-center">${r.nonaktif}</td>
-                    <td class="border px-4 py-2 text-center">${r.do}</td>
-                    <td class="border px-4 py-2 text-center">${r.meninggal}</td>
+    Object.keys(recap).forEach(prodi => {
+        Object.keys(recap[prodi]).forEach(thn => {
+            const r = recap[prodi][thn];
+            body.innerHTML += `
+                <tr>
+                    <td class="px-6 py-3 text-center">${no++}</td>
+                    <td class="px-6 py-3">${prodi} — ${thn}</td>
+                    <td class="px-6 py-3 text-center">${r.total}</td>
+                    <td class="px-6 py-3 text-center">${r.Aktif}</td>
+                    <td class="px-6 py-3 text-center">${r.Lulus}</td>
+                    <td class="px-6 py-3 text-center">${r.Nonaktif}</td>
+                    <td class="px-6 py-3 text-center">${r["Mundur/DO"]}</td>
+                    <td class="px-6 py-3 text-center">${r.Meninggal}</td>
                 </tr>
             `;
         });
-
-        // BARIS SUBTOTAL (sama persis seperti screenshot kanan)
-        tbody.innerHTML += `
-            <tr class="bg-blue-50 font-bold">
-                <td class="border px-4 py-2 text-center"></td>
-                <td class="border px-4 py-2">Sub-Total ${prodi}</td>
-                <td class="border px-4 py-2 text-center">${subtotal.total}</td>
-                <td class="border px-4 py-2 text-center">${subtotal.aktif}</td>
-                <td class="border px-4 py-2 text-center">${subtotal.lulus}</td>
-                <td class="border px-4 py-2 text-center">${subtotal.nonaktif}</td>
-                <td class="border px-4 py-2 text-center">${subtotal.do}</td>
-                <td class="border px-4 py-2 text-center">${subtotal.meninggal}</td>
-            </tr>
-        `;
     });
-
-    // BARIS TOTAL KESELURUHAN
-    tbody.innerHTML += `
-        <tr class="bg-gray-100 font-bold">
-            <td class="border px-4 py-2 text-center"></td>
-            <td class="border px-4 py-2">Total Keseluruhan</td>
-            <td class="border px-4 py-2 text-center">${totalAll.total}</td>
-            <td class="border px-4 py-2 text-center">${totalAll.aktif}</td>
-            <td class="border px-4 py-2 text-center">${totalAll.lulus}</td>
-            <td class="border px-4 py-2 text-center">${totalAll.nonaktif}</td>
-            <td class="border px-4 py-2 text-center">${totalAll.do}</td>
-            <td class="border px-4 py-2 text-center">${totalAll.meninggal}</td>
-        </tr>
-    `;
 }
+
 </script>
 
   <script>
@@ -1993,13 +1862,15 @@ async function loadRekapitulasi() {
         return;
     }
 
-    // Grouping per PRODI → per TAHUN MASUK
+    // Grouping berdasarkan prodi + tahun masuk
     const grouped = {};
 
     data.forEach(m => {
-        if (!grouped[m.prodi]) grouped[m.prodi] = {};
-        if (!grouped[m.prodi][m.tahun_masuk]) {
-            grouped[m.prodi][m.tahun_masuk] = {
+        const key = `${m.prodi} - ${m.tahun_masuk}`;
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                prodi_tahun: key,
                 total: 0,
                 aktif: 0,
                 lulus: 0,
@@ -2009,114 +1880,40 @@ async function loadRekapitulasi() {
             };
         }
 
-        const row = grouped[m.prodi][m.tahun_masuk];
-        row.total++;
+        grouped[key].total++;
 
         switch (m.status.toLowerCase()) {
-            case "aktif": row.aktif++; break;
-            case "lulus": row.lulus++; break;
-            case "nonaktif": row.nonaktif++; break;
-            case "mundur":
+            case "aktif": grouped[key].aktif++; break;
+            case "lulus": grouped[key].lulus++; break;
+            case "nonaktif": grouped[key].nonaktif++; break;
+            case "mundur": 
             case "do":
             case "mundur/do":
-                row.do++; break;
-            case "meninggal": row.meninggal++; break;
+                grouped[key].do++; 
+                break;
+            case "meninggal": grouped[key].meninggal++; break;
         }
     });
 
-    // Siapkan tbody
+    // Tampilkan hasil ke tabel
     const tbody = document.getElementById("rekap-body");
     tbody.innerHTML = "";
 
-    let no = 1;
+    let index = 1;
 
-    // GRAND TOTAL
-    let grand = {
-        total: 0,
-        aktif: 0,
-        lulus: 0,
-        nonaktif: 0,
-        do: 0,
-        meninggal: 0
-    };
-
-    // === LOOP PER PRODI ===
-    Object.keys(grouped).forEach(prodi => {
-
-        // SUBTOTAL PRODI
-        let subtotal = {
-            total: 0,
-            aktif: 0,
-            lulus: 0,
-            nonaktif: 0,
-            do: 0,
-            meninggal: 0
-        };
-
-        // === LOOP PER TAHUN MASUK ===
-        Object.keys(grouped[prodi]).forEach(tahun => {
-
-            const r = grouped[prodi][tahun];
-
-            // Tambahkan ke subtotal prodi
-            subtotal.total += r.total;
-            subtotal.aktif += r.aktif;
-            subtotal.lulus += r.lulus;
-            subtotal.nonaktif += r.nonaktif;
-            subtotal.do += r.do;
-            subtotal.meninggal += r.meninggal;
-
-            // Tambahkan ke GRAND TOTAL
-            grand.total += r.total;
-            grand.aktif += r.aktif;
-            grand.lulus += r.lulus;
-            grand.nonaktif += r.nonaktif;
-            grand.do += r.do;
-            grand.meninggal += r.meninggal;
-
-            // === ROW UTAMA (PRODI – TAHUN MASUK) ===
-            tbody.innerHTML += `
-                <tr>
-                    <td class="border px-2 py-1 text-center">${no++}</td>
-                    <td class="border px-2 py-1">${prodi} - ${tahun}</td>
-                    <td class="border px-2 py-1 text-center">${r.total}</td>
-                    <td class="border px-2 py-1 text-center">${r.aktif}</td>
-                    <td class="border px-2 py-1 text-center">${r.lusus}</td>
-                    <td class="border px-2 py-1 text-center">${r.nonaktif}</td>
-                    <td class="border px-2 py-1 text-center">${r.do}</td>
-                    <td class="border px-2 py-1 text-center">${r.meninggal}</td>
-                </tr>
-            `;
-        });
-
-        // === SUBTOTAL PER PRODI ===
+    Object.values(grouped).forEach(row => {
         tbody.innerHTML += `
-            <tr class="rekap-subtotal font-bold bg-blue-50">
-                <td class="border px-2 py-1"></td>
-                <td class="border px-2 py-1">Sub-Total ${prodi}</td>
-                <td class="border px-2 py-1 text-center">${subtotal.total}</td>
-                <td class="border px-2 py-1 text-center">${subtotal.aktif}</td>
-                <td class="border px-2 py-1 text-center">${subtotal.lulus}</td>
-                <td class="border px-2 py-1 text-center">${subtotal.nonaktif}</td>
-                <td class="border px-2 py-1 text-center">${subtotal.do}</td>
-                <td class="border px-2 py-1 text-center">${subtotal.meninggal}</td>
-            </tr>
-        `;
+        <tr class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-center">${index++}</td>
+            <td class="border px-4 py-2">${row.prodi_tahun}</td>
+            <td class="border px-4 py-2 text-center">${row.total}</td>
+            <td class="border px-4 py-2 text-center">${row.aktif}</td>
+            <td class="border px-4 py-2 text-center">${row.lulus}</td>
+            <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
+            <td class="border px-4 py-2 text-center">${row.do}</td>
+            <td class="border px-4 py-2 text-center">${row.meninggal}</td>
+        </tr>`;
     });
-
-    // === TOTAL KESELURUHAN ===
-    tbody.innerHTML += `
-        <tr class="rekap-total font-bold bg-gray-100">
-            <td class="border px-2 py-1"></td>
-            <td class="border px-2 py-1">Total Keseluruhan</td>
-            <td class="border px-2 py-1 text-center">${grand.total}</td>
-            <td class="border px-2 py-1 text-center">${grand.aktif}</td>
-            <td class="border px-2 py-1 text-center">${grand.lulus}</td>
-            <td class="border px-2 py-1 text-center">${grand.nonaktif}</td>
-            <td class="border px-2 py-1 text-center">${grand.do}</td>
-            <td class="border px-2 py-1 text-center">${grand.meninggal}</td>
-        </tr>
-    `;
 }
     
 </script>
