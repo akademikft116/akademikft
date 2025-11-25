@@ -687,19 +687,16 @@
     let searchTahunSelect; 
     let statusSelect; 
 
-document.addEventListener('DOMContentLoaded', () => {
+// Di bagian DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Inisialisasi Tom Select
     prodiSelect = new TomSelect("#prodi", { create: false });
     tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-    statusSelect = new TomSelect("#status", { create: false }); 
+    statusSelect = new TomSelect("#status", { create: false });
 
     populateYearSelect(tahunMasukSelect);
 
-    searchTahunSelect = new TomSelect("#searchTahun", { 
-        create: false,
-        placeholder: "Pilih Tahun",
-    });
-    populateYearSelect(searchTahunSelect, true);
-
+    // Inisialisasi filter
     new TomSelect("#searchProdi", {
         allowEmptyOption: true,
         create: false,
@@ -712,10 +709,20 @@ document.addEventListener('DOMContentLoaded', () => {
         placeholder: "Semua Status"
     });
 
+    // Load data awal
     showMainTab('crud');
     loadMahasiswaData();
 });
 
+// Fungsi untuk tombol Cari
+function performSearch() {
+    const prodi = document.getElementById('searchProdi')?.value || '';
+    const kelas = document.getElementById('searchKelas')?.value || '';
+    const status = document.getElementById('searchStatus')?.value || '';
+    const tahun = document.getElementById('searchTahun')?.value || '';
+
+    loadMahasiswaData({ prodi, kelas, status, tahun });
+}
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
 function showMainTab(tab) {
@@ -1079,69 +1086,74 @@ async function saveEditData() {
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
+    const tableBody = document.getElementById('mahasiswa-table-body');
+    if (!tableBody) return;
 
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="8" class="text-center py-4 text-gray-500">
-        <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
-      </td>
-    </tr>
-  `;
-
-  // Mulai query dasar
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  // Filter
-  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
-  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
-  if (filters.status) query = query.eq('status', filters.status);
-  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
-
-  // Ambil data
-  const { data, error } = await query;
-
-  if (error) {
-    console.error(error);
     tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
-    return;
-  }
-
-  // Simpan data untuk EXPORT PDF/EXCEL
-  currentMahasiswaData = data;
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
-
-  // Render ke tabel
-  let rows = "";
-  data.forEach((mhs, index) => {
-    rows += `
-      <tr class="hover:bg-gray-100 text-sm">
-        <td class="border px-2 py-1 text-center">${index + 1}</td>
-        <td class="border px-2 py-1">${mhs.npm}</td>
-        <td class="border px-2 py-1">${mhs.nama}</td>
-        <td class="border px-2 py-1">${mhs.prodi}</td>
-        <td class="border px-2 py-1">${mhs.kelas}</td>
-        <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
-        <td class="border px-2 py-1">${mhs.status}</td>
-        <td class="border px-2 py-1 text-center">
-          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="showDetail('${mhs.npm}')"></i>
-          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.npm}')"></i>
-          <i class="fas fa-trash text-red-500 cursor-pointer" 
-   onclick="openDeleteModal(${mhs.id}, '${mhs.npm}', '${mhs.nama}')">
-</i>
-        </td>
-      </tr>
+        <tr>
+            <td colspan="8" class="text-center py-4 text-gray-500">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
+            </td>
+        </tr>
     `;
-  });
 
-  tableBody.innerHTML = rows;
+    try {
+        let query = supabaseClient.from('mahasiswa').select('*');
+
+        // Filter
+        if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
+        if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+        if (filters.status) query = query.eq('status', filters.status);
+        if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        currentMahasiswaData = data || [];
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-gray-500">
+                        Tidak ada data ditemukan.
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        // Render tabel
+        let rows = "";
+        data.forEach((mhs, index) => {
+            rows += `
+                <tr class="hover:bg-gray-100 text-sm">
+                    <td class="border px-2 py-1 text-center">${index + 1}</td>
+                    <td class="border px-2 py-1">${mhs.npm}</td>
+                    <td class="border px-2 py-1">${mhs.nama}</td>
+                    <td class="border px-2 py-1">${mhs.prodi}</td>
+                    <td class="border px-2 py-1">${mhs.kelas || '-'}</td>
+                    <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
+                    <td class="border px-2 py-1">${mhs.status}</td>
+                    <td class="border px-2 py-1 text-center">
+                        <i class="fas fa-eye text-blue-500 cursor-pointer mx-1" onclick="showDetail('${mhs.npm}')"></i>
+                        <i class="fas fa-edit text-yellow-500 cursor-pointer mx-1" onclick="editMahasiswa('${mhs.npm}')"></i>
+                        <i class="fas fa-trash text-red-500 cursor-pointer mx-1" onclick="openDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama}')"></i>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableBody.innerHTML = rows;
+
+    } catch (error) {
+        console.error('Error loading data:', error);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center text-red-500 py-4">
+                    Gagal memuat data: ${error.message}
+                </td>
+            </tr>`;
+    }
 }
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
