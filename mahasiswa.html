@@ -1034,35 +1034,35 @@ function resetSearch() {
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
+    const tableBody = document.getElementById('mahasiswa-table-body');
+    if (!tableBody) return;
 
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="8" class="text-center py-4 text-gray-500">
-        <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
-      </td>
-    </tr>
-  `;
-
-  // Mulai query dasar
-  let query = supabaseClient.from('mahasiswa').select('*');
-
-  // Filter
-  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
-  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
-  if (filters.status) query = query.eq('status', filters.status);
-  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
-
-  // Ambil data
-  const { data, error } = await query;
-
-  if (error) {
-    console.error(error);
     tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
-    return;
-  }
+        <tr>
+            <td colspan="8" class="text-center py-4 text-gray-500">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
+            </td>
+        </tr>
+    `;
+
+    // PERBAIKI: gunakan supabaseClient yang benar
+    let query = supabaseClient.from('mahasiswa').select('*');
+    //                   ^^^^^^^^^^ PASTIKAN BENAR
+
+    // Filter logic...
+    if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
+    if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+    if (filters.status) query = query.eq('status', filters.status);
+    if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error loading data:', error);
+        tableBody.innerHTML = `
+            <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
+        return;
+    }
 
   // Simpan data untuk EXPORT PDF/EXCEL
   currentMahasiswaData = data;
@@ -2006,6 +2006,12 @@ async function loadRekapitulasi() {
     // Scroll ke form
     document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Loading initial data...');
+    loadMahasiswaData();
+    // loadRekapitulasi();
+});
     
 </script>
 </body>
