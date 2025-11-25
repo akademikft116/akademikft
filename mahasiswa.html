@@ -525,144 +525,95 @@
 </div>
 
   <!-- MODAL EDIT BARU -->
-<!-- MODAL EDIT DENGAN TAMPILAN SAMA SEPERTI TAMBAH DATA -->
-<div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div class="p-6">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="editFormTitle">Edit Data Mahasiswa</h2>
-            
-            <div class="border-b border-gray-200 mb-4">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button type="button" id="edit-tab-akademik" onclick="switchEditFormTab('akademik')" class="edit-tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
-                        <i class="fas fa-user-graduate mr-2"></i> Data Akademik & Identitas
-                    </button>
-                    <button type="button" id="edit-tab-personal" onclick="switchEditFormTab('personal')" class="edit-tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                        <i class="fas fa-id-card mr-2"></i> Data Personal & Orang Tua
-                    </button>
-                </nav>
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-96 p-5">
+
+        <h2 class="text-xl font-semibold mb-3 text-yellow-600">
+            Edit Data Mahasiswa
+        </h2>
+
+          <div>
+        <label class="font-bold">NPM</label>
+        <input id="editNpm" class="w-full border rounded p-2" />
+          </div>
+
+        <div class="text-sm space-y-3" id="editContent">
+            <div>
+                <label class="font-bold">Nama</label>
+                <input id="editNama" class="w-full border rounded p-2" />
             </div>
 
-            <!-- TAB AKADEMIK -->
-            <div id="edit-content-akademik" class="edit-tab-content">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="edit-npm" class="block text-sm font-medium text-gray-700">NPM <span class="text-red-500">*</span></label>
-                        <input type="text" id="edit-npm" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-nama" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
-                        <input type="text" id="edit-nama" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-prodi" class="block text-sm font-medium text-gray-700">Program Studi <span class="text-red-500">*</span></label>
-                        <select id="edit-prodi" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Pilih Prodi</option>
-                            <option value="Industri">Teknik Industri</option>
-                            <option value="Sipil">Teknik Sipil</option>
-                            <option value="Informatika">Teknik Informatika</option>
-                            <option value="Arsitektur">Arsitektur</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="edit-kelas" class="block text-sm font-medium text-gray-700">Kelas (A/B/C)</label>
-                        <input type="text" id="edit-kelas" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-jenisKelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
-                        <select id="edit-jenisKelamin" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Pilih J. Kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="edit-tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
-                        <select id="edit-tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="">Pilih Tahun</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="edit-nik" class="block text-sm font-medium text-gray-700">NIK Mahasiswa</label>
-                        <input type="text" id="edit-nik" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-nohp" class="block text-sm font-medium text-gray-700">No. HP</label>
-                        <input type="text" id="edit-nohp" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    
-                    <div>
-                        <label for="edit-status" class="block text-sm font-medium text-gray-700">Status Mahasiswa <span class="text-red-500">*</span></label>
-                        <select id="edit-status" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            <option value="Aktif">Aktif</option>
-                            <option value="Mengundurkan diri">Mengundurkan diri</option>
-                            <option value="Nonaktif">Nonaktif</option>
-                            <option value="Lulus">Lulus</option>
-                            <option value="Drop Out">Drop Out</option>
-                            <option value="Meninggal">Meninggal Dunia</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label for="edit-nomorIjazah" class="block text-sm font-medium text-gray-700">Nomor Ijazah (Opsional)</label>
-                        <input type="text" id="edit-nomorIjazah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div></div> 
-                    <div></div> 
-                </div>
-                
-                <div class="mt-4">
-                    <label for="edit-judulskripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi (Opsional)</label>
-                    <input type="text" id="edit-judulskripsi" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                </div>
-                <hr class="my-8 border-t-2 border-gray-200">
+            <div>
+                <label class="font-bold">Prodi</label>
+                <input id="editProdi" class="w-full border rounded p-2" />
             </div>
 
-            <!-- TAB PERSONAL -->
-            <div id="edit-content-personal" class="edit-tab-content hidden">
-                <p class="text-sm text-gray-600 mb-4">Lengkapi data personal dan orang tua (dapat dikosongkan).</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="edit-namaayah" class="block text-sm font-medium text-gray-700">Nama Ayah</label>
-                        <input type="text" id="edit-namaayah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-namaibu" class="block text-sm font-medium text-gray-700">Nama Ibu</label>
-                        <input type="text" id="edit-namaibu" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-ttl" class="block text-sm font-medium text-gray-700">TTL</label>
-                        <input type="text" id="edit-ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-
-                    <div>
-                        <label for="edit-kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
-                        <input type="text" id="edit-kelurahan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="edit-kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
-                        <input type="text" id="edit-kecamatan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div></div>
-                </div>
-
-                <div class="mt-4">
-                    <label for="edit-alamat" class="block text-sm font-medium text-gray-700">Alamat Lengkap (Jalan, RT/RW)</label>
-                    <textarea id="edit-alamat" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-                </div>
+            <div>
+                <label class="font-bold">Tahun Masuk</label>
+                <input id="editTahunMasuk" type="number" class="w-full border rounded p-2" />
             </div>
 
-            <input type="hidden" id="edit-mahasiswaId" value="">
-            <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
-                <button type="button" onclick="saveEditData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                    <i class="fas fa-save mr-2"></i> Update Data
-                </button>
-                <button type="button" onclick="closeEditModal()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-                    <i class="fas fa-times mr-2"></i> Batal
-                </button>
+            <div>
+                <label class="font-bold">Kelas</label>
+                <input id="editKelas" class="w-full border rounded p-2" />
+            </div>
+
+            <div>
+                <label class="font-bold">Status</label>
+                <select id="editStatus" class="w-full border rounded p-2">
+                    <option value="Aktif">Aktif</option>
+                    <option value="Nonaktif">Nonaktif</option>
+                    <option value="Lulus">Lulus</option>
+                    <option value="Drop Out">Drop Out</option>
+                    <option value="Mengundurkan diri">Mengundurkan Diri</option>
+                    <option value="Meninggal Dunia">Meninggal Dunia</option>
+                </select>
             </div>
         </div>
+
+        <div class="text-right mt-4 flex justify-end space-x-3">
+            <button onclick="closeEditModal()" 
+                class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+                Batal
+            </button>
+
+            <button onclick="saveEditData()" 
+                class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                Simpan
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL HAPUS (DISAMAKAN DENGAN DETAIL) -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-96 p-5">
+
+        <h2 class="text-xl font-semibold mb-3 text-red-600">
+            Konfirmasi Hapus Data
+        </h2>
+
+        <p class="text-gray-700 mb-3">
+            Apakah Anda yakin ingin menghapus data mahasiswa berikut?
+        </p>
+
+        <div id="deleteInfo" class="text-sm space-y-1 text-gray-800 mb-4">
+            <!-- NPM & Nama diisi otomatis -->
+        </div>
+
+        <div class="text-right flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()" 
+                class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+                Batal
+            </button>
+
+            <button id="confirmDeleteBtn"
+                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                Hapus Permanen
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -687,16 +638,19 @@
     let searchTahunSelect; 
     let statusSelect; 
 
-// Di bagian DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Inisialisasi Tom Select
+document.addEventListener('DOMContentLoaded', () => {
     prodiSelect = new TomSelect("#prodi", { create: false });
     tahunMasukSelect = new TomSelect("#tahunmasuk", { create: false });
-    statusSelect = new TomSelect("#status", { create: false });
+    statusSelect = new TomSelect("#status", { create: false }); 
 
     populateYearSelect(tahunMasukSelect);
 
-    // Inisialisasi filter
+    searchTahunSelect = new TomSelect("#searchTahun", { 
+        create: false,
+        placeholder: "Pilih Tahun",
+    });
+    populateYearSelect(searchTahunSelect, true);
+
     new TomSelect("#searchProdi", {
         allowEmptyOption: true,
         create: false,
@@ -709,20 +663,10 @@ document.addEventListener('DOMContentLoaded', function() {
         placeholder: "Semua Status"
     });
 
-    // Load data awal
     showMainTab('crud');
     loadMahasiswaData();
 });
 
-// Fungsi untuk tombol Cari
-function performSearch() {
-    const prodi = document.getElementById('searchProdi')?.value || '';
-    const kelas = document.getElementById('searchKelas')?.value || '';
-    const status = document.getElementById('searchStatus')?.value || '';
-    const tahun = document.getElementById('searchTahun')?.value || '';
-
-    loadMahasiswaData({ prodi, kelas, status, tahun });
-}
 
     // --- FUNGSI NAVIGASI KONTEN UTAMA (BARU) ---
 function showMainTab(tab) {
@@ -866,118 +810,180 @@ function showMainTab(tab) {
         }
     }
     
-    // Fungsi untuk switch tab di modal edit
-function switchEditFormTab(tabName) {
-    document.querySelectorAll('.edit-tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
+    function switchFormTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
 
-    document.querySelectorAll('.edit-tab-button').forEach(button => {
-        button.classList.remove('text-blue-600', 'border-blue-600');
-        button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-    });
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('text-blue-600', 'border-blue-600');
+            button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        });
 
-    document.getElementById(`edit-content-${tabName}`).classList.remove('hidden');
+        document.getElementById(`content-${tabName}`).classList.remove('hidden');
 
-    const activeBtn = document.getElementById(`edit-tab-${tabName}`);
-    activeBtn.classList.add('text-blue-600', 'border-blue-600');
-    activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-}
-
-// Fungsi untuk menutup modal edit
-function closeEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
-}
-
-// Fungsi untuk mengisi data ke modal edit
-async function editMahasiswa(npm) {
-    const { data: mhs, error } = await supabaseClient
-        .from('mahasiswa')
-        .select('*')
-        .eq('npm', npm)
-        .single();
-
-    if (error || !mhs) {
-        alert("❌ Data tidak ditemukan.");
-        return;
+        const activeBtn = document.getElementById(`tab-${tabName}`);
+        activeBtn.classList.add('text-blue-600', 'border-blue-600');
+        activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
     }
 
-    // Isi data ke form modal edit
-    document.getElementById('edit-mahasiswaId').value = mhs.id;
-    document.getElementById('edit-npm').value = mhs.npm;
-    document.getElementById('edit-nama').value = mhs.nama;
-    document.getElementById('edit-prodi').value = mhs.prodi;
-    document.getElementById('edit-kelas').value = mhs.kelas || '';
-    document.getElementById('edit-jenisKelamin').value = mhs.jenis_kelamin || '';
-    document.getElementById('edit-tahunmasuk').value = mhs.tahun_masuk;
-    document.getElementById('edit-status').value = mhs.status;
-    document.getElementById('edit-nik').value = mhs.nik_mahasiswa || '';
-    document.getElementById('edit-nohp').value = mhs.no_hp || '';
-    document.getElementById('edit-nomorIjazah').value = mhs.nomor_ijazah || '';
-    document.getElementById('edit-judulskripsi').value = mhs.judul_skripsi || '';
-    document.getElementById('edit-namaayah').value = mhs.nama_ayah || '';
-    document.getElementById('edit-namaibu').value = mhs.nama_ibu || '';
-    document.getElementById('edit-ttl').value = mhs.ttl || '';
-    document.getElementById('edit-alamat').value = mhs.alamat || '';
-    document.getElementById('edit-kelurahan').value = mhs.kelurahan || '';
-    document.getElementById('edit-kecamatan').value = mhs.kecamatan || '';
 
-    // Set judul modal
-    document.getElementById('editFormTitle').textContent = `Edit Data Mahasiswa: ${mhs.nama}`;
+    // --- FUNGSI CRUD & EXPORT ---
 
-    // Tampilkan modal dan set tab ke akademik
-    document.getElementById('editModal').classList.remove('hidden');
-    switchEditFormTab('akademik');
+    // GANTI / TEMPELKAN fungsi performSearch() dan resetSearch() ini
+function performSearch() {
+  const prodi = document.getElementById('searchProdi')?.value.trim() || '';
+  const kelas = document.getElementById('searchKelas')?.value.trim() || '';
+  const status = document.getElementById('searchStatus')?.value.trim() || '';
+  const tahun = document.getElementById('searchTahun')?.value.trim() || '';
+
+  console.log('performSearch -> filters:', { prodi, kelas, status, tahun });
+
+  if (typeof loadMahasiswaData === 'function') {
+    // panggil fungsi load dengan objek filter
+    loadMahasiswaData({ prodi, kelas, status, tahun });
+  } else {
+    console.error('loadMahasiswaData() tidak ditemukan. Pastikan fungsi itu ada di file.');
+    alert('Terjadi kesalahan: fungsi loadMahasiswaData() tidak ditemukan di halaman.');
+  }
 }
 
-// Fungsi untuk menyimpan data edit
-async function saveEditData() {
-    const id = document.getElementById('edit-mahasiswaId').value;
-    const npm = document.getElementById('edit-npm').value;
-    const nama = document.getElementById('edit-nama').value;
-    const prodi = document.getElementById('edit-prodi').value;
-    const jenisKelamin = document.getElementById('edit-jenisKelamin').value;
-    const tahunmasuk = parseInt(document.getElementById('edit-tahunmasuk').value);
-    const statusMhs = document.getElementById('edit-status').value;
-    
-    const kelas = document.getElementById('edit-kelas').value || null;
-    const nik = document.getElementById('edit-nik').value || null;
-    const nohp = document.getElementById('edit-nohp').value || null;
-    const nomorIjazah = document.getElementById('edit-nomorIjazah').value || null;
-    const judulskripsi = document.getElementById('edit-judulskripsi').value || null;
-    const namaAyah = document.getElementById('edit-namaayah').value || null;
-    const namaIbu = document.getElementById('edit-namaibu').value || null;
-    const ttl = document.getElementById('edit-ttl').value || null;
-    const alamat = document.getElementById('edit-alamat').value || null;
-    const kelurahan = document.getElementById('edit-kelurahan').value || null;
-    const kecamatan = document.getElementById('edit-kecamatan').value || null;
+function resetSearch() {
+  const elProdi = document.getElementById('searchProdi');
+  const elKelas = document.getElementById('searchKelas');
+  const elStatus = document.getElementById('searchStatus');
+  const elTahun = document.getElementById('searchTahun');
 
-    if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
-        alert('❌ Pastikan semua field wajib terisi dengan benar.');
-        return;
+  if (elProdi) elProdi.value = '';
+  if (elKelas) elKelas.value = '';
+  if (elStatus) elStatus.value = '';
+  if (elTahun) elTahun.value = '';
+
+  if (typeof loadMahasiswaData === 'function') {
+    loadMahasiswaData();
+  }
+}
+
+    function downloadTemplate() {
+        const headers = [
+            "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
+            "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
+            "KELAS", "JUDUL_SKRIPSI",
+            "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS" 
+        ];
+        
+        const wsData = [
+            headers,
+            ["12345678", "Contoh Nama", "3210123456789012", "Jakarta, 01-01-2000", "081234567890", "Jl. Contoh No. 1", "Kelurahan Contoh", "Kecamatan Contoh", "Nama Ibu", "Nama Ayah", "A", "Skripsi Contoh", "Industri", "Laki-laki", 2023, "Aktif"]
+        ];
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = [
+            { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 25 }, { wch: 15 }, 
+            { wch: 40 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 25 }, 
+            { wch: 8 }, { wch: 40 }, 
+            { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 10 }
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "BiodataMahasiswa");
+        XLSX.writeFile(wb, "mahasiswa_template_ft.xlsx");
     }
 
-    const mahasiswaData = {
-        npm, nama, prodi, jenis_kelamin: jenisKelamin, 
-        tahun_masuk: tahunmasuk, kelas, nik_mahasiswa: nik, no_hp: nohp,
-        nomor_ijazah: nomorIjazah, judul_skripsi, status: statusMhs,
-        nama_ayah: namaAyah, nama_ibu: namaIbu, ttl, alamat,
-        kelurahan, kecamatan,
-    };
+    async function importFromExcel(event) {
+        const file = event.target.files[0];
+        if (!file) { return; }
 
-    const { error } = await supabaseClient
-        .from('mahasiswa')
-        .update(mahasiswaData)
-        .eq('id', id);
+        const importStatus = document.getElementById('importStatus');
+        importStatus.textContent = 'Membaca file...';
 
-    if (error) {
-        alert('❌ Gagal memperbarui data: ' + error.message);
-    } else {
-        alert('✅ Data berhasil diperbarui!');
-        closeEditModal();
-        loadMahasiswaData();
-    }
-} catch (err) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                if (excelData.length < 2) {
+                    importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
+                    return;
+                }
+
+                const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
+                const rawData = excelData.slice(1);
+                
+                const columnMapping = {
+                    'NPM': 'npm', 'NAMA': 'nama', 'PRODI': 'prodi', 'JENIS_KELAMIN': 'jenis_kelamin', 
+                    'TAHUN_MASUK': 'tahun_masuk', 'STATUS': 'status', 'KELAS': 'kelas',
+                    'NIK': 'nik_mahasiswa', 'NO_HP': 'no_hp', 'NOMOR_IJAZAH': 'nomor_ijazah', 
+                    'JUDUL_SKRIPSI': 'judul_skripsi', 'NAMA_AYAH': 'nama_ayah', 'NAMA_IBU': 'nama_ibu',
+                    'TTL': 'ttl', 'ALAMAT': 'alamat', 'KELURAHAN': 'kelurahan', 'KECAMATAN': 'kecamatan',
+                };
+
+                const studentsToInsert = [];
+                
+                for (const row of rawData) {
+                    let student = {};
+                    let isValidRow = true;
+                    
+                    for (let i = 0; i < headers.length; i++) {
+                        const excelHeader = headers[i];
+                        const supabaseColumn = columnMapping[excelHeader];
+                        
+                        if (supabaseColumn) {
+                             let value = row[i] === undefined ? null : row[i];
+                             
+                             if (supabaseColumn === 'tahun_masuk') {
+                                 if (typeof value === 'number') {
+                                     value = Math.floor(value);
+                                 } else {
+                                     value = parseInt(String(value).trim()) || null;
+                                 }
+                             } else if (value !== null) {
+                                 value = String(value).trim() || null;
+                             }
+                             
+                             student[supabaseColumn] = value;
+                        }
+                    }
+                    
+                    if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
+                         console.warn('Baris diabaikan karena data wajib tidak lengkap:', student);
+                         isValidRow = false; 
+                    }
+                    
+                    student.semester = null; 
+                    student.status = student.status || 'Aktif'; 
+
+                    if (isValidRow) {
+                        studentsToInsert.push(student);
+                    }
+                }
+                
+                if (studentsToInsert.length === 0) {
+                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib terisi.';
+                    return;
+                }
+
+                importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
+
+                const { error: insertError } = await supabaseClient
+                    .from('mahasiswa')
+                    .upsert(studentsToInsert, { onConflict: 'npm' }); 
+
+                if (insertError) {
+                    alert('❌ Gagal mengimpor data. Pesan: ' + insertError.message);
+                    importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
+                    console.error(insertError);
+                } else {
+                    alert(`✅ Import Sukses! ${studentsToInsert.length} data mahasiswa berhasil disimpan/diperbarui.`);
+                    importStatus.textContent = `✅ Import Sukses. ${studentsToInsert.length} data disimpan/diperbarui.`;
+                    loadMahasiswaData();
+                }
+            } catch (err) {
                 console.error('Error saat memproses file Excel:', err);
                 importStatus.textContent = '❌ Terjadi kesalahan saat memproses file. Pastikan format file .xlsx/.xls benar.';
             } finally {
@@ -1086,74 +1092,69 @@ async function saveEditData() {
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 async function loadMahasiswaData(filters = {}) {
-    const tableBody = document.getElementById('mahasiswa-table-body');
-    if (!tableBody) return;
+  const tableBody = document.getElementById('mahasiswa-table-body');
+  if (!tableBody) return;
 
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="8" class="text-center py-4 text-gray-500">
+        <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
+      </td>
+    </tr>
+  `;
+
+  // Mulai query dasar
+  let query = supabaseClient.from('mahasiswa').select('*');
+
+  // Filter
+  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
+  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
+
+  // Ambil data
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(error);
     tableBody.innerHTML = `
-        <tr>
-            <td colspan="8" class="text-center py-4 text-gray-500">
-                <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
-            </td>
-        </tr>
+      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
+    return;
+  }
+
+  // Simpan data untuk EXPORT PDF/EXCEL
+  currentMahasiswaData = data;
+
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
+    return;
+  }
+
+  // Render ke tabel
+  let rows = "";
+  data.forEach((mhs, index) => {
+    rows += `
+      <tr class="hover:bg-gray-100 text-sm">
+        <td class="border px-2 py-1 text-center">${index + 1}</td>
+        <td class="border px-2 py-1">${mhs.npm}</td>
+        <td class="border px-2 py-1">${mhs.nama}</td>
+        <td class="border px-2 py-1">${mhs.prodi}</td>
+        <td class="border px-2 py-1">${mhs.kelas}</td>
+        <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
+        <td class="border px-2 py-1">${mhs.status}</td>
+        <td class="border px-2 py-1 text-center">
+          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="showDetail('${mhs.npm}')"></i>
+          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.npm}')"></i>
+          <i class="fas fa-trash text-red-500 cursor-pointer" 
+   onclick="openDeleteModal(${mhs.id}, '${mhs.npm}', '${mhs.nama}')">
+</i>
+        </td>
+      </tr>
     `;
+  });
 
-    try {
-        let query = supabaseClient.from('mahasiswa').select('*');
-
-        // Filter
-        if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
-        if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
-        if (filters.status) query = query.eq('status', filters.status);
-        if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-
-        currentMahasiswaData = data || [];
-
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4 text-gray-500">
-                        Tidak ada data ditemukan.
-                    </td>
-                </tr>`;
-            return;
-        }
-
-        // Render tabel
-        let rows = "";
-        data.forEach((mhs, index) => {
-            rows += `
-                <tr class="hover:bg-gray-100 text-sm">
-                    <td class="border px-2 py-1 text-center">${index + 1}</td>
-                    <td class="border px-2 py-1">${mhs.npm}</td>
-                    <td class="border px-2 py-1">${mhs.nama}</td>
-                    <td class="border px-2 py-1">${mhs.prodi}</td>
-                    <td class="border px-2 py-1">${mhs.kelas || '-'}</td>
-                    <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
-                    <td class="border px-2 py-1">${mhs.status}</td>
-                    <td class="border px-2 py-1 text-center">
-                        <i class="fas fa-eye text-blue-500 cursor-pointer mx-1" onclick="showDetail('${mhs.npm}')"></i>
-                        <i class="fas fa-edit text-yellow-500 cursor-pointer mx-1" onclick="editMahasiswa('${mhs.npm}')"></i>
-                        <i class="fas fa-trash text-red-500 cursor-pointer mx-1" onclick="openDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama}')"></i>
-                    </td>
-                </tr>
-            `;
-        });
-
-        tableBody.innerHTML = rows;
-
-    } catch (error) {
-        console.error('Error loading data:', error);
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8" class="text-center text-red-500 py-4">
-                    Gagal memuat data: ${error.message}
-                </td>
-            </tr>`;
-    }
+  tableBody.innerHTML = rows;
 }
     async function saveMahasiswa() {
         const npm = document.getElementById('npm').value;
