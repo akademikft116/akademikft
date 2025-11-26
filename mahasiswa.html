@@ -696,35 +696,62 @@ function showMainTab(tab) {
         document.getElementById('mahasiswa-list-container').classList.add('hidden');
     }
 
-    function showForm() {
-        resetForm();
-        hideList(); 
-        document.getElementById('mahasiswa-container').classList.remove('hidden');
-        document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
-        switchFormTab('akademik');
+    // --- FUNGSI TAMBAH BARU (Tampil/Sembunyi Form dan List) ---
+
+/**
+ * Menampilkan Form (#mahasiswa-container) dan menyembunyikan List (#mahasiswa-list-container).
+ * Fungsi ini dipanggil saat klik "Tambah Data Mahasiswa".
+ */
+function showForm() {
+    const formContainer = document.getElementById('mahasiswa-container');
+    const listContainer = document.getElementById('mahasiswa-list-container');
+    
+    // Tampilkan Form
+    if (formContainer) {
+        formContainer.classList.remove('hidden');
     }
 
-    function hideFormAndShowList() {
-        document.getElementById('mahasiswa-container').classList.add('hidden');
-        showList(); 
-        document.getElementById('mahasiswa-list-container').scrollIntoView({ behavior: 'smooth' });
+    // Sembunyikan List
+    if (listContainer) {
+        listContainer.classList.add('hidden');
     }
+}
 
-    function resetForm() {
-        document.getElementById('mahasiswaForm').reset();
-        prodiSelect.clear();
-        tahunMasukSelect.clear();
-        document.getElementById('jenisKelamin').value = ''; 
-        statusSelect.setValue('Aktif'); 
-        isEditMode = false;
-        currentMahasiswaId = null;
-        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
-        document.getElementById('mahasiswaId').value = '';
-        
-        hideFormAndShowList();
+/**
+ * Menyembunyikan Form (#mahasiswa-container) dan menampilkan List (#mahasiswa-list-container).
+ * Fungsi ini dipanggil di dalam resetForm() dan setelah data berhasil disimpan.
+ */
+function hideFormAndShowList() {
+    const formContainer = document.getElementById('mahasiswa-container');
+    const listContainer = document.getElementById('mahasiswa-list-container');
+    
+    // Sembunyikan Form
+    if (formContainer) {
+        formContainer.classList.add('hidden');
     }
+    
+    // Tampilkan List
+    if (listContainer) {
+        listContainer.classList.remove('hidden');
+    }
+}
 
+// -----------------------------------------------------------
+
+// Kemudian, pastikan fungsi resetForm() Anda terlihat seperti ini (sudah memanggil hideFormAndShowList):
+function resetForm() {
+    document.getElementById('mahasiswaForm').reset();
+    
+    // Reset mode dan judul
+    isEditMode = false;
+    currentMahasiswaId = null;
+    document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
+    document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
+    document.getElementById('mahasiswaId').value = '';
+    
+    // 🚨 KODE INI YANG MEMUNCULKAN KEMBALI TABEL:
+    hideFormAndShowList(); 
+}
 
     // --- FUNGSI BANTUAN DATA ---
 
