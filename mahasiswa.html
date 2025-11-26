@@ -414,7 +414,7 @@
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="mahasiswa-table-body" class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
                                 </tbody>
                         </table>
                     </div>
@@ -696,62 +696,35 @@ function showMainTab(tab) {
         document.getElementById('mahasiswa-list-container').classList.add('hidden');
     }
 
-    // --- FUNGSI TAMBAH BARU (Tampil/Sembunyi Form dan List) ---
-
-/**
- * Menampilkan Form (#mahasiswa-container) dan menyembunyikan List (#mahasiswa-list-container).
- * Fungsi ini dipanggil saat klik "Tambah Data Mahasiswa".
- */
-function showForm() {
-    const formContainer = document.getElementById('mahasiswa-container');
-    const listContainer = document.getElementById('mahasiswa-list-container');
-    
-    // Tampilkan Form
-    if (formContainer) {
-        formContainer.classList.remove('hidden');
+    function showForm() {
+        resetForm();
+        hideList(); 
+        document.getElementById('mahasiswa-container').classList.remove('hidden');
+        document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
+        switchFormTab('akademik');
     }
 
-    // Sembunyikan List
-    if (listContainer) {
-        listContainer.classList.add('hidden');
+    function hideFormAndShowList() {
+        document.getElementById('mahasiswa-container').classList.add('hidden');
+        showList(); 
+        document.getElementById('mahasiswa-list-container').scrollIntoView({ behavior: 'smooth' });
     }
-}
 
-/**
- * Menyembunyikan Form (#mahasiswa-container) dan menampilkan List (#mahasiswa-list-container).
- * Fungsi ini dipanggil di dalam resetForm() dan setelah data berhasil disimpan.
- */
-function hideFormAndShowList() {
-    const formContainer = document.getElementById('mahasiswa-container');
-    const listContainer = document.getElementById('mahasiswa-list-container');
-    
-    // Sembunyikan Form
-    if (formContainer) {
-        formContainer.classList.add('hidden');
+    function resetForm() {
+        document.getElementById('mahasiswaForm').reset();
+        prodiSelect.clear();
+        tahunMasukSelect.clear();
+        document.getElementById('jenisKelamin').value = ''; 
+        statusSelect.setValue('Aktif'); 
+        isEditMode = false;
+        currentMahasiswaId = null;
+        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
+        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
+        document.getElementById('mahasiswaId').value = '';
+        
+        hideFormAndShowList();
     }
-    
-    // Tampilkan List
-    if (listContainer) {
-        listContainer.classList.remove('hidden');
-    }
-}
 
-// -----------------------------------------------------------
-
-// Kemudian, pastikan fungsi resetForm() Anda terlihat seperti ini (sudah memanggil hideFormAndShowList):
-function resetForm() {
-    document.getElementById('mahasiswaForm').reset();
-    
-    // Reset mode dan judul
-    isEditMode = false;
-    currentMahasiswaId = null;
-    document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
-    document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
-    document.getElementById('mahasiswaId').value = '';
-    
-    // 🚨 KODE INI YANG MEMUNCULKAN KEMBALI TABEL:
-    hideFormAndShowList(); 
-}
 
     // --- FUNGSI BANTUAN DATA ---
 
@@ -1056,178 +1029,138 @@ function resetSearch() {
 
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
-// A. FUNGSI UNTUK MEMUAT DATA DARI SUPABASE
-function loadMahasiswa() {
-    // Fungsi ini dipanggil saat masuk ke tab CRUD
-    // Kita pastikan fungsi utama pemuat data dipanggil di sini
-    loadMahasiswaData(); 
-}
+async function loadMahasiswaData(filters = {}) {
+  const tableBody = document.getElementById('mahasiswa-table-body');
+  if (!tableBody) return;
 
-// -------------------------------------------------------------
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="8" class="text-center py-4 text-gray-500">
+        <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
+      </td>
+    </tr>
+  `;
 
-// Pastikan juga fungsi navigasi tab Anda memanggilnya:
-function showMainTab(tab) {
-    // ... kode untuk menyembunyikan/menampilkan div ...
+  // Mulai query dasar
+  let query = supabaseClient.from('mahasiswa').select('*');
 
-    if (tab === 'crud') {
-        document.getElementById('content-crud').classList.remove('hidden');
-        document.getElementById('mainTitle').textContent = "Manajemen Biodata & Pencarian Mahasiswa";
-        loadMahasiswa(); // <-- PASTIKAN INI ADA
-    } 
-    // ...
-}
+  // Filter
+  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
+  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
+  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
 
+  // Ambil data
+  const { data, error } = await query;
 
-// B. FUNGSI UNTUK MENGGAMBAR (RENDER) DATA KE DALAM TABEL HTML
-function renderMahasiswaTable(data) {
-    // 🚨 ID ini harus sama dengan ID yang Anda tambahkan di langkah 1
-    const tableBody = document.getElementById('mahasiswa-table-body'); 
-    
-    // Pastikan elemen ada
-    if (!tableBody) {
-        console.error("Elemen 'mahasiswa-table-body' tidak ditemukan. Gagal render tabel.");
-        return; 
-    }
+  if (error) {
+    console.error(error);
+    tableBody.innerHTML = `
+      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
+    return;
+  }
 
-    // Hapus baris lama
-    tableBody.innerHTML = '';
+  // Simpan data untuk EXPORT PDF/EXCEL
+  currentMahasiswaData = data;
 
-    if (data && data.length > 0) {
-        data.forEach(mhs => {
-            const row = tableBody.insertRow();
-            
-            // Kolom 1: NPM
-            row.insertCell().textContent = mhs.npm;
-            
-            // Kolom 2: Nama
-            row.insertCell().textContent = mhs.nama;
-            
-            // Kolom 3: Prodi
-            row.insertCell().textContent = mhs.prodi;
-            
-            // Kolom 4: Tahun Masuk
-            row.insertCell().textContent = mhs.tahun_masuk;
-            
-            // Kolom 5: Status
-            const statusCell = row.insertCell();
-            statusCell.textContent = mhs.status;
-            if (mhs.status === 'Aktif') {
-                statusCell.classList.add('px-2', 'inline-flex', 'text-xs', 'leading-5', 'font-semibold', 'rounded-full', 'bg-green-100', 'text-green-800');
-            } else if (mhs.status === 'Lulus') {
-                statusCell.classList.add('px-2', 'inline-flex', 'text-xs', 'leading-5', 'font-semibold', 'rounded-full', 'bg-blue-100', 'text-blue-800');
-            }
-            // Tambahkan styling lain jika ada
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
+    return;
+  }
 
-            // Kolom 6: Aksi (Edit & Hapus)
-            const actionCell = row.insertCell();
-            actionCell.classList.add('flex', 'space-x-2');
+  // Render ke tabel
+  let rows = "";
+  data.forEach((mhs, index) => {
+    rows += `
+      <tr class="hover:bg-gray-100 text-sm">
+        <td class="border px-2 py-1 text-center">${index + 1}</td>
+        <td class="border px-2 py-1">${mhs.npm}</td>
+        <td class="border px-2 py-1">${mhs.nama}</td>
+        <td class="border px-2 py-1">${mhs.prodi}</td>
+        <td class="border px-2 py-1">${mhs.kelas}</td>
+        <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
+        <td class="border px-2 py-1">${mhs.status}</td>
+        <td class="border px-2 py-1 text-center">
+          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="showDetail('${mhs.npm}')"></i>
+          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.npm}')"></i>
+          <i class="fas fa-trash text-red-500 cursor-pointer" 
+   onclick="openDeleteModal(${mhs.id}, '${mhs.npm}', '${mhs.nama}')">
+</i>
+        </td>
+      </tr>
+    `;
+  });
 
-            // Tombol Edit
-            const editButton = document.createElement('button');
-            editButton.innerHTML = '<i class="fas fa-edit"></i>';
-            editButton.classList.add('text-blue-600', 'hover:text-blue-900', 'p-1', 'rounded', 'hover:bg-blue-100');
-            editButton.onclick = () => editMahasiswa(mhs.npm); // Pastikan fungsi editMahasiswa ada
-            actionCell.appendChild(editButton);
-
-            // Tombol Hapus
-            const deleteButton = document.createElement('button');
-            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-            deleteButton.classList.add('text-red-600', 'hover:text-red-900', 'p-1', 'rounded', 'hover:bg-red-100');
-            deleteButton.onclick = () => deleteMahasiswa(mhs.id, mhs.nama); // Pastikan fungsi deleteMahasiswa ada
-            actionCell.appendChild(deleteButton);
-        });
-    } else {
-        // Tampilkan pesan jika data kosong
-        const row = tableBody.insertRow();
-        const cell = row.insertCell();
-        cell.colSpan = 6; // Harus sesuai dengan jumlah kolom header
-        cell.textContent = 'Tidak ada data mahasiswa ditemukan.';
-        cell.classList.add('text-center', 'py-4', 'text-gray-500');
-    }
+  tableBody.innerHTML = rows;
 }
     async function saveMahasiswa() {
-    const npm = document.getElementById('npm').value.trim();
-    const nama = document.getElementById('nama').value.trim();
-    const prodi = document.getElementById('prodi').value;
-    const jenisKelamin = document.getElementById('jenisKelamin').value;
-    const tahunmasuk = parseInt(document.getElementById('tahunmasuk').value);
-    const statusMhs = document.getElementById('status').value;
-    const kelas = document.getElementById('kelas').value.trim() || null;
-    const nik = document.getElementById('nik').value.trim() || null;
-    const nohp = document.getElementById('nohp').value.trim() || null;
-    const nomorIjazah = document.getElementById('nomorIjazah').value || null;
-    const judulskripsi = document.getElementById('judulskripsi').value || null;
-    const namaAyah = document.getElementById('namaayah').value || null;
-    const namaIbu = document.getElementById('namaibu').value || null;
-    const ttl = document.getElementById('ttl').value || null;
-    const alamat = document.getElementById('alamat').value || null;
-    const kelurahan = document.getElementById('kelurahan').value || null;
-    const kecamatan = document.getElementById('kecamatan').value || null;
-    const semester = null;
+        const npm = document.getElementById('npm').value;
+        const nama = document.getElementById('nama').value;
+        const prodi = prodiSelect.getValue();
+        const jenisKelamin = document.getElementById('jenisKelamin').value; 
+        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
+        const statusMhs = statusSelect.getValue(); 
+        
+        const kelas = document.getElementById('kelas').value || null;
+        const nik = document.getElementById('nik').value || null;
+        const nohp = document.getElementById('nohp').value || null;
+        const nomorIjazah = document.getElementById('nomorIjazah').value || null;
+        const judulskripsi = document.getElementById('judulskripsi').value || null;
+        
+        const namaAyah = document.getElementById('namaayah').value || null;
+        const namaIbu = document.getElementById('namaibu').value || null;
+        const ttl = document.getElementById('ttl').value || null;
+        const alamat = document.getElementById('alamat').value || null;
+        const kelurahan = document.getElementById('kelurahan').value || null;
+        const kecamatan = document.getElementById('kecamatan').value || null;
+        
+        const semester = null; 
 
-    const hiddenIdInput = document.getElementById('mahasiswaId');
-    const idToProcess = hiddenIdInput ? hiddenIdInput.value : null;
+        if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
+             alert('❌ Pastikan NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
+             switchFormTab('akademik');
+             return;
+        }
 
-    if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
-        alert('❌ Pastikan NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
-        switchFormTab('akademik');
-        return;
+      // ✅ Tambahkan baris ini untuk memastikan ID mahasiswa tetap terbaca
+if (!currentMahasiswaId) {
+    const hiddenId = document.getElementById('mahasiswaId');
+    if (hiddenId && hiddenId.value) {
+        currentMahasiswaId = hiddenId.value;
     }
 
-    const mahasiswaData = {
-        npm: npm,
-        nama: nama,
-        prodi: prodi,
-        jenis_kelamin: jenisKelamin,
-        semester: semester,
-        tahun_masuk: tahunmasuk,
-        kelas: kelas,
-        nik_mahasiswa: nik,
-        no_hp: nohp,
-        nomor_ijazah: nomorIjazah,
-        judul_skripsi: judulskripsi,
-        status: statusMhs,
-        nama_ayah: namaAyah,
-        nama_ibu: namaIbu,
-        ttl: ttl,
-        alamat: alamat,
-        kelurahan: kelurahan,
-        kecamatan: kecamatan,
-    };
+        const mahasiswaData = {
+            npm: npm, nama: nama, prodi: prodi, jenis_kelamin: jenisKelamin, semester: semester, 
+            tahun_masuk: tahunmasuk, kelas: kelas, nik_mahasiswa: nik, no_hp: nohp,
+            nomor_ijazah: nomorIjazah, judul_skripsi: judulskripsi, status: statusMhs,
+            nama_ayah: namaAyah, nama_ibu: namaIbu, ttl: ttl, alamat: alamat,
+            kelurahan: kelurahan, kecamatan: kecamatan,
+        };
 
-    // 🚨 Perbaikan Logika: Gunakan idToProcess untuk menentukan apakah ini UPDATE atau INSERT.
-    if (idToProcess) {
-        // --- LOGIKA UPDATE DATA ---
-        const { error: updateError } = await supabaseClient
-            .from('mahasiswa')
-            .update(mahasiswaData)
-            .eq('id', idToProcess); // Gunakan ID dari hidden field
-
-        if (updateError) {
-            alert('❌ Gagal memperbarui data mahasiswa: ' + updateError.message);
-            console.error(updateError);
-        } else {
-            alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
-            resetForm();
-            loadMahasiswaData();
-        }
-    } else {
-        // --- LOGIKA TAMBAH DATA BARU ---
-        const { error } = await supabaseClient
-            .from('mahasiswa')
-            .insert([mahasiswaData]);
-
-        if (error) {
-            alert('❌ Gagal menyimpan data mahasiswa baru: ' + error.message);
-            console.error(error);
-        } else {
-            alert(`✅ Data mahasiswa ${nama} berhasil disimpan!`);
-            resetForm();
-            loadMahasiswaData();
-        }
+      // ✅ Tambahkan baris ini untuk memastikan ID mahasiswa tetap terbaca
+if (!currentMahasiswaId) {
+    const hiddenId = document.getElementById('mahasiswaId');
+    if (hiddenId && hiddenId.value) {
+        currentMahasiswaId = hiddenId.value;
     }
 }
-        else {
+
+        if (isEditMode && currentMahasiswaId) {
+            const { error: updateError } = await supabaseClient
+                .from('mahasiswa')
+                .update(mahasiswaData)
+                .eq('id', currentMahasiswaId);
+
+            if (updateError) {
+                alert('❌ Gagal memperbarui data mahasiswa: ' + updateError.message);
+                console.error(updateError);
+            } else {
+                alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
+                resetForm();
+                loadMahasiswaData();
+            }
+        } else {
             const { error: insertError } = await supabaseClient
                 .from('mahasiswa')
                 .insert([mahasiswaData]);
