@@ -414,7 +414,7 @@
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="mahasiswa-table-body">
+                            <tbody id="mahasiswa-table-body" class="bg-white divide-y divide-gray-200">
                                 </tbody>
                         </table>
                     </div>
@@ -1056,70 +1056,97 @@ function resetSearch() {
 
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
-async function loadMahasiswaData(filters = {}) {
-  const tableBody = document.getElementById('mahasiswa-table-body');
-  if (!tableBody) return;
+// A. FUNGSI UNTUK MEMUAT DATA DARI SUPABASE
+async function loadMahasiswaData(searchTerm = '') {
+    let query = supabaseClient
+        .from('mahasiswa')
+        .select('id, npm, nama, prodi, tahun_masuk, status')
+        .order('npm', { ascending: true });
 
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="8" class="text-center py-4 text-gray-500">
-        <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...
-      </td>
-    </tr>
-  `;
+    // Tambahkan filter jika ada pencarian
+    if (searchTerm) {
+        query = query.or(`npm.ilike.%${searchTerm}%,nama.ilike.%${searchTerm}%`);
+    }
 
-  // Mulai query dasar
-  let query = supabaseClient.from('mahasiswa').select('*');
+    const { data, error } = await query;
 
-  // Filter
-  if (filters.prodi) query = query.ilike('prodi', `%${filters.prodi}%`);
-  if (filters.kelas) query = query.ilike('kelas', `%${filters.kelas}%`);
-  if (filters.status) query = query.eq('status', filters.status);
-  if (filters.tahun) query = query.eq('tahun_masuk', filters.tahun);
+    if (error) {
+        console.error('❌ Error saat memuat data mahasiswa:', error.message);
+        // Mungkin perlu menampilkan pesan error di UI
+        return; 
+    }
 
-  // Ambil data
-  const { data, error } = await query;
+    // Panggil fungsi untuk mengisi tabel dengan data yang sudah diambil
+    renderMahasiswaTable(data);
+}
 
-  if (error) {
-    console.error(error);
-    tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center text-red-500 py-4">Gagal memuat data.</td></tr>`;
-    return;
-  }
 
-  // Simpan data untuk EXPORT PDF/EXCEL
-  currentMahasiswaData = data;
+// B. FUNGSI UNTUK MENGGAMBAR (RENDER) DATA KE DALAM TABEL HTML
+function renderMahasiswaTable(data) {
+    // 🚨 ID ini harus sama dengan ID yang Anda tambahkan di langkah 1
+    const tableBody = document.getElementById('mahasiswa-table-body'); 
+    
+    // Pastikan elemen ada
+    if (!tableBody) {
+        console.error("Elemen 'mahasiswa-table-body' tidak ditemukan. Gagal render tabel.");
+        return; 
+    }
 
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `
-      <tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada data ditemukan.</td></tr>`;
-    return;
-  }
+    // Hapus baris lama
+    tableBody.innerHTML = '';
 
-  // Render ke tabel
-  let rows = "";
-  data.forEach((mhs, index) => {
-    rows += `
-      <tr class="hover:bg-gray-100 text-sm">
-        <td class="border px-2 py-1 text-center">${index + 1}</td>
-        <td class="border px-2 py-1">${mhs.npm}</td>
-        <td class="border px-2 py-1">${mhs.nama}</td>
-        <td class="border px-2 py-1">${mhs.prodi}</td>
-        <td class="border px-2 py-1">${mhs.kelas}</td>
-        <td class="border px-2 py-1">${mhs.tahun_masuk}</td>
-        <td class="border px-2 py-1">${mhs.status}</td>
-        <td class="border px-2 py-1 text-center">
-          <i class="fas fa-eye text-blue-500 cursor-pointer" onclick="showDetail('${mhs.npm}')"></i>
-          <i class="fas fa-edit text-yellow-500 cursor-pointer ml-2" onclick="editMahasiswa('${mhs.npm}')"></i>
-          <i class="fas fa-trash text-red-500 cursor-pointer" 
-   onclick="openDeleteModal(${mhs.id}, '${mhs.npm}', '${mhs.nama}')">
-</i>
-        </td>
-      </tr>
-    `;
-  });
+    if (data && data.length > 0) {
+        data.forEach(mhs => {
+            const row = tableBody.insertRow();
+            
+            // Kolom 1: NPM
+            row.insertCell().textContent = mhs.npm;
+            
+            // Kolom 2: Nama
+            row.insertCell().textContent = mhs.nama;
+            
+            // Kolom 3: Prodi
+            row.insertCell().textContent = mhs.prodi;
+            
+            // Kolom 4: Tahun Masuk
+            row.insertCell().textContent = mhs.tahun_masuk;
+            
+            // Kolom 5: Status
+            const statusCell = row.insertCell();
+            statusCell.textContent = mhs.status;
+            if (mhs.status === 'Aktif') {
+                statusCell.classList.add('px-2', 'inline-flex', 'text-xs', 'leading-5', 'font-semibold', 'rounded-full', 'bg-green-100', 'text-green-800');
+            } else if (mhs.status === 'Lulus') {
+                statusCell.classList.add('px-2', 'inline-flex', 'text-xs', 'leading-5', 'font-semibold', 'rounded-full', 'bg-blue-100', 'text-blue-800');
+            }
+            // Tambahkan styling lain jika ada
 
-  tableBody.innerHTML = rows;
+            // Kolom 6: Aksi (Edit & Hapus)
+            const actionCell = row.insertCell();
+            actionCell.classList.add('flex', 'space-x-2');
+
+            // Tombol Edit
+            const editButton = document.createElement('button');
+            editButton.innerHTML = '<i class="fas fa-edit"></i>';
+            editButton.classList.add('text-blue-600', 'hover:text-blue-900', 'p-1', 'rounded', 'hover:bg-blue-100');
+            editButton.onclick = () => editMahasiswa(mhs.npm); // Pastikan fungsi editMahasiswa ada
+            actionCell.appendChild(editButton);
+
+            // Tombol Hapus
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteButton.classList.add('text-red-600', 'hover:text-red-900', 'p-1', 'rounded', 'hover:bg-red-100');
+            deleteButton.onclick = () => deleteMahasiswa(mhs.id, mhs.nama); // Pastikan fungsi deleteMahasiswa ada
+            actionCell.appendChild(deleteButton);
+        });
+    } else {
+        // Tampilkan pesan jika data kosong
+        const row = tableBody.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 6; // Harus sesuai dengan jumlah kolom header
+        cell.textContent = 'Tidak ada data mahasiswa ditemukan.';
+        cell.classList.add('text-center', 'py-4', 'text-gray-500');
+    }
 }
     async function saveMahasiswa() {
     const npm = document.getElementById('npm').value.trim();
