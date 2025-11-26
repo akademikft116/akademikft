@@ -1094,13 +1094,16 @@ async function loadMahasiswaData(filters = {}) {
 
   tableBody.innerHTML = rows;
 }
-    async function saveMahasiswa() {
-        const npm = document.getElementById('npm').value;
-        const nama = document.getElementById('nama').value;
-        const prodi = prodiSelect.getValue();
-        const jenisKelamin = document.getElementById('jenisKelamin').value; 
-        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
-        const statusMhs = statusSelect.getValue(); 
+   
+function saveMahasiswa() {
+    // 1. Ambil nilai-nilai dari form
+    const npm = document.getElementById('npm').value.trim();
+    const nama = document.getElementById('nama').value.trim();
+    const prodi = prodiSelect.getValue(); // Nilai dari Tom-Select
+    const jenisKelamin = document.getElementById('jenisKelamin').value;
+    const tahunmasuk = parseInt(tahunMasukSelect.getValue()); // Nilai dari Tom-Select
+    const statusMhs = statusSelect.getValue(); // Nilai dari Tom-Select
+    }
         
         const kelas = document.getElementById('kelas').value || null;
         const nik = document.getElementById('nik').value || null;
