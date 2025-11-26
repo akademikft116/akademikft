@@ -285,7 +285,7 @@
                         </div>
 
 
-                        <input type="hidden" id="mahasiswaId" name="mahasiswaId">
+                        <input type="hidden" id="mahasiswaId" value="">
                         <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
                             <button type="submit" id="submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
                                 <i class="fas fa-save mr-2"></i> Simpan Data
@@ -1094,16 +1094,13 @@ async function loadMahasiswaData(filters = {}) {
 
   tableBody.innerHTML = rows;
 }
-   
-function saveMahasiswa() {
-    // 1. Ambil nilai-nilai dari form
-    const npm = document.getElementById('npm').value.trim();
-    const nama = document.getElementById('nama').value.trim();
-    const prodi = prodiSelect.getValue(); // Nilai dari Tom-Select
-    const jenisKelamin = document.getElementById('jenisKelamin').value;
-    const tahunmasuk = parseInt(tahunMasukSelect.getValue()); // Nilai dari Tom-Select
-    const statusMhs = statusSelect.getValue(); // Nilai dari Tom-Select
-    }
+    async function saveMahasiswa() {
+        const npm = document.getElementById('npm').value;
+        const nama = document.getElementById('nama').value;
+        const prodi = prodiSelect.getValue();
+        const jenisKelamin = document.getElementById('jenisKelamin').value; 
+        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
+        const statusMhs = statusSelect.getValue(); 
         
         const kelas = document.getElementById('kelas').value || null;
         const nik = document.getElementById('nik').value || null;
@@ -1235,12 +1232,7 @@ if (!currentMahasiswaId) {
     // ─────────────────────────────
     // PENGISIAN FORM LENGKAP & BENAR
     // ─────────────────────────────
-    if (document.getElementById('mahasiswaId')) {
     document.getElementById('mahasiswaId').value = mhs.id;
-} else {
-    // Pesan ini seharusnya muncul jika elemen tidak ditemukan
-    console.error("DEBUG: Input 'mahasiswaId' tidak ditemukan di DOM.");
-}
     document.getElementById('npm').value = mhs.npm;
     document.getElementById('nama').value = mhs.nama;
 
