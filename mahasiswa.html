@@ -1057,27 +1057,24 @@ function resetSearch() {
     // ✅ versi baru yang cocok dengan filter Prodi, Kelas, Status, Tahun
 // ✅ Fungsi versi terbaru - bisa tampil & filter data
 // A. FUNGSI UNTUK MEMUAT DATA DARI SUPABASE
-async function loadMahasiswaData(searchTerm = '') {
-    let query = supabaseClient
-        .from('mahasiswa')
-        .select('id, npm, nama, prodi, tahun_masuk, status')
-        .order('npm', { ascending: true });
+function loadMahasiswa() {
+    // Fungsi ini dipanggil saat masuk ke tab CRUD
+    // Kita pastikan fungsi utama pemuat data dipanggil di sini
+    loadMahasiswaData(); 
+}
 
-    // Tambahkan filter jika ada pencarian
-    if (searchTerm) {
-        query = query.or(`npm.ilike.%${searchTerm}%,nama.ilike.%${searchTerm}%`);
-    }
+// -------------------------------------------------------------
 
-    const { data, error } = await query;
+// Pastikan juga fungsi navigasi tab Anda memanggilnya:
+function showMainTab(tab) {
+    // ... kode untuk menyembunyikan/menampilkan div ...
 
-    if (error) {
-        console.error('❌ Error saat memuat data mahasiswa:', error.message);
-        // Mungkin perlu menampilkan pesan error di UI
-        return; 
-    }
-
-    // Panggil fungsi untuk mengisi tabel dengan data yang sudah diambil
-    renderMahasiswaTable(data);
+    if (tab === 'crud') {
+        document.getElementById('content-crud').classList.remove('hidden');
+        document.getElementById('mainTitle').textContent = "Manajemen Biodata & Pencarian Mahasiswa";
+        loadMahasiswa(); // <-- PASTIKAN INI ADA
+    } 
+    // ...
 }
 
 
