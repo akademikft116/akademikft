@@ -1232,12 +1232,11 @@ if (!currentMahasiswaId) {
     // ─────────────────────────────
     // PENGISIAN FORM LENGKAP & BENAR
     // ─────────────────────────────
-    const mahasiswaIdInput = document.getElementById('mahasiswaId');
-if (mahasiswaIdInput) {
-    mahasiswaIdInput.value = mhs.id;
+    if (document.getElementById('mahasiswaId')) {
+    document.getElementById('mahasiswaId').value = mhs.id;
 } else {
-    // Opsional: Pesan error di console jika elemen tidak ditemukan
-    console.error("Elemen dengan ID 'mahasiswaId' tidak ditemukan di DOM. Pastikan ID sudah benar.");
+    // Pesan ini seharusnya muncul jika elemen tidak ditemukan
+    console.error("DEBUG: Input 'mahasiswaId' tidak ditemukan di DOM.");
 }
     document.getElementById('npm').value = mhs.npm;
     document.getElementById('nama').value = mhs.nama;
