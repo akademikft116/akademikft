@@ -54,6 +54,31 @@
     th, td {
         font-size: 12px !important; /* Memastikan semua teks dalam tabel kecil */
     }
+
+    /* === NOTIFIKASI MODERN === */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.success { background-color: #16a34a; }  /* hijau */
+.notification.error { background-color: #dc2626; }    /* merah */
+    
   </style>
 </head>
 <body class="bg-gray-100">
@@ -479,6 +504,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script>
+  function showNotif(message, type = "success") {
+    const notif = document.getElementById("notif");
+    
+    notif.textContent = message;
+    notif.className = "notification " + type + " show";
+
+    setTimeout(() => {
+        notif.classList.remove("show");
+    }, 3000); // menghilang setelah 3 detik
+}
     // ==================== KONFIGURASI & VARIABEL GLOBAL ====================
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co"; 
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
@@ -862,7 +897,8 @@
                     throw updateError;
                 }
                 
-                alert(`✅ Data mahasiswa ${nama} berhasil diperbarui!`);
+                showNotif(`Data mahasiswa ${nama} berhasil diperbarui :3`, "success");
+
                 resetForm();
                 loadMahasiswaData();
                 
@@ -876,14 +912,14 @@
                     throw insertError;
                 }
                 
-                alert(`✅ Data mahasiswa ${nama} (NPM: ${npm}) berhasil ditambahkan!`);
+                showNotif(`Data mahasiswa ${nama} berhasil ditambahkan!`, "success");
                 resetForm();
                 loadMahasiswaData();
             }
         } catch (error) {
-            console.error('Error saving data:', error);
-            alert('❌ Gagal menyimpan data: ' + error.message);
-        }
+    console.error('Error saving data:', error);
+    showNotif("Gagal menyimpan data: " + error.message, "error");
+}
     }
 
     async function editMahasiswa(npm) {
@@ -1395,5 +1431,6 @@
         reader.readAsArrayBuffer(file);
     }
 </script>
+  <div id="notif" class="notification"></div>
 </body>
 </html>
