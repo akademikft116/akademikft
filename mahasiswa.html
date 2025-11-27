@@ -710,11 +710,18 @@
     async function loadMahasiswaData(filters = {}) {
 
     // Jika load awal (tanpa filter), sembunyikan tabel & hentikan
-    if (!filters || Object.keys(filters).length === 0) {
-        document.getElementById("mahasiswa-table-wrapper").classList.add("hidden");
-        return; 
-    }
+    // cek apakah SEMUA filter kosong
+const allEmpty =
+    (!filters.prodi || filters.prodi === "") &&
+    (!filters.kelas || filters.kelas.trim() === "") &&
+    (!filters.status || filters.status === "") &&
+    (!filters.tahun || filters.tahun === "");
 
+// jika semua kosong → sembunyikan tabel dan hentikan
+if (allEmpty) {
+    document.getElementById("mahasiswa-table-wrapper").classList.add("hidden");
+    return;
+}
 
         // Tampilkan loading
         tableBody.innerHTML = `
