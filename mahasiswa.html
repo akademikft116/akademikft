@@ -708,13 +708,13 @@
 
     // ==================== FUNGSI UTAMA LOAD DATA ====================
     async function loadMahasiswaData(filters = {}) {
-        console.log('Loading mahasiswa data...', filters);
-        
-        const tableBody = document.getElementById('mahasiswa-table-body');
-        if (!tableBody) {
-            console.error('Table body not found!');
-            return;
-        }
+
+    // Jika load awal (tanpa filter), sembunyikan tabel & hentikan
+    if (!filters || Object.keys(filters).length === 0) {
+        document.getElementById("mahasiswa-table-wrapper").classList.add("hidden");
+        return; 
+    }
+
 
         // Tampilkan loading
         tableBody.innerHTML = `
