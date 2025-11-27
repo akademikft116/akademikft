@@ -389,7 +389,7 @@
                     </div>
 
                     <!-- Tabel Mahasiswa -->
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto hidden" id="mahasiswa-table-wrapper">
                         <table class="min-w-full divide-y divide-gray-200 table-small">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -762,19 +762,23 @@
     }
 
     function renderMahasiswaTable(data) {
-        const tableBody = document.getElementById('mahasiswa-table-body');
-        
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-8 text-gray-500">
-                        📭 Tidak ada data mahasiswa
-                    </td>
-                </tr>
-            `;
-            return;
-        }
 
+    // tampilkan tabel hanya setelah pencarian
+    const wrapper = document.getElementById("mahasiswa-table-wrapper");
+    if (wrapper) wrapper.classList.remove("hidden");
+
+    const tableBody = document.getElementById('mahasiswa-table-body');
+        
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8 text-gray-500">
+                    📭 Tidak ada data mahasiswa
+                </td>
+            </tr>
+        `;
+        return;
+    }
         let html = '';
         data.forEach((mhs, index) => {
             html += `
