@@ -16,6 +16,21 @@
     .main-content {
       height: calc(100vh - 4rem);
     }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -110,41 +125,101 @@
           </div>
         </div>
 
-        <!-- PENGATURAN -->
-        <div id="pengaturan" class="bg-white p-6 rounded-lg shadow-xl hidden max-w-2xl">
-          <h2 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Akun</h2>
-          <div class="mb-8 border-b pb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-3">1. Ubah Username</h3>
-            <p class="text-sm text-gray-500 mb-4">Username saat ini: <strong id="currentUsername">Admin</strong></p>
-            <div class="space-y-4 max-w-sm">
-              <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              <button onclick="updateUsername()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-150">
-                Simpan Username Baru
-              </button>
-            </div>
-          </div>
-
-          <div class="mb-8 pb-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-3">2. Ubah Password</h3>
-            <div class="space-y-4 max-w-sm">
-              <div class="relative">
-                <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pr-10 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500" title="Tampilkan Password">
-                  <i id="eyeIcon" class="fas fa-eye"></i>
-                </button>
+        <!-- PENGATURAN (DIUBAH) -->
+        <div id="pengaturan" class="hidden">
+          <div class="flex flex-col items-center justify-center min-h-full">
+            <div class="w-full max-w-4xl">
+              <div class="text-center mb-10">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Pengaturan Akun</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Kelola informasi akun Anda dan sesuaikan preferensi sesuai kebutuhan</p>
               </div>
-              <button onclick="updatePassword()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-150">
-                Simpan Password Baru
-              </button>
-            </div>
-          </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Card 1: Ubah Username -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 card-hover">
+                  <div class="flex items-center mb-6">
+                    <div class="gradient-bg p-3 rounded-xl mr-4">
+                      <i class="fas fa-user-edit text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Ubah Username</h3>
+                  </div>
+                  <p class="text-gray-600 mb-4">Username saat ini: <span class="font-semibold text-blue-600" id="currentUsername">Admin</span></p>
+                  <div class="space-y-4">
+                    <div class="relative">
+                      <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
+                      <input id="newUsername" type="text" placeholder="Masukkan Username Baru" class="w-full border border-gray-300 p-2 pl-10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                    </div>
+                    <button onclick="updateUsername()" class="w-full gradient-bg text-white font-semibold py-3 rounded-lg hover:opacity-90 transition duration-200 flex items-center justify-center">
+                      <i class="fas fa-save mr-2"></i> Simpan Username Baru
+                    </button>
+                  </div>
+                </div>
 
-          <div class="mt-8 pt-6 border-t border-gray-200">
-            <h3 class="text-xl font-semibold text-gray-700 mb-3">3. Opsi Ganti Akun</h3>
-            <p class="text-sm text-gray-500 mb-4">Anda akan keluar dari sesi ini dan diarahkan ke halaman login.</p>
-            <button onclick="logout()" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-150">
-              Ganti Akun / Logout
-            </button>
+                <!-- Card 2: Ubah Password -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 card-hover">
+                  <div class="flex items-center mb-6">
+                    <div class="gradient-bg p-3 rounded-xl mr-4">
+                      <i class="fas fa-lock text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Ubah Password</h3>
+                  </div>
+                  <div class="space-y-4">
+                    <div class="relative">
+                      <i class="fas fa-key absolute left-3 top-3 text-gray-400"></i>
+                      <input id="newPassword" type="password" placeholder="Password Baru (min 6 karakter)" class="w-full border border-gray-300 p-2 pl-10 pr-10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                      <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-blue-500 transition duration-200" title="Tampilkan Password">
+                        <i id="eyeIcon" class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                    <button onclick="updatePassword()" class="w-full gradient-bg text-white font-semibold py-3 rounded-lg hover:opacity-90 transition duration-200 flex items-center justify-center">
+                      <i class="fas fa-key mr-2"></i> Simpan Password Baru
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card 3: Opsi Ganti Akun -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 card-hover md:col-span-2">
+                  <div class="flex items-center mb-6">
+                    <div class="bg-red-500 p-3 rounded-xl mr-4">
+                      <i class="fas fa-sign-out-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Keluar Akun</h3>
+                  </div>
+                  <p class="text-gray-600 mb-6">Anda akan keluar dari sesi ini dan diarahkan ke halaman login.</p>
+                  <button onclick="logout()" class="bg-red-500 text-white font-semibold py-3 px-8 rounded-lg hover:bg-red-600 transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Ganti Akun / Logout
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Informasi Tambahan -->
+              <div class="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Informasi Sistem</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                  <div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm inline-block mb-2">
+                      <i class="fas fa-shield-alt text-blue-500 text-2xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-700">Keamanan</h4>
+                    <p class="text-sm text-gray-600 mt-2">Data Anda dilindungi dengan enkripsi tingkat tinggi</p>
+                  </div>
+                  <div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm inline-block mb-2">
+                      <i class="fas fa-sync text-green-500 text-2xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-700">Sinkronisasi</h4>
+                    <p class="text-sm text-gray-600 mt-2">Perubahan disimpan secara real-time ke database</p>
+                  </div>
+                  <div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm inline-block mb-2">
+                      <i class="fas fa-history text-purple-500 text-2xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-700">Riwayat</h4>
+                    <p class="text-sm text-gray-600 mt-2">Semua perubahan dicatat dalam log sistem</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -221,19 +296,19 @@
 
     function updateUsername() { alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); }
     function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
-   async function logout() {
-  // 1. Panggil signOut untuk mengakhiri sesi di Supabase
-  const { error } = await supabaseClient.auth.signOut();
+    async function logout() {
+      // 1. Panggil signOut untuk mengakhiri sesi di Supabase
+      const { error } = await supabaseClient.auth.signOut();
 
-  if (error) {
-    console.error('Logout Error:', error.message);
-    alert('Gagal keluar sesi. Silakan coba lagi.');
-  } else {
-    // 2. Arahkan ke halaman LOGIN (bukan halaman dashboard/index.html)
-    // Ubah ini kembali ke halaman login Anda yang sebenarnya.
-    window.location.href = 'index.html'; 
-  }
-}
+      if (error) {
+        console.error('Logout Error:', error.message);
+        alert('Gagal keluar sesi. Silakan coba lagi.');
+      } else {
+        // 2. Arahkan ke halaman LOGIN (bukan halaman dashboard/index.html)
+        // Ubah ini kembali ke halaman login Anda yang sebenarnya.
+        window.location.href = 'index.html'; 
+      }
+    }
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
   </script>
 </body>
