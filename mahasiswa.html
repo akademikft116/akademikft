@@ -299,7 +299,8 @@
                 </div>
                 
                 <!-- Daftar Mahasiswa -->
-                <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
+                <input id="searchInput" onkeyup="filterMahasiswa()" class="border p-2 rounded w-full" placeholder="Cari mahasiswa...">
+                <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg hidden">
                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
 
                     <!-- Filter Pencarian -->
@@ -504,6 +505,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script>
+  let allMahasiswa = [];
   function showNotif(message, type = "success") {
     const notif = document.getElementById("notif");
     
@@ -715,6 +717,9 @@
             console.error('Table body not found!');
             return;
         }
+      allMahasiswa = data;
+      renderMahasiswaTable(data);
+}
 
         // Tampilkan loading
         tableBody.innerHTML = `
@@ -763,6 +768,7 @@
 
     function renderMahasiswaTable(data) {
         const tableBody = document.getElementById('mahasiswa-table-body');
+        document.getElementById("mahasiswa-list-container").classList.remove("hidden");
         
         if (!data || data.length === 0) {
             tableBody.innerHTML = `
@@ -777,6 +783,7 @@
 
         let html = '';
         data.forEach((mhs, index) => {
+          document.getElementById("mahasiswa-table-container").classList.remove("hidden");
             html += `
                 <tr class="hover:bg-gray-100 text-xs">
                     <td class="px-6 py-4 text-center text-sm border">${index + 1}</td>
@@ -1430,6 +1437,29 @@
         };
         reader.readAsArrayBuffer(file);
     }
+</script>
+    <script>
+
+// ========================
+// FUNGSI FILTER MAHASISWA
+// ========================
+function filterMahasiswa() {
+    const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+    const filtered = allMahasiswa.filter(m =>
+        m.nama.toLowerCase().includes(keyword) ||
+        m.npm.includes(keyword)
+    );
+
+    // render tabel dengan hasil pencarian
+    renderMahasiswaTable(filtered);
+
+    // tampilkan tabel setelah ada hasil
+    if (filtered.length > 0) {
+        document.getElementById("mahasiswa-list-container").classList.remove("hidden");
+    }
+}
+
 </script>
   <div id="notif" class="notification"></div>
 </body>
