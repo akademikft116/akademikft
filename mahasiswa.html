@@ -388,8 +388,15 @@
                         </div>
                     </div>
 
-                    <!-- Tabel Mahasiswa -->
-                    <div class="overflow-x-auto">
+                    <!-- Pesan Default (Tabel disembunyikan) -->
+                    <div id="default-message" class="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                        <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Gunakan filter pencarian untuk menampilkan data mahasiswa</h3>
+                        <p class="text-gray-500">Pilih prodi, kelas, status, atau tahun masuk untuk melihat daftar mahasiswa</p>
+                    </div>
+
+                    <!-- Tabel Mahasiswa (Awalnya disembunyikan) -->
+                    <div id="mahasiswa-table-container" class="overflow-x-auto hidden">
                         <table class="min-w-full divide-y divide-gray-200 table-small">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -530,7 +537,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Document loaded, initializing...');
         initializeTomSelect();
-        loadMahasiswaData();
+        // Tampilkan pesan default, jangan load data mahasiswa
+        showDefaultMessage();
         showMainTab('crud');
         
         // Setup event listener untuk delete
@@ -616,7 +624,8 @@
         if (tab === 'crud') {
             document.getElementById('content-crud').classList.remove('hidden');
             document.getElementById('mainTitle').textContent = "Manajemen Biodata & Pencarian Mahasiswa";
-            loadMahasiswaData();
+            // Tampilkan pesan default, jangan load data mahasiswa
+            showDefaultMessage();
         } 
         else if (tab === 'rekap') {
             document.getElementById('content-rekap').classList.remove('hidden');
@@ -711,6 +720,9 @@
         console.log('Loading mahasiswa data...', filters);
         
         const tableBody = document.getElementById('mahasiswa-table-body');
+        const tableContainer = document.getElementById('mahasiswa-table-container');
+        const defaultMessage = document.getElementById('default-message');
+        
         if (!tableBody) {
             console.error('Table body not found!');
             return;
@@ -724,6 +736,10 @@
                 </td>
             </tr>
         `;
+
+        // Sembunyikan pesan default dan tampilkan tabel
+        defaultMessage.classList.add('hidden');
+        tableContainer.classList.remove('hidden');
 
         try {
             let query = supabaseClient.from('mahasiswa').select('*');
@@ -761,6 +777,14 @@
         }
     }
 
+    function showDefaultMessage() {
+        const tableContainer = document.getElementById('mahasiswa-table-container');
+        const defaultMessage = document.getElementById('default-message');
+        
+        tableContainer.classList.add('hidden');
+        defaultMessage.classList.remove('hidden');
+    }
+
     function renderMahasiswaTable(data) {
         const tableBody = document.getElementById('mahasiswa-table-body');
         
@@ -768,7 +792,7 @@
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" class="text-center py-8 text-gray-500">
-                        📭 Tidak ada data mahasiswa
+                        📭 Tidak ada data mahasiswa yang sesuai dengan filter pencarian
                     </td>
                 </tr>
             `;
@@ -830,7 +854,7 @@
         document.getElementById('searchKelas').value = '';
         document.getElementById('searchStatus').value = '';
         document.getElementById('searchTahun').value = '';
-        loadMahasiswaData();
+        showDefaultMessage();
     }
 
     // ==================== CRUD OPERATIONS ====================
