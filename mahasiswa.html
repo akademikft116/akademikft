@@ -214,7 +214,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="ttl" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+                                    <label for="ttl" class="block text-sm font-medium text-gray-700">TTL</label>
                                     <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                 </div>                    
                                 <div>
@@ -389,7 +389,7 @@
                     </div>
 
                     <!-- Tabel Mahasiswa -->
-                    <div class="overflow-x-auto hidden" id="mahasiswa-table-wrapper">
+                    <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 table-small">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -708,20 +708,13 @@
 
     // ==================== FUNGSI UTAMA LOAD DATA ====================
     async function loadMahasiswaData(filters = {}) {
-
-    // Jika load awal (tanpa filter), sembunyikan tabel & hentikan
-    // cek apakah SEMUA filter kosong
-const allEmpty =
-    (!filters.prodi || filters.prodi === "") &&
-    (!filters.kelas || filters.kelas.trim() === "") &&
-    (!filters.status || filters.status === "") &&
-    (!filters.tahun || filters.tahun === "");
-
-// jika semua kosong → sembunyikan tabel dan hentikan
-if (allEmpty) {
-    document.getElementById("mahasiswa-table-wrapper").classList.add("hidden");
-    return;
-}
+        console.log('Loading mahasiswa data...', filters);
+        
+        const tableBody = document.getElementById('mahasiswa-table-body');
+        if (!tableBody) {
+            console.error('Table body not found!');
+            return;
+        }
 
         // Tampilkan loading
         tableBody.innerHTML = `
@@ -769,23 +762,19 @@ if (allEmpty) {
     }
 
     function renderMahasiswaTable(data) {
-
-    // tampilkan tabel hanya setelah pencarian
-    const wrapper = document.getElementById("mahasiswa-table-wrapper");
-    if (wrapper) wrapper.classList.remove("hidden");
-
-    const tableBody = document.getElementById('mahasiswa-table-body');
+        const tableBody = document.getElementById('mahasiswa-table-body');
         
-    if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="8" class="text-center py-8 text-gray-500">
-                    📭 Tidak ada data mahasiswa
-                </td>
-            </tr>
-        `;
-        return;
-    }
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-8 text-gray-500">
+                        📭 Tidak ada data mahasiswa
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
         let html = '';
         data.forEach((mhs, index) => {
             html += `
@@ -1009,7 +998,7 @@ if (allEmpty) {
             <p><strong>Kelas:</strong> ${mhs.kelas || '-'}</p>
             <p><strong>Tahun Masuk:</strong> ${mhs.tahun_masuk}</p>
             <p><strong>Status:</strong> <span class="${statusColor} font-bold">${mhs.status}</span></p>
-            <p><strong>Tanggal Lahir:</strong> ${mhs.ttl || '-'}</p>
+            <p><strong>TTL:</strong> ${mhs.ttl || '-'}</p>
             <p><strong>No. HP:</strong> ${mhs.no_hp || '-'}</p>
             <p><strong>NIK:</strong> ${mhs.nik_mahasiswa || '-'}</p>
             <p><strong>Alamat:</strong> ${mhs.alamat || '-'}</p>
