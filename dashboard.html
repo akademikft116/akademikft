@@ -393,7 +393,7 @@
       clickedButton?.classList.add('active-link');
       
       if (tabId === 'matkul') {
-        loadMatkulData(); // Panggil fungsi baru untuk memuat data dengan filter
+        loadMatkulData();
       }
     }
 
@@ -453,7 +453,7 @@
       renderMatkulTable(filteredMatkulData);
     }
 
-    // Fungsi untuk menampilkan tabel mata kuliah
+    // Fungsi untuk menampilkan tabel mata kuliah - SOLUSI: gunakan event delegation
     function renderMatkulTable(data) {
       const tableBody = document.getElementById('matkulTableBody');
 
@@ -471,6 +471,7 @@
       let html = "";
 
       data.forEach((matkul, index) => {
+        // Gunakan data attributes untuk menyimpan nilai
         html += `
         <tr class="hover:bg-gray-50">
           <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
@@ -483,12 +484,19 @@
           </td>
           <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
           <td class="px-6 py-4 text-sm flex space-x-3">
-            <button onclick="openEditMatkulModal('${matkul.id}', '${matkul.kode}', '${matkul.nama}', '${matkul.sks}')"
-                    class="text-yellow-600 hover:text-yellow-800">
+            <button onclick="handleEditClick(this)"
+                    class="text-yellow-600 hover:text-yellow-800"
+                    data-id="${matkul.id}"
+                    data-kode="${matkul.kode}"
+                    data-nama="${matkul.nama}"
+                    data-sks="${matkul.sks}">
               <i class="fas fa-edit"></i>
             </button>
-            <button onclick="showDeleteConfirmation('${matkul.id}', '${matkul.kode}', '${matkul.nama}')"
-                    class="text-red-600 hover:text-red-800">
+            <button onclick="handleDeleteClick(this)"
+                    class="text-red-600 hover:text-red-800"
+                    data-id="${matkul.id}"
+                    data-kode="${matkul.kode}"
+                    data-nama="${matkul.nama}">
               <i class="fas fa-trash"></i>
             </button>
           </td>
@@ -497,6 +505,25 @@
       });
 
       tableBody.innerHTML = html;
+    }
+
+    // Handler untuk edit button
+    function handleEditClick(button) {
+      const id = button.getAttribute('data-id');
+      const kode = button.getAttribute('data-kode');
+      const nama = button.getAttribute('data-nama');
+      const sks = button.getAttribute('data-sks');
+      
+      openEditMatkulModal(id, kode, nama, sks);
+    }
+
+    // Handler untuk delete button
+    function handleDeleteClick(button) {
+      const id = button.getAttribute('data-id');
+      const kode = button.getAttribute('data-kode');
+      const nama = button.getAttribute('data-nama');
+      
+      showDeleteConfirmation(id, kode, nama);
     }
 
     // Fungsi untuk memfilter data mata kuliah
@@ -508,18 +535,15 @@
       filteredMatkulData = allMatkulData.filter(matkul => {
         let passes = true;
         
-        // Filter berdasarkan kode program studi
         if (kodeProdi) {
           const kodePrefix = matkul.kode.substring(0, 5);
           if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
         }
         
-        // Filter berdasarkan nama mata kuliah
         if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
           passes = false;
         }
         
-        // Filter berdasarkan SKS
         if (sks && matkul.sks != sks) {
           passes = false;
         }
@@ -625,7 +649,6 @@
 
     function closeAddMatkulModal() {
       document.getElementById('addMatkulModal').classList.add('hidden');
-      // Reset form
       document.getElementById('addKode').value = '';
       document.getElementById('addNama').value = '';
       document.getElementById('addSKS').value = '';
@@ -710,6 +733,10 @@
         return;
       }
 
+      if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+        return;
+      }
+
       const { error } = await supabaseClient
         .from('matakuliah')
         .delete()
@@ -717,11 +744,9 @@
 
       if (error) {
         alert("Gagal menghapus: " + error.message);
-        closeDeleteConfirmation();
         return;
       }
 
-      alert('✅ Data berhasil dihapus!');
       closeDeleteConfirmation();
       loadMatkulData();
     }
