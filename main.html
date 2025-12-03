@@ -840,17 +840,29 @@
 
       document.getElementById("edit_id").value = id;
       
-      // Mengisi TomSelect Mata Kuliah - tampilkan kode yang sedang diedit
+      // Mengisi TomSelect Mata Kuliah
       const mkValue = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
-      tsEditMataKuliah.setValue(mkValue);
       
-      // Fokus pada input pencarian dan pilih teks agar mudah mengedit
+      // Pastikan TomSelect sudah diinisialisasi
+      if (!tsEditMataKuliah) {
+          showToast("TomSelect belum siap, coba lagi", 'error');
+          return;
+      }
+      
+      // Set nilai ke TomSelect
+      tsEditMataKuliah.setValue(mkValue, true); // true untuk silent mode
+      
+      // Refresh TomSelect untuk menampilkan nilai yang sudah dipilih
       setTimeout(() => {
-        const editSearchInput = document.querySelector('#edit_kode_matkul_search + .ts-wrapper .ts-control input');
-        if (editSearchInput) {
-          editSearchInput.focus();
-          editSearchInput.select();
-        }
+          tsEditMataKuliah.refreshOptions(false); // Refresh options
+          
+          // Fokus ke input pencarian
+          const editSearchInput = document.querySelector('#edit_kode_matkul_search + .ts-wrapper .ts-control input');
+          if (editSearchInput) {
+              editSearchInput.focus();
+              // Set nilai input agar terlihat
+              editSearchInput.value = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
+          }
       }, 100);
       
       document.getElementById("edit_prodi").value = dataToEdit.prodi;
@@ -860,8 +872,8 @@
       document.getElementById("edit_sks").value = dataToEdit.sks;
       
       // Mengisi TomSelect Dosen & Asisten
-      document.getElementById("edit_dosen").tomselect.setValue(dataToEdit.dosen || '');
-      document.getElementById("edit_asisten").tomselect.setValue(dataToEdit.asisten || '');
+      document.getElementById("edit_dosen").tomselect.setValue(dataToEdit.dosen || '', true);
+      document.getElementById("edit_asisten").tomselect.setValue(dataToEdit.asisten || '', true);
       
       document.getElementById("edit_semester").value = dataToEdit.semester;
       document.getElementById("edit_kelas").value = dataToEdit.kelas;
