@@ -184,14 +184,15 @@
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
-                </tr>
-              </thead>
+  <tr>
+      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
+      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
+      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+  </tr>
+</thead>
               <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
                 <tr><td colspan="5" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
               </tbody>
@@ -380,45 +381,60 @@
 
     // Fungsi untuk menampilkan tabel mata kuliah
     function renderMatkulTable(data) {
-      const tableBody = document.getElementById('matkulTableBody');
-      
-      if (!data || data.length === 0) {
+    const tableBody = document.getElementById('matkulTableBody');
+
+    // Jika tidak ada data
+    if (!data || data.length === 0) {
         tableBody.innerHTML = `
-          <tr>
-            <td colspan="5" class="px-6 py-8 text-sm text-gray-500 text-center">
-              📭 Tidak ada data mata kuliah yang sesuai dengan filter pencarian
-            </td>
-          </tr>
+            <tr>
+                <td colspan="6" class="text-center py-4 text-gray-500">
+                    Tidak ada data mata kuliah
+                </td>
+            </tr>
         `;
         return;
-      }
-
-      let html = '';
-      data.forEach((matkul, index) => {
-        html += `
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
-            <td class="px-6 py-4 text-sm text-gray-900">
-              <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                ${matkul.prodi || 'Lainnya'}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
-<td class="px-6 py-4 text-sm">
-    <button onclick="openEditMatkulModal('${matkul.id}', '${matkul.kode}', '${matkul.nama}', '${matkul.sks}')" 
-        class="text-yellow-600 hover:text-yellow-800 font-bold">
-        Edit
-    </button>
-</td>
-<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-          </tr>
-        `;
-      });
-
-      tableBody.innerHTML = html;
     }
+
+    let html = "";
+
+    data.forEach((matkul, index) => {
+        html += `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
+
+            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
+
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
+
+            <td class="px-6 py-4 text-sm text-gray-900">
+                <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    ${matkul.prodi ?? "Lainnya"}
+                </span>
+            </td>
+
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+
+            <td class="px-6 py-4 text-sm flex space-x-3">
+
+                <!-- ICON EDIT -->
+                <button onclick="openEditMatkulModal('${matkul.id}', '${matkul.kode}', '${matkul.nama}', '${matkul.sks}')"
+                        class="text-yellow-600 hover:text-yellow-800">
+                    <i class="fas fa-edit"></i>
+                </button>
+
+                <!-- ICON DELETE -->
+                <button onclick="deleteMatkul('${matkul.id}')"
+                        class="text-red-600 hover:text-red-800">
+                    <i class="fas fa-trash"></i>
+                </button>
+
+            </td>
+        </tr>
+        `;
+    });
+
+    tableBody.innerHTML = html;
+}
 
     // Fungsi untuk memfilter data mata kuliah
     function filterMatkulData() {
@@ -620,6 +636,21 @@ async function updateMatkul() {
     }
 
     closeEditMatkulModal();
+    loadMatkulData();
+}
+    async function deleteMatkul(id) {
+    if (!confirm("Hapus mata kuliah ini?")) return;
+
+    const { error } = await supabaseClient
+        .from('matakuliah')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Gagal menghapus: " + error.message);
+        return;
+    }
+
     loadMatkulData();
 }
   </script>
