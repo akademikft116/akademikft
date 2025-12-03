@@ -477,8 +477,7 @@
             });
             
              // TomSelect untuk Form Edit
-            // Di loadReferences()
-                tsEditMataKuliah = new TomSelect('#edit_kode_matkul_search', { ... });
+            tsEditMataKuliah = new TomSelect('#edit_kode_matkul_search', {
                 valueField: 'value',
                 labelField: 'text',
                 searchField: ['kode', 'nama'], 
@@ -841,25 +840,17 @@
 
       document.getElementById("edit_id").value = id;
       
-      // Ambil nilai yang harus dimasukkan ke TomSelect: "Kode | Nama"
+      // Mengisi TomSelect Mata Kuliah
       const mkValue = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
+      tsEditMataKuliah.setValue(mkValue);
       
-      // PASTIKAN tsEditMataKuliah SUDAH TERINISIALISASI SEBELUM MENGGUNAKAN setValue()
-      // Ini akan mengisi TomSelect dengan nilai yang sesuai.
-      if (tsEditMataKuliah) {
-         tsEditMataKuliah.setValue(mkValue);
-      } else {
-         console.error("TomSelect Edit Mata Kuliah belum terinisialisasi!");
-      }
-      
-      // Mengisi SELECT/INPUT lainnya
       document.getElementById("edit_prodi").value = dataToEdit.prodi;
       document.getElementById("edit_hari").value = dataToEdit.hari;
-      document.getElementById("edit_jam_mulai").value = dataToEdit.jam_mulai ? dataToEdit.jam_mulai.slice(0, 5) : ""; // Pastikan format hh:mm
-      document.getElementById("edit_jam_akhir").value = dataToEdit.jam_akhir ? dataToEdit.jam_akhir.slice(0, 5) : ""; // Pastikan format hh:mm
+      document.getElementById("edit_jam_mulai").value = dataToEdit.jam_mulai;
+      document.getElementById("edit_jam_akhir").value = dataToEdit.jam_akhir;
       document.getElementById("edit_sks").value = dataToEdit.sks;
       
-      // Mengisi TomSelect Dosen & Asisten (Menggunakan method TomSelect)
+      // Mengisi TomSelect Dosen & Asisten
       document.getElementById("edit_dosen").tomselect.setValue(dataToEdit.dosen || '');
       document.getElementById("edit_asisten").tomselect.setValue(dataToEdit.asisten || '');
       
@@ -868,7 +859,6 @@
       document.getElementById("edit_ruangan").value = dataToEdit.ruangan;
       document.getElementById("edit_tahun_akademik").value = dataToEdit.tahun_akademik; 
 
-      // Tampilkan Modal
       document.getElementById('editModal').classList.remove('hidden');
       document.getElementById('editModal').classList.add('flex');
     }
