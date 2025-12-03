@@ -167,34 +167,34 @@
           
           <!-- Tombol Export -->
           <div class="flex justify-between mb-4">
-    <button onclick="openAddMatkulModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
-        <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
-    </button>
+            <button onclick="openAddMatkulModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
+              <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
+            </button>
 
-    <div class="space-x-2">
-        <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
-            <i class="fas fa-file-pdf mr-2"></i> Export PDF
-        </button>
-        <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
-            <i class="fas fa-file-excel mr-2"></i> Export Excel
-        </button>
-    </div>
-</div>
+            <div class="space-x-2">
+              <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
+                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+              </button>
+              <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+              </button>
+            </div>
+          </div>
         
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
-  <tr>
-      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
-      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
-      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
-      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
-      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-  </tr>
-</thead>
+                <tr>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+                  <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
               <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
-                  <tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
+                <tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -301,6 +301,79 @@
     </main>
   </div>
 
+  <!-- MODAL TAMBAH MATA KULIAH -->
+  <div id="addMatkulModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+      <h2 class="text-xl font-bold mb-4">Tambah Mata Kuliah</h2>
+      <label class="block mb-2">Kode Mata Kuliah</label>
+      <input id="addKode" class="border p-2 w-full mb-3 rounded">
+      <label class="block mb-2">Nama Mata Kuliah</label>
+      <input id="addNama" class="border p-2 w-full mb-3 rounded">
+      <label class="block mb-2">SKS</label>
+      <input id="addSKS" type="number" class="border p-2 w-full mb-3 rounded">
+      <div class="flex justify-end space-x-2 mt-4">
+        <button onclick="closeAddMatkulModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+        <button onclick="saveNewMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT MATA KULIAH -->
+  <div id="editMatkulModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+      <h2 class="text-xl font-bold mb-4">Edit Mata Kuliah</h2>
+      <input type="hidden" id="editId">
+      <label class="block mb-2">Kode Mata Kuliah</label>
+      <input id="editKode" class="border p-2 w-full mb-3 rounded">
+      <label class="block mb-2">Nama Mata Kuliah</label>
+      <input id="editNama" class="border p-2 w-full mb-3 rounded">
+      <label class="block mb-2">SKS</label>
+      <input id="editSKS" type="number" class="border p-2 w-full mb-3 rounded">
+      <div class="flex justify-end space-x-2 mt-4">
+        <button onclick="closeEditMatkulModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+        <button onclick="updateMatkul()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI HAPUS (Seperti gambar) -->
+  <div id="deleteConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-96">
+      <div class="p-6">
+        <div class="flex items-center mb-4">
+          <div class="bg-red-100 p-3 rounded-full mr-4">
+            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800">Konfirmasi Hapus Data</h2>
+        </div>
+        
+        <p class="text-gray-600 mb-6">
+          Apakah Anda yakin ingin menghapus data mata kuliah berikut?
+        </p>
+        
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div class="mb-2">
+            <span class="font-semibold text-gray-700">Kode:</span>
+            <span id="deleteMatkulKode" class="ml-2 font-mono text-red-600"></span>
+          </div>
+          <div>
+            <span class="font-semibold text-gray-700">Nama:</span>
+            <span id="deleteMatkulNama" class="ml-2 text-red-600"></span>
+          </div>
+        </div>
+
+        <div class="flex justify-between space-x-3">
+          <button onclick="closeDeleteConfirmation()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-lg transition duration-200">
+            <i class="fas fa-times mr-2"></i>Batal
+          </button>
+          <button onclick="confirmDeleteMatkul()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-lg transition duration-200">
+            <i class="fas fa-trash mr-2"></i>Hapus Permanent
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
@@ -309,6 +382,7 @@
     // Variabel untuk data mata kuliah
     let allMatkulData = [];
     let filteredMatkulData = [];
+    let matkulToDeleteId = null;
 
     function showContent(tabId, clickedButton) {
       ['main', 'matkul', 'pengaturan'].forEach(id => {
@@ -381,60 +455,49 @@
 
     // Fungsi untuk menampilkan tabel mata kuliah
     function renderMatkulTable(data) {
-    const tableBody = document.getElementById('matkulTableBody');
+      const tableBody = document.getElementById('matkulTableBody');
 
-    // Jika tidak ada data
-    if (!data || data.length === 0) {
+      if (!data || data.length === 0) {
         tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="text-center py-4 text-gray-500">
-                    Tidak ada data mata kuliah
-                </td>
-            </tr>
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">
+              Tidak ada data mata kuliah
+            </td>
+          </tr>
         `;
         return;
-    }
+      }
 
-    let html = "";
+      let html = "";
 
-    data.forEach((matkul, index) => {
+      data.forEach((matkul, index) => {
         html += `
         <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
-
-            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
-
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
-
-            <td class="px-6 py-4 text-sm text-gray-900">
-                <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    ${matkul.prodi ?? "Lainnya"}
-                </span>
-            </td>
-
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
-
-            <td class="px-6 py-4 text-sm flex space-x-3">
-
-                <!-- ICON EDIT -->
-                <button onclick="openEditMatkulModal('${matkul.id}', '${matkul.kode}', '${matkul.nama}', '${matkul.sks}')"
-                        class="text-yellow-600 hover:text-yellow-800">
-                    <i class="fas fa-edit"></i>
-                </button>
-
-                <!-- ICON DELETE -->
-                <button onclick="deleteMatkul('${matkul.id}')"
-                        class="text-red-600 hover:text-red-800">
-                    <i class="fas fa-trash"></i>
-                </button>
-
-            </td>
+          <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
+          <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
+          <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
+          <td class="px-6 py-4 text-sm text-gray-900">
+            <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              ${matkul.prodi ?? "Lainnya"}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+          <td class="px-6 py-4 text-sm flex space-x-3">
+            <button onclick="openEditMatkulModal('${matkul.id}', '${matkul.kode}', '${matkul.nama}', '${matkul.sks}')"
+                    class="text-yellow-600 hover:text-yellow-800">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="showDeleteConfirmation('${matkul.id}', '${matkul.kode}', '${matkul.nama}')"
+                    class="text-red-600 hover:text-red-800">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
         </tr>
         `;
-    });
+      });
 
-    tableBody.innerHTML = html;
-}
+      tableBody.innerHTML = html;
+    }
 
     // Fungsi untuk memfilter data mata kuliah
     function filterMatkulData() {
@@ -555,145 +618,150 @@
       XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
     }
 
+    // Modal functions
+    function openAddMatkulModal() {
+      document.getElementById('addMatkulModal').classList.remove('hidden');
+    }
+
+    function closeAddMatkulModal() {
+      document.getElementById('addMatkulModal').classList.add('hidden');
+      // Reset form
+      document.getElementById('addKode').value = '';
+      document.getElementById('addNama').value = '';
+      document.getElementById('addSKS').value = '';
+    }
+
+    async function saveNewMatkul() {
+      const kode = document.getElementById('addKode').value.trim();
+      const nama = document.getElementById('addNama').value.trim();
+      const sks = document.getElementById('addSKS').value;
+
+      if (!kode || !nama || !sks) {
+        alert('Harap isi semua field!');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('matakuliah')
+        .insert([{ kode, nama, sks }]);
+
+      if (error) {
+        alert("Gagal menambah mata kuliah: " + error.message);
+        return;
+      }
+
+      closeAddMatkulModal();
+      loadMatkulData();
+    }
+
+    function openEditMatkulModal(id, kode, nama, sks) {
+      document.getElementById('editId').value = id;
+      document.getElementById('editKode').value = kode;
+      document.getElementById('editNama').value = nama;
+      document.getElementById('editSKS').value = sks;
+      document.getElementById('editMatkulModal').classList.remove('hidden');
+    }
+
+    function closeEditMatkulModal() {
+      document.getElementById('editMatkulModal').classList.add('hidden');
+    }
+
+    async function updateMatkul() {
+      const id = document.getElementById('editId').value;
+      const kode = document.getElementById('editKode').value.trim();
+      const nama = document.getElementById('editNama').value.trim();
+      const sks = document.getElementById('editSKS').value;
+
+      if (!kode || !nama || !sks) {
+        alert('Harap isi semua field!');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('matakuliah')
+        .update({ kode, nama, sks })
+        .eq('id', id);
+
+      if (error) {
+        alert("Gagal update data: " + error.message);
+        return;
+      }
+
+      closeEditMatkulModal();
+      loadMatkulData();
+    }
+
+    // Fungsi untuk menampilkan modal konfirmasi hapus
+    function showDeleteConfirmation(id, kode, nama) {
+      matkulToDeleteId = id;
+      document.getElementById('deleteMatkulKode').textContent = kode;
+      document.getElementById('deleteMatkulNama').textContent = nama;
+      document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+    }
+
+    function closeDeleteConfirmation() {
+      document.getElementById('deleteConfirmationModal').classList.add('hidden');
+      matkulToDeleteId = null;
+    }
+
+    async function confirmDeleteMatkul() {
+      if (!matkulToDeleteId) {
+        alert('ID mata kuliah tidak ditemukan!');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('matakuliah')
+        .delete()
+        .eq('id', matkulToDeleteId);
+
+      if (error) {
+        alert("Gagal menghapus: " + error.message);
+        closeDeleteConfirmation();
+        return;
+      }
+
+      alert('✅ Data berhasil dihapus!');
+      closeDeleteConfirmation();
+      loadMatkulData();
+    }
+
     function togglePasswordVisibility() {
       const input = document.getElementById('newPassword');
       const eye = document.getElementById('eyeIcon');
       if (input.type === 'password') {
-        input.type = 'text'; eye.classList.replace('fa-eye', 'fa-eye-slash');
+        input.type = 'text'; 
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
       } else {
-        input.type = 'password'; eye.classList.replace('fa-eye-slash', 'fa-eye');
+        input.type = 'password'; 
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
       }
     }
 
-    function updateUsername() { alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); }
-    function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
+    function updateUsername() { 
+      alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); 
+    }
+    
+    function updatePassword() { 
+      alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); 
+    }
     
     async function logout() {
-      // 1. Panggil signOut untuk mengakhiri sesi di Supabase
       const { error } = await supabaseClient.auth.signOut();
 
       if (error) {
         console.error('Logout Error:', error.message);
         alert('Gagal keluar sesi. Silakan coba lagi.');
       } else {
-        // 2. Arahkan ke halaman LOGIN (bukan halaman dashboard/index.html)
-        // Ubah ini kembali ke halaman login Anda yang sebenarnya.
         window.location.href = 'index.html'; 
       }
     }
     
-    document.addEventListener("DOMContentLoaded", loadDashboardTotals);
-
-    function openAddMatkulModal() {
-    document.getElementById('addMatkulModal').classList.remove('hidden');
-}
-
-function closeAddMatkulModal() {
-    document.getElementById('addMatkulModal').classList.add('hidden');
-}
-async function saveNewMatkul() {
-    const kode = document.getElementById('addKode').value;
-    const nama = document.getElementById('addNama').value;
-    const sks = document.getElementById('addSKS').value;
-
-    const { error } = await supabaseClient
-        .from('matakuliah')
-        .insert([{ kode, nama, sks }]);
-
-    if (error) {
-        alert("Gagal menambah mata kuliah: " + error.message);
-        return;
-    }
-
-    closeAddMatkulModal();
-    loadMatkulData();
-}
-function openEditMatkulModal(id, kode, nama, sks) {
-    document.getElementById('editId').value = id;
-    document.getElementById('editKode').value = kode;
-    document.getElementById('editNama').value = nama;
-    document.getElementById('editSKS').value = sks;
-
-    document.getElementById('editMatkulModal').classList.remove('hidden');
-}
-function closeEditMatkulModal() {
-    document.getElementById('editMatkulModal').classList.add('hidden');
-}
-// Di fungsi updateMatkul()
-async function updateMatkul() {
-    // ... (kode ambil nilai)
-    const { error } = await supabaseClient
-        .from('matakuliah')
-        .update({ kode, nama, sks })
-        .eq('id', id);
-
-    if (error) {
-        console.error("Supabase Update Error:", error); // <-- Tambahkan ini
-        alert("❌ Gagal update data: " + error.message);
-        return;
-    }
-
-    closeEditMatkulModal();
-    alert("✅ Data Mata Kuliah berhasil diperbarui!"); // <-- Tambahkan ini
-    loadMatkulData();
-}
-    async function deleteMatkul(id) {
-    if (!confirm("Hapus mata kuliah ini?")) return;
-
-    const { error } = await supabaseClient
-        .from('matakuliah')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
-        alert("Gagal menghapus: " + error.message);
-        return;
-    }
-
-    loadMatkulData();
-}
+    // Inisialisasi
+    document.addEventListener("DOMContentLoaded", function() {
+      loadDashboardTotals();
+      showContent('main', document.getElementById('mainLink'));
+    });
   </script>
-  <!-- MODAL TAMBAH MATA KULIAH -->
-<div id="addMatkulModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl w-96">
-        <h2 class="text-xl font-bold mb-4">Tambah Mata Kuliah</h2>
-
-        <label class="block mb-2">Kode Mata Kuliah</label>
-        <input id="addKode" class="border p-2 w-full mb-3 rounded">
-
-        <label class="block mb-2">Nama Mata Kuliah</label>
-        <input id="addNama" class="border p-2 w-full mb-3 rounded">
-
-        <label class="block mb-2">SKS</label>
-        <input id="addSKS" type="number" class="border p-2 w-full mb-3 rounded">
-
-        <div class="flex justify-end space-x-2 mt-4">
-            <button onclick="closeAddMatkulModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-            <button onclick="saveNewMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
-        </div>
-    </div>
-</div>
-  <!-- MODAL EDIT MATA KULIAH -->
-<div id="editMatkulModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl w-96">
-        <h2 class="text-xl font-bold mb-4">Edit Mata Kuliah</h2>
-
-        <input type="hidden" id="editId">
-
-        <label class="block mb-2">Kode Mata Kuliah</label>
-        <input id="editKode" class="border p-2 w-full mb-3 rounded">
-
-        <label class="block mb-2">Nama Mata Kuliah</label>
-        <input id="editNama" class="border p-2 w-full mb-3 rounded">
-
-        <label class="block mb-2">SKS</label>
-        <input id="editSKS" type="number" class="border p-2 w-full mb-3 rounded">
-
-        <div class="flex justify-end space-x-2 mt-4">
-            <button onclick="closeEditMatkulModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-            <button onclick="updateMatkul()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">Update</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
