@@ -42,29 +42,6 @@
         padding: 0.5rem !important;
         min-height: 2.5rem !important; 
     }
-    /* Style untuk dropdown pencarian kode mata kuliah */
-#edit_kode_results {
-    max-height: 200px;
-    width: 100%;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-#edit_kode_results div {
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-}
-
-#edit_kode_results div:hover {
-    background-color: #eff6ff;
-}
-
-#edit_kode_input {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-}
 
     /* 🚨 CSS UTAMA UNTUK MEMADATKAN TABEL DATA DI LAYAR KECIL 🚨 */
     
@@ -115,45 +92,71 @@
         }
     }
 
+    /* Style untuk dropdown pencarian kode mata kuliah */
+    #edit_kode_results {
+        position: absolute;
+        max-height: 200px;
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        background-color: white;
+    }
+
+    #edit_kode_results div {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    #edit_kode_results div:hover {
+        background-color: #eff6ff;
+    }
+
+    #edit_kode_input {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+
   </style>
 </head>
 <body class="bg-gray-100">
 
 <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
-  <div class="flex items-center space-x-3">
-    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
-    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
-  </div>
-  <div class="flex items-center space-x-4">
-    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT">Halo, AkademikFT</span>
-  </div>
+    <div class="flex items-center space-x-3">
+        <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+        <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
+    </div>
+    <div class="flex items-center space-x-4">
+        <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+    </div>
 </nav>
 
 <div class="flex pt-16 main-content">
-  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
-    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-       <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+    <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
+        <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+           <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
         <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span></a>
-      <a href="main.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
-        <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
-      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
-      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
-      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-book w-5"></i><span>Mata Kuliah</span></a>
-      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
-        <i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
-    </nav>
-    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
-      <p>&copy; 2025 Akademik FT</p>
-      <p>Designed by Rifqi & Alfi</p>
-       <p>ABD</p>
-    </div>
-  </aside>
+            <a href="main.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
+                <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span></a>
+            <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span></a>
+            <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span></a>
+            <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                <i class="fas fa-book w-5"></i><span>Mata Kuliah</span></a>
+            <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                <i class="fas fa-cog w-5"></i><span>Pengaturan</span></a>
+        </nav>
+        <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+            <p>&copy; 2025 Akademik FT</p>
+            <p>Designed by Rifqi & Alfi</p>
+               <p>ABD</p>
+        </div>
+    </aside>
 
-  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
-    <div class="container mx-auto">
+    <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+        <div class="container mx-auto">
 
 <div class="max-w-6xl mx-auto p-6 bg-white shadow-md mt-6 rounded-xl">
     <h1 class="text-2xl font-bold mb-4">Manajemen Jadwal Kuliah</h1>
@@ -298,7 +301,6 @@
     </div>
   </div>
 
-
   <!-- MODAL EDIT JADWAL -->
 <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
@@ -315,7 +317,7 @@
                 
                 <!-- BARIS 1: Kode & Prodi -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div class="relative">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Kode / Mata Kuliah</label>
                         <div class="flex space-x-2">
                             <input type="text" id="edit_kode_input" 
@@ -328,7 +330,7 @@
                             </button>
                         </div>
                         <!-- Dropdown hasil pencarian -->
-                        <div id="edit_kode_results" class="hidden absolute z-10 bg-white border rounded shadow-lg mt-1 max-h-60 overflow-y-auto w-96">
+                        <div id="edit_kode_results" class="hidden absolute z-10 bg-white border rounded shadow-lg mt-1 max-h-60 overflow-y-auto w-full">
                             <!-- Hasil pencarian akan muncul di sini -->
                         </div>
                         <input type="hidden" id="edit_mata_kuliah_hidden">
@@ -466,6 +468,12 @@
     </div>
 </div>
 
+  <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-50">
+  </div>
+</div>
+  </main>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -480,6 +488,7 @@
     let tsFilterDosen; 
     let dosenOptions = [];   
     let asistenOptions = []; 
+    let editMataKuliahList = [];
     
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -539,7 +548,6 @@
 
     // --- FUNGSI Memuat opsi pilihan (Disesuaikan untuk TomSelect) ---
     async function loadReferences() {
-      editMataKuliahList = mkData;
         // --- 1. Ambil dan Inisialisasi Mata Kuliah (TomSelect) ---
         const { data: mkData, error: mkError } = await supabaseClient
             .from('matakuliah')
@@ -551,110 +559,15 @@
             showToast("Gagal memuat data Mata Kuliah", 'error'); 
         } else {
             mataKuliahData = mkData; 
+            // Simpan data mata kuliah untuk pencarian di modal edit
+            editMataKuliahList = mkData;
+            
             const tomSelectOptions = mkData.map(item => ({
                 value: item.kode + ' | ' + item.nama, 
                 text: item.kode + ' | ' + item.nama, 
                 kode: item.kode,
                 nama: item.nama
             }));
-
-          async function searchMataKuliahForEdit(searchTerm) {
-    const resultsContainer = document.getElementById('edit_kode_results');
-    
-    if (!searchTerm || searchTerm.length < 2) {
-        resultsContainer.classList.add('hidden');
-        return;
-    }
-    
-    // Filter dari daftar mata kuliah yang sudah dimuat
-    const filtered = editMataKuliahList.filter(item => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-            (item.kode && item.kode.toLowerCase().includes(searchLower)) ||
-            (item.nama && item.nama.toLowerCase().includes(searchLower))
-        );
-    });
-    
-    if (filtered.length === 0) {
-        resultsContainer.innerHTML = `
-            <div class="p-3 text-gray-500 text-sm">
-                <i class="fas fa-search mr-2"></i> Tidak ditemukan
-            </div>
-        `;
-        resultsContainer.classList.remove('hidden');
-        return;
-    }
-    
-    let html = '';
-    filtered.forEach(item => {
-        html += `
-            <div class="p-3 border-b hover:bg-blue-50 cursor-pointer flex items-center justify-between"
-                 onclick="selectMatkulForEdit('${item.kode}', '${item.nama.replace(/'/g, "\\'")}')">
-                <div>
-                    <div class="font-mono font-bold text-blue-600">${item.kode}</div>
-                    <div class="text-sm text-gray-600 truncate">${item.nama}</div>
-                </div>
-                <div class="text-xs text-gray-400">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        `;
-    });
-    
-    resultsContainer.innerHTML = html;
-    resultsContainer.classList.remove('hidden');
-}
-
-// Fungsi untuk memilih mata kuliah dari hasil pencarian
-function selectMatkulForEdit(kode, nama) {
-    document.getElementById('edit_kode_input').value = kode;
-    document.getElementById('edit_mata_kuliah_hidden').value = nama;
-    
-    // Tampilkan info mata kuliah
-    document.getElementById('edit_matkul_name').textContent = `${kode} - ${nama}`;
-    document.getElementById('edit_matkul_info').classList.remove('hidden');
-    
-    // Sembunyikan dropdown hasil pencarian
-    document.getElementById('edit_kode_results').classList.add('hidden');
-    
-    // Auto-deteksi prodi dari kode
-    autoDetectProdiFromKode(kode);
-}
-
-// Fungsi untuk auto-deteksi prodi dari kode
-function autoDetectProdiFromKode(kode) {
-    if (!kode) return;
-    
-    const kodePrefix = kode.substring(0, 5);
-    let prodi = '';
-    
-    // Mapping kode ke program studi
-    if (kodePrefix === '50262') prodi = 'Industri';
-    else if (kodePrefix === '50263') prodi = 'Sipil';
-    else if (kodePrefix === '50463') prodi = 'Informatika';
-    else if (kodePrefix === '50362') prodi = 'Arsitektur';
-    else if (kodePrefix === '50264') prodi = 'Elektro';
-    else if (kodePrefix === '50262') prodi = 'MKWU';
-    
-    if (prodi) {
-        document.getElementById('edit_prodi').value = prodi;
-    }
-}
-
-// Fungsi untuk menghapus pencarian
-function clearEditKodeSearch() {
-    document.getElementById('edit_kode_input').value = '';
-    document.getElementById('edit_mata_kuliah_hidden').value = '';
-    document.getElementById('edit_kode_results').classList.add('hidden');
-    document.getElementById('edit_matkul_info').classList.add('hidden');
-}
-
-// Fungsi untuk menutup modal edit
-function closeEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
-    document.getElementById('editModal').classList.remove('flex');
-    clearEditKodeSearch();
-}
 
             // TomSelect untuk Form Tambah
             tsMataKuliah = new TomSelect('#kode_matkul_search', {
@@ -810,6 +723,106 @@ function closeEditModal() {
         populateSelect('filterTahunAkademik', tahunAkademikOptions, taFilterDefaultText, true);
     }
 
+    // ==================== FUNGSI PENCARIAN KODE MATA KULIAH UNTUK EDIT ====================
+
+    // Fungsi untuk mencari mata kuliah berdasarkan kode/nama
+    async function searchMataKuliahForEdit(searchTerm) {
+        const resultsContainer = document.getElementById('edit_kode_results');
+        
+        if (!searchTerm || searchTerm.length < 2) {
+            resultsContainer.classList.add('hidden');
+            return;
+        }
+        
+        // Filter dari daftar mata kuliah yang sudah dimuat
+        const filtered = editMataKuliahList.filter(item => {
+            const searchLower = searchTerm.toLowerCase();
+            return (
+                (item.kode && item.kode.toLowerCase().includes(searchLower)) ||
+                (item.nama && item.nama.toLowerCase().includes(searchLower))
+            );
+        });
+        
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="p-3 text-gray-500 text-sm">
+                    <i class="fas fa-search mr-2"></i> Tidak ditemukan
+                </div>
+            `;
+            resultsContainer.classList.remove('hidden');
+            return;
+        }
+        
+        let html = '';
+        filtered.forEach(item => {
+            html += `
+                <div class="p-3 border-b hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                     onclick="selectMatkulForEdit('${item.kode}', '${item.nama.replace(/'/g, "\\'")}')">
+                    <div>
+                        <div class="font-mono font-bold text-blue-600">${item.kode}</div>
+                        <div class="text-sm text-gray-600 truncate">${item.nama}</div>
+                    </div>
+                    <div class="text-xs text-gray-400">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsContainer.innerHTML = html;
+        resultsContainer.classList.remove('hidden');
+    }
+
+    // Fungsi untuk memilih mata kuliah dari hasil pencarian
+    function selectMatkulForEdit(kode, nama) {
+        document.getElementById('edit_kode_input').value = kode;
+        document.getElementById('edit_mata_kuliah_hidden').value = nama;
+        
+        // Tampilkan info mata kuliah
+        document.getElementById('edit_matkul_name').textContent = `${kode} - ${nama}`;
+        document.getElementById('edit_matkul_info').classList.remove('hidden');
+        
+        // Sembunyikan dropdown hasil pencarian
+        document.getElementById('edit_kode_results').classList.add('hidden');
+        
+        // Auto-deteksi prodi dari kode
+        autoDetectProdiFromKode(kode);
+    }
+
+    // Fungsi untuk auto-deteksi prodi dari kode
+    function autoDetectProdiFromKode(kode) {
+        if (!kode) return;
+        
+        const kodePrefix = kode.substring(0, 5);
+        let prodi = '';
+        
+        // Mapping kode ke program studi
+        if (kodePrefix === '50262') prodi = 'Industri';
+        else if (kodePrefix === '50263') prodi = 'Sipil';
+        else if (kodePrefix === '50463') prodi = 'Informatika';
+        else if (kodePrefix === '50362') prodi = 'Arsitektur';
+        else if (kodePrefix === '50264') prodi = 'Elektro';
+        else if (kodePrefix === '50262') prodi = 'MKWU';
+        
+        if (prodi) {
+            document.getElementById('edit_prodi').value = prodi;
+        }
+    }
+
+    // Fungsi untuk menghapus pencarian
+    function clearEditKodeSearch() {
+        document.getElementById('edit_kode_input').value = '';
+        document.getElementById('edit_mata_kuliah_hidden').value = '';
+        document.getElementById('edit_kode_results').classList.add('hidden');
+        document.getElementById('edit_matkul_info').classList.add('hidden');
+    }
+
+    // Fungsi untuk menutup modal edit
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').classList.remove('flex');
+        clearEditKodeSearch();
+    }
 
     // --- Cek login user ---
     window.onload = async () => {
@@ -1027,124 +1040,122 @@ function closeEditModal() {
     }
     
     // --- Edit Jadwal (Mengisi Modal) ---
-    // --- Edit Jadwal (Mengisi Modal) ---
-async function editJadwal(id) {
-    const dataToEdit = semuaData.find(d => d.id === id);
-    if (!dataToEdit) return;
+    async function editJadwal(id) {
+        const dataToEdit = semuaData.find(d => d.id === id);
+        if (!dataToEdit) return;
 
-    document.getElementById("edit_id").value = id;
-    
-    // Isi kode mata kuliah langsung (bukan TomSelect)
-    document.getElementById("edit_kode_input").value = dataToEdit.kode_matkul || '';
-    document.getElementById("edit_mata_kuliah_hidden").value = dataToEdit.mata_kuliah || '';
-    
-    // Tampilkan info mata kuliah
-    if (dataToEdit.kode_matkul && dataToEdit.mata_kuliah) {
-        document.getElementById('edit_matkul_name').textContent = 
-            `${dataToEdit.kode_matkul} - ${dataToEdit.mata_kuliah}`;
-        document.getElementById('edit_matkul_info').classList.remove('hidden');
-    }
-    
-    // Isi data lainnya
-    document.getElementById("edit_prodi").value = dataToEdit.prodi || '';
-    document.getElementById("edit_hari").value = dataToEdit.hari || '';
-    document.getElementById("edit_jam_mulai").value = dataToEdit.jam_mulai || '';
-    document.getElementById("edit_jam_akhir").value = dataToEdit.jam_akhir || '';
-    document.getElementById("edit_sks").value = dataToEdit.sks || '';
-    document.getElementById("edit_dosen").value = dataToEdit.dosen || '';
-    document.getElementById("edit_asisten").value = dataToEdit.asisten || '';
-    document.getElementById("edit_semester").value = dataToEdit.semester || '';
-    document.getElementById("edit_kelas").value = dataToEdit.kelas || '';
-    document.getElementById("edit_ruangan").value = dataToEdit.ruangan || '';
-    document.getElementById("edit_tahun_akademik").value = dataToEdit.tahun_akademik || '';
-
-    // Inisialisasi daftar mata kuliah untuk pencarian
-    if (editMataKuliahList.length === 0) {
-        editMataKuliahList = [...mataKuliahData];
-    }
-
-    document.getElementById('editModal').classList.remove('hidden');
-    document.getElementById('editModal').classList.add('flex');
-}
-
-    // --- Update Jadwal (Simpan Perubahan dari Modal) ---
-    // --- Update Jadwal (Simpan Perubahan dari Modal) ---
-async function updateJadwal() {
-    const id = document.getElementById("edit_id").value;
-    
-    const kode = document.getElementById("edit_kode_input").value.trim();
-    const nama = document.getElementById("edit_mata_kuliah_hidden").value.trim();
-    
-    if (!kode || !nama) {
-        showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
-        return;
-    }
-    
-    const jam_mulai = document.getElementById("edit_jam_mulai").value;
-    const jam_akhir = document.getElementById("edit_jam_akhir").value;
-    
-    if (jam_mulai >= jam_akhir) {
-        showToast("Jam Mulai harus lebih awal dari Jam Akhir!", 'error');
-        return;
-    }
-    
-    const updatedJadwal = {
-        kode_matkul: kode,
-        mata_kuliah: nama,
-        prodi: document.getElementById("edit_prodi").value,
-        hari: document.getElementById("edit_hari").value,
-        jam_mulai: jam_mulai,
-        jam_akhir: jam_akhir,
-        sks: parseInt(document.getElementById("edit_sks").value) || 0,
-        dosen: document.getElementById("edit_dosen").value,
-        asisten: document.getElementById("edit_asisten").value || "-",
-        semester: parseInt(document.getElementById("edit_semester").value) || 1,
-        kelas: document.getElementById("edit_kelas").value,
-        ruangan: document.getElementById("edit_ruangan").value,
-        tahun_akademik: document.getElementById("edit_tahun_akademik").value
-    };
-    
-    // Cek Konflik (dengan mengecualikan data yang sedang di-edit)
-    const isConflict = semuaData.some(item => {
-        if (item.id === parseInt(id)) return false; // Abaikan data saat ini
+        document.getElementById("edit_id").value = id;
         
-        if (item.hari === updatedJadwal.hari && 
-            item.ruangan === updatedJadwal.ruangan && 
-            item.tahun_akademik === updatedJadwal.tahun_akademik) {
-            
-            const start1 = updatedJadwal.jam_mulai;
-            const end1 = updatedJadwal.jam_akhir;
-            const start2 = item.jam_mulai;
-            const end2 = item.jam_akhir;
-
-            // Cek jika jam berpotongan: (Start1 < End2) AND (End1 > Start2)
-            if (start1 < end2 && end1 > start2) {
-                return true;
-            }
+        // Isi kode mata kuliah langsung (bukan TomSelect)
+        document.getElementById("edit_kode_input").value = dataToEdit.kode_matkul || '';
+        document.getElementById("edit_mata_kuliah_hidden").value = dataToEdit.mata_kuliah || '';
+        
+        // Tampilkan info mata kuliah
+        if (dataToEdit.kode_matkul && dataToEdit.mata_kuliah) {
+            document.getElementById('edit_matkul_name').textContent = 
+                `${dataToEdit.kode_matkul} - ${dataToEdit.mata_kuliah}`;
+            document.getElementById('edit_matkul_info').classList.remove('hidden');
         }
-        return false;
-    });
+        
+        // Isi data lainnya
+        document.getElementById("edit_prodi").value = dataToEdit.prodi || '';
+        document.getElementById("edit_hari").value = dataToEdit.hari || '';
+        document.getElementById("edit_jam_mulai").value = dataToEdit.jam_mulai || '';
+        document.getElementById("edit_jam_akhir").value = dataToEdit.jam_akhir || '';
+        document.getElementById("edit_sks").value = dataToEdit.sks || '';
+        document.getElementById("edit_dosen").value = dataToEdit.dosen || '';
+        document.getElementById("edit_asisten").value = dataToEdit.asisten || '';
+        document.getElementById("edit_semester").value = dataToEdit.semester || '';
+        document.getElementById("edit_kelas").value = dataToEdit.kelas || '';
+        document.getElementById("edit_ruangan").value = dataToEdit.ruangan || '';
+        document.getElementById("edit_tahun_akademik").value = dataToEdit.tahun_akademik || '';
 
-    if (isConflict) {
-        showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama di Tahun Akademik yang sama.", 'error');
-        return;
+        // Inisialisasi daftar mata kuliah untuk pencarian
+        if (editMataKuliahList.length === 0) {
+            editMataKuliahList = [...mataKuliahData];
+        }
+
+        document.getElementById('editModal').classList.remove('hidden');
+        document.getElementById('editModal').classList.add('flex');
     }
 
-    const { error } = await supabaseClient
-        .from('jadwal')
-        .update(updatedJadwal)
-        .eq('id', id);
+    // --- Update Jadwal (Simpan Perubahan dari Modal) ---
+    async function updateJadwal() {
+        const id = document.getElementById("edit_id").value;
+        
+        const kode = document.getElementById("edit_kode_input").value.trim();
+        const nama = document.getElementById("edit_mata_kuliah_hidden").value.trim();
+        
+        if (!kode || !nama) {
+            showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
+            return;
+        }
+        
+        const jam_mulai = document.getElementById("edit_jam_mulai").value;
+        const jam_akhir = document.getElementById("edit_jam_akhir").value;
+        
+        if (jam_mulai >= jam_akhir) {
+            showToast("Jam Mulai harus lebih awal dari Jam Akhir!", 'error');
+            return;
+        }
+        
+        const updatedJadwal = {
+            kode_matkul: kode,
+            mata_kuliah: nama,
+            prodi: document.getElementById("edit_prodi").value,
+            hari: document.getElementById("edit_hari").value,
+            jam_mulai: jam_mulai,
+            jam_akhir: jam_akhir,
+            sks: parseInt(document.getElementById("edit_sks").value) || 0,
+            dosen: document.getElementById("edit_dosen").value,
+            asisten: document.getElementById("edit_asisten").value || "-",
+            semester: parseInt(document.getElementById("edit_semester").value) || 1,
+            kelas: document.getElementById("edit_kelas").value,
+            ruangan: document.getElementById("edit_ruangan").value,
+            tahun_akademik: document.getElementById("edit_tahun_akademik").value
+        };
+        
+        // Cek Konflik (dengan mengecualikan data yang sedang di-edit)
+        const isConflict = semuaData.some(item => {
+            if (item.id === parseInt(id)) return false; // Abaikan data saat ini
+            
+            if (item.hari === updatedJadwal.hari && 
+                item.ruangan === updatedJadwal.ruangan && 
+                item.tahun_akademik === updatedJadwal.tahun_akademik) {
+                
+                const start1 = updatedJadwal.jam_mulai;
+                const end1 = updatedJadwal.jam_akhir;
+                const start2 = item.jam_mulai;
+                const end2 = item.jam_akhir;
 
-    if (error) {
-        console.error("Gagal mengupdate jadwal:", error);
-        showToast("Gagal menyimpan perubahan: " + error.message, 'error');
-        return;
+                // Cek jika jam berpotongan: (Start1 < End2) AND (End1 > Start2)
+                if (start1 < end2 && end1 > start2) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        if (isConflict) {
+            showToast("Konflik Jadwal! Ruangan sudah terisi pada waktu yang sama di Tahun Akademik yang sama.", 'error');
+            return;
+        }
+
+        const { error } = await supabaseClient
+            .from('jadwal')
+            .update(updatedJadwal)
+            .eq('id', id);
+
+        if (error) {
+            console.error("Gagal mengupdate jadwal:", error);
+            showToast("Gagal menyimpan perubahan: " + error.message, 'error');
+            return;
+        }
+
+        closeEditModal();
+        showToast("Jadwal berhasil diperbarui!", 'success');
+        loadData();
     }
-
-    closeEditModal();
-    showToast("Jadwal berhasil diperbarui!", 'success');
-    loadData();
-}
     
     // --- Filter Data ---
     function filterData() {
