@@ -166,15 +166,21 @@
           </div>
           
           <!-- Tombol Export -->
-          <div class="flex justify-end mb-4 space-x-2">
-            <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-file-pdf mr-2"></i> Export PDF
-            </button>
-            <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-file-excel mr-2"></i> Export Excel
-            </button>
-          </div>
-          
+          <div class="flex justify-between mb-4">
+    <button onclick="openAddMatkulModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
+        <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
+    </button>
+
+    <div class="space-x-2">
+        <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
+            <i class="fas fa-file-pdf mr-2"></i> Export PDF
+        </button>
+        <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md">
+            <i class="fas fa-file-excel mr-2"></i> Export Excel
+        </button>
+    </div>
+</div>
+        
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
@@ -400,6 +406,13 @@
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+<td class="px-6 py-4 text-sm">
+    <button onclick="openEditMatkulModal('${matkul.id}', '${matkul.kode}', '${matkul.nama}', '${matkul.sks}')" 
+        class="text-yellow-600 hover:text-yellow-800 font-bold">
+        Edit
+    </button>
+</td>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
           </tr>
         `;
       });
@@ -554,6 +567,103 @@
     }
     
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
+
+    function openAddMatkulModal() {
+    document.getElementById('addMatkulModal').classList.remove('hidden');
+}
+
+function closeAddMatkulModal() {
+    document.getElementById('addMatkulModal').classList.add('hidden');
+}
+async function saveNewMatkul() {
+    const kode = document.getElementById('addKode').value;
+    const nama = document.getElementById('addNama').value;
+    const sks = document.getElementById('addSKS').value;
+
+    const { error } = await supabaseClient
+        .from('matakuliah')
+        .insert([{ kode, nama, sks }]);
+
+    if (error) {
+        alert("Gagal menambah mata kuliah: " + error.message);
+        return;
+    }
+
+    closeAddMatkulModal();
+    loadMatkulData();
+}
+function openEditMatkulModal(id, kode, nama, sks) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editKode').value = kode;
+    document.getElementById('editNama').value = nama;
+    document.getElementById('editSKS').value = sks;
+
+    document.getElementById('editMatkulModal').classList.remove('hidden');
+}
+function closeEditMatkulModal() {
+    document.getElementById('editMatkulModal').classList.add('hidden');
+}
+async function updateMatkul() {
+    const id = document.getElementById('editId').value;
+    const kode = document.getElementById('editKode').value;
+    const nama = document.getElementById('editNama').value;
+    const sks = document.getElementById('editSKS').value;
+
+    const { error } = await supabaseClient
+        .from('matakuliah')
+        .update({ kode, nama, sks })
+        .eq('id', id);
+
+    if (error) {
+        alert("Gagal update data: " + error.message);
+        return;
+    }
+
+    closeEditMatkulModal();
+    loadMatkulData();
+}
   </script>
+  <!-- MODAL TAMBAH MATA KULIAH -->
+<div id="addMatkulModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+        <h2 class="text-xl font-bold mb-4">Tambah Mata Kuliah</h2>
+
+        <label class="block mb-2">Kode Mata Kuliah</label>
+        <input id="addKode" class="border p-2 w-full mb-3 rounded">
+
+        <label class="block mb-2">Nama Mata Kuliah</label>
+        <input id="addNama" class="border p-2 w-full mb-3 rounded">
+
+        <label class="block mb-2">SKS</label>
+        <input id="addSKS" type="number" class="border p-2 w-full mb-3 rounded">
+
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeAddMatkulModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+            <button onclick="saveNewMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Simpan</button>
+        </div>
+    </div>
+</div>
+  <!-- MODAL EDIT MATA KULIAH -->
+<div id="editMatkulModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+        <h2 class="text-xl font-bold mb-4">Edit Mata Kuliah</h2>
+
+        <input type="hidden" id="editId">
+
+        <label class="block mb-2">Kode Mata Kuliah</label>
+        <input id="editKode" class="border p-2 w-full mb-3 rounded">
+
+        <label class="block mb-2">Nama Mata Kuliah</label>
+        <input id="editNama" class="border p-2 w-full mb-3 rounded">
+
+        <label class="block mb-2">SKS</label>
+        <input id="editSKS" type="number" class="border p-2 w-full mb-3 rounded">
+
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeEditMatkulModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+            <button onclick="updateMatkul()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">Update</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
