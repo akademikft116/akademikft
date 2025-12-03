@@ -386,6 +386,7 @@
     let tsFilterDosen; 
     let dosenOptions = [];   
     let asistenOptions = []; 
+    let tomSelectOptions = []; // Simpan opsi mata kuliah untuk nanti
     
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -456,7 +457,7 @@
             showToast("Gagal memuat data Mata Kuliah", 'error'); 
         } else {
             mataKuliahData = mkData; 
-            const tomSelectOptions = mkData.map(item => ({
+            tomSelectOptions = mkData.map(item => ({
                 value: item.kode + ' | ' + item.nama, 
                 text: item.kode + ' | ' + item.nama, 
                 kode: item.kode,
@@ -832,22 +833,36 @@
         tsEditMataKuliah.destroy();
       }
       
-      // Hanya tambahkan kode yang sedang diedit ke opsi TomSelect
+      // Cari data kode yang sedang diedit dari daftar tomSelectOptions
       const mkValue = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
-      const singleOption = [{
-        value: mkValue,
-        text: mkValue,
-        kode: dataToEdit.kode_matkul,
-        nama: dataToEdit.mata_kuliah
-      }];
+      const currentKodeOption = tomSelectOptions.find(option => 
+        option.value === mkValue
+      );
       
-      // Buat TomSelect baru dengan hanya 1 opsi (kode yang sedang diedit)
+      // Buat daftar opsi khusus untuk modal edit
+      let editOptions = [];
+      
+      // Tambahkan kode yang sedang diedit sebagai opsi pertama
+      if (currentKodeOption) {
+        editOptions.push(currentKodeOption);
+      } else {
+        // Jika tidak ditemukan, buat opsi baru
+        editOptions.push({
+          value: mkValue,
+          text: mkValue,
+          kode: dataToEdit.kode_matkul,
+          nama: dataToEdit.mata_kuliah
+        });
+      }
+      
+      // Buat TomSelect untuk modal edit dengan opsi yang sudah difilter
       tsEditMataKuliah = new TomSelect('#edit_kode_matkul_search', {
         valueField: 'value',
         labelField: 'text',
         searchField: ['kode', 'nama'],
-        options: singleOption,
+        options: editOptions, // Hanya kode yang sedang diedit
         items: [mkValue], // Langsung pilih kode ini
+        create: false, // Tidak boleh input baru
         placeholder: 'Kode / Mata Kuliah',
         render: {
           option: (data, escape) => `<div><span class="font-bold">${escape(data.kode)}</span> | ${escape(data.nama)}</div>`,
@@ -856,6 +871,22 @@
         onInitialize: function() {
           // Set nilai saat diinisialisasi
           this.setValue(mkValue);
+        },
+        onDropdownOpen: function() {
+          // Saat dropdown dibuka, muat semua opsi
+          this.clearOptions();
+          this.addOptions(tomSelectOptions);
+        },
+        onType: function(str) {
+          // Saat mengetik, filter opsi yang sesuai
+          if (str.length > 0) {
+            const filteredOptions = tomSelectOptions.filter(option => 
+              option.kode.toLowerCase().includes(str.toLowerCase()) || 
+              option.nama.toLowerCase().includes(str.toLowerCase())
+            );
+            this.clearOptions();
+            this.addOptions(filteredOptions);
+          }
         }
       });
       
