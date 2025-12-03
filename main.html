@@ -476,19 +476,6 @@
                 }
             });
             
-             // TomSelect untuk Form Edit
-            tsEditMataKuliah = new TomSelect('#edit_kode_matkul_search', {
-                valueField: 'value',
-                labelField: 'text',
-                searchField: ['kode', 'nama'], 
-                options: tomSelectOptions,
-                placeholder: 'Cari Kode atau Nama Mata Kuliah',
-                render: {
-                    option: (data, escape) => `<div><span class="font-bold">${escape(data.kode)}</span> | ${escape(data.nama)}</div>`,
-                    item: (data, escape) => `<div>${escape(data.text)}</div>`
-                }
-            });
-            
             // TomSelect untuk Filter Mata Kuliah
             const filterOptionsMk = [{ value: '', text: 'Semua Mata Kuliah', kode: '', nama: '' }, ...tomSelectOptions];
             
@@ -840,30 +827,42 @@
 
       document.getElementById("edit_id").value = id;
       
-      // Mengisi TomSelect Mata Kuliah
-      const mkValue = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
-      
-      // Pastikan TomSelect sudah diinisialisasi
-      if (!tsEditMataKuliah) {
-          showToast("TomSelect belum siap, coba lagi", 'error');
-          return;
+      // HAPUS TomSelect lama jika ada
+      if (tsEditMataKuliah) {
+        tsEditMataKuliah.destroy();
       }
       
-      // Set nilai ke TomSelect
-      tsEditMataKuliah.setValue(mkValue, true); // true untuk silent mode
+      // Hanya tambahkan kode yang sedang diedit ke opsi TomSelect
+      const mkValue = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
+      const singleOption = [{
+        value: mkValue,
+        text: mkValue,
+        kode: dataToEdit.kode_matkul,
+        nama: dataToEdit.mata_kuliah
+      }];
       
-      // Refresh TomSelect untuk menampilkan nilai yang sudah dipilih
+      // Buat TomSelect baru dengan hanya 1 opsi (kode yang sedang diedit)
+      tsEditMataKuliah = new TomSelect('#edit_kode_matkul_search', {
+        valueField: 'value',
+        labelField: 'text',
+        searchField: ['kode', 'nama'],
+        options: singleOption,
+        items: [mkValue], // Langsung pilih kode ini
+        placeholder: 'Kode / Mata Kuliah',
+        render: {
+          option: (data, escape) => `<div><span class="font-bold">${escape(data.kode)}</span> | ${escape(data.nama)}</div>`,
+          item: (data, escape) => `<div>${escape(data.text)}</div>`
+        },
+        onInitialize: function() {
+          // Set nilai saat diinisialisasi
+          this.setValue(mkValue);
+        }
+      });
+      
+      // Pastikan nilai sudah ter-set
       setTimeout(() => {
-          tsEditMataKuliah.refreshOptions(false); // Refresh options
-          
-          // Fokus ke input pencarian
-          const editSearchInput = document.querySelector('#edit_kode_matkul_search + .ts-wrapper .ts-control input');
-          if (editSearchInput) {
-              editSearchInput.focus();
-              // Set nilai input agar terlihat
-              editSearchInput.value = dataToEdit.kode_matkul + ' | ' + dataToEdit.mata_kuliah;
-          }
-      }, 100);
+        tsEditMataKuliah.setValue(mkValue, true);
+      }, 50);
       
       document.getElementById("edit_prodi").value = dataToEdit.prodi;
       document.getElementById("edit_hari").value = dataToEdit.hari;
@@ -890,7 +889,7 @@
 
         const mkValue = tsEditMataKuliah.getValue();
         if (!mkValue) {
-            showToast("Pilih Kode/Mata Kuliah terlebih dahulu!", 'warning');
+            showToast("Kode/Mata Kuliah tidak valid!", 'warning');
             return;
         }
         const [kode, nama] = mkValue.split(' | ').map(s => s.trim());
