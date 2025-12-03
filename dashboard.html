@@ -194,7 +194,7 @@
   </tr>
 </thead>
               <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
-                <tr><td colspan="5" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
+                  <tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -345,12 +345,12 @@
     // Fungsi untuk memuat data mata kuliah dengan filter
     async function loadMatkulData() {
       const tableBody = document.getElementById('matkulTableBody');
-      tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
       
       const { data, error } = await supabaseClient.from('matakuliah').select('*').order('kode');
       
       if (error) {
-        tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
         return;
       }
       
