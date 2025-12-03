@@ -619,23 +619,22 @@ function openEditMatkulModal(id, kode, nama, sks) {
 function closeEditMatkulModal() {
     document.getElementById('editMatkulModal').classList.add('hidden');
 }
+// Di fungsi updateMatkul()
 async function updateMatkul() {
-    const id = document.getElementById('editId').value;
-    const kode = document.getElementById('editKode').value;
-    const nama = document.getElementById('editNama').value;
-    const sks = document.getElementById('editSKS').value;
-
+    // ... (kode ambil nilai)
     const { error } = await supabaseClient
         .from('matakuliah')
         .update({ kode, nama, sks })
         .eq('id', id);
 
     if (error) {
-        alert("Gagal update data: " + error.message);
+        console.error("Supabase Update Error:", error); // <-- Tambahkan ini
+        alert("❌ Gagal update data: " + error.message);
         return;
     }
 
     closeEditMatkulModal();
+    alert("✅ Data Mata Kuliah berhasil diperbarui!"); // <-- Tambahkan ini
     loadMatkulData();
 }
     async function deleteMatkul(id) {
