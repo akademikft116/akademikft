@@ -108,12 +108,7 @@
         </div>
 
         <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Daftar Semua Mata Kuliah</h2>
-            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex items-center">
-              <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
-            </button>
-          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
           
           <div class="mb-6 border p-4 rounded-lg bg-gray-50">
             <h3 class="text-lg font-medium mb-3 text-gray-700">
@@ -130,7 +125,7 @@
                   <option value="50463">Informatika</option>
                   <option value="50362">Arsitektur</option>
                   <option value="50264">Elektro</option>
-                </select>
+                  </select>
               </div>
 
               <div>
@@ -168,6 +163,9 @@
             </button>
             <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
+            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+              <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
             </button>
           </div>
           
@@ -330,13 +328,13 @@
     // Fungsi untuk memuat data mata kuliah dengan filter
     async function loadMatkulData() {
       const tableBody = document.getElementById('matkulTableBody');
-      // colspan diubah menjadi 6
+      // colspan disesuaikan menjadi 6
       tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
       
       const { data, error } = await supabaseClient.from('matakuliah').select('*').order('kode');
       
       if (error) {
-        // colspan diubah menjadi 6
+         // colspan disesuaikan menjadi 6
         tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
         return;
       }
@@ -354,11 +352,11 @@
         else if (kodePrefix === '50463') prodi = 'Informatika';
         else if (kodePrefix === '50362') prodi = 'Arsitektur';
         else if (kodePrefix === '50264') prodi = 'Elektro';
+        // MKWU dihilangkan
         
         return {
           ...matkul,
           prodi: prodi,
-          // Tambahkan ID placeholder jika data asli tidak memilikinya (misalnya, jika kode adalah ID)
           id: matkul.kode // Asumsi: menggunakan kode sebagai ID untuk fungsi edit/hapus
         };
       });
@@ -372,7 +370,7 @@
       const tableBody = document.getElementById('matkulTableBody');
       
       if (!data || data.length === 0) {
-        // colspan diubah menjadi 6
+        // colspan disesuaikan menjadi 6
         tableBody.innerHTML = `
           <tr>
             <td colspan="6" class="px-6 py-8 text-sm text-gray-500 text-center">
@@ -451,23 +449,22 @@
       renderMatkulTable(filteredMatkulData);
     }
 
-    // FUNGSI PLACEHOLDER BARU
+    // FUNGSI PLACEHOLDER (tujuan hanya memunculkan alert, bukan fungsi database)
     function addMatkul() { 
       alert('🔧 Fungsi Tambah Mata Kuliah belum diaktifkan. ID yang akan ditambahkan: New Matkul');
     }
 
-    // FUNGSI PLACEHOLDER BARU
+    // FUNGSI PLACEHOLDER (tujuan hanya memunculkan alert, bukan fungsi database)
     function editMatkul(id) { 
       alert('🔧 Fungsi Edit Mata Kuliah belum diaktifkan. ID Matkul: ' + id);
     }
 
-    // FUNGSI PLACEHOLDER BARU
+    // FUNGSI PLACEHOLDER (tujuan hanya memunculkan alert, bukan fungsi database)
     function deleteMatkul(id) { 
       if(confirm('Apakah Anda yakin ingin menghapus Mata Kuliah dengan ID: ' + id + '?')) {
         alert('🔧 Fungsi Hapus Mata Kuliah belum diaktifkan. ID yang akan dihapus: ' + id);
       }
     }
-
 
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
@@ -479,6 +476,7 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
+      // Headers sekarang memiliki 5 kolom
       const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS']];
       const body = filteredMatkulData.map((matkul, index) => [
         index + 1,
