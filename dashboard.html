@@ -55,6 +55,15 @@
       overflow-y: auto;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
+    .delete-modal {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -399,6 +408,28 @@
     </div>
   </div>
 
+  <!-- Modal Konfirmasi Hapus -->
+  <div id="deleteModal" class="modal-overlay">
+    <div class="delete-modal">
+      <div class="mb-6">
+        <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2" id="deleteTitle">Konfirmasi Hapus</h3>
+        <p class="text-gray-600" id="deleteMessage">Anda yakin ingin menghapus mata kuliah ini?</p>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button onclick="closeDeleteModal()" class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
+          Batal
+        </button>
+        <button onclick="confirmDelete()" class="px-5 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200">
+          <i class="fas fa-trash-alt mr-2"></i> Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
@@ -407,6 +438,7 @@
     // Variabel untuk data mata kuliah
     let allMatkulData = [];
     let filteredMatkulData = [];
+    let matkulToDelete = null;
 
     function showContent(tabId, clickedButton) {
       ['main', 'matkul', 'pengaturan'].forEach(id => {
@@ -452,8 +484,9 @@
         return;
       }
       
-      allMatkulData = data;
+      allMatkulData = data || [];
       
+      // Map data untuk menentukan program studi dari kode
       allMatkulData = allMatkulData.map(matkul => {
         let prodi = 'Lainnya';
         const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
@@ -467,7 +500,7 @@
         return {
           ...matkul,
           prodi: matkul.prodi || prodi,
-          id: matkul.id || matkul.kode
+          id: matkul.id
         };
       });
       
@@ -496,20 +529,20 @@
         html += `
           <tr class="hover:bg-gray-50">
             <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
+            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode || '-'}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama || '-'}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${matkul.semester || '-'}</td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 ${matkul.prodi || 'Lainnya'}
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || '-'}</td>
             <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-              <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
+              <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md mr-2" title="Edit Mata Kuliah">
                 <i class="fas fa-edit mr-1"></i> Edit
               </button>
-              <button onclick="showDeleteModal('${matkul.id}', '${matkul.nama}')" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-md" title="Hapus Mata Kuliah">
+              <button onclick="showDeleteModal('${matkul.id}', '${matkul.nama || matkul.kode}')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md" title="Hapus Mata Kuliah">
                 <i class="fas fa-trash-alt mr-1"></i> Hapus
               </button>
             </td>
@@ -529,9 +562,11 @@
       filteredMatkulData = allMatkulData.filter(matkul => {
         let passes = true;
         
-        if (kodeProdi) {
+        if (kodeProdi && matkul.kode) {
           const kodePrefix = matkul.kode.substring(0, 5);
-          if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
+          if (kodePrefix !== kodeProdi) {
+            passes = false;
+          }
         }
         
         if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
@@ -559,10 +594,15 @@
 
     // Modal untuk konfirmasi hapus
     function showDeleteModal(id, nama) {
-      if (!confirm(`Apakah Anda yakin ingin menghapus mata kuliah:\n"${nama}"?\n\nTindakan ini tidak dapat dibatalkan.`)) {
-        return;
-      }
-      deleteMatkul(id);
+      matkulToDelete = id;
+      document.getElementById('deleteTitle').textContent = 'Konfirmasi Hapus Mata Kuliah';
+      document.getElementById('deleteMessage').textContent = `Anda yakin ingin menghapus mata kuliah "${nama}"? Tindakan ini tidak dapat dibatalkan.`;
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+      matkulToDelete = null;
     }
 
     // FUNGSI CRUD LENGKAP
@@ -592,17 +632,17 @@
     }
 
     async function editMatkul(id) {
-      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+      const matkul = allMatkulData.find(m => m.id == id);
       if (!matkul) {
         alert('Data mata kuliah tidak ditemukan');
         return;
       }
 
-      document.getElementById('matkulId').value = matkul.id || matkul.kode;
-      document.getElementById('modalKode').value = matkul.kode;
-      document.getElementById('modalNama').value = matkul.nama;
+      document.getElementById('matkulId').value = matkul.id;
+      document.getElementById('modalKode').value = matkul.kode || '';
+      document.getElementById('modalNama').value = matkul.nama || '';
       document.getElementById('modalProdi').value = matkul.prodi || '';
-      document.getElementById('modalSKS').value = matkul.sks;
+      document.getElementById('modalSKS').value = matkul.sks || '';
       document.getElementById('modalSemester').value = matkul.semester || '';
       document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
       document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
@@ -614,15 +654,20 @@
       event.preventDefault();
       
       const id = document.getElementById('matkulId').value;
-      const kode = document.getElementById('modalKode').value;
-      const nama = document.getElementById('modalNama').value;
+      const kode = document.getElementById('modalKode').value.trim();
+      const nama = document.getElementById('modalNama').value.trim();
       const prodi = document.getElementById('modalProdi').value;
       const sks = document.getElementById('modalSKS').value;
       const semester = document.getElementById('modalSemester').value;
 
-      // Validasi kode unik
-      const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
-      if (existing && !id) {
+      if (!kode || !nama || !prodi || !sks || !semester) {
+        alert('Semua field yang ditandai dengan * harus diisi!');
+        return;
+      }
+
+      // Validasi kode unik (kecuali untuk edit)
+      const existing = allMatkulData.find(m => m.kode === kode && m.id != id);
+      if (existing) {
         alert('Kode mata kuliah sudah digunakan!');
         return;
       }
@@ -666,8 +711,8 @@
         if (error) throw error;
         
         closeModal();
-        loadMatkulData();
-        loadDashboardTotals();
+        await loadMatkulData();
+        await loadDashboardTotals();
         
       } catch (error) {
         console.error('Error menyimpan mata kuliah:', error);
@@ -675,18 +720,21 @@
       }
     }
 
-    async function deleteMatkul(id) {
+    async function confirmDelete() {
+      if (!matkulToDelete) return;
+      
       try {
         const { error } = await supabaseClient
           .from('matakuliah')
           .delete()
-          .eq('id', id);
+          .eq('id', matkulToDelete);
 
         if (error) throw error;
         
         alert('✅ Mata kuliah berhasil dihapus!');
-        loadMatkulData();
-        loadDashboardTotals();
+        closeDeleteModal();
+        await loadMatkulData();
+        await loadDashboardTotals();
         
       } catch (error) {
         console.error('Error menghapus mata kuliah:', error);
@@ -707,11 +755,11 @@
       const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Semester', 'Program Studi', 'SKS']];
       const body = filteredMatkulData.map((matkul, index) => [
         index + 1,
-        matkul.kode,
-        matkul.nama,
+        matkul.kode || '-',
+        matkul.nama || '-',
         matkul.semester || '-',
         matkul.prodi || 'Lainnya',
-        matkul.sks
+        matkul.sks || '-'
       ]);
       
       doc.setFontSize(16);
@@ -749,11 +797,11 @@
       const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Semester', 'Program Studi', 'SKS']];
       const data = filteredMatkulData.map((matkul, index) => [
         index + 1,
-        matkul.kode,
-        matkul.nama,
+        matkul.kode || '-',
+        matkul.nama || '-',
         matkul.semester || '-',
         matkul.prodi || 'Lainnya',
-        matkul.sks
+        matkul.sks || '-'
       ]);
       
       const wsData = [
@@ -804,6 +852,7 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeModal();
+        closeDeleteModal();
       }
     });
     
