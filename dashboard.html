@@ -34,6 +34,27 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -164,7 +185,7 @@
             <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-file-excel mr-2"></i> Export Excel
             </button>
-            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
             </button>
           </div>
@@ -178,11 +199,12 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
               </thead>
               <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
-                <tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
+                <tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -284,6 +306,106 @@
     </main>
   </div>
 
+  <!-- Modal Tambah/Edit Mata Kuliah -->
+  <div id="matkulModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-800" id="modalTitle">Tambah Mata Kuliah Baru</h3>
+          <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <form id="matkulForm" onsubmit="saveMatkul(event)">
+          <input type="hidden" id="matkulId" value="">
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label for="modalKode" class="block text-sm font-medium text-gray-700 mb-1">Kode Mata Kuliah *</label>
+              <input type="text" id="modalKode" required 
+                     class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="Contoh: 50262001">
+              <p class="text-xs text-gray-500 mt-1">5 digit pertama adalah kode prodi</p>
+            </div>
+            
+            <div>
+              <label for="modalNama" class="block text-sm font-medium text-gray-700 mb-1">Nama Mata Kuliah *</label>
+              <input type="text" id="modalNama" required 
+                     class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="Contoh: Matematika Teknik">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label for="modalProdi" class="block text-sm font-medium text-gray-700 mb-1">Program Studi *</label>
+              <select id="modalProdi" required 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Pilih Program Studi</option>
+                <option value="Industri">Industri</option>
+                <option value="Sipil">Sipil</option>
+                <option value="Informatika">Informatika</option>
+                <option value="Arsitektur">Arsitektur</option>
+                <option value="Elektro">Elektro</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="modalSKS" class="block text-sm font-medium text-gray-700 mb-1">Jumlah SKS *</label>
+              <select id="modalSKS" required 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Pilih SKS</option>
+                <option value="1">1 SKS</option>
+                <option value="2">2 SKS</option>
+                <option value="3">3 SKS</option>
+                <option value="4">4 SKS</option>
+                <option value="5">5 SKS</option>
+                <option value="6">6 SKS</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="modalSemester" class="block text-sm font-medium text-gray-700 mb-1">Semester *</label>
+              <select id="modalSemester" required 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Pilih Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <label for="modalDeskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Mata Kuliah</label>
+            <textarea id="modalDeskripsi" rows="3" 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi singkat tentang mata kuliah..."></textarea>
+          </div>
+          
+          <div class="flex justify-end space-x-3 pt-4 border-t">
+            <button type="button" onclick="closeModal()" 
+                    class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
+              Batal
+            </button>
+            <button type="submit" 
+                    class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center">
+              <i class="fas fa-save mr-2"></i>
+              <span id="saveButtonText">Simpan Mata Kuliah</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
@@ -302,7 +424,7 @@
       clickedButton?.classList.add('active-link');
       
       if (tabId === 'matkul') {
-        loadMatkulData(); // Panggil fungsi baru untuk memuat data dengan filter
+        loadMatkulData();
       }
     }
 
@@ -325,44 +447,40 @@
       await getTotalCount('matakuliah', 'totalMataKuliah');
     }
 
-    // Fungsi untuk memuat data mata kuliah dengan filter
+    // Fungsi untuk memuat data mata kuliah
     async function loadMatkulData() {
       const tableBody = document.getElementById('matkulTableBody');
-      // colspan disesuaikan menjadi 6
-      tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
       
       const { data, error } = await supabaseClient.from('matakuliah').select('*').order('kode');
       
       if (error) {
-         // colspan disesuaikan menjadi 6
-        tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
         return;
       }
       
       allMatkulData = data;
       
-      // Tentukan program studi berdasarkan kode
       allMatkulData = allMatkulData.map(matkul => {
         let prodi = 'Lainnya';
-        const kodePrefix = matkul.kode.substring(0, 5);
+        const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
         
-        // Mapping kode ke program studi
         if (kodePrefix === '50262') prodi = 'Industri';
         else if (kodePrefix === '50263') prodi = 'Sipil';
         else if (kodePrefix === '50463') prodi = 'Informatika';
         else if (kodePrefix === '50362') prodi = 'Arsitektur';
         else if (kodePrefix === '50264') prodi = 'Elektro';
-        // MKWU dihilangkan
         
         return {
           ...matkul,
-          prodi: prodi,
-          id: matkul.kode // Asumsi: menggunakan kode sebagai ID untuk fungsi edit/hapus
+          prodi: matkul.prodi || prodi,
+          id: matkul.id || matkul.kode
         };
       });
       
       filteredMatkulData = [...allMatkulData];
       renderMatkulTable(filteredMatkulData);
+      document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
     }
 
     // Fungsi untuk menampilkan tabel mata kuliah
@@ -370,10 +488,9 @@
       const tableBody = document.getElementById('matkulTableBody');
       
       if (!data || data.length === 0) {
-        // colspan disesuaikan menjadi 6
         tableBody.innerHTML = `
           <tr>
-            <td colspan="6" class="px-6 py-8 text-sm text-gray-500 text-center">
+            <td colspan="7" class="px-6 py-8 text-sm text-gray-500 text-center">
               📭 Tidak ada data mata kuliah yang sesuai dengan filter pencarian
             </td>
           </tr>
@@ -394,12 +511,13 @@
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.semester || '-'}</td>
             <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-              <button onclick="editMatkul('${matkul.id}')" class="text-indigo-600 hover:text-indigo-900 mr-2" title="Edit Mata Kuliah">
-                <i class="fas fa-edit"></i>
+              <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
+                <i class="fas fa-edit mr-1"></i> Edit
               </button>
-              <button onclick="deleteMatkul('${matkul.id}')" class="text-red-600 hover:text-red-900" title="Hapus Mata Kuliah">
-                <i class="fas fa-trash-alt"></i>
+              <button onclick="deleteMatkul('${matkul.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md" title="Hapus Mata Kuliah">
+                <i class="fas fa-trash-alt mr-1"></i> Hapus
               </button>
             </td>
           </tr>
@@ -418,18 +536,15 @@
       filteredMatkulData = allMatkulData.filter(matkul => {
         let passes = true;
         
-        // Filter berdasarkan kode program studi
         if (kodeProdi) {
           const kodePrefix = matkul.kode.substring(0, 5);
           if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
         }
         
-        // Filter berdasarkan nama mata kuliah
         if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
           passes = false;
         }
         
-        // Filter berdasarkan SKS
         if (sks && matkul.sks != sks) {
           passes = false;
         }
@@ -449,20 +564,140 @@
       renderMatkulTable(filteredMatkulData);
     }
 
-    // FUNGSI PLACEHOLDER (tujuan hanya memunculkan alert, bukan fungsi database)
-    function addMatkul() { 
-      alert('🔧 Fungsi Tambah Mata Kuliah belum diaktifkan. ID yang akan ditambahkan: New Matkul');
+    // FUNGSI CRUD LENGKAP
+    function openModal() {
+      document.getElementById('matkulModal').style.display = 'flex';
     }
 
-    // FUNGSI PLACEHOLDER (tujuan hanya memunculkan alert, bukan fungsi database)
-    function editMatkul(id) { 
-      alert('🔧 Fungsi Edit Mata Kuliah belum diaktifkan. ID Matkul: ' + id);
+    function closeModal() {
+      document.getElementById('matkulModal').style.display = 'none';
+      resetForm();
     }
 
-    // FUNGSI PLACEHOLDER (tujuan hanya memunculkan alert, bukan fungsi database)
-    function deleteMatkul(id) { 
-      if(confirm('Apakah Anda yakin ingin menghapus Mata Kuliah dengan ID: ' + id + '?')) {
-        alert('🔧 Fungsi Hapus Mata Kuliah belum diaktifkan. ID yang akan dihapus: ' + id);
+    function resetForm() {
+      document.getElementById('matkulId').value = '';
+      document.getElementById('modalKode').value = '';
+      document.getElementById('modalNama').value = '';
+      document.getElementById('modalProdi').value = '';
+      document.getElementById('modalSKS').value = '';
+      document.getElementById('modalSemester').value = '';
+      document.getElementById('modalDeskripsi').value = '';
+      document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
+      document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
+    }
+
+    function addMatkul() {
+      resetForm();
+      openModal();
+    }
+
+    async function editMatkul(id) {
+      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+      if (!matkul) {
+        alert('Data mata kuliah tidak ditemukan');
+        return;
+      }
+
+      document.getElementById('matkulId').value = matkul.id || matkul.kode;
+      document.getElementById('modalKode').value = matkul.kode;
+      document.getElementById('modalNama').value = matkul.nama;
+      document.getElementById('modalProdi').value = matkul.prodi || '';
+      document.getElementById('modalSKS').value = matkul.sks;
+      document.getElementById('modalSemester').value = matkul.semester || '';
+      document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
+      document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+      document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+      
+      openModal();
+    }
+
+    async function saveMatkul(event) {
+      event.preventDefault();
+      
+      const id = document.getElementById('matkulId').value;
+      const kode = document.getElementById('modalKode').value;
+      const nama = document.getElementById('modalNama').value;
+      const prodi = document.getElementById('modalProdi').value;
+      const sks = document.getElementById('modalSKS').value;
+      const semester = document.getElementById('modalSemester').value;
+      const deskripsi = document.getElementById('modalDeskripsi').value;
+
+      // Validasi kode unik
+      const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
+      if (existing && !id) {
+        alert('Kode mata kuliah sudah digunakan!');
+        return;
+      }
+
+      const matkulData = {
+        kode,
+        nama,
+        prodi,
+        sks: parseInt(sks),
+        semester: parseInt(semester),
+        deskripsi
+      };
+
+      try {
+        let error;
+        
+        if (id) {
+          // Update data
+          const { data, error: updateError } = await supabaseClient
+            .from('matakuliah')
+            .update(matkulData)
+            .eq('id', id)
+            .select();
+          error = updateError;
+          
+          if (!error) {
+            alert('✅ Mata kuliah berhasil diperbarui!');
+          }
+        } else {
+          // Tambah data baru
+          const { data, error: insertError } = await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData])
+            .select();
+          error = insertError;
+          
+          if (!error) {
+            alert('✅ Mata kuliah berhasil ditambahkan!');
+          }
+        }
+
+        if (error) throw error;
+        
+        closeModal();
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menyimpan mata kuliah:', error);
+        alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+      }
+    }
+
+    async function deleteMatkul(id) {
+      if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient
+          .from('matakuliah')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        alert('✅ Mata kuliah berhasil dihapus!');
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menghapus mata kuliah:', error);
+        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
       }
     }
 
@@ -476,14 +711,14 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      // Headers sekarang memiliki 5 kolom
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS']];
+      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
       const body = filteredMatkulData.map((matkul, index) => [
         index + 1,
         matkul.kode,
         matkul.nama,
         matkul.prodi || 'Lainnya',
-        matkul.sks
+        matkul.sks,
+        matkul.semester || '-'
       ]);
       
       doc.setFontSize(16);
@@ -501,9 +736,10 @@
         columnStyles: {
           0: { cellWidth: 10 },
           1: { cellWidth: 25 },
-          2: { halign: 'left', cellWidth: 80 },
+          2: { halign: 'left', cellWidth: 70 },
           3: { cellWidth: 30 },
-          4: { cellWidth: 15 }
+          4: { cellWidth: 15 },
+          5: { cellWidth: 20 }
         }
       });
       
@@ -517,13 +753,14 @@
         return;
       }
       
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS']];
+      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
       const data = filteredMatkulData.map((matkul, index) => [
         index + 1,
         matkul.kode,
         matkul.nama,
         matkul.prodi || 'Lainnya',
-        matkul.sks
+        matkul.sks,
+        matkul.semester || '-'
       ]);
       
       const wsData = [
@@ -538,8 +775,8 @@
       const ws = XLSX.utils.aoa_to_sheet(wsData);
       
       ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }
       ];
       
       XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
@@ -560,18 +797,22 @@
     function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
     
     async function logout() {
-      // 1. Panggil signOut untuk mengakhiri sesi di Supabase
       const { error } = await supabaseClient.auth.signOut();
 
       if (error) {
         console.error('Logout Error:', error.message);
         alert('Gagal keluar sesi. Silakan coba lagi.');
       } else {
-        // 2. Arahkan ke halaman LOGIN (bukan halaman dashboard/index.html)
-        // Ubah ini kembali ke halaman login Anda yang sebenarnya.
         window.location.href = 'index.html'; 
       }
     }
+    
+    // Event listener untuk menutup modal dengan ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
     
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
   </script>
