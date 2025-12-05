@@ -197,9 +197,9 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
               </thead>
@@ -339,22 +339,6 @@
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label for="modalSemester" class="block text-sm font-medium text-gray-700 mb-1">Semester *</label>
-              <select id="modalSemester" required 
-                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">Pilih Semester</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
-                <option value="3">Semester 3</option>
-                <option value="4">Semester 4</option>
-                <option value="5">Semester 5</option>
-                <option value="6">Semester 6</option>
-                <option value="7">Semester 7</option>
-                <option value="8">Semester 8</option>
-              </select>
-            </div>
-            
-            <div>
               <label for="modalProdi" class="block text-sm font-medium text-gray-700 mb-1">Program Studi *</label>
               <select id="modalProdi" required 
                       class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -381,6 +365,29 @@
                 <option value="6">6 SKS</option>
               </select>
             </div>
+            
+            <div>
+              <label for="modalSemester" class="block text-sm font-medium text-gray-700 mb-1">Semester *</label>
+              <select id="modalSemester" required 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Pilih Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <label for="modalDeskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Mata Kuliah</label>
+            <textarea id="modalDeskripsi" rows="3" 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi singkat tentang mata kuliah..."></textarea>
           </div>
           
           <div class="flex justify-end space-x-3 pt-4 border-t">
@@ -404,6 +411,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Variabel untuk data mata kuliah
     let allMatkulData = [];
     let filteredMatkulData = [];
 
@@ -413,185 +421,110 @@
       });
       document.getElementById(tabId)?.classList.remove('hidden');
       document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
-      if (clickedButton) clickedButton.classList.add('active-link');
+      clickedButton?.classList.add('active-link');
       
       if (tabId === 'matkul') {
         loadMatkulData();
       }
     }
 
-    async function loadDashboardTotals() {
+    async function getTotalCount(table, elementId) {
       try {
-        const { count: countDosen, error: errorDosen } = await supabaseClient
-          .from('dosen')
+        const { count, error } = await supabaseClient
+          .from(table)
           .select('*', { count: 'exact', head: true });
-        document.getElementById('totalDosen').textContent = errorDosen ? 0 : (countDosen || 0);
-
-        const { count: countJadwal, error: errorJadwal } = await supabaseClient
-          .from('jadwal')
-          .select('*', { count: 'exact', head: true });
-        document.getElementById('totalJadwal').textContent = errorJadwal ? 0 : (countJadwal || 0);
-
-        const { count: countMatkul, error: errorMatkul } = await supabaseClient
-          .from('matakuliah')
-          .select('*', { count: 'exact', head: true });
-        document.getElementById('totalMataKuliah').textContent = errorMatkul ? 0 : (countMatkul || 0);
-      } catch (error) {
-        console.error('Error loading dashboard totals:', error);
+        if (error) throw error;
+        document.getElementById(elementId).textContent = count ?? 0;
+      } catch (err) {
+        console.error(`Error ambil total dari ${table}:`, err.message);
+        document.getElementById(elementId).textContent = 0;
       }
     }
 
-    // Fungsi untuk memuat data mata kuliah - DIPERBAIKI
+    async function loadDashboardTotals() {
+      await getTotalCount('dosen', 'totalDosen');
+      await getTotalCount('jadwal', 'totalJadwal');
+      await getTotalCount('matakuliah', 'totalMataKuliah');
+    }
+
+    // Fungsi untuk memuat data mata kuliah
     async function loadMatkulData() {
       const tableBody = document.getElementById('matkulTableBody');
       tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
       
-      try {
-        const { data, error } = await supabaseClient
-          .from('matakuliah')
-          .select('*')
-          .order('kode');
-        
-        if (error) {
-          throw error;
-        }
-        
-        console.log('Data loaded from Supabase:', data); // Debug log
-        
-        allMatkulData = data || [];
-        
-        // Map data untuk menentukan program studi dari kode
-        allMatkulData = allMatkulData.map(matkul => {
-          let prodi = 'Lainnya';
-          if (matkul.kode) {
-            const kodePrefix = matkul.kode.substring(0, 5);
-            if (kodePrefix === '50262') prodi = 'Industri';
-            else if (kodePrefix === '50263') prodi = 'Sipil';
-            else if (kodePrefix === '50463') prodi = 'Informatika';
-            else if (kodePrefix === '50362') prodi = 'Arsitektur';
-            else if (kodePrefix === '50264') prodi = 'Elektro';
-          }
-          
-          return {
-            ...matkul,
-            prodi: matkul.prodi || prodi,
-            id: matkul.id // Gunakan id dari database
-          };
-        });
-        
-        filteredMatkulData = [...allMatkulData];
-        renderMatkulTable(filteredMatkulData);
-        document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
-        
-      } catch (error) {
-        console.error('Error loading mata kuliah:', error);
-        tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">Error: ${error.message}</td></tr>`;
+      const { data, error } = await supabaseClient.from('matakuliah').select('*').order('kode');
+      
+      if (error) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
+        return;
       }
+      
+      allMatkulData = data;
+      
+      allMatkulData = allMatkulData.map(matkul => {
+        let prodi = 'Lainnya';
+        const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
+        
+        if (kodePrefix === '50262') prodi = 'Industri';
+        else if (kodePrefix === '50263') prodi = 'Sipil';
+        else if (kodePrefix === '50463') prodi = 'Informatika';
+        else if (kodePrefix === '50362') prodi = 'Arsitektur';
+        else if (kodePrefix === '50264') prodi = 'Elektro';
+        
+        return {
+          ...matkul,
+          prodi: matkul.prodi || prodi,
+          id: matkul.id || matkul.kode
+        };
+      });
+      
+      filteredMatkulData = [...allMatkulData];
+      renderMatkulTable(filteredMatkulData);
+      document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
     }
 
-    // Fungsi untuk menampilkan tabel mata kuliah - DIPERBAIKI
+    // Fungsi untuk menampilkan tabel mata kuliah
     function renderMatkulTable(data) {
-  const tableBody = document.getElementById('matkulTableBody');
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-8 text-sm text-gray-500 text-center">
-          📭 Tidak ada data mata kuliah
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  let html = '';
-  data.forEach((matkul, index) => {
-
-    const kodePrefix = (matkul.kode || '').substring(0, 5);
-    let prodi = 'Lainnya';
-    if (kodePrefix === '50262') prodi = 'Industri';
-    else if (kodePrefix === '50263') prodi = 'Sipil';
-    else if (kodePrefix === '50463') prodi = 'Informatika';
-    else if (kodePrefix === '50362') prodi = 'Arsitektur';
-    else if (kodePrefix === '50264') prodi = 'Elektro';
-
-    html += `
-      <tr>
-        <td class="px-6 py-4">${index + 1}</td>
-        <td class="px-6 py-4">${matkul.kode}</td>
-        <td class="px-6 py-4">${matkul.nama}</td>
-        <td class="px-6 py-4">${matkul.semester}</td>
-        <td class="px-6 py-4">${prodi}</td>
-        <td class="px-6 py-4">${matkul.sks}</td>
-        <td class="px-6 py-4">
-          <button onclick="editMatkul(${matkul.id})" class="bg-yellow-500 text-white px-3 py-1 rounded">Edit</button>
-          <button onclick="confirmDelete(${matkul.id}, '${matkul.nama}')" class="bg-red-600 text-white px-3 py-1 rounded">Hapus</button>
-        </td>
-      </tr>
-    `;
-  });
-
-  tableBody.innerHTML = html;
-}
-
-    // Fungsi Edit - DIPERBAIKI
-    async function editMatkul(id) {
-  const matkul = allMatkulData.find(m => m.id === id);
-  if (!matkul) {
-    alert('❌ Data mata kuliah tidak ditemukan');
-    return;
-  }
-
-  document.getElementById('matkulId').value = matkul.id;
-  document.getElementById('modalKode').value = matkul.kode || '';
-  document.getElementById('modalNama').value = matkul.nama || '';
-  document.getElementById('modalSKS').value = matkul.sks || '';
-  document.getElementById('modalSemester').value = matkul.semester || '';
-
-  // Program studi dihitung otomatis → tidak disimpan ke DB
-  const kodePrefix = (matkul.kode || '').substring(0, 5);
-  let prodi = "Lainnya";
-  if (kodePrefix === "50262") prodi = "Industri";
-  else if (kodePrefix === "50263") prodi = "Sipil";
-  else if (kodePrefix === "50463") prodi = "Informatika";
-  else if (kodePrefix === "50362") prodi = "Arsitektur";
-  else if (kodePrefix === "50264") prodi = "Elektro";
-
-  document.getElementById('modalProdi').value = prodi;
-
-  document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-  document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
-  
-  openModal();
-}
-
-    // Fungsi Delete - DIPERBAIKI
-    function confirmDelete(id, nama) {
-      const namaDisplay = nama || 'mata kuliah ini';
-      if (confirm(`Apakah Anda yakin ingin menghapus mata kuliah:\n"${namaDisplay}"?\n\nTindakan ini tidak dapat dibatalkan.`)) {
-        deleteMatkul(id);
+      const tableBody = document.getElementById('matkulTableBody');
+      
+      if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-sm text-gray-500 text-center">
+              📭 Tidak ada data mata kuliah yang sesuai dengan filter pencarian
+            </td>
+          </tr>
+        `;
+        return;
       }
-    }
 
-    async function deleteMatkul(id) {
-      try {
-        console.log('Deleting matkul with ID:', id); // Debug log
-        
-        const { error } = await supabaseClient
-          .from('matakuliah')
-          .delete()
-          .eq('id', id);
+      let html = '';
+      data.forEach((matkul, index) => {
+        html += `
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
+            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">
+              <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                ${matkul.prodi || 'Lainnya'}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.semester || '-'}</td>
+            <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+              <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
+                <i class="fas fa-edit mr-1"></i> Edit
+              </button>
+              <button onclick="deleteMatkul('${matkul.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md" title="Hapus Mata Kuliah">
+                <i class="fas fa-trash-alt mr-1"></i> Hapus
+              </button>
+            </td>
+          </tr>
+        `;
+      });
 
-        if (error) throw error;
-        
-        alert('✅ Mata kuliah berhasil dihapus!');
-        await loadMatkulData();
-        await loadDashboardTotals();
-        
-      } catch (error) {
-        console.error('Error menghapus mata kuliah:', error);
-        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
-      }
+      tableBody.innerHTML = html;
     }
 
     // Fungsi untuk memfilter data mata kuliah
@@ -603,13 +536,13 @@
       filteredMatkulData = allMatkulData.filter(matkul => {
         let passes = true;
         
-        if (kodeProdi && matkul.kode) {
+        if (kodeProdi) {
           const kodePrefix = matkul.kode.substring(0, 5);
-          if (kodePrefix !== kodeProdi) passes = false;
+          if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
         }
         
-        if (namaMatkul && matkul.nama) {
-          if (!matkul.nama.toLowerCase().includes(namaMatkul)) passes = false;
+        if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
+          passes = false;
         }
         
         if (sks && matkul.sks != sks) {
@@ -648,6 +581,7 @@
       document.getElementById('modalProdi').value = '';
       document.getElementById('modalSKS').value = '';
       document.getElementById('modalSemester').value = '';
+      document.getElementById('modalDeskripsi').value = '';
       document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
       document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
     }
@@ -657,63 +591,115 @@
       openModal();
     }
 
-    async function saveMatkul(event) {
-  event.preventDefault();
-  
-  const id = document.getElementById('matkulId').value;
-  const kode = document.getElementById('modalKode').value.trim();
-  const nama = document.getElementById('modalNama').value.trim();
-  const sks = parseInt(document.getElementById('modalSKS').value);
-  const semester = parseInt(document.getElementById('modalSemester').value);
+    async function editMatkul(id) {
+      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+      if (!matkul) {
+        alert('Data mata kuliah tidak ditemukan');
+        return;
+      }
 
-  if (!kode || !nama || !sks || !semester) {
-    alert('❌ Semua field wajib diisi!');
-    return;
-  }
-
-  // Validasi kode unik
-  const existing = allMatkulData.find(m => m.kode === kode && m.id != id);
-  if (existing) {
-    alert('❌ Kode mata kuliah sudah digunakan!');
-    return;
-  }
-
-  // HANYA kolom yang ada di database
-  const matkulData = {
-    kode,
-    nama,
-    sks,
-    semester
-  };
-
-  try {
-    let result;
-
-    if (id) {
-      result = await supabaseClient
-        .from('matakuliah')
-        .update(matkulData)
-        .eq('id', id)
-        .select();
-    } else {
-      result = await supabaseClient
-        .from('matakuliah')
-        .insert([matkulData])
-        .select();
+      document.getElementById('matkulId').value = matkul.id || matkul.kode;
+      document.getElementById('modalKode').value = matkul.kode;
+      document.getElementById('modalNama').value = matkul.nama;
+      document.getElementById('modalProdi').value = matkul.prodi || '';
+      document.getElementById('modalSKS').value = matkul.sks;
+      document.getElementById('modalSemester').value = matkul.semester || '';
+      document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
+      document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+      document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+      
+      openModal();
     }
 
-    if (result.error) throw result.error;
+    async function saveMatkul(event) {
+      event.preventDefault();
+      
+      const id = document.getElementById('matkulId').value;
+      const kode = document.getElementById('modalKode').value;
+      const nama = document.getElementById('modalNama').value;
+      const prodi = document.getElementById('modalProdi').value;
+      const sks = document.getElementById('modalSKS').value;
+      const semester = document.getElementById('modalSemester').value;
+      const deskripsi = document.getElementById('modalDeskripsi').value;
 
-    alert(id ? '✅ Mata kuliah berhasil diupdate!' : '✅ Mata kuliah berhasil ditambahkan!');
-    closeModal();
-    await loadMatkulData();
-    await loadDashboardTotals();
+      // Validasi kode unik
+      const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
+      if (existing && !id) {
+        alert('Kode mata kuliah sudah digunakan!');
+        return;
+      }
 
-  } catch (error) {
-    console.error('Error menyimpan mata kuliah:', error);
-    alert(`❌ Gagal menyimpan: ${error.message}`);
-  }
-}
+      const matkulData = {
+        kode,
+        nama,
+        prodi,
+        sks: parseInt(sks),
+        semester: parseInt(semester),
+        deskripsi
+      };
+
+      try {
+        let error;
+        
+        if (id) {
+          // Update data
+          const { data, error: updateError } = await supabaseClient
+            .from('matakuliah')
+            .update(matkulData)
+            .eq('id', id)
+            .select();
+          error = updateError;
+          
+          if (!error) {
+            alert('✅ Mata kuliah berhasil diperbarui!');
+          }
+        } else {
+          // Tambah data baru
+          const { data, error: insertError } = await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData])
+            .select();
+          error = insertError;
+          
+          if (!error) {
+            alert('✅ Mata kuliah berhasil ditambahkan!');
+          }
+        }
+
+        if (error) throw error;
+        
+        closeModal();
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menyimpan mata kuliah:', error);
+        alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+      }
+    }
+
+    async function deleteMatkul(id) {
+      if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient
+          .from('matakuliah')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        alert('✅ Mata kuliah berhasil dihapus!');
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menghapus mata kuliah:', error);
+        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
+      }
+    }
 
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
@@ -725,14 +711,14 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Semester', 'Program Studi', 'SKS']];
+      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
       const body = filteredMatkulData.map((matkul, index) => [
         index + 1,
-        matkul.kode || '-',
-        matkul.nama || '-',
-        matkul.semester || '-',
+        matkul.kode,
+        matkul.nama,
         matkul.prodi || 'Lainnya',
-        matkul.sks || '-'
+        matkul.sks,
+        matkul.semester || '-'
       ]);
       
       doc.setFontSize(16);
@@ -746,7 +732,15 @@
         startY: 30,
         theme: 'grid',
         styles: { fontSize: 9, cellPadding: 2 },
-        headStyles: { fillColor: [30, 64, 175] }
+        headStyles: { fillColor: [30, 64, 175] },
+        columnStyles: {
+          0: { cellWidth: 10 },
+          1: { cellWidth: 25 },
+          2: { halign: 'left', cellWidth: 70 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 15 },
+          5: { cellWidth: 20 }
+        }
       });
       
       doc.save('daftar_mata_kuliah_ft.pdf');
@@ -759,14 +753,14 @@
         return;
       }
       
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Semester', 'Program Studi', 'SKS']];
+      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
       const data = filteredMatkulData.map((matkul, index) => [
         index + 1,
-        matkul.kode || '-',
-        matkul.nama || '-',
-        matkul.semester || '-',
+        matkul.kode,
+        matkul.nama,
         matkul.prodi || 'Lainnya',
-        matkul.sks || '-'
+        matkul.sks,
+        matkul.semester || '-'
       ]);
       
       const wsData = [
@@ -779,6 +773,11 @@
       
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }
+      ];
       
       XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
       XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
@@ -794,17 +793,14 @@
       }
     }
 
-    function updateUsername() { 
-      alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); 
-    }
-    
-    function updatePassword() { 
-      alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); 
-    }
+    function updateUsername() { alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); }
+    function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
     
     async function logout() {
       const { error } = await supabaseClient.auth.signOut();
+
       if (error) {
+        console.error('Logout Error:', error.message);
         alert('Gagal keluar sesi. Silakan coba lagi.');
       } else {
         window.location.href = 'index.html'; 
@@ -818,11 +814,7 @@
       }
     });
     
-    // Load dashboard saat halaman dimuat
-    document.addEventListener("DOMContentLoaded", function() {
-      loadDashboardTotals();
-      console.log('Dashboard loaded'); // Debug log
-    });
+    document.addEventListener("DOMContentLoaded", loadDashboardTotals);
   </script>
 </body>
 </html>
