@@ -382,7 +382,13 @@
               </select>
             </div>
           </div>
-        
+          
+          <div class="mb-6">
+            <label for="modalDeskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Mata Kuliah</label>
+            <textarea id="modalDeskripsi" rows="3" 
+                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi singkat tentang mata kuliah..."></textarea>
+          </div>
           
           <div class="flex justify-end space-x-3 pt-4 border-t">
             <button type="button" onclick="closeModal()" 
@@ -468,7 +474,7 @@
         return {
           ...matkul,
           prodi: matkul.prodi || prodi,
-          id: matkul.id
+          id: matkul.id || matkul.kode
         };
       });
       
@@ -574,7 +580,8 @@
       document.getElementById('modalNama').value = '';
       document.getElementById('modalProdi').value = '';
       document.getElementById('modalSKS').value = '';
-      document.getElementById('semesterDropdown').value = '';
+      document.getElementById('modalSemester').value = '';
+      document.getElementById('modalDeskripsi').value = '';
       document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
       document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
     }
@@ -591,12 +598,13 @@
         return;
       }
 
-      document.getElementById('matkulId').value = matkul.id;
+      document.getElementById('matkulId').value = matkul.id || matkul.kode;
       document.getElementById('modalKode').value = matkul.kode;
       document.getElementById('modalNama').value = matkul.nama;
       document.getElementById('modalProdi').value = matkul.prodi || '';
       document.getElementById('modalSKS').value = matkul.sks;
-      document.getElementById('semesterDropdown').value = matkul.semester || '';
+      document.getElementById('modalSemester').value = matkul.semester || '';
+      document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
       document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
       document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
       
@@ -611,7 +619,7 @@
       const nama = document.getElementById('modalNama').value;
       const prodi = document.getElementById('modalProdi').value;
       const sks = document.getElementById('modalSKS').value;
-      const semester = parseInt(document.getElementById('semesterDropdown').value);
+      const semester = document.getElementById('modalSemester').value;
       const deskripsi = document.getElementById('modalDeskripsi').value;
 
       // Validasi kode unik
@@ -622,11 +630,13 @@
       }
 
       const matkulData = {
-  kode,
-  nama,
-  sks: parseInt(sks),
-  semester: parseInt(semester)
-};
+        kode,
+        nama,
+        prodi,
+        sks: parseInt(sks),
+        semester: parseInt(semester),
+        deskripsi
+      };
 
       try {
         let error;
