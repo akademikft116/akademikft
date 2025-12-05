@@ -461,25 +461,22 @@
       
       allMatkulData = data;
       
-// Di dalam fungsi loadMatkulData(), modifikasi bagian ini:
-allMatkulData = allMatkulData.map(matkul => {
-  let prodi = 'Lainnya';
-  const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
-  
-  if (kodePrefix === '50262') prodi = 'Industri';
-  else if (kodePrefix === '50263') prodi = 'Sipil';
-  else if (kodePrefix === '50463') prodi = 'Informatika';
-  else if (kodePrefix === '50362') prodi = 'Arsitektur';
-  else if (kodePrefix === '50264') prodi = 'Elektro';
-  
-  return {
-    ...matkul,
-    prodi: matkul.prodi || prodi,
-    id: matkul.id || matkul.kode,
-    // Pastikan semester dalam format yang benar
-    semester: matkul.semester ? String(matkul.semester) : ''
-  };
-});
+      allMatkulData = allMatkulData.map(matkul => {
+        let prodi = 'Lainnya';
+        const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
+        
+        if (kodePrefix === '50262') prodi = 'Industri';
+        else if (kodePrefix === '50263') prodi = 'Sipil';
+        else if (kodePrefix === '50463') prodi = 'Informatika';
+        else if (kodePrefix === '50362') prodi = 'Arsitektur';
+        else if (kodePrefix === '50264') prodi = 'Elektro';
+        
+        return {
+          ...matkul,
+          prodi: matkul.prodi || prodi,
+          id: matkul.id || matkul.kode
+        };
+      });
       
       filteredMatkulData = [...allMatkulData];
       renderMatkulTable(filteredMatkulData);
@@ -595,116 +592,164 @@ allMatkulData = allMatkulData.map(matkul => {
     }
 
     async function editMatkul(id) {
-  // Cari mata kuliah berdasarkan ID atau kode
-  const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
-  
-  if (!matkul) {
-    alert('Data mata kuliah tidak ditemukan');
-    return;
-  }
+      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+      if (!matkul) {
+        alert('Data mata kuliah tidak ditemukan');
+        return;
+      }
 
-  // Gunakan ID yang benar dari database (jika ada)
-  const matkulId = matkul.id || matkul.kode;
-  
-  document.getElementById('matkulId').value = matkulId;
-  document.getElementById('modalKode').value = matkul.kode;
-  document.getElementById('modalNama').value = matkul.nama;
-  document.getElementById('modalProdi').value = matkul.prodi || '';
-  document.getElementById('modalSKS').value = matkul.sks;
-  document.getElementById('modalSemester').value = matkul.semester || '';
-  document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
-  document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-  document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
-  
-  openModal();
-}
+      // Gunakan ID yang benar dari database
+      const matkulId = matkul.id || matkul.kode;
+      
+      document.getElementById('matkulId').value = matkulId;
+      document.getElementById('modalKode').value = matkul.kode;
+      document.getElementById('modalNama').value = matkul.nama;
+      document.getElementById('modalProdi').value = matkul.prodi || '';
+      document.getElementById('modalSKS').value = matkul.sks;
+      document.getElementById('modalSemester').value = matkul.semester || '';
+      document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
+      document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+      document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+      
+      openModal();
+    }
 
     async function saveMatkul(event) {
-  event.preventDefault();
-  
-  const id = document.getElementById('matkulId').value;
-  const kode = document.getElementById('modalKode').value;
-  const nama = document.getElementById('modalNama').value;
-  const prodi = document.getElementById('modalProdi').value;
-  const sks = document.getElementById('modalSKS').value;
-  const semester = document.getElementById('modalSemester').value;
-  const deskripsi = document.getElementById('modalDeskripsi').value;
-
-  // Validasi kode unik (hanya untuk data baru, bukan update)
-  if (!id) { // Jika id kosong, berarti ini data baru
-    const existing = allMatkulData.find(m => m.kode === kode);
-    if (existing) {
-      alert('Kode mata kuliah sudah digunakan!');
-      return;
-    }
-  }
-  
-  // Validasi semester
-  if (!semester || semester < 1 || semester > 8) {
-    alert('❌ Semester harus diisi antara 1-8!');
-    return;
-  }
-
-  const matkulData = {
-    kode,
-    nama,
-    prodi,
-    sks: parseInt(sks),
-    semester: parseInt(semester),
-    deskripsi
-  };
-
-  try {
-    let error;
-    
-    if (id) {
-      // Update data - gunakan filter yang lebih spesifik
-      const { data, error: updateError } = await supabaseClient
-        .from('matakuliah')
-        .update(matkulData)
-        .match({ id: id }) // Coba dengan ID dulu
-        .select();
+      event.preventDefault();
       
-      // Jika tidak ditemukan dengan ID, coba dengan kode
-      if (updateError || !data || data.length === 0) {
-        const { data: dataByKode, error: errorByKode } = await supabaseClient
-          .from('matakuliah')
-          .update(matkulData)
-          .match({ kode: id }) // Coba dengan kode
-          .select();
+      const id = document.getElementById('matkulId').value;
+      const kode = document.getElementById('modalKode').value;
+      const nama = document.getElementById('modalNama').value;
+      const prodi = document.getElementById('modalProdi').value;
+      const sks = document.getElementById('modalSKS').value;
+      const semester = document.getElementById('modalSemester').value;
+      const deskripsi = document.getElementById('modalDeskripsi').value;
+
+      // Validasi input
+      if (!kode || !nama || !prodi || !sks || !semester) {
+        alert('❌ Harap lengkapi semua field yang wajib diisi!');
+        return;
+      }
+
+      // Validasi kode unik (hanya untuk data baru)
+      if (!id) {
+        const existing = allMatkulData.find(m => m.kode === kode);
+        if (existing) {
+          alert('Kode mata kuliah sudah digunakan!');
+          return;
+        }
+      }
+      
+      // Validasi semester
+      if (!semester || semester < 1 || semester > 8) {
+        alert('❌ Semester harus diisi antara 1-8!');
+        return;
+      }
+
+      const matkulData = {
+        kode,
+        nama,
+        prodi,
+        sks: parseInt(sks),
+        semester: parseInt(semester),
+        deskripsi
+      };
+
+      try {
+        let result;
+        
+        if (id) {
+          // Update data - cari berdasarkan ID atau kode
+          const existingMatkul = allMatkulData.find(m => 
+            (m.id && m.id == id) || m.kode == id
+          );
           
-        error = errorByKode;
-      } else {
-        error = updateError;
-      }
-      
-      if (!error) {
-        alert('✅ Mata kuliah berhasil diperbarui!');
-      }
-    } else {
-      // Tambah data baru
-      const { data, error: insertError } = await supabaseClient
-        .from('matakuliah')
-        .insert([matkulData])
-        .select();
-      error = insertError;
-      
-      if (!error) {
-        alert('✅ Mata kuliah berhasil ditambahkan!');
+          if (existingMatkul) {
+            // Update berdasarkan ID jika ada
+            if (existingMatkul.id) {
+              result = await supabaseClient
+                .from('matakuliah')
+                .update(matkulData)
+                .eq('id', existingMatkul.id);
+            } else {
+              // Update berdasarkan kode
+              result = await supabaseClient
+                .from('matakuliah')
+                .update(matkulData)
+                .eq('kode', existingMatkul.kode);
+            }
+          } else {
+            // Fallback: update berdasarkan kode dari input
+            result = await supabaseClient
+              .from('matakuliah')
+              .update(matkulData)
+              .eq('kode', kode);
+          }
+          
+          if (result.error) throw result.error;
+          alert('✅ Mata kuliah berhasil diperbarui!');
+        } else {
+          // Tambah data baru
+          result = await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData]);
+          
+          if (result.error) throw result.error;
+          alert('✅ Mata kuliah berhasil ditambahkan!');
+        }
+
+        closeModal();
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menyimpan mata kuliah:', error);
+        alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
       }
     }
 
-    if (error) throw error;
-    
-    closeModal();
-    loadMatkulData();
-    loadDashboardTotals();
-    
-  } catch (error) {
-    console.error('Error menyimpan mata kuliah:', error);
-    alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
-  }
-}
+    async function deleteMatkul(id) {
+      if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
+        return;
+      }
+
+      try {
+        // Cari mata kuliah berdasarkan ID atau kode
+        const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+        
+        if (!matkul) {
+          alert('Data mata kuliah tidak ditemukan');
+          return;
+        }
+
+        let result;
+        
+        // Coba hapus dengan ID jika ada
+        if (matkul.id) {
+          result = await supabaseClient
+            .from('matakuliah')
+            .delete()
+            .eq('id', matkul.id);
+        } else {
+          // Hapus dengan kode
+          result = await supabaseClient
+            .from('matakuliah')
+            .delete()
+            .eq('kode', matkul.kode);
+        }
+
+        if (result.error) throw result.error;
+        
+        alert('✅ Mata kuliah berhasil dihapus!');
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menghapus mata kuliah:', error);
+        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
+      }
+    }
+
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
       if (!filteredMatkulData || filteredMatkulData.length === 0) {
