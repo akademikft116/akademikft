@@ -383,13 +383,6 @@
             </div>
           </div>
           
-          <div class="mb-6">
-            <label for="modalDeskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Mata Kuliah</label>
-            <textarea id="modalDeskripsi" rows="3" 
-                      class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Deskripsi singkat tentang mata kuliah..."></textarea>
-          </div>
-          
           <div class="flex justify-end space-x-3 pt-4 border-t">
             <button type="button" onclick="closeModal()" 
                     class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
@@ -575,16 +568,16 @@
     }
 
     function resetForm() {
-      document.getElementById('matkulId').value = '';
-      document.getElementById('modalKode').value = '';
-      document.getElementById('modalNama').value = '';
-      document.getElementById('modalProdi').value = '';
-      document.getElementById('modalSKS').value = '';
-      document.getElementById('modalSemester').value = '';
-      document.getElementById('modalDeskripsi').value = '';
-      document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
-      document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
-    }
+  document.getElementById('matkulId').value = '';
+  document.getElementById('modalKode').value = '';
+  document.getElementById('modalNama').value = '';
+  document.getElementById('modalProdi').value = '';
+  document.getElementById('modalSKS').value = '';
+  document.getElementById('modalSemester').value = '';
+  // HAPUS BARIS INI: document.getElementById('modalDeskripsi').value = '';
+  document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
+  document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
+}
 
     function addMatkul() {
       resetForm();
@@ -592,92 +585,91 @@
     }
 
     async function editMatkul(id) {
-      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
-      if (!matkul) {
-        alert('Data mata kuliah tidak ditemukan');
-        return;
-      }
+  const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+  if (!matkul) {
+    alert('Data mata kuliah tidak ditemukan');
+    return;
+  }
 
-      document.getElementById('matkulId').value = matkul.id || matkul.kode;
-      document.getElementById('modalKode').value = matkul.kode;
-      document.getElementById('modalNama').value = matkul.nama;
-      document.getElementById('modalProdi').value = matkul.prodi || '';
-      document.getElementById('modalSKS').value = matkul.sks;
-      document.getElementById('modalSemester').value = matkul.semester || '';
-      document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
-      document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-      document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
-      
-      openModal();
-    }
+  document.getElementById('matkulId').value = matkul.id || matkul.kode;
+  document.getElementById('modalKode').value = matkul.kode;
+  document.getElementById('modalNama').value = matkul.nama;
+  document.getElementById('modalProdi').value = matkul.prodi || '';
+  document.getElementById('modalSKS').value = matkul.sks;
+  document.getElementById('modalSemester').value = matkul.semester || '';
+  // HAPUS BARIS INI: document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
+  document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+  document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+  
+  openModal();
+}
 
     async function saveMatkul(event) {
-      event.preventDefault();
+  event.preventDefault();
+  
+  const id = document.getElementById('matkulId').value;
+  const kode = document.getElementById('modalKode').value;
+  const nama = document.getElementById('modalNama').value;
+  const prodi = document.getElementById('modalProdi').value;
+  const sks = document.getElementById('modalSKS').value;
+  const semester = document.getElementById('modalSemester').value;
+  // Hapus variabel deskripsi
+
+  // Validasi kode unik
+  const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
+  if (existing && !id) {
+    alert('Kode mata kuliah sudah digunakan!');
+    return;
+  }
+
+  const matkulData = {
+    kode,
+    nama,
+    prodi,
+    sks: parseInt(sks),
+    semester: parseInt(semester) // Pastikan semester sebagai integer
+    // Hapus properti deskripsi
+  };
+
+  try {
+    let error;
+    
+    if (id) {
+      // Update data
+      const { data, error: updateError } = await supabaseClient
+        .from('matakuliah')
+        .update(matkulData)
+        .eq('id', id)
+        .select();
+      error = updateError;
       
-      const id = document.getElementById('matkulId').value;
-      const kode = document.getElementById('modalKode').value;
-      const nama = document.getElementById('modalNama').value;
-      const prodi = document.getElementById('modalProdi').value;
-      const sks = document.getElementById('modalSKS').value;
-      const semester = document.getElementById('modalSemester').value;
-      const deskripsi = document.getElementById('modalDeskripsi').value;
-
-      // Validasi kode unik
-      const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
-      if (existing && !id) {
-        alert('Kode mata kuliah sudah digunakan!');
-        return;
+      if (!error) {
+        alert('✅ Mata kuliah berhasil diperbarui!');
       }
-
-      const matkulData = {
-        kode,
-        nama,
-        prodi,
-        sks: parseInt(sks),
-        semester: parseInt(semester),
-        deskripsi
-      };
-
-      try {
-        let error;
-        
-        if (id) {
-          // Update data
-          const { data, error: updateError } = await supabaseClient
-            .from('matakuliah')
-            .update(matkulData)
-            .eq('id', id)
-            .select();
-          error = updateError;
-          
-          if (!error) {
-            alert('✅ Mata kuliah berhasil diperbarui!');
-          }
-        } else {
-          // Tambah data baru
-          const { data, error: insertError } = await supabaseClient
-            .from('matakuliah')
-            .insert([matkulData])
-            .select();
-          error = insertError;
-          
-          if (!error) {
-            alert('✅ Mata kuliah berhasil ditambahkan!');
-          }
-        }
-
-        if (error) throw error;
-        
-        closeModal();
-        loadMatkulData();
-        loadDashboardTotals();
-        
-      } catch (error) {
-        console.error('Error menyimpan mata kuliah:', error);
-        alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+    } else {
+      // Tambah data baru
+      const { data, error: insertError } = await supabaseClient
+        .from('matakuliah')
+        .insert([matkulData])
+        .select();
+      error = insertError;
+      
+      if (!error) {
+        alert('✅ Mata kuliah berhasil ditambahkan!');
       }
     }
 
+    if (error) throw error;
+    
+    closeModal();
+    loadMatkulData();
+    loadDashboardTotals();
+    
+  } catch (error) {
+    console.error('Error menyimpan mata kuliah:', error);
+    alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+  }
+}
     async function deleteMatkul(id) {
       if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
         return;
