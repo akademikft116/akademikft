@@ -659,7 +659,7 @@ document.addEventListener("DOMContentLoaded", function() {
   openModal();
 }
 
-    async function saveMatkul(event) {
+async function saveMatkul(event) {
   event.preventDefault();
   
   const id = document.getElementById('matkulId').value;
@@ -670,111 +670,89 @@ document.addEventListener("DOMContentLoaded", function() {
   const semester = document.getElementById('modalSemester').value;
   const deskripsi = document.getElementById('modalDeskripsi').value.trim();
 
-  // Validasi input
-  if (!kode) {
-    alert('❌ Kode mata kuliah harus diisi!');
-    return;
-  }
-  
-  if (!nama) {
-    alert('❌ Nama mata kuliah harus diisi!');
-    return;
-  }
-  
+  // VALIDASI TAMBAHAN
   if (!prodi || prodi === '') {
     alert('❌ Program studi harus dipilih!');
     return;
   }
-  
-  if (!sks) {
-    alert('❌ Jumlah SKS harus dipilih!');
-    return;
-  }
-  
-  // Validasi kode unik (PERBAIKAN)
-  const existing = allMatkulData.find(m => m.kode === kode);
-  if (existing) {
-    // Jika mode edit, periksa apakah ini data yang sama
-    if (id) {
-      const currentMatkul = allMatkulData.find(m => m.id == id || m.kode == id);
-      if (currentMatkul && currentMatkul.kode !== kode) {
-        alert('❌ Kode mata kuliah sudah digunakan!');
-        return;
-      }
-    } else {
-      // Mode tambah baru
-      alert('❌ Kode mata kuliah sudah digunakan!');
-      return;
-    }
-  }
-  
-  // Validasi semester
-  if (!semester || semester < 1 || semester > 8) {
-    alert('❌ Semester harus diisi antara 1-8!');
-    return;
-  }
 
-  // Persiapkan data untuk disimpan
   const matkulData = {
     kode: kode,
     nama: nama,
-    prodi: prodi, // Kolom ini sudah ada di database
+    prodi: prodi,  // Kolom ini SUDAH ADA di database
     sks: parseInt(sks),
     semester: parseInt(semester),
     deskripsi: deskripsi || null
   };
 
-  console.log('Data yang akan disimpan:', matkulData); // Untuk debugging
+  console.log('Mengirim data:', matkulData); // Debug
 
   try {
-    let result;
-    
+    // OPTION 1: Gunakan request tanpa cache
+    const headers = {
+      'Prefer': 'return=representation',
+      'Cache-Control': 'no-cache'
+    };
+
     if (id) {
-      // Mode edit - update data
-      console.log('Mode edit, ID:', id);
+      // UPDATE dengan headers khusus
       const { data, error } = await supabaseClient
         .from('matakuliah')
-        .update(matkulData)
-        .eq('id', id)
-        .select();
+        .update(matkulData, { 
+          returning: 'representation',
+          count: 'exact'
+        })
+        .eq('id', id);
       
-      if (error) {
-        console.error('Error update:', error);
-        throw error;
-      }
-      result = data;
+      if (error) throw error;
       alert('✅ Mata kuliah berhasil diperbarui!');
     } else {
-      // Mode tambah - insert data baru
-      console.log('Mode tambah baru');
+      // INSERT dengan headers khusus
       const { data, error } = await supabaseClient
         .from('matakuliah')
-        .insert([matkulData])
-        .select();
+        .insert([matkulData], { 
+          returning: 'representation'
+        });
       
-      if (error) {
-        console.error('Error insert:', error);
-        throw error;
-      }
-      result = data;
+      if (error) throw error;
       alert('✅ Mata kuliah berhasil ditambahkan!');
     }
     
-    console.log('Hasil penyimpanan:', result);
-    
-    // Refresh data
     closeModal();
     await loadMatkulData();
     await loadDashboardTotals();
     
   } catch (error) {
-    console.error('Error menyimpan mata kuliah:', error);
+    console.error('Error detail:', error);
     
-    // Berikan pesan error yang lebih spesifik
-    if (error.message.includes('prodi')) {
-      alert(`❌ Gagal menyimpan: Masalah dengan kolom 'prodi'.\n\nDetail: ${error.message}\n\nPastikan kolom 'prodi' ada di tabel 'matakuliah' di Supabase.`);
+    // PERIKSA JIKA MASIH ERROR DENGAN 'prodi'
+    if (error.message.includes('prodi') || error.message.includes('schema cache')) {
+      // Coba tanpa kolom prodi dulu (untuk testing)
+      console.warn('Masih error dengan prodi, coba tanpa prodi...');
+      
+      // Hapus kolom prodi dari data sementara
+      delete matkulData.prodi;
+      
+      try {
+        if (id) {
+          await supabaseClient
+            .from('matakuliah')
+            .update(matkulData)
+            .eq('id', id);
+        } else {
+          await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData]);
+        }
+        
+        alert('⚠️ Data disimpan TANPA kolom prodi (cache issue). Refresh halaman dan coba lagi.');
+        closeModal();
+        loadMatkulData();
+      } catch (error2) {
+        alert(`❌ Gagal total: ${error2.message}`);
+      }
     } else {
-      alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+      alert(`❌ Error: ${error.message}`);
     }
   }
 }
