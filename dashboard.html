@@ -607,6 +607,10 @@
     async function saveMatkul(event) {
   event.preventDefault();
   
+  const semesterValue = document.getElementById('modalSemester').value;
+  console.log('Semester value dari form:', semesterValue);
+  }
+  
   const id = document.getElementById('matkulId').value;
   const kode = document.getElementById('modalKode').value;
   const nama = document.getElementById('modalNama').value;
@@ -628,8 +632,10 @@
     prodi,
     sks: parseInt(sks),
     semester: parseInt(semester) // Pastikan semester sebagai integer
-    // Hapus properti deskripsi
+    deskripsi
   };
+
+    console.log('Data yang akan disimpan:', matkulData); // DEBUG
 
   try {
     let error;
