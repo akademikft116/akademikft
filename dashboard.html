@@ -628,6 +628,11 @@
         alert('Kode mata kuliah sudah digunakan!');
         return;
       }
+      
+      if (!semester || semester < 1 || semester > 8) {
+    alert('❌ Semester harus diisi antara 1-8!');
+    return;
+  }
 
       const matkulData = {
         kode,
