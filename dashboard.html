@@ -578,6 +578,9 @@
     async function loadMatkulData() {
       const tableBody = document.getElementById('matkulTableBody');
       tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
+
+      // Debug: Tampilkan query yang akan dijalankan
+      console.log('Mengambil data dari tabel matakuliah...');
       
       const { data, error } = await supabaseClient.from('matakuliah').select('*').order('kode');
       
@@ -585,6 +588,12 @@
         tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
         return;
       }
+
+       console.log('Data diterima dari Supabase:', data);
+  if (data && data.length > 0) {
+    console.log('Kolom dalam data pertama:', Object.keys(data[0]));
+    console.log('Contoh data pertama:', data[0]);
+  }
       
       allMatkulData = data;
       
@@ -738,72 +747,109 @@
       openModal();
     }
 
-    async function saveMatkul(event) {
-      event.preventDefault();
+async function saveMatkul(event) {
+  event.preventDefault();
+  
+  console.log('=== SAVE MATA KULIAH DIJALANKAN ===');
+  
+  const id = document.getElementById('matkulId').value;
+  const kode = document.getElementById('modalKode').value;
+  const nama = document.getElementById('modalNama').value;
+  const prodi = document.getElementById('modalProdi').value;
+  const sks = document.getElementById('modalSKS').value;
+  const semester = document.getElementById('modalSemester').value;
+  const deskripsi = document.getElementById('modalDeskripsi').value;
+
+  console.log('Data yang akan disimpan:', { id, kode, nama, prodi, sks, semester, deskripsi });
+
+  // Validasi input
+  if (!kode || !nama || !prodi || !sks) {
+    alert('❌ Kode, Nama, Program Studi, dan SKS wajib diisi!');
+    return;
+  }
+
+  // Validasi kode unik
+  const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
+  if (existing && !id) {
+    alert('❌ Kode mata kuliah sudah digunakan!');
+    return;
+  }
+
+  // Siapkan data untuk database
+  const matkulData = {
+    kode: kode.trim(),
+    nama: nama.trim(),
+    prodi: prodi.trim(),
+    sks: parseInt(sks) || 0,
+    deskripsi: deskripsi ? deskripsi.trim() : null
+  };
+  
+  // Tambahkan semester jika ada nilai
+  if (semester && semester !== '') {
+    matkulData.semester = parseInt(semester);
+  } else {
+    // Jika semester kosong, set null
+    matkulData.semester = null;
+  }
+
+  console.log('Data untuk database:', matkulData);
+
+  try {
+    let result;
+    
+    if (id && id !== '') {
+      console.log('Mode: UPDATE data dengan ID:', id);
+      // Update data existing
+      const { data, error: updateError } = await supabaseClient
+        .from('matakuliah')
+        .update(matkulData)
+        .eq('id', id)
+        .select();
       
-      const id = document.getElementById('matkulId').value;
-      const kode = document.getElementById('modalKode').value;
-      const nama = document.getElementById('modalNama').value;
-      const prodi = document.getElementById('modalProdi').value;
-      const sks = document.getElementById('modalSKS').value;
-      const semester = document.getElementById('modalSemester').value;
-      const deskripsi = document.getElementById('modalDeskripsi').value;
-
-      // Validasi kode unik
-      const existing = allMatkulData.find(m => m.kode === kode && (m.id !== id && m.kode !== id));
-      if (existing && !id) {
-        alert('Kode mata kuliah sudah digunakan!');
-        return;
+      result = { data, error: updateError };
+      console.log('Hasil UPDATE:', result);
+      
+      if (!updateError) {
+        alert('✅ Mata kuliah berhasil diperbarui!');
       }
-
-      const matkulData = {
-        kode,
-        nama,
-        prodi,
-        sks: parseInt(sks),
-        semester: parseInt(semester),
-        deskripsi
-      };
-
-      try {
-        let error;
-        
-        if (id) {
-          // Update data
-          const { data, error: updateError } = await supabaseClient
-            .from('matakuliah')
-            .update(matkulData)
-            .eq('id', id)
-            .select();
-          error = updateError;
-          
-          if (!error) {
-            alert('✅ Mata kuliah berhasil diperbarui!');
-          }
-        } else {
-          // Tambah data baru
-          const { data, error: insertError } = await supabaseClient
-            .from('matakuliah')
-            .insert([matkulData])
-            .select();
-          error = insertError;
-          
-          if (!error) {
-            alert('✅ Mata kuliah berhasil ditambahkan!');
-          }
-        }
-
-        if (error) throw error;
-        
-        closeModal();
-        loadMatkulData();
-        loadDashboardTotals();
-        
-      } catch (error) {
-        console.error('Error menyimpan mata kuliah:', error);
-        alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+    } else {
+      console.log('Mode: INSERT data baru');
+      // Tambah data baru
+      const { data, error: insertError } = await supabaseClient
+        .from('matakuliah')
+        .insert([matkulData])
+        .select();
+      
+      result = { data, error: insertError };
+      console.log('Hasil INSERT:', result);
+      
+      if (!insertError) {
+        alert('✅ Mata kuliah berhasil ditambahkan!');
       }
     }
+
+    if (result.error) {
+      console.error('Error dari Supabase:', result.error);
+      
+      // Cek apakah error karena kolom tidak ada
+      if (result.error.message.includes('column') && result.error.message.includes('does not exist')) {
+        alert(`❌ Error: Kolom tidak ditemukan di database. Pastikan tabel 'matakuliah' memiliki kolom: kode, nama, prodi, sks, semester`);
+      } else {
+        throw result.error;
+      }
+      return;
+    }
+    
+    console.log('Simpan berhasil, reload data...');
+    closeModal();
+    loadMatkulData();
+    loadDashboardTotals();
+    
+  } catch (error) {
+    console.error('Error menyimpan mata kuliah:', error);
+    alert(`❌ Gagal menyimpan mata kuliah: ${error.message}\n\nCek Console untuk detail.`);
+  }
+}
 
     async function deleteMatkul(id) {
       if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
