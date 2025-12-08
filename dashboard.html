@@ -179,10 +179,17 @@
           </div>
           
           <div class="flex justify-end mb-4 space-x-2">
+            <button onclick="downloadTemplateMatkul()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-download mr-2"></i> Download Template
+            </button>
+            
+            <button onclick="showImportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-upload mr-2"></i> Import File
+            </button>
             <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-file-pdf mr-2"></i> Export PDF
             </button>
-            <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+            <button onclick="" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-file-excel mr-2"></i> Export Excel
             </button>
             <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
@@ -405,6 +412,80 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Import File Excel -->
+<div id="importModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold text-gray-800">Import Data Mata Kuliah</h3>
+        <button onclick="closeImportModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+          <i class="fas fa-info-circle mr-2"></i> Panduan Import
+        </h4>
+        <ul class="text-sm text-blue-700 list-disc pl-5 space-y-1">
+          <li>Download template terlebih dahulu untuk format yang benar</li>
+          <li>Format file harus Excel (.xlsx atau .xls)</li>
+          <li>Kolom wajib: Kode, Nama, SKS, Semester, Program Studi</li>
+          <li>Kode harus unik dan tidak boleh duplikat</li>
+        </ul>
+      </div>
+      
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Pilih File Excel
+        </label>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition duration-200"
+             id="dropArea">
+          <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden" onchange="handleFileSelect(event)">
+          <i class="fas fa-file-excel text-4xl text-green-500 mb-4"></i>
+          <p class="text-gray-600 mb-2">Drag & drop file Excel atau klik untuk memilih</p>
+          <button onclick="document.getElementById('fileInput').click()" 
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
+            <i class="fas fa-folder-open mr-2"></i> Pilih File
+          </button>
+          <p class="text-xs text-gray-500 mt-2">Ukuran maksimal: 5MB</p>
+        </div>
+        <div id="fileName" class="mt-3 text-sm text-gray-600"></div>
+      </div>
+      
+      <div id="previewTable" class="mb-6 hidden">
+        <h4 class="font-semibold text-gray-700 mb-3">Preview Data (5 baris pertama)</h4>
+        <div class="overflow-x-auto border rounded-lg">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr id="previewHeader"></tr>
+            </thead>
+            <tbody id="previewBody" class="bg-white divide-y divide-gray-200"></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="flex justify-between items-center pt-4 border-t">
+        <div class="text-sm text-gray-500">
+          <i class="fas fa-database mr-1"></i>
+          <span id="totalRows">0</span> data akan diimport
+        </div>
+        <div class="space-x-3">
+          <button type="button" onclick="closeImportModal()" 
+                  class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
+            Batal
+          </button>
+          <button id="importButton" onclick="importMatkulData()" 
+                  class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 flex items-center opacity-50 cursor-not-allowed"
+                  disabled>
+            <i class="fas fa-upload mr-2"></i> Import Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   <script>
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
@@ -782,6 +863,294 @@
       XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
       XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
     }
+
+    // Fungsi untuk download template Excel
+function downloadTemplateMatkul() {
+  const templateData = [
+    ['Kode', 'Nama', 'SKS', 'Semester', 'Program Studi', 'Deskripsi'],
+    ['50262001', 'Matematika Teknik', '3', '1', 'Industri', 'Mata kuliah dasar teknik'],
+    ['50263001', 'Fisika Dasar', '3', '1', 'Sipil', 'Konsep dasar fisika'],
+    ['50463001', 'Algoritma Pemrograman', '4', '1', 'Informatika', 'Dasar pemrograman'],
+    ['50362001', 'Gambar Arsitektur', '2', '1', 'Arsitektur', 'Teknik menggambar'],
+    ['50264001', 'Rangkaian Listrik', '3', '2', 'Elektro', 'Dasar rangkaian listrik'],
+    ['50262002', 'Statika', '2', '2', 'Industri', 'Mekanika teknik dasar']
+  ];
+  
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(templateData);
+  
+  // Format kolom
+  const colWidths = [
+    { wch: 15 }, // Kode
+    { wch: 35 }, // Nama
+    { wch: 8 },  // SKS
+    { wch: 10 }, // Semester
+    { wch: 20 }, // Program Studi
+    { wch: 40 }  // Deskripsi
+  ];
+  ws['!cols'] = colWidths;
+  
+  XLSX.utils.book_append_sheet(wb, ws, 'Template');
+  XLSX.writeFile(wb, 'template_mata_kuliah.xlsx');
+  
+  alert('✅ Template berhasil didownload. Silakan isi data mata kuliah.');
+}
+
+// Fungsi untuk modal import
+let importData = [];
+
+function showImportModal() {
+  document.getElementById('importModal').style.display = 'flex';
+  resetImportForm();
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').style.display = 'none';
+  resetImportForm();
+}
+
+function resetImportForm() {
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileName').textContent = '';
+  document.getElementById('previewTable').classList.add('hidden');
+  document.getElementById('previewHeader').innerHTML = '';
+  document.getElementById('previewBody').innerHTML = '';
+  document.getElementById('totalRows').textContent = '0';
+  
+  const importButton = document.getElementById('importButton');
+  importButton.disabled = true;
+  importButton.classList.add('opacity-50', 'cursor-not-allowed');
+  importButton.classList.remove('opacity-100', 'cursor-pointer');
+  
+  importData = [];
+}
+
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const dropArea = document.getElementById('dropArea');
+  dropArea.classList.remove('border-blue-400');
+  dropArea.classList.add('border-green-400');
+  
+  document.getElementById('fileName').innerHTML = `
+    <i class="fas fa-file-excel text-green-500 mr-2"></i>
+    <span class="font-medium">${file.name}</span>
+    <span class="text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
+  `;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+    
+    processImportData(jsonData);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function processImportData(data) {
+  if (data.length < 2) {
+    alert('❌ File Excel kosong atau format tidak sesuai.');
+    return;
+  }
+  
+  const headers = data[0];
+  const requiredHeaders = ['Kode', 'Nama', 'SKS', 'Semester', 'Program Studi'];
+  
+  // Validasi header
+  for (const required of requiredHeaders) {
+    if (!headers.includes(required)) {
+      alert(`❌ Kolom "${required}" tidak ditemukan dalam file.`);
+      return;
+    }
+  }
+  
+  // Ambil data (abaikan baris pertama/header)
+  importData = [];
+  for (let i = 1; i < Math.min(data.length, 100); i++) { // Maksimal 100 data preview
+    const row = data[i];
+    if (row.length === 0 || !row[0]) continue; // Lewati baris kosong
+    
+    const obj = {};
+    headers.forEach((header, index) => {
+      obj[header] = row[index] || '';
+    });
+    importData.push(obj);
+  }
+  
+  if (importData.length === 0) {
+    alert('❌ Tidak ada data yang valid untuk diimport.');
+    return;
+  }
+  
+  // Tampilkan preview
+  showPreview(headers, importData.slice(0, 5)); // Tampilkan 5 baris pertama
+  
+  // Update total rows
+  document.getElementById('totalRows').textContent = importData.length;
+  
+  // Aktifkan tombol import
+  const importButton = document.getElementById('importButton');
+  importButton.disabled = false;
+  importButton.classList.remove('opacity-50', 'cursor-not-allowed');
+  importButton.classList.add('opacity-100', 'cursor-pointer');
+}
+
+function showPreview(headers, data) {
+  const previewHeader = document.getElementById('previewHeader');
+  const previewBody = document.getElementById('previewBody');
+  
+  // Header
+  let headerHtml = '';
+  headers.forEach(header => {
+    headerHtml += `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">${header}</th>`;
+  });
+  previewHeader.innerHTML = headerHtml;
+  
+  // Body
+  let bodyHtml = '';
+  data.forEach((row, rowIndex) => {
+    bodyHtml += '<tr>';
+    headers.forEach(header => {
+      const value = row[header] || '';
+      bodyHtml += `
+        <td class="px-4 py-2 text-sm border ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
+          ${value}
+        </td>
+      `;
+    });
+    bodyHtml += '</tr>';
+  });
+  previewBody.innerHTML = bodyHtml;
+  
+  document.getElementById('previewTable').classList.remove('hidden');
+}
+
+async function importMatkulData() {
+  if (importData.length === 0) {
+    alert('❌ Tidak ada data untuk diimport.');
+    return;
+  }
+  
+  if (!confirm(`Apakah Anda yakin ingin mengimport ${importData.length} data mata kuliah?`)) {
+    return;
+  }
+  
+  // Validasi data sebelum import
+  const validData = [];
+  const errors = [];
+  
+  for (let i = 0; i < importData.length; i++) {
+    const item = importData[i];
+    const rowNumber = i + 2; // +2 karena header di baris 1, dan index mulai dari 0
+    
+    // Validasi data wajib
+    if (!item.Kode) {
+      errors.push(`Baris ${rowNumber}: Kode tidak boleh kosong`);
+      continue;
+    }
+    
+    if (!item.Nama) {
+      errors.push(`Baris ${rowNumber}: Nama tidak boleh kosong`);
+      continue;
+    }
+    
+    if (!item.SKS || isNaN(item.SKS)) {
+      errors.push(`Baris ${rowNumber}: SKS harus angka`);
+      continue;
+    }
+    
+    if (!item.Semester || isNaN(item.Semester)) {
+      errors.push(`Baris ${rowNumber}: Semester harus angka`);
+      continue;
+    }
+    
+    validData.push({
+      kode: String(item.Kode).trim(),
+      nama: String(item.Nama).trim(),
+      sks: parseInt(item.SKS),
+      semester: parseInt(item.Semester),
+      prodi: String(item['Program Studi'] || item['Program_Studi'] || 'Lainnya').trim(),
+      deskripsi: String(item.Deskripsi || item.deskripsi || '').trim()
+    });
+  }
+  
+  if (errors.length > 0) {
+    alert('❌ Terdapat kesalahan dalam data:\n\n' + errors.slice(0, 5).join('\n') + 
+          (errors.length > 5 ? '\n...dan ' + (errors.length - 5) + ' error lainnya' : ''));
+    return;
+  }
+  
+  if (validData.length === 0) {
+    alert('❌ Tidak ada data yang valid untuk diimport.');
+    return;
+  }
+  
+  try {
+    // Import data ke Supabase
+    const { data, error } = await supabaseClient
+      .from('matakuliah')
+      .insert(validData)
+      .select();
+    
+    if (error) throw error;
+    
+    alert(`✅ Berhasil mengimport ${validData.length} data mata kuliah!`);
+    closeImportModal();
+    loadMatkulData();
+    loadDashboardTotals();
+    
+  } catch (error) {
+    console.error('Error importing data:', error);
+    alert(`❌ Gagal mengimport data: ${error.message}`);
+  }
+}
+
+// Drag and drop functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const dropArea = document.getElementById('dropArea');
+  const fileInput = document.getElementById('fileInput');
+  
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, highlight, false);
+  });
+  
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, unhighlight, false);
+  });
+  
+  function highlight() {
+    dropArea.classList.add('border-blue-400');
+  }
+  
+  function unhighlight() {
+    dropArea.classList.remove('border-blue-400');
+  }
+  
+  dropArea.addEventListener('drop', handleDrop, false);
+  
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+      fileInput.files = files;
+      handleFileSelect({ target: { files: files } });
+    }
+  }
+});
 
     function togglePasswordVisibility() {
       const input = document.getElementById('newPassword');
