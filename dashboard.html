@@ -485,43 +485,42 @@
     async function testDatabaseConnection() {
       console.log('Testing koneksi database...');
       
-      try {
-        // Test 1: Cek apakah tabel ada
-        const { data: tableData, error: tableError } = await supabaseClient
-          .from('matakuliah')
-          .select('count', { count: 'exact', head: true });
-        
-        if (tableError) {
-          console.error('Error akses tabel:', tableError);
-          return false;
+try {
+
+    if (id) {
+        // UPDATE berdasarkan KODE (bukan id)
+        const { error: updateError } = await supabaseClient
+            .from('matakuliah')
+            .update(matkulData)
+            .eq('kode', kode);
+
+        if (updateError) {
+            throw updateError;
         }
-        
-        // Test 2: Ambil 1 data untuk cek struktur
-        const { data: sampleData, error: sampleError } = await supabaseClient
-          .from('matakuliah')
-          .select('*')
-          .limit(1);
-        
-        if (sampleError) {
-          console.error('Error ambil sample:', sampleError);
-          return false;
+
+        alert('✅ Mata kuliah berhasil diperbarui!');
+
+    } else {
+        // INSERT baru
+        const { error: insertError } = await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData]);
+
+        if (insertError) {
+            throw insertError;
         }
-        
-        if (sampleData && sampleData.length > 0) {
-          console.log('✅ Struktur tabel matakuliah:', Object.keys(sampleData[0]));
-          console.log('✅ Kolom "prodi" ada?', 'prodi' in sampleData[0]);
-          console.log('✅ Contoh data prodi:', sampleData[0].prodi);
-          return true;
-        }
-        
-        console.log('⚠️ Tabel matakuliah kosong');
-        return true;
-        
-      } catch (error) {
-        console.error('Test koneksi gagal:', error);
-        return false;
-      }
+
+        alert('✅ Mata kuliah berhasil ditambahkan!');
     }
+
+    closeModal();
+    loadMatkulData();
+    loadDashboardTotals();
+
+} catch (error) {
+    console.error('Error menyimpan mata kuliah:', error);
+    alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
+}
 
     // ========== FUNGSI UTAMA ==========
     function showContent(tabId, clickedButton) {
