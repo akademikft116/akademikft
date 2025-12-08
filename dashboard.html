@@ -185,10 +185,10 @@
   </button>
 
   <label class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md cursor-pointer">
-    <i class="fas fa-file-import mr-2"></i> Import File
-    <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx"
-      onchange="importMatkulFromExcel(event)" />
-  </label>
+  <i class="fas fa-file-import mr-2"></i> Import Excel
+  <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx,.xls"
+    onchange="importMatkulFromExcel(event)" />
+</label>
 
   <button onclick="exportMatkulToPDF()" 
     class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
@@ -482,10 +482,29 @@
     }
 
     // Fungsi untuk test koneksi dan cek struktur
-    async function testDatabaseConnection() {
-      console.log('Testing koneksi database...');
-      
-try {
+    // GANTI fungsi testDatabaseConnection() yang ada dengan ini:
+async function testDatabaseConnection() {
+  console.log('Testing koneksi database...');
+  
+  try {
+    // Test query sederhana
+    const { data, error } = await supabaseClient
+      .from('matakuliah')
+      .select('count', { count: 'exact', head: true })
+      .limit(1);
+
+    if (error) {
+      console.error('❌ Koneksi gagal:', error.message);
+      return false;
+    }
+
+    console.log('✅ Koneksi database berhasil');
+    return true;
+  } catch (err) {
+    console.error('❌ Error koneksi:', err.message);
+    return false;
+  }
+}
 
     if (id) {
         // UPDATE berdasarkan KODE (bukan id)
@@ -736,7 +755,7 @@ try {
 async function saveMatkul(event) {
   event.preventDefault();
 
-  const id = document.getElementById('matkulId').value; // MENYIMPAN kode lama
+  const id = document.getElementById('matkulId').value;
   const kode = document.getElementById('modalKode').value.trim();
   const nama = document.getElementById('modalNama').value.trim();
   const prodi = document.getElementById('modalProdi').value;
@@ -744,21 +763,40 @@ async function saveMatkul(event) {
   const semester = document.getElementById('modalSemester').value;
   const deskripsi = document.getElementById('modalDeskripsi').value.trim();
 
-  // Validasi
+  // Validasi lengkap
   if (!kode) {
     alert('❌ Kode mata kuliah harus diisi!');
+    document.getElementById('modalKode').focus();
     return;
   }
+
+  if (!/^\d{8}$/.test(kode)) {
+    alert('❌ Kode harus 8 digit angka!');
+    document.getElementById('modalKode').focus();
+    return;
+  }
+
   if (!nama) {
     alert('❌ Nama mata kuliah harus diisi!');
+    document.getElementById('modalNama').focus();
     return;
   }
+
   if (!prodi || prodi === '') {
     alert('❌ Program studi harus dipilih!');
+    document.getElementById('modalProdi').focus();
     return;
   }
-  if (!sks || isNaN(parseInt(sks))) {
-    alert('❌ SKS harus angka!');
+
+  if (!sks || isNaN(parseInt(sks)) || parseInt(sks) < 1 || parseInt(sks) > 6) {
+    alert('❌ SKS harus angka antara 1-6!');
+    document.getElementById('modalSKS').focus();
+    return;
+  }
+
+  if (!semester || isNaN(parseInt(semester)) || parseInt(semester) < 1 || parseInt(semester) > 8) {
+    alert('❌ Semester harus angka antara 1-8!');
+    document.getElementById('modalSemester').focus();
     return;
   }
 
@@ -767,14 +805,12 @@ async function saveMatkul(event) {
     nama,
     prodi,
     sks: parseInt(sks),
-    semester: semester ? parseInt(semester) : null,
+    semester: parseInt(semester),
     deskripsi
   };
 
   try {
-    // ============================
     // INSERT DATA BARU
-    // ============================
     if (!id) {
       // Cek duplikat kode
       const { data: existing, error: existErr } = await supabaseClient
@@ -798,12 +834,8 @@ async function saveMatkul(event) {
 
       alert('✅ Mata kuliah berhasil ditambahkan!');
     }
-
-    // ============================
     // UPDATE DATA LAMA
-    // ============================
     else {
-
       // Jika kode berubah, pastikan tidak duplikat
       if (kode !== id) {
         const { data: dup, error: dupErr } = await supabaseClient
@@ -839,6 +871,36 @@ async function saveMatkul(event) {
   } catch (error) {
     console.error('❌ Error menyimpan mata kuliah:', error);
     alert(`❌ Gagal menyimpan mata kuliah: ${error.message || error}`);
+  }
+}
+    
+    async function deleteMatkul(id) {
+  if (!confirm('⚠️ Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
+    return;
+  }
+
+  try {
+    // Cari data berdasarkan id (bisa id atau kode)
+    const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+    if (!matkul) {
+      alert('❌ Data tidak ditemukan');
+      return;
+    }
+
+    // Hapus berdasarkan kode (karena lebih konsisten)
+    const { error } = await supabaseClient
+      .from('matakuliah')
+      .delete()
+      .eq('kode', matkul.kode);
+
+    if (error) throw error;
+
+    alert('✅ Mata kuliah berhasil dihapus!');
+    loadMatkulData();
+    loadDashboardTotals();
+  } catch (error) {
+    console.error('Error menghapus mata kuliah:', error);
+    alert(`❌ Gagal menghapus: ${error.message}`);
   }
 }
 
@@ -928,43 +990,88 @@ async function saveMatkul(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  // Reset input file
+  event.target.value = '';
+
+  // Validasi ekstensi file
+  if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    alert('❌ Hanya file Excel (.xlsx/.xls) yang diperbolehkan!');
+    return;
+  }
+
   const reader = new FileReader();
 
   reader.onload = async (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: "array" });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
 
-    const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      // Konversi ke JSON
+      const rows = XLSX.utils.sheet_to_json(sheet, { 
+        defval: "",
+        raw: false 
+      });
 
-    if (rows.length === 0) {
-      alert("❌ File kosong!");
-      return;
-    }
-
-    // Validasi kolom wajib
-    const requiredColumns = ["kode", "nama", "prodi", "sks", "semester", "deskripsi"];
-    for (const col of requiredColumns) {
-      if (!Object.keys(rows[0]).includes(col)) {
-        alert(`❌ Kolom '${col}' tidak ditemukan di file!`);
+      if (rows.length === 0) {
+        alert("❌ File kosong atau format tidak sesuai!");
         return;
       }
-    }
 
-    try {
+      // Validasi header
+      const requiredColumns = ["kode", "nama", "prodi", "sks"];
+      const firstRow = rows[0];
+      const headers = Object.keys(firstRow);
+
+      for (const col of requiredColumns) {
+        if (!headers.includes(col)) {
+          alert(`❌ Kolom '${col}' tidak ditemukan di file!`);
+          return;
+        }
+      }
+
+      // Proses data
+      const processedData = rows.map(row => ({
+        kode: row.kode.toString().trim(),
+        nama: row.nama.toString().trim(),
+        prodi: row.prodi.toString().trim(),
+        sks: parseInt(row.sks) || 0,
+        semester: parseInt(row.semester) || null,
+        deskripsi: row.deskripsi ? row.deskripsi.toString().trim() : ''
+      })).filter(row => row.kode && row.nama); // Filter data kosong
+
+      if (processedData.length === 0) {
+        alert("❌ Tidak ada data valid untuk diimport!");
+        return;
+      }
+
+      // Konfirmasi sebelum import
+      if (!confirm(`✅ Akan mengimport ${processedData.length} data mata kuliah. Lanjutkan?`)) {
+        return;
+      }
+
+      // Insert ke database
       const { error } = await supabaseClient
         .from("matakuliah")
-        .insert(rows);
+        .insert(processedData);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      alert("✅ Import berhasil dimasukkan ke database!");
+      alert(`✅ Berhasil mengimport ${processedData.length} data mata kuliah!`);
       loadMatkulData();
+      loadDashboardTotals();
 
     } catch (err) {
-      alert("❌ Gagal import: " + err.message);
+      console.error("Import error:", err);
+      alert("❌ Gagal import: " + (err.message || "Terjadi kesalahan"));
     }
+  };
+
+  reader.onerror = () => {
+    alert("❌ Gagal membaca file!");
   };
 
   reader.readAsArrayBuffer(file);
@@ -995,29 +1102,42 @@ async function saveMatkul(event) {
     }
     
     // ========== EVENT LISTENERS ==========
-    document.addEventListener("DOMContentLoaded", async function() {
-      console.log('Dashboard dimuat pada:', new Date().toLocaleString());
-      
-      // Test koneksi database
-      const isConnected = await testDatabaseConnection();
-      
-      if (!isConnected) {
-        console.warn('⚠️ Ada masalah koneksi, coba buat client baru...');
-        // Coba buat client baru
-        supabaseClient = createFreshSupabaseClient();
-        
-        // Test lagi
-        await testDatabaseConnection();
-      }
-      
-      // Load data dashboard
-      await loadDashboardTotals();
-      
-      // Tambahkan tombol debug di console
-      console.log('%c🔧 DEBUG TOOLS:', 'color: blue; font-weight: bold;');
-      console.log('1. Ketik "resetClient()" di console untuk refresh Supabase client');
-      console.log('2. Ketik "testSave()" di console untuk test save function');
-    });
+document.addEventListener("DOMContentLoaded", async function() {
+  console.log('Dashboard dimuat pada:', new Date().toLocaleString());
+  
+  // Load username dari localStorage jika ada
+  const savedUsername = localStorage.getItem('dashboard_username');
+  if (savedUsername) {
+    document.getElementById('currentUsername').textContent = savedUsername;
+    document.getElementById('AkademikFT').textContent = savedUsername;
+    document.getElementById('userNameNav').textContent = `Halo, ${savedUsername}`;
+  }
+  
+  // Test koneksi database
+  const isConnected = await testDatabaseConnection();
+  
+  if (!isConnected) {
+    console.warn('⚠️ Ada masalah koneksi, coba buat client baru...');
+    supabaseClient = createFreshSupabaseClient();
+    await testDatabaseConnection();
+  }
+  
+  // Load data dashboard
+  await loadDashboardTotals();
+  
+  // Debug tools
+  console.log('%c🔧 DEBUG TOOLS:', 'color: blue; font-weight: bold;');
+  console.log('1. Ketik "resetClient()" di console untuk refresh Supabase client');
+  console.log('2. Ketik "testSave()" di console untuk test save function');
+  console.log('3. Ketik "clearLocalStorage()" di console untuk reset data lokal');
+});
+
+// Tambahkan fungsi clearLocalStorage untuk debugging
+window.clearLocalStorage = function() {
+  localStorage.removeItem('dashboard_username');
+  localStorage.removeItem('dashboard_password_last_changed');
+  location.reload();
+};
 
     // Fungsi debug untuk di console
     window.resetClient = function() {
