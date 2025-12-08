@@ -185,6 +185,14 @@
             <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-file-excel mr-2"></i> Export Excel
             </button>
+            <button onclick="downloadTemplateMatkul()" 
+              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-download mr-2"></i> Download Template
+            </button>
+            <label class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer">
+              <i class="fas fa-file-import mr-2"></i> Import Excel
+              <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx" onchange="importMatkulFromExcel(event)" />
+            </label>
             <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
               <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
             </button>
@@ -430,6 +438,20 @@
     // Variabel untuk data mata kuliah
     let allMatkulData = [];
     let filteredMatkulData = [];
+
+    function downloadTemplateMatkul() {
+  const wb = XLSX.utils.book_new();
+
+  const wsData = [
+    ["kode", "nama", "prodi", "sks", "semester", "deskripsi"],
+    ["50262001", "Contoh Mata Kuliah", "Industri", 3, 1, "Deskripsi singkat"]
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  XLSX.utils.book_append_sheet(wb, ws, "Template");
+
+  XLSX.writeFile(wb, "template_mata_kuliah.xlsx");
+}
 
     // Fungsi untuk membuat client baru (refresh cache)
     function createFreshSupabaseClient() {
@@ -967,6 +989,52 @@
       XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
       XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
     }
+
+    async function importMatkulFromExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = async (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    if (rows.length === 0) {
+      alert("❌ File kosong!");
+      return;
+    }
+
+    // Validasi kolom wajib
+    const requiredColumns = ["kode", "nama", "prodi", "sks", "semester", "deskripsi"];
+    for (const col of requiredColumns) {
+      if (!Object.keys(rows[0]).includes(col)) {
+        alert(`❌ Kolom '${col}' tidak ditemukan di file!`);
+        return;
+      }
+    }
+
+    try {
+      const { error } = await supabaseClient
+        .from("matakuliah")
+        .insert(rows);
+
+      if (error) throw error;
+
+      alert("✅ Import berhasil dimasukkan ke database!");
+      loadMatkulData();
+
+    } catch (err) {
+      alert("❌ Gagal import: " + err.message);
+    }
+  };
+
+  reader.readAsArrayBuffer(file);
+}
 
     function togglePasswordVisibility() {
       const input = document.getElementById('newPassword');
