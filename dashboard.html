@@ -61,7 +61,7 @@
 
   <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
     <div class="flex items-center space-x-3">
-      <img src="logo.jpeg" class="h-10 w-auto"> 
+      <img src="logo.jpeg" alt="Logo FT" class="h-10 w-auto" onerror="this.style.display='none'"> 
       <h1 class="text-xl font-bold text-white">DASHBOARD AKADEMIK FT</h1>
     </div>
     <div class="flex items-center space-x-4">
@@ -105,6 +105,7 @@
 
     <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100 h-full">
       <div id="contentArea" class="space-y-8">
+        <!-- Dashboard Main -->
         <div id="main" class="bg-white p-6 rounded-lg shadow-xl min-h-full">
           <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Selamat Datang di Dashboard Akademik</h2>
           <p id="welcomeMessage" class="text-xl text-gray-600 mb-6">
@@ -128,14 +129,15 @@
           </div>
         </div>
 
+        <!-- Mata Kuliah -->
         <div id="matkul" class="bg-white p-6 rounded-lg shadow-xl hidden">
           <h2 class="text-2xl font-bold text-gray-800 mb-4">Daftar Semua Mata Kuliah</h2>
           
+          <!-- Filter Section -->
           <div class="mb-6 border p-4 rounded-lg bg-gray-50">
             <h3 class="text-lg font-medium mb-3 text-gray-700">
               <i class="fas fa-filter mr-2"></i> Filter Pencarian
             </h3>
-            
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div>
                 <label for="filterKodeProdi" class="block text-sm font-medium text-gray-700">Kode Program Studi</label>
@@ -146,7 +148,7 @@
                   <option value="50463">Informatika</option>
                   <option value="50362">Arsitektur</option>
                   <option value="50264">Elektro</option>
-                  </select>
+                </select>
               </div>
 
               <div>
@@ -178,36 +180,31 @@
             </div>
           </div>
           
+          <!-- Action Buttons -->
           <div class="flex flex-wrap gap-3 mt-4 mb-4">
-  <button onclick="downloadTemplateMatkul()" 
-    class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-    <i class="fas fa-download mr-2"></i> Download Template
-  </button>
+            <button onclick="downloadTemplateMatkul()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-download mr-2"></i> Download Template
+            </button>
 
-  <label class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md cursor-pointer">
-  <i class="fas fa-file-import mr-2"></i> Import Excel
-  <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx,.xls"
-    onchange="importMatkulFromExcel(event)" />
-</label>
+            <label class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md cursor-pointer">
+              <i class="fas fa-file-import mr-2"></i> Import Excel
+              <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx,.xls" onchange="importMatkulFromExcel(event)" />
+            </label>
 
-  <button onclick="exportMatkulToPDF()" 
-    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-    <i class="fas fa-file-pdf mr-2"></i> Export PDF
-  </button>
+            <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            </button>
 
-  <button onclick="exportMatkulToExcel()" 
-    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-    <i class="fas fa-file-excel mr-2"></i> Export Excel
-  </button>
+            <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
 
-  <button onclick="addMatkul()" 
-    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-    <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
-  </button>
-
-</div>
-
+            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+              <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
+            </button>
+          </div>
           
+          <!-- Table -->
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
@@ -228,6 +225,7 @@
           </div>
         </div>
 
+        <!-- Pengaturan -->
         <div id="pengaturan" class="hidden">
           <div class="flex flex-col items-center justify-center min-h-full">
             <div class="w-full max-w-4xl">
@@ -288,33 +286,6 @@
                   <button onclick="logout()" class="bg-red-500 text-white font-semibold py-3 px-8 rounded-lg hover:bg-red-600 transition duration-200 flex items-center justify-center">
                     <i class="fas fa-sign-out-alt mr-2"></i> Ganti Akun / Logout
                   </button>
-                </div>
-              </div>
-              
-              <div class="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Informasi Sistem</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                  <div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm inline-block mb-2">
-                      <i class="fas fa-shield-alt text-blue-500 text-2xl"></i>
-                    </div>
-                    <h4 class="font-semibold text-gray-700">Keamanan</h4>
-                    <p class="text-sm text-gray-600 mt-2">Data Anda dilindungi dengan enkripsi tingkat tinggi</p>
-                  </div>
-                  <div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm inline-block mb-2">
-                      <i class="fas fa-sync text-green-500 text-2xl"></i>
-                    </div>
-                    <h4 class="font-semibold text-gray-700">Sinkronisasi</h4>
-                    <p class="text-sm text-gray-600 mt-2">Perubahan disimpan secara real-time ke database</p>
-                  </div>
-                  <div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm inline-block mb-2">
-                      <i class="fas fa-history text-purple-500 text-2xl"></i>
-                    </div>
-                    <h4 class="font-semibold text-gray-700">Riwayat</h4>
-                    <p class="text-sm text-gray-600 mt-2">Semua perubahan dicatat dalam log sistem</p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -425,196 +396,98 @@
   </div>
 
   <script>
+    // Konfigurasi Supabase
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
     
-    // ========== DEKLARASI CLIENT DENGAN CACHE DISABLED ==========
-    let supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: false, // Nonaktifkan session persistence untuk testing
-        detectSessionInUrl: false
-      },
-      global: {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-          'x-client-info': 'dashboard-ft-v1'
-        }
-      }
+    // Inisialisasi Supabase Client
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false }
     });
 
-    // Variabel untuk data mata kuliah
+    // Variabel global
     let allMatkulData = [];
     let filteredMatkulData = [];
 
-    function downloadTemplateMatkul() {
-  const wb = XLSX.utils.book_new();
+    // ==================== FUNGSI UTAMA ====================
 
-  const wsData = [
-    ["kode", "nama", "prodi", "sks", "semester", "deskripsi"],
-    ["50262001", "Contoh Mata Kuliah", "Industri", 3, 1, "Deskripsi singkat"]
-  ];
-
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-  XLSX.utils.book_append_sheet(wb, ws, "Template");
-
-  XLSX.writeFile(wb, "template_mata_kuliah.xlsx");
-}
-
-    // Fungsi untuk membuat client baru (refresh cache)
-    function createFreshSupabaseClient() {
-      console.log('Membuat Supabase client baru...');
-      return supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: false, // Nonaktifkan untuk hindari cache
-          detectSessionInUrl: false
-        },
-        global: {
-          headers: {
-            'Cache-Control': 'no-cache',
-            'x-timestamp': Date.now().toString() // Tambahkan timestamp unik
-          }
-        }
-      });
-    }
-
-    // Fungsi untuk test koneksi dan cek struktur
-    // GANTI fungsi testDatabaseConnection() yang ada dengan ini:
-async function testDatabaseConnection() {
-  console.log('Testing koneksi database...');
-  
-  try {
-    // Test query sederhana
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .select('count', { count: 'exact', head: true })
-      .limit(1);
-
-    if (error) {
-      console.error('❌ Koneksi gagal:', error.message);
-      return false;
-    }
-
-    console.log('✅ Koneksi database berhasil');
-    return true;
-  } catch (err) {
-    console.error('❌ Error koneksi:', err.message);
-    return false;
-  }
-}
-
-    if (id) {
-        // UPDATE berdasarkan KODE (bukan id)
-        const { error: updateError } = await supabaseClient
-            .from('matakuliah')
-            .update(matkulData)
-            .eq('kode', kode);
-
-        if (updateError) {
-            throw updateError;
-        }
-
-        alert('✅ Mata kuliah berhasil diperbarui!');
-
-    } else {
-        // INSERT baru
-        const { error: insertError } = await supabaseClient
-            .from('matakuliah')
-            .insert([matkulData]);
-
-        if (insertError) {
-            throw insertError;
-        }
-
-        alert('✅ Mata kuliah berhasil ditambahkan!');
-    }
-
-    closeModal();
-    loadMatkulData();
-    loadDashboardTotals();
-
-} catch (error) {
-    console.error('Error menyimpan mata kuliah:', error);
-    alert(`❌ Gagal menyimpan mata kuliah: ${error.message}`);
-}
-
-    // ========== FUNGSI UTAMA ==========
+    // Fungsi untuk menampilkan konten
     function showContent(tabId, clickedButton) {
-      ['main', 'matkul', 'pengaturan'].forEach(id => {
-        document.getElementById(id)?.classList.add('hidden');
-      });
-      document.getElementById(tabId)?.classList.remove('hidden');
-      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
-      clickedButton?.classList.add('active-link');
+      // Sembunyikan semua konten
+      document.getElementById('main').classList.add('hidden');
+      document.getElementById('matkul').classList.add('hidden');
+      document.getElementById('pengaturan').classList.add('hidden');
       
+      // Tampilkan konten yang dipilih
+      document.getElementById(tabId).classList.remove('hidden');
+      
+      // Update navigasi aktif
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('active-link');
+      });
+      
+      if (clickedButton) {
+        clickedButton.classList.add('active-link');
+      }
+      
+      // Load data jika tab mata kuliah
       if (tabId === 'matkul') {
         loadMatkulData();
       }
     }
 
-    async function getTotalCount(table, elementId) {
+    // ==================== FUNGSI DASHBOARD ====================
+
+    // Load total data dashboard
+    async function loadDashboardTotals() {
       try {
-        const { count, error } = await supabaseClient
-          .from(table)
+        // Total dosen
+        const { count: dosenCount } = await supabaseClient
+          .from('dosen')
           .select('*', { count: 'exact', head: true });
-        if (error) throw error;
-        document.getElementById(elementId).textContent = count ?? 0;
-      } catch (err) {
-        console.error(`Error ambil total dari ${table}:`, err.message);
-        document.getElementById(elementId).textContent = 0;
+        document.getElementById('totalDosen').textContent = dosenCount || 0;
+
+        // Total jadwal
+        const { count: jadwalCount } = await supabaseClient
+          .from('jadwal')
+          .select('*', { count: 'exact', head: true });
+        document.getElementById('totalJadwal').textContent = jadwalCount || 0;
+
+        // Total mata kuliah
+        const { count: matkulCount } = await supabaseClient
+          .from('matakuliah')
+          .select('*', { count: 'exact', head: true });
+        document.getElementById('totalMataKuliah').textContent = matkulCount || 0;
+      } catch (error) {
+        console.error('Error loading dashboard totals:', error);
       }
     }
 
-    async function loadDashboardTotals() {
-      await getTotalCount('dosen', 'totalDosen');
-      await getTotalCount('jadwal', 'totalJadwal');
-      await getTotalCount('matakuliah', 'totalMataKuliah');
-    }
+    // ==================== FUNGSI MATA KULIAH ====================
 
-    // Fungsi untuk memuat data mata kuliah
+    // Load data mata kuliah
     async function loadMatkulData() {
       const tableBody = document.getElementById('matkulTableBody');
-      tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
+      tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>';
       
-      const { data, error } = await supabaseClient.from('matakuliah').select('*').order('kode');
-      
-      if (error) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('matakuliah')
+          .select('*')
+          .order('kode');
+        
+        if (error) throw error;
+        
+        allMatkulData = data || [];
+        filteredMatkulData = [...allMatkulData];
+        
+        renderMatkulTable(filteredMatkulData);
+      } catch (error) {
         tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">${error.message}</td></tr>`;
-        return;
       }
-      
-      allMatkulData = data;
-      
-      // PERBAIKAN: Pastikan semua data memiliki nilai prodi yang valid
-      allMatkulData = allMatkulData.map(matkul => {
-        let prodi = matkul.prodi || 'Lainnya';
-        const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
-        
-        // Jika prodi masih kosong atau 'Lainnya', coba deteksi dari kode
-        if (!matkul.prodi || matkul.prodi === 'Lainnya') {
-          if (kodePrefix === '50262') prodi = 'Industri';
-          else if (kodePrefix === '50263') prodi = 'Sipil';
-          else if (kodePrefix === '50463') prodi = 'Informatika';
-          else if (kodePrefix === '50362') prodi = 'Arsitektur';
-          else if (kodePrefix === '50264') prodi = 'Elektro';
-        }
-        
-        return {
-          ...matkul,
-          prodi: prodi,
-          id: matkul.id || matkul.kode
-        };
-      });
-      
-      filteredMatkulData = [...allMatkulData];
-      renderMatkulTable(filteredMatkulData);
-      document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
     }
 
-    // Fungsi untuk menampilkan tabel mata kuliah
+    // Render tabel mata kuliah
     function renderMatkulTable(data) {
       const tableBody = document.getElementById('matkulTableBody');
       
@@ -622,7 +495,7 @@ async function testDatabaseConnection() {
         tableBody.innerHTML = `
           <tr>
             <td colspan="7" class="px-6 py-8 text-sm text-gray-500 text-center">
-              📭 Tidak ada data mata kuliah yang sesuai dengan filter pencarian
+              📭 Tidak ada data mata kuliah
             </td>
           </tr>
         `;
@@ -634,20 +507,20 @@ async function testDatabaseConnection() {
         html += `
           <tr class="hover:bg-gray-50">
             <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode}</td>
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama}</td>
+            <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode || ''}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama || ''}</td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 ${matkul.prodi || 'Lainnya'}
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${matkul.semester || '-'}</td>
             <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-              <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
+              <button onclick="editMatkul('${matkul.id || matkul.kode}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2">
                 <i class="fas fa-edit mr-1"></i> Edit
               </button>
-              <button onclick="deleteMatkul('${matkul.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md" title="Hapus Mata Kuliah">
+              <button onclick="deleteMatkul('${matkul.id || matkul.kode}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md">
                 <i class="fas fa-trash-alt mr-1"></i> Hapus
               </button>
             </td>
@@ -658,7 +531,7 @@ async function testDatabaseConnection() {
       tableBody.innerHTML = html;
     }
 
-    // Fungsi untuk memfilter data mata kuliah
+    // Filter data mata kuliah
     function filterMatkulData() {
       const kodeProdi = document.getElementById('filterKodeProdi').value;
       const namaMatkul = document.getElementById('filterNamaMatkul').value.toLowerCase();
@@ -667,13 +540,13 @@ async function testDatabaseConnection() {
       filteredMatkulData = allMatkulData.filter(matkul => {
         let passes = true;
         
-        if (kodeProdi) {
+        if (kodeProdi && matkul.kode) {
           const kodePrefix = matkul.kode.substring(0, 5);
-          if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
+          if (kodePrefix !== kodeProdi) passes = false;
         }
         
-        if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
-          passes = false;
+        if (namaMatkul && matkul.nama) {
+          if (!matkul.nama.toLowerCase().includes(namaMatkul)) passes = false;
         }
         
         if (sks && matkul.sks != sks) {
@@ -686,7 +559,7 @@ async function testDatabaseConnection() {
       renderMatkulTable(filteredMatkulData);
     }
 
-    // Fungsi untuk mereset filter mata kuliah
+    // Reset filter
     function resetMatkulFilter() {
       document.getElementById('filterKodeProdi').value = '';
       document.getElementById('filterNamaMatkul').value = '';
@@ -695,16 +568,11 @@ async function testDatabaseConnection() {
       renderMatkulTable(filteredMatkulData);
     }
 
-    // FUNGSI CRUD LENGKAP
+    // ==================== CRUD MATA KULIAH ====================
+
+    // Modal functions
     function openModal() {
       document.getElementById('matkulModal').style.display = 'flex';
-      // Pastikan dropdown di-reset ke pilihan yang benar
-      setTimeout(() => {
-        const prodiSelect = document.getElementById('modalProdi');
-        if (!prodiSelect.value) {
-          prodiSelect.value = '';
-        }
-      }, 100);
     }
 
     function closeModal() {
@@ -737,13 +605,10 @@ async function testDatabaseConnection() {
       }
 
       document.getElementById('matkulId').value = matkul.id || matkul.kode;
-      document.getElementById('modalKode').value = matkul.kode;
-      document.getElementById('modalNama').value = matkul.nama;
-      
-      // PERBAIKAN DI SINI: Pastikan nilai prodi di-set dengan benar
-      document.getElementById('modalProdi').value = matkul.prodi || 'Lainnya';
-      
-      document.getElementById('modalSKS').value = matkul.sks;
+      document.getElementById('modalKode').value = matkul.kode || '';
+      document.getElementById('modalNama').value = matkul.nama || '';
+      document.getElementById('modalProdi').value = matkul.prodi || '';
+      document.getElementById('modalSKS').value = matkul.sks || '';
       document.getElementById('modalSemester').value = matkul.semester || '';
       document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
       document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
@@ -752,428 +617,257 @@ async function testDatabaseConnection() {
       openModal();
     }
 
-async function saveMatkul(event) {
-  event.preventDefault();
+    // Save mata kuliah
+    async function saveMatkul(event) {
+      event.preventDefault();
 
-  const id = document.getElementById('matkulId').value;
-  const kode = document.getElementById('modalKode').value.trim();
-  const nama = document.getElementById('modalNama').value.trim();
-  const prodi = document.getElementById('modalProdi').value;
-  const sks = document.getElementById('modalSKS').value;
-  const semester = document.getElementById('modalSemester').value;
-  const deskripsi = document.getElementById('modalDeskripsi').value.trim();
+      const id = document.getElementById('matkulId').value;
+      const kode = document.getElementById('modalKode').value.trim();
+      const nama = document.getElementById('modalNama').value.trim();
+      const prodi = document.getElementById('modalProdi').value;
+      const sks = document.getElementById('modalSKS').value;
+      const semester = document.getElementById('modalSemester').value;
+      const deskripsi = document.getElementById('modalDeskripsi').value.trim();
 
-  // Validasi lengkap
-  if (!kode) {
-    alert('❌ Kode mata kuliah harus diisi!');
-    document.getElementById('modalKode').focus();
-    return;
-  }
-
-  if (!/^\d{8}$/.test(kode)) {
-    alert('❌ Kode harus 8 digit angka!');
-    document.getElementById('modalKode').focus();
-    return;
-  }
-
-  if (!nama) {
-    alert('❌ Nama mata kuliah harus diisi!');
-    document.getElementById('modalNama').focus();
-    return;
-  }
-
-  if (!prodi || prodi === '') {
-    alert('❌ Program studi harus dipilih!');
-    document.getElementById('modalProdi').focus();
-    return;
-  }
-
-  if (!sks || isNaN(parseInt(sks)) || parseInt(sks) < 1 || parseInt(sks) > 6) {
-    alert('❌ SKS harus angka antara 1-6!');
-    document.getElementById('modalSKS').focus();
-    return;
-  }
-
-  if (!semester || isNaN(parseInt(semester)) || parseInt(semester) < 1 || parseInt(semester) > 8) {
-    alert('❌ Semester harus angka antara 1-8!');
-    document.getElementById('modalSemester').focus();
-    return;
-  }
-
-  const matkulData = {
-    kode,
-    nama,
-    prodi,
-    sks: parseInt(sks),
-    semester: parseInt(semester),
-    deskripsi
-  };
-
-  try {
-    // INSERT DATA BARU
-    if (!id) {
-      // Cek duplikat kode
-      const { data: existing, error: existErr } = await supabaseClient
-        .from('matakuliah')
-        .select('kode')
-        .eq('kode', kode)
-        .limit(1);
-
-      if (existErr) throw existErr;
-
-      if (existing && existing.length > 0) {
-        alert('❌ Kode sudah digunakan mata kuliah lain!');
+      // Validasi
+      if (!kode || !nama || !prodi || !sks || !semester) {
+        alert('❌ Semua field bertanda * harus diisi!');
         return;
       }
 
-      const { error: insertError } = await supabaseClient
-        .from('matakuliah')
-        .insert([matkulData]);
+      const matkulData = {
+        kode,
+        nama,
+        prodi,
+        sks: parseInt(sks),
+        semester: parseInt(semester),
+        deskripsi
+      };
 
-      if (insertError) throw insertError;
+      try {
+        if (!id) {
+          // Insert baru
+          const { error } = await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData]);
 
-      alert('✅ Mata kuliah berhasil ditambahkan!');
-    }
-    // UPDATE DATA LAMA
-    else {
-      // Jika kode berubah, pastikan tidak duplikat
-      if (kode !== id) {
-        const { data: dup, error: dupErr } = await supabaseClient
-          .from('matakuliah')
-          .select('kode')
-          .eq('kode', kode)
-          .limit(1);
+          if (error) throw error;
+          alert('✅ Mata kuliah berhasil ditambahkan!');
+        } else {
+          // Update berdasarkan id atau kode
+          const { error } = await supabaseClient
+            .from('matakuliah')
+            .update(matkulData)
+            .eq('kode', kode);
 
-        if (dupErr) throw dupErr;
-
-        if (dup && dup.length > 0) {
-          alert('❌ Kode baru sudah digunakan oleh mata kuliah lain!');
-          return;
+          if (error) throw error;
+          alert('✅ Mata kuliah berhasil diperbarui!');
         }
+
+        closeModal();
+        loadMatkulData();
+        loadDashboardTotals();
+      } catch (error) {
+        console.error('Error:', error);
+        alert(`❌ Gagal menyimpan: ${error.message}`);
       }
-
-      // Update berdasarkan KODE LAMA (id)
-      const { error: updateError } = await supabaseClient
-        .from('matakuliah')
-        .update(matkulData)
-        .eq('kode', id);
-
-      if (updateError) throw updateError;
-
-      alert('✅ Mata kuliah berhasil diperbarui!');
     }
 
-    // Refresh UI
-    closeModal();
-    loadMatkulData();
-    loadDashboardTotals();
-
-  } catch (error) {
-    console.error('❌ Error menyimpan mata kuliah:', error);
-    alert(`❌ Gagal menyimpan mata kuliah: ${error.message || error}`);
-  }
-}
-    
+    // Delete mata kuliah
     async function deleteMatkul(id) {
-  if (!confirm('⚠️ Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
-    return;
-  }
+      if (!confirm('⚠️ Yakin hapus mata kuliah ini?')) return;
 
-  try {
-    // Cari data berdasarkan id (bisa id atau kode)
-    const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
-    if (!matkul) {
-      alert('❌ Data tidak ditemukan');
-      return;
+      try {
+        const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+        if (!matkul) throw new Error('Data tidak ditemukan');
+
+        const { error } = await supabaseClient
+          .from('matakuliah')
+          .delete()
+          .eq('kode', matkul.kode);
+
+        if (error) throw error;
+
+        alert('✅ Mata kuliah berhasil dihapus!');
+        loadMatkulData();
+        loadDashboardTotals();
+      } catch (error) {
+        alert(`❌ Gagal menghapus: ${error.message}`);
+      }
     }
 
-    // Hapus berdasarkan kode (karena lebih konsisten)
-    const { error } = await supabaseClient
-      .from('matakuliah')
-      .delete()
-      .eq('kode', matkul.kode);
+    // ==================== EXPORT/IMPORT ====================
 
-    if (error) throw error;
+    // Download template
+    function downloadTemplateMatkul() {
+      const wb = XLSX.utils.book_new();
+      const wsData = [
+        ['kode', 'nama', 'prodi', 'sks', 'semester', 'deskripsi'],
+        ['50262001', 'Matematika Teknik', 'Industri', 3, 1, 'Deskripsi singkat'],
+        ['50263001', 'Mekanika Teknik', 'Sipil', 3, 2, 'Deskripsi singkat']
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Template');
+      XLSX.writeFile(wb, 'template_mata_kuliah.xlsx');
+    }
 
-    alert('✅ Mata kuliah berhasil dihapus!');
-    loadMatkulData();
-    loadDashboardTotals();
-  } catch (error) {
-    console.error('Error menghapus mata kuliah:', error);
-    alert(`❌ Gagal menghapus: ${error.message}`);
-  }
-}
+    // Import dari Excel
+    async function importMatkulFromExcel(event) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-    // Fungsi untuk export ke PDF
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+          if (!confirm(`Import ${rows.length} data mata kuliah?`)) return;
+
+          const { error } = await supabaseClient
+            .from('matakuliah')
+            .insert(rows);
+
+          if (error) throw error;
+
+          alert('✅ Import berhasil!');
+          loadMatkulData();
+        } catch (error) {
+          alert(`❌ Import gagal: ${error.message}`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Export ke PDF
     function exportMatkulToPDF() {
-      if (!filteredMatkulData || filteredMatkulData.length === 0) {
-        alert('❌ Tidak ada data mata kuliah untuk diekspor.');
+      if (filteredMatkulData.length === 0) {
+        alert('❌ Tidak ada data untuk diekspor');
         return;
       }
-      
+
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
-      const body = filteredMatkulData.map((matkul, index) => [
-        index + 1,
+      doc.text('Daftar Mata Kuliah', 14, 15);
+      
+      const headers = [['No', 'Kode', 'Nama', 'Prodi', 'SKS', 'Semester']];
+      const body = filteredMatkulData.map((matkul, i) => [
+        i + 1,
         matkul.kode,
         matkul.nama,
-        matkul.prodi || 'Lainnya',
+        matkul.prodi,
         matkul.sks,
-        matkul.semester || '-'
+        matkul.semester
       ]);
-      
-      doc.setFontSize(16);
-      doc.text('Daftar Mata Kuliah Fakultas Teknik', 14, 15);
-      doc.setFontSize(10);
-      doc.text(`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`, 14, 22);
-      
+
       doc.autoTable({
         head: headers,
         body: body,
-        startY: 30,
-        theme: 'grid',
-        styles: { fontSize: 9, cellPadding: 2 },
-        headStyles: { fillColor: [30, 64, 175] },
-        columnStyles: {
-          0: { cellWidth: 10 },
-          1: { cellWidth: 25 },
-          2: { halign: 'left', cellWidth: 70 },
-          3: { cellWidth: 30 },
-          4: { cellWidth: 15 },
-          5: { cellWidth: 20 }
-        }
+        startY: 20,
+        theme: 'grid'
       });
-      
-      doc.save('daftar_mata_kuliah_ft.pdf');
+
+      doc.save('mata_kuliah.pdf');
     }
 
-    // Fungsi untuk export ke Excel
+    // Export ke Excel
     function exportMatkulToExcel() {
-      if (!filteredMatkulData || filteredMatkulData.length === 0) {
-        alert('❌ Tidak ada data mata kuliah untuk diekspor.');
+      if (filteredMatkulData.length === 0) {
+        alert('❌ Tidak ada data untuk diekspor');
         return;
       }
-      
+
       const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
-      const data = filteredMatkulData.map((matkul, index) => [
-        index + 1,
+      const data = filteredMatkulData.map((matkul, i) => [
+        i + 1,
         matkul.kode,
         matkul.nama,
-        matkul.prodi || 'Lainnya',
+        matkul.prodi,
         matkul.sks,
-        matkul.semester || '-'
+        matkul.semester
       ]);
-      
-      const wsData = [
-        ['DAFTAR MATA KULIAH FAKULTAS TEKNIK'],
-        [`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`],
-        [],
-        ...headers,
-        ...data
-      ];
-      
+
+      const wsData = [...headers, ...data];
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(wsData);
-      
-      ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }
-      ];
-      
-      XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
-      XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
+      XLSX.utils.book_append_sheet(wb, ws, 'Mata Kuliah');
+      XLSX.writeFile(wb, 'mata_kuliah.xlsx');
     }
 
-    async function importMatkulFromExcel(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // Reset input file
-  event.target.value = '';
-
-  // Validasi ekstensi file
-  if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-    alert('❌ Hanya file Excel (.xlsx/.xls) yang diperbolehkan!');
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = async (e) => {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-
-      // Konversi ke JSON
-      const rows = XLSX.utils.sheet_to_json(sheet, { 
-        defval: "",
-        raw: false 
-      });
-
-      if (rows.length === 0) {
-        alert("❌ File kosong atau format tidak sesuai!");
-        return;
-      }
-
-      // Validasi header
-      const requiredColumns = ["kode", "nama", "prodi", "sks"];
-      const firstRow = rows[0];
-      const headers = Object.keys(firstRow);
-
-      for (const col of requiredColumns) {
-        if (!headers.includes(col)) {
-          alert(`❌ Kolom '${col}' tidak ditemukan di file!`);
-          return;
-        }
-      }
-
-      // Proses data
-      const processedData = rows.map(row => ({
-        kode: row.kode.toString().trim(),
-        nama: row.nama.toString().trim(),
-        prodi: row.prodi.toString().trim(),
-        sks: parseInt(row.sks) || 0,
-        semester: parseInt(row.semester) || null,
-        deskripsi: row.deskripsi ? row.deskripsi.toString().trim() : ''
-      })).filter(row => row.kode && row.nama); // Filter data kosong
-
-      if (processedData.length === 0) {
-        alert("❌ Tidak ada data valid untuk diimport!");
-        return;
-      }
-
-      // Konfirmasi sebelum import
-      if (!confirm(`✅ Akan mengimport ${processedData.length} data mata kuliah. Lanjutkan?`)) {
-        return;
-      }
-
-      // Insert ke database
-      const { error } = await supabaseClient
-        .from("matakuliah")
-        .insert(processedData);
-
-      if (error) {
-        throw error;
-      }
-
-      alert(`✅ Berhasil mengimport ${processedData.length} data mata kuliah!`);
-      loadMatkulData();
-      loadDashboardTotals();
-
-    } catch (err) {
-      console.error("Import error:", err);
-      alert("❌ Gagal import: " + (err.message || "Terjadi kesalahan"));
-    }
-  };
-
-  reader.onerror = () => {
-    alert("❌ Gagal membaca file!");
-  };
-
-  reader.readAsArrayBuffer(file);
-}
+    // ==================== PENGATURAN ====================
 
     function togglePasswordVisibility() {
       const input = document.getElementById('newPassword');
       const eye = document.getElementById('eyeIcon');
       if (input.type === 'password') {
-        input.type = 'text'; eye.classList.replace('fa-eye', 'fa-eye-slash');
+        input.type = 'text';
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
       } else {
-        input.type = 'password'; eye.classList.replace('fa-eye-slash', 'fa-eye');
+        input.type = 'password';
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
       }
     }
 
-    function updateUsername() { alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); }
-    function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
-    
+    function updateUsername() {
+      const newUsername = document.getElementById('newUsername').value.trim();
+      if (!newUsername) {
+        alert('❌ Username tidak boleh kosong');
+        return;
+      }
+
+      // Simpan ke localStorage untuk demo
+      localStorage.setItem('username', newUsername);
+      document.getElementById('currentUsername').textContent = newUsername;
+      document.getElementById('AkademikFT').textContent = newUsername;
+      document.getElementById('userNameNav').textContent = `Halo, ${newUsername}`;
+      document.getElementById('newUsername').value = '';
+      alert('✅ Username berhasil diperbarui!');
+    }
+
+    function updatePassword() {
+      const newPassword = document.getElementById('newPassword').value;
+      if (!newPassword || newPassword.length < 6) {
+        alert('❌ Password minimal 6 karakter');
+        return;
+      }
+
+      localStorage.setItem('password_changed', new Date().toISOString());
+      document.getElementById('newPassword').value = '';
+      alert('✅ Password berhasil diperbarui (demo mode)!');
+    }
+
     async function logout() {
-      const { error } = await supabaseClient.auth.signOut();
-
-      if (error) {
-        console.error('Logout Error:', error.message);
-        alert('Gagal keluar sesi. Silakan coba lagi.');
-      } else {
-        window.location.href = 'index.html'; 
+      try {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Logout error:', error);
       }
     }
-    
-    // ========== EVENT LISTENERS ==========
-document.addEventListener("DOMContentLoaded", async function() {
-  console.log('Dashboard dimuat pada:', new Date().toLocaleString());
-  
-  // Load username dari localStorage jika ada
-  const savedUsername = localStorage.getItem('dashboard_username');
-  if (savedUsername) {
-    document.getElementById('currentUsername').textContent = savedUsername;
-    document.getElementById('AkademikFT').textContent = savedUsername;
-    document.getElementById('userNameNav').textContent = `Halo, ${savedUsername}`;
-  }
-  
-  // Test koneksi database
-  const isConnected = await testDatabaseConnection();
-  
-  if (!isConnected) {
-    console.warn('⚠️ Ada masalah koneksi, coba buat client baru...');
-    supabaseClient = createFreshSupabaseClient();
-    await testDatabaseConnection();
-  }
-  
-  // Load data dashboard
-  await loadDashboardTotals();
-  
-  // Debug tools
-  console.log('%c🔧 DEBUG TOOLS:', 'color: blue; font-weight: bold;');
-  console.log('1. Ketik "resetClient()" di console untuk refresh Supabase client');
-  console.log('2. Ketik "testSave()" di console untuk test save function');
-  console.log('3. Ketik "clearLocalStorage()" di console untuk reset data lokal');
-});
 
-// Tambahkan fungsi clearLocalStorage untuk debugging
-window.clearLocalStorage = function() {
-  localStorage.removeItem('dashboard_username');
-  localStorage.removeItem('dashboard_password_last_changed');
-  location.reload();
-};
+    // ==================== INITIALIZATION ====================
 
-    // Fungsi debug untuk di console
-    window.resetClient = function() {
-      supabaseClient = createFreshSupabaseClient();
-      console.log('✅ Supabase client di-reset');
-      return supabaseClient;
-    };
-
-    window.testSave = async function() {
-      const testData = {
-        kode: 'TEST' + Date.now().toString().slice(-4),
-        nama: 'Mata Kuliah Test',
-        prodi: 'Informatika',
-        sks: 2,
-        semester: 3,
-        deskripsi: 'Data test dari console'
-      };
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Dashboard loaded');
       
-      console.log('Mengirim test data:', testData);
-      
-      const { data, error } = await supabaseClient
-        .from('matakuliah')
-        .insert([testData])
-        .select();
-      
-      if (error) {
-        console.error('❌ Test gagal:', error);
-        return { success: false, error: error.message };
-      } else {
-        console.log('✅ Test berhasil:', data);
-        return { success: true, data: data };
+      // Load username dari localStorage
+      const savedUsername = localStorage.getItem('username');
+      if (savedUsername) {
+        document.getElementById('currentUsername').textContent = savedUsername;
+        document.getElementById('AkademikFT').textContent = savedUsername;
+        document.getElementById('userNameNav').textContent = `Halo, ${savedUsername}`;
       }
-    };
+      
+      // Load data awal
+      loadDashboardTotals();
+    });
 
-    // Event listener untuk menutup modal dengan ESC
-    document.addEventListener('keydown', (e) => {
+    // Event listener untuk ESC key
+    document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeModal();
       }
