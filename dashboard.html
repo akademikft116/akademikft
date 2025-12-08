@@ -178,25 +178,39 @@
             </div>
           </div>
           
-          <div class="flex justify-end mb-4 space-x-2">
-            <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-file-pdf mr-2"></i> Export PDF
-            </button>
-            <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-file-excel mr-2"></i> Export Excel
-            </button>
-            <button onclick="downloadTemplateMatkul()" 
-              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-download mr-2"></i> Download Template
-            </button>
-            <label class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer">
-              <i class="fas fa-file-import mr-2"></i> Import Excel
-              <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx" onchange="importMatkulFromExcel(event)" />
-            </label>
-            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
-            </button>
-          </div>
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+
+  <!-- Download Template -->
+  <button onclick="downloadTemplateMatkul()" 
+    class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+    <i class="fas fa-download mr-2"></i> Download Template
+  </button>
+
+  <!-- Import File -->
+  <label class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150 cursor-pointer">
+    <i class="fas fa-file-import mr-2"></i> Import File
+    <input type="file" id="importMatkulInput" class="hidden" accept=".xlsx"
+      onchange="importMatkulFromExcel(event)" />
+  </label>
+
+  <!-- Export PDF -->
+  <button onclick="exportMatkulToPDF()" 
+    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+    <i class="fas fa-file-pdf mr-2"></i> Export PDF
+  </button>
+
+  <!-- Export Excel -->
+  <button onclick="exportMatkulToExcel()" 
+    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+    <i class="fas fa-file-excel mr-2"></i> Export Excel
+  </button>
+
+  <!-- Tambah Mata Kuliah -->
+  <button onclick="addMatkul()" 
+    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+    <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
+  </button>
+</div>
           
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
