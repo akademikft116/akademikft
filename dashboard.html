@@ -733,190 +733,114 @@ try {
       openModal();
     }
 
-    // ========== FUNGSI SAVE MATKUL YANG DIPERBAIKI ==========
-    async function saveMatkul(event) {
-      event.preventDefault();
-      
-      const id = document.getElementById('matkulId').value;
-      const kode = document.getElementById('modalKode').value.trim();
-      const nama = document.getElementById('modalNama').value.trim();
-      const prodi = document.getElementById('modalProdi').value;
-      const sks = document.getElementById('modalSKS').value;
-      const semester = document.getElementById('modalSemester').value;
-      const deskripsi = document.getElementById('modalDeskripsi').value.trim();
+async function saveMatkul(event) {
+  event.preventDefault();
 
-      // Validasi
-      if (!prodi || prodi === '') {
-        alert('❌ Program studi harus dipilih!');
+  const id = document.getElementById('matkulId').value; // MENYIMPAN kode lama
+  const kode = document.getElementById('modalKode').value.trim();
+  const nama = document.getElementById('modalNama').value.trim();
+  const prodi = document.getElementById('modalProdi').value;
+  const sks = document.getElementById('modalSKS').value;
+  const semester = document.getElementById('modalSemester').value;
+  const deskripsi = document.getElementById('modalDeskripsi').value.trim();
+
+  // Validasi
+  if (!kode) {
+    alert('❌ Kode mata kuliah harus diisi!');
+    return;
+  }
+  if (!nama) {
+    alert('❌ Nama mata kuliah harus diisi!');
+    return;
+  }
+  if (!prodi || prodi === '') {
+    alert('❌ Program studi harus dipilih!');
+    return;
+  }
+  if (!sks || isNaN(parseInt(sks))) {
+    alert('❌ SKS harus angka!');
+    return;
+  }
+
+  const matkulData = {
+    kode,
+    nama,
+    prodi,
+    sks: parseInt(sks),
+    semester: semester ? parseInt(semester) : null,
+    deskripsi
+  };
+
+  try {
+    // ============================
+    // INSERT DATA BARU
+    // ============================
+    if (!id) {
+      // Cek duplikat kode
+      const { data: existing, error: existErr } = await supabaseClient
+        .from('matakuliah')
+        .select('kode')
+        .eq('kode', kode)
+        .limit(1);
+
+      if (existErr) throw existErr;
+
+      if (existing && existing.length > 0) {
+        alert('❌ Kode sudah digunakan mata kuliah lain!');
         return;
       }
 
-      // Siapkan data - pastikan nama kolom SAMA PERSIS dengan di Supabase
-      const matkulData = {
-        kode: kode,
-        nama: nama,
-        prodi: prodi,  // PASTIKAN nama kolom ini sama dengan di database
-        sks: parseInt(sks),
-        semester: parseInt(semester),
-        deskripsi: deskripsi || null
-      };
+      const { error: insertError } = await supabaseClient
+        .from('matakuliah')
+        .insert([matkulData]);
 
-      console.log('Data yang dikirim ke Supabase:', matkulData);
+      if (insertError) throw insertError;
 
-      try {
-        // GANTI CARA PENYIMPANAN: Gunakan fetch API langsung (bypass supabase client cache)
-        const result = await saveToSupabaseDirect(id, matkulData);
-        
-        if (result.success) {
-          alert(id ? '✅ Mata kuliah berhasil diperbarui!' : '✅ Mata kuliah berhasil ditambahkan!');
-          closeModal();
-          await loadMatkulData();
-          await loadDashboardTotals();
-        } else {
-          throw new Error(result.error);
-        }
-        
-      } catch (error) {
-        console.error('Error menyimpan:', error);
-        
-        // Coba cara alternatif jika masih gagal
-        if (error.message.includes('prodi') || error.message.includes('schema')) {
-          const retryResult = await retrySaveMatkul(id, matkulData);
-          if (retryResult.success) {
-            alert('✅ Berhasil disimpan setelah retry!');
-            closeModal();
-            loadMatkulData();
-            loadDashboardTotals();
-          } else {
-            alert(`❌ Gagal menyimpan: ${retryResult.error}`);
-          }
-        } else {
-          alert(`❌ Gagal menyimpan: ${error.message}`);
-        }
-      }
+      alert('✅ Mata kuliah berhasil ditambahkan!');
     }
 
-    // FUNGSI BARU: Simpan langsung ke Supabase REST API
-    async function saveToSupabaseDirect(id, matkulData) {
-      const url = id 
-        ? `${SUPABASE_URL}/rest/v1/matakuliah?id=eq.${id}`
-        : `${SUPABASE_URL}/rest/v1/matakuliah`;
-      
-      const method = id ? 'PATCH' : 'POST';
-      
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(matkulData)
-      });
+    // ============================
+    // UPDATE DATA LAMA
+    // ============================
+    else {
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        return {
-          success: false,
-          error: `HTTP ${response.status}: ${errorText}`
-        };
-      }
+      // Jika kode berubah, pastikan tidak duplikat
+      if (kode !== id) {
+        const { data: dup, error: dupErr } = await supabaseClient
+          .from('matakuliah')
+          .select('kode')
+          .eq('kode', kode)
+          .limit(1);
 
-      const data = await response.json();
-      return {
-        success: true,
-        data: data
-      };
-    }
+        if (dupErr) throw dupErr;
 
-    // FUNGSI BARU: Retry dengan pendekatan berbeda
-    async function retrySaveMatkul(id, matkulData) {
-      try {
-        // Coba tanpa kolom prodi dulu (opsi fallback)
-        const dataWithoutProdi = { ...matkulData };
-        delete dataWithoutProdi.prodi;
-        
-        if (id) {
-            await supabaseClient
-                .from('matakuliah')
-                .update(dataWithoutProdi)
-                .eq('kode', kode);   // ← WAJIB diganti
-        }
-
-          
-          // Kemudian update hanya prodi secara terpisah
-          await supabaseClient
-            .from('matakuliah')
-            .update({ prodi: matkulData.prodi })
-            .eq('id', id);
-        } else {
-          // Insert tanpa prodi
-          const { data: inserted } = await supabaseClient
-            .from('matakuliah')
-            .insert([dataWithoutProdi])
-            .select();
-          
-          // Kemudian update prodi
-          if (inserted && inserted[0]) {
-            await supabaseClient
-              .from('matakuliah')
-              .update({ prodi: matkulData.prodi })
-              .eq('id', inserted[0].id);
-          }
-        }
-        
-        return { success: true };
-        
-      } catch (error) {
-        return {
-          success: false,
-          error: error.message
-        };
-      }
-    }
-
-    async function deleteMatkul(id) {
-      if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
-        return;
-      }
-
-      try {
-        // Cari mata kuliah berdasarkan ID atau kode
-        const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
-        
-        if (!matkul) {
-          alert('Data mata kuliah tidak ditemukan');
+        if (dup && dup.length > 0) {
+          alert('❌ Kode baru sudah digunakan oleh mata kuliah lain!');
           return;
         }
-
-        let result;
-        
-        // Coba hapus dengan ID jika ada
-        if (matkul.id) {
-          result = await supabaseClient
-            .from('matakuliah')
-            .delete()
-            .eq('id', matkul.id);
-        } else {
-          // Hapus dengan kode
-          result = await supabaseClient
-            .from('matakuliah')
-            .delete()
-            .eq('kode', matkul.kode);
-        }
-
-        if (result.error) throw result.error;
-        
-        alert('✅ Mata kuliah berhasil dihapus!');
-        loadMatkulData();
-        loadDashboardTotals();
-        
-      } catch (error) {
-        console.error('Error menghapus mata kuliah:', error);
-        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
       }
+
+      // Update berdasarkan KODE LAMA (id)
+      const { error: updateError } = await supabaseClient
+        .from('matakuliah')
+        .update(matkulData)
+        .eq('kode', id);
+
+      if (updateError) throw updateError;
+
+      alert('✅ Mata kuliah berhasil diperbarui!');
     }
+
+    // Refresh UI
+    closeModal();
+    loadMatkulData();
+    loadDashboardTotals();
+
+  } catch (error) {
+    console.error('❌ Error menyimpan mata kuliah:', error);
+    alert(`❌ Gagal menyimpan mata kuliah: ${error.message || error}`);
+  }
+}
 
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
