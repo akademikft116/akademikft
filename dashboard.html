@@ -55,6 +55,45 @@
       overflow-y: auto;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
+    .btn-group-spacing {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-action {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-action i {
+  margin-right: 8px;
+}
+
+.btn-left-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-right-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.import-status {
+  margin-left: 10px;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+}
   </style>
 </head>
 <body class="bg-gray-100">
@@ -178,24 +217,31 @@
             </div>
           </div>
           
-          <div class="flex justify-end mb-4 space-x-2">
-            <button onclick="downloadTemplateMatkul()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-download mr-2"></i> Download Template
-            </button>
-            
-            <button onclick="showImportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-upload mr-2"></i> Import File
-            </button>
-            <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-file-pdf mr-2"></i> Export PDF
-            </button>
-            <button onclick="" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-file-excel mr-2"></i> Export Excel
-            </button>
-            <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
-              <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
-            </button>
-          </div>
+          <!-- Tombol Aksi -->
+<!-- Tombol Aksi -->
+<div class="flex justify-between mb-6">
+  <div class="flex items-center space-x-3">
+    <button onclick="downloadTemplateMatkul()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150">
+      <i class="fas fa-download mr-2"></i> Download Template
+    </button>
+    
+    <button onclick="showImportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150">
+      <i class="fas fa-file-excel mr-2"></i> Import File
+    </button>
+  </div>
+
+  <div class="flex space-x-3">
+    <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+      <i class="fas fa-file-pdf mr-2"></i> Export PDF
+    </button>
+    <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+      <i class="fas fa-file-excel mr-2"></i> Export Excel
+    </button>
+    <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+      <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
+    </button>
+  </div>
+</div>
           
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -1107,6 +1153,152 @@ async function importMatkulData() {
     console.error('Error importing data:', error);
     alert(`❌ Gagal mengimport data: ${error.message}`);
   }
+}
+
+    // Fungsi untuk import Excel langsung (tanpa modal)
+async function importMatkulFromExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const importStatus = document.getElementById('importStatusMatkul');
+  importStatus.textContent = 'Membaca file...';
+  importStatus.classList.remove('hidden');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      
+      let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      if (excelData.length < 2) {
+        importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
+        return;
+      }
+
+      const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
+      const rawData = excelData.slice(1);
+      
+      const columnMapping = {
+        'KODE': 'kode', 
+        'NAMA': 'nama', 
+        'SKS': 'sks', 
+        'SEMESTER': 'semester', 
+        'PROGRAM_STUDI': 'prodi',
+        'PRODI': 'prodi',
+        'DESKRIPSI': 'deskripsi'
+      };
+
+      const matkulToInsert = [];
+      let skippedRows = 0;
+      
+      for (const row of rawData) {
+        let matkul = {};
+        let isValidRow = true;
+        
+        for (let i = 0; i < headers.length; i++) {
+          const excelHeader = headers[i];
+          const supabaseColumn = columnMapping[excelHeader];
+          
+          if (supabaseColumn) {
+            let value = row[i] === undefined ? null : row[i];
+            
+            if (supabaseColumn === 'sks' || supabaseColumn === 'semester') {
+              if (typeof value === 'number') {
+                value = Math.floor(value);
+              } else {
+                value = parseInt(String(value).trim()) || null;
+              }
+            } else if (value !== null) {
+              value = String(value).trim() || null;
+            }
+            
+            matkul[supabaseColumn] = value;
+          }
+        }
+        
+        // Validasi data wajib
+        if (!matkul.kode || !matkul.nama || !matkul.sks || !matkul.semester) {
+          skippedRows++;
+          continue;
+        }
+        
+        matkulToInsert.push(matkul);
+      }
+      
+      if (matkulToInsert.length === 0) {
+        importStatus.textContent = `❌ Tidak ada data valid. ${skippedRows} baris diabaikan.`;
+        return;
+      }
+
+      importStatus.textContent = `Menemukan ${matkulToInsert.length} data valid (${skippedRows} baris diabaikan). Menyimpan...`;
+
+      const { error: insertError } = await supabaseClient
+        .from('matakuliah')
+        .upsert(matkulToInsert, { onConflict: 'kode' });
+
+      if (insertError) {
+        importStatus.textContent = '❌ Gagal mengimpor data.';
+        alert('❌ Gagal mengimpor data: ' + insertError.message);
+        console.error(insertError);
+      } else {
+        importStatus.textContent = `✅ Import Sukses! ${matkulToInsert.length} data disimpan/diperbarui.`;
+        alert(`✅ Import Sukses! ${matkulToInsert.length} data mata kuliah berhasil disimpan/diperbarui.`);
+        loadMatkulData();
+      }
+    } catch (err) {
+      console.error('Error saat memproses file Excel:', err);
+      importStatus.textContent = '❌ Terjadi kesalahan saat memproses file.';
+    } finally {
+      event.target.value = '';
+      // Sembunyikan status setelah 5 detik
+      setTimeout(() => {
+        importStatus.classList.add('hidden');
+      }, 5000);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// Perbaiki tombol export excel yang kosong
+function exportMatkulToExcel() {
+  if (!filteredMatkulData || filteredMatkulData.length === 0) {
+    alert('❌ Tidak ada data mata kuliah untuk diekspor.');
+    return;
+  }
+  
+  const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester', 'Deskripsi']];
+  const data = filteredMatkulData.map((matkul, index) => [
+    index + 1,
+    matkul.kode,
+    matkul.nama,
+    matkul.prodi || 'Lainnya',
+    matkul.sks,
+    matkul.semester || '-',
+    matkul.deskripsi || '-'
+  ]);
+  
+  const wsData = [
+    ['DAFTAR MATA KULIAH FAKULTAS TEKNIK'],
+    [`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`],
+    [],
+    ...headers,
+    ...data
+  ];
+  
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
+  ];
+  
+  XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
+  XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
 }
 
 // Drag and drop functionality
