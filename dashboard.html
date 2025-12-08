@@ -839,11 +839,12 @@
         delete dataWithoutProdi.prodi;
         
         if (id) {
-          // Update tanpa prodi
-          await supabaseClient
-            .from('matakuliah')
-            .update(dataWithoutProdi)
-            .eq('id', id);
+            await supabaseClient
+                .from('matakuliah')
+                .update(dataWithoutProdi)
+                .eq('kode', kode);   // ← WAJIB diganti
+        }
+
           
           // Kemudian update hanya prodi secara terpisah
           await supabaseClient
