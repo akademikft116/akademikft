@@ -300,6 +300,20 @@
                 </div>
                 
                 <!-- Daftar Mahasiswa -->
+
+                <!-- Pencarian Cepat -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="quickSearch" placeholder="Cari cepat (nama atau npm)..." 
+                               class="w-full border border-gray-300 rounded-md shadow-sm p-3 pl-10"
+                               onkeyup="quickSearch()">
+                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                        <button onclick="clearQuickSearch()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+              
                 <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
 
@@ -310,6 +324,12 @@
                         </h3>
                         
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                          <!-- Pencarian Nama/NPM -->
+                    <div>
+                        <label for="searchKeyword" class="block text-sm font-medium text-gray-700">Cari (Nama/NPM)</label>
+                        <input type="text" id="searchKeyword" placeholder="Masukkan nama atau npm..." 
+                               class="w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
                             <!-- Prodi -->
                             <div>
                                 <label for="searchProdi" class="block text-sm font-medium text-gray-700">Prodi</label>
@@ -760,6 +780,9 @@
                 query = query.eq('tahun_masuk', parseInt(filters.tahun));
             }
 
+            if (filters.keyword && filters.keyword !== '') {
+            query = query.or(`nama.ilike.%${filters.keyword}%,npm.ilike.%${filters.keyword}%`);
+        }
             const { data, error } = await query;
 
             if (error) throw error;
@@ -841,23 +864,26 @@
 
     // ==================== FILTER & SEARCH ====================
     function performSearch() {
-        const filters = {
-            prodi: document.getElementById('searchProdi').value,
-            kelas: document.getElementById('searchKelas').value.trim(),
-            status: document.getElementById('searchStatus').value,
-            tahun: document.getElementById('searchTahun').value
-        };
-        console.log('Search with filters:', filters);
-        loadMahasiswaData(filters);
-    }
+    const keyword = document.getElementById('searchKeyword').value.trim();
+    const filters = {
+        prodi: document.getElementById('searchProdi').value,
+        kelas: document.getElementById('searchKelas').value.trim(),
+        status: document.getElementById('searchStatus').value,
+        tahun: document.getElementById('searchTahun').value,
+        keyword: keyword // Tambahkan keyword pencarian
+    };
+    console.log('Search with filters:', filters);
+    loadMahasiswaData(filters);
+}
 
     function resetSearch() {
-        document.getElementById('searchProdi').value = '';
-        document.getElementById('searchKelas').value = '';
-        document.getElementById('searchStatus').value = '';
-        document.getElementById('searchTahun').value = '';
-        showDefaultMessage();
-    }
+    document.getElementById('searchKeyword').value = ''; // Tambahkan ini
+    document.getElementById('searchProdi').value = '';
+    document.getElementById('searchKelas').value = '';
+    document.getElementById('searchStatus').value = '';
+    document.getElementById('searchTahun').value = '';
+    showDefaultMessage();
+}
 
     // ==================== CRUD OPERATIONS ====================
     async function saveMahasiswa() {
@@ -1456,6 +1482,32 @@
         };
         reader.readAsArrayBuffer(file);
     }
+
+    function quickSearch() {
+    const keyword = document.getElementById('quickSearch').value.trim().toLowerCase();
+    
+    if (!currentMahasiswaData || currentMahasiswaData.length === 0) {
+        return;
+    }
+    
+    if (keyword === '') {
+        renderMahasiswaTable(currentMahasiswaData);
+        return;
+    }
+    
+    const filteredData = currentMahasiswaData.filter(mhs => {
+        const nama = (mhs.nama || '').toLowerCase();
+        const npm = (mhs.npm || '').toLowerCase();
+        return nama.includes(keyword) || npm.includes(keyword);
+    });
+    
+    renderMahasiswaTable(filteredData);
+}
+
+function clearQuickSearch() {
+    document.getElementById('quickSearch').value = '';
+    renderMahasiswaTable(currentMahasiswaData);
+}
 </script>
   <div id="notif" class="notification"></div>
 </body>
