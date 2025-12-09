@@ -111,6 +111,26 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+    /* Perkecil ukuran tabel seluruh halaman mahasiswa */
+table.min-w-full th,
+table.min-w-full td {
+    padding: 4px 6px !important;  /* perkecil jarak antar kolom */
+    font-size: 11px !important;   /* perkecil teks */
+}
+
+/* Header lebih ramping */
+table.min-w-full thead th {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+}
+
+/* Border lebih tipis */
+table.min-w-full th,
+table.min-w-full td {
+    border-width: 1px !important;
+}
+    
   </style>
 </head>
 <body class="bg-gray-100">
