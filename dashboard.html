@@ -817,7 +817,7 @@ async function saveMatkul(event) {
     prodi,
     sks: parseInt(sks) || 0,
     semester: parseInt(semester) || 0,
-    deskripsi: deskripsi || null
+    deskripsi: deskripsi || ''
   };
 
   // Debug data yang akan disimpan
@@ -851,9 +851,21 @@ async function saveMatkul(event) {
     
     console.log('Result setelah save:', result);
     
+    // TUTUP MODAL DAN LOAD ULANG DATA
     closeModal();
-    await loadMatkulData(); // Tunggu data dimuat ulang
-    await loadDashboardTotals();
+    
+    // Tampilkan loading
+    const tableBody = document.getElementById('matkulTableBody');
+    tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat ulang data...</td></tr>`;
+    
+    // Tunggu sebentar lalu load data
+    setTimeout(async () => {
+      await loadMatkulData();
+      await loadDashboardTotals();
+      
+      // Scroll ke tabel
+      document.getElementById('matkul').scrollIntoView({ behavior: 'smooth' });
+    }, 500);
     
   } catch (error) {
     console.error('Error detail:', error);
@@ -862,27 +874,101 @@ async function saveMatkul(event) {
 }
 
     async function deleteMatkul(id) {
-      if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
-        return;
-      }
+  if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
+    return;
+  }
 
-      try {
-        const { error } = await supabaseClient
-          .from('matakuliah')
-          .delete()
-          .eq('id', id);
+  try {
+    const { error } = await supabaseClient
+      .from('matakuliah')
+      .delete()
+      .eq('id', id);
 
-        if (error) throw error;
-        
-        alert('✅ Mata kuliah berhasil dihapus!');
-        loadMatkulData();
-        loadDashboardTotals();
-        
-      } catch (error) {
-        console.error('Error menghapus mata kuliah:', error);
-        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
-      }
-    }
+    if (error) throw error;
+    
+    alert('✅ Mata kuliah berhasil dihapus!');
+    
+    // Tampilkan loading
+    const tableBody = document.getElementById('matkulTableBody');
+    tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat ulang data...</td></tr>`;
+    
+    // Load ulang data
+    await loadMatkulData();
+    await loadDashboardTotals();
+    
+  } catch (error) {
+    console.error('Error menghapus mata kuliah:', error);
+    alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
+  }
+}
+
+    // Fungsi untuk setup real-time subscription
+function setupRealtimeSubscription() {
+  try {
+    console.log('🔄 Setting up real-time subscription...');
+    
+    const subscription = supabaseClient
+      .channel('matakuliah-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'matakuliah'
+        },
+        (payload) => {
+          console.log('📡 Real-time update:', payload);
+          
+          // Refresh data ketika ada perubahan
+          if (payload.eventType === 'INSERT' || 
+              payload.eventType === 'UPDATE' || 
+              payload.eventType === 'DELETE') {
+            
+            console.log(`🔄 Data berubah (${payload.eventType}), reloading...`);
+            
+            // Tampilkan notifikasi
+            showNotification(`Data mata kuliah ${payload.eventType === 'INSERT' ? 'ditambahkan' : 
+              payload.eventType === 'UPDATE' ? 'diperbarui' : 'dihapus'}`);
+            
+            // Refresh data setelah 1 detik
+            setTimeout(() => {
+              loadMatkulData();
+              loadDashboardTotals();
+            }, 1000);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('📡 Subscription status:', status);
+      });
+    
+    return subscription;
+    
+  } catch (err) {
+    console.error('Error setting up subscription:', err);
+  }
+}
+
+// Fungsi untuk menampilkan notifikasi
+function showNotification(message) {
+  // Buat elemen notifikasi jika belum ada
+  let notification = document.getElementById('realtime-notification');
+  
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'realtime-notification';
+    notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden';
+    document.body.appendChild(notification);
+  }
+  
+  notification.textContent = message;
+  notification.classList.remove('hidden');
+  
+  // Sembunyikan setelah 3 detik
+  setTimeout(() => {
+    notification.classList.add('hidden');
+  }, 3000);
+}
 
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
@@ -1437,9 +1523,12 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener("DOMContentLoaded", function() {
   loadDashboardTotals();
   
-  // Cek apakah sedang di halaman mata kuliah
-  if (window.location.hash === '#matkul' || 
-      document.getElementById('matkul').classList.contains('active-link')) {
+  // Setup real-time subscription
+  setupRealtimeSubscription();
+  
+  // Auto-load jika di halaman mata kuliah
+  const currentTab = document.querySelector('.nav-item.active-link');
+  if (currentTab && currentTab.id === 'matkulLink') {
     loadMatkulData();
   }
 });
