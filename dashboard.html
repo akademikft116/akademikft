@@ -595,22 +595,23 @@
     // Fungsi untuk memuat data mata kuliah dari database
 async function loadMatkulData() {
   const tableBody = document.getElementById('matkulTableBody');
-  console.log('🔄 LoadMatkulData dipanggil');
+  console.log('🔄 LoadMatkulData dipanggil - MENGAMBIL DATA TERBARU');
   
   // Tampilkan loading
   tableBody.innerHTML = `
     <tr>
-      <td colspan="7" class="px-6 py-8 text-center">
+      <td colspan="7" class="px-6 py-10 text-center">
         <div class="flex flex-col items-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-          <p class="text-sm text-gray-600">Memuat data mata kuliah...</p>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
+          <p class="text-sm text-gray-700 font-medium">Memuat data mata kuliah...</p>
+          <p class="text-xs text-gray-500 mt-1">Mengambil data terbaru dari database</p>
         </div>
       </td>
     </tr>
   `;
   
   try {
-    // Ambil data dari database
+    // **AMBIL DATA DENGAN CACHE DISABLE (optional)**
     const { data, error } = await supabaseClient
       .from('matakuliah')
       .select('*')
@@ -623,6 +624,11 @@ async function loadMatkulData() {
     
     console.log(`✅ Data diterima: ${data?.length || 0} record`);
     
+    // **DEBUG: Tampilkan 3 data pertama di console**
+    if (data && data.length > 0) {
+      console.log('📊 Sample data (3 pertama):', data.slice(0, 3));
+    }
+    
     // Update array lokal
     allMatkulData = data || [];
     filteredMatkulData = [...allMatkulData];
@@ -631,7 +637,10 @@ async function loadMatkulData() {
     renderMatkulTable(filteredMatkulData);
     
     // Update counter
-    document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
+    const counterElement = document.getElementById('totalMataKuliah');
+    if (counterElement) {
+      counterElement.textContent = allMatkulData.length;
+    }
     
     console.log('✅ Tabel berhasil dirender');
     
@@ -640,7 +649,11 @@ async function loadMatkulData() {
     tableBody.innerHTML = `
       <tr>
         <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-          ❌ Gagal memuat data: ${error.message}
+          <div class="flex flex-col items-center">
+            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+            <p>❌ Gagal memuat data</p>
+            <p class="text-xs mt-1">${error.message || 'Coba refresh halaman'}</p>
+          </div>
         </td>
       </tr>
     `;
@@ -651,36 +664,41 @@ async function loadMatkulData() {
 function setupRealtimeSync() {
   console.log('🔄 Setup real-time sync...');
   
-  const channel = supabaseClient
-    .channel('matakuliah-realtime')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'matakuliah'
-      },
-      (payload) => {
-        console.log('📡 Real-time update:', payload);
-        
-        // Auto-refresh jika ada perubahan
-        if (payload.eventType === 'INSERT' || 
-            payload.eventType === 'UPDATE' || 
-            payload.eventType === 'DELETE') {
+  try {
+    const channel = supabaseClient
+      .channel('matakuliah-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'matakuliah'
+        },
+        (payload) => {
+          console.log('📡 Real-time update diterima:', payload);
           
-          console.log(`🔄 Auto-refresh karena ${payload.eventType}`);
-          
-          // Tampilkan notifikasi
-          showToast(`Data ${getEventName(payload.eventType)}`);
-          
-          // Refresh data
-          setTimeout(() => loadMatkulData(), 500);
+          if (payload.eventType === 'UPDATE') {
+            console.log('🔄 Data di-update, refresh otomatis...');
+            
+            // Tampilkan notifikasi
+            showSuccessNotification('Data diperbarui secara real-time');
+            
+            // Refresh data setelah 1 detik
+            setTimeout(() => {
+              loadMatkulData();
+            }, 1000);
+          }
         }
-      }
-    )
-    .subscribe();
-  
-  return channel;
+      )
+      .subscribe((status) => {
+        console.log('📡 Status subscription:', status);
+      });
+    
+    return channel;
+    
+  } catch (err) {
+    console.error('Error setup real-time sync:', err);
+  }
 }
 
 function getEventName(eventType) {
@@ -719,7 +737,7 @@ function renderMatkulTable(data) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="7" class="px-6 py-8 text-sm text-gray-500 text-center">
-          📭 Tidak ada data mata kuliah yang sesuai dengan filter pencarian
+          📭 Tidak ada data mata kuliah
         </td>
       </tr>
     `;
@@ -728,28 +746,38 @@ function renderMatkulTable(data) {
 
   let html = '';
   data.forEach((matkul, index) => {
-    // Debug setiap baris data
-    console.log(`Baris ${index + 1}:`, matkul);
+    // **DEBUG: Tampilkan data di console untuk memastikan**
+    console.log(`Rendering row ${index + 1}:`, {
+      kode: matkul.kode,
+      nama: matkul.nama,
+      prodi: matkul.prodi,
+      sks: matkul.sks,
+      semester: matkul.semester
+    });
     
     html += `
-      <tr class="hover:bg-gray-50">
+      <tr class="hover:bg-gray-50 transition-colors duration-200">
         <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
-        <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode || ''}</td>
-        <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama || ''}</td>
+        <td class="px-6 py-4 text-sm text-gray-900 font-mono font-medium">${matkul.kode || ''}</td>
+        <td class="px-6 py-4 text-sm text-gray-900 font-medium">${matkul.nama || ''}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
-          <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold ${getProdiColor(matkul.prodi)}">
             ${matkul.prodi || 'Lainnya'}
           </span>
         </td>
-        <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
+        <td class="px-6 py-4 text-sm text-gray-900 font-bold">${matkul.sks || 0}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
-          ${matkul.semester ? `Semester ${matkul.semester}` : '-'}
+          ${matkul.semester ? `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-medium">Semester ${matkul.semester}</span>` : '-'}
         </td>
         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-          <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
+          <button onclick="editMatkul('${matkul.id}')" 
+                  class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md mr-2 transition duration-200"
+                  title="Edit Mata Kuliah">
             <i class="fas fa-edit mr-1"></i> Edit
           </button>
-          <button onclick="deleteMatkul('${matkul.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md" title="Hapus Mata Kuliah">
+          <button onclick="deleteMatkul('${matkul.id}')" 
+                  class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition duration-200"
+                  title="Hapus Mata Kuliah">
             <i class="fas fa-trash-alt mr-1"></i> Hapus
           </button>
         </td>
@@ -758,6 +786,21 @@ function renderMatkulTable(data) {
   });
 
   tableBody.innerHTML = html;
+  
+  // **LOG: Konfirmasi render selesai**
+  console.log(`✅ Tabel dirender dengan ${data.length} baris`);
+}
+
+// Fungsi helper untuk warna prodi
+function getProdiColor(prodi) {
+  const colors = {
+    'Industri': 'bg-blue-100 text-blue-800',
+    'Sipil': 'bg-green-100 text-green-800',
+    'Informatika': 'bg-purple-100 text-purple-800',
+    'Arsitektur': 'bg-yellow-100 text-yellow-800',
+    'Elektro': 'bg-red-100 text-red-800'
+  };
+  return colors[prodi] || 'bg-gray-100 text-gray-800';
 }
 
     // Fungsi untuk memfilter data mata kuliah
@@ -934,55 +977,47 @@ async function saveMatkul(event) {
   event.preventDefault();
   console.log('💾 saveMatkul dipanggil');
   
+  // Ambil semua nilai form
+  const id = document.getElementById('matkulId').value;
+  const kode = document.getElementById('modalKode').value.trim();
+  const nama = document.getElementById('modalNama').value.trim();
+  const prodi = document.getElementById('modalProdi').value;
+  const sks = document.getElementById('modalSKS').value;
+  const semester = document.getElementById('modalSemester').value;
+  const deskripsi = document.getElementById('modalDeskripsi').value.trim();
+  
+  console.log('📋 Data dari form:', { id, kode, nama, prodi, sks, semester, deskripsi });
+  
+  // VALIDASI
+  if (!kode || !nama || !prodi || !sks || !semester) {
+    alert('❌ Harap isi semua field yang wajib!');
+    return;
+  }
+  
+  // Siapkan data
+  const matkulData = {
+    kode,
+    nama,
+    prodi,
+    sks: parseInt(sks),
+    semester: parseInt(semester),
+    deskripsi: deskripsi || ''
+  };
+  
+  console.log('📤 Data yang akan disimpan:', matkulData);
+  
+  // Tampilkan loading di button
+  const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+  const originalText = saveButton.innerHTML;
+  saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+  saveButton.disabled = true;
+  
   try {
-    // Ambil nilai form dengan null check
-    const getValue = (id) => {
-      const element = document.getElementById(id);
-      return element ? element.value.trim() : '';
-    };
-    
-    const id = getValue('matkulId');
-    const kode = getValue('modalKode');
-    const nama = getValue('modalNama');
-    const prodi = getValue('modalProdi');
-    const sks = getValue('modalSKS');
-    const semester = getValue('modalSemester');
-    const deskripsi = getValue('modalDeskripsi');
-    
-    console.log('📋 Data dari form:', { id, kode, nama, prodi, sks, semester, deskripsi });
-    
-    // Validasi sederhana
-    if (!kode || !nama || !prodi || !sks || !semester) {
-      alert('❌ Harap lengkapi semua field yang wajib diisi!');
-      return;
-    }
-    
-    // Siapkan data
-    const matkulData = {
-      kode,
-      nama,
-      prodi,
-      sks: parseInt(sks) || 0,
-      semester: parseInt(semester) || 1,
-      deskripsi: deskripsi || ''
-    };
-    
-    console.log('📤 Data yang akan disimpan:', matkulData);
-    
-    // Tampilkan loading di button
-    const saveButton = document.querySelector('#matkulForm button[type="submit"]');
-    const originalText = saveButton ? saveButton.innerHTML : '';
-    
-    if (saveButton) {
-      saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
-      saveButton.disabled = true;
-    }
-    
     let result;
     
     if (id) {
-      // UPDATE
-      console.log('🔄 Mode: UPDATE');
+      // EDIT/UPDATE
+      console.log('🔄 Mode: UPDATE data');
       const { data, error } = await supabaseClient
         .from('matakuliah')
         .update(matkulData)
@@ -990,43 +1025,99 @@ async function saveMatkul(event) {
         .select();
       
       if (error) throw error;
+      
       result = data;
-      console.log('✅ Update berhasil:', result);
+      console.log('✅ Update berhasil ke Supabase:', result);
       
     } else {
-      // INSERT
-      console.log('🔄 Mode: INSERT');
+      // TAMBAH BARU
+      console.log('🔄 Mode: INSERT data baru');
       const { data, error } = await supabaseClient
         .from('matakuliah')
         .insert([matkulData])
         .select();
       
       if (error) throw error;
+      
       result = data;
-      console.log('✅ Insert berhasil:', result);
+      console.log('✅ Insert berhasil ke Supabase:', result);
     }
     
-    // Tampilkan pesan sukses
-    alert(`✅ Mata kuliah ${id ? 'diperbarui' : 'ditambahkan'} dengan sukses!`);
+    // **PENTING: TAMPILKAN ALERT SUKSES**
+    alert(`✅ Mata kuliah "${nama}" berhasil ${id ? 'diperbarui' : 'ditambahkan'}!`);
     
-    // Tutup modal
+    // **TUTUP MODAL**
     closeModal();
     
-    // Load ulang data
-    await loadMatkulData();
-    await loadDashboardTotals();
+    // **REFRESH UI DENGAN CARA YANG LEBIH AGGRESIF**
+    console.log('🔄 Memulai refresh UI...');
+    
+    // 1. Tampilkan loading di tabel
+    const tableBody = document.getElementById('matkulTableBody');
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="px-6 py-8 text-center">
+          <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
+            <p class="text-sm text-gray-700 font-medium">Memperbarui tampilan...</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    
+    // 2. Tunggu 500ms untuk memastikan Supabase sudah selesai
+    setTimeout(async () => {
+      try {
+        console.log('🔄 Mengambil data TERBARU dari Supabase...');
+        
+        // Ambil data TERBARU langsung dari database (bukan dari cache)
+        const { data: freshData, error: freshError } = await supabaseClient
+          .from('matakuliah')
+          .select('*')
+          .order('kode');
+        
+        if (freshError) throw freshError;
+        
+        console.log(`✅ Data terbaru diterima: ${freshData.length} record`);
+        
+        // **UPDATE ARRAY LOKAL DENGAN DATA BARU**
+        allMatkulData = freshData || [];
+        filteredMatkulData = [...allMatkulData];
+        
+        // **RENDER ULANG TABEL**
+        renderMatkulTable(filteredMatkulData);
+        
+        // **UPDATE COUNTER DASHBOARD**
+        document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
+        
+        console.log('✅ UI berhasil di-refresh!');
+        
+        // **TAMPILKAN NOTIFIKASI VISUAL**
+        showSuccessNotification(`Data berhasil ${id ? 'diperbarui' : 'ditambahkan'}!`);
+        
+      } catch (refreshError) {
+        console.error('❌ Error refresh UI:', refreshError);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
+              ❌ Gagal memuat ulang data
+            </td>
+          </tr>
+        `;
+      }
+    }, 500); // Tunggu 500ms
     
   } catch (error) {
     console.error('💥 Error saat menyimpan:', error);
-    alert(`❌ Gagal menyimpan data: ${error.message || 'Terjadi kesalahan'}`);
+    alert(`❌ Gagal menyimpan: ${error.message || 'Terjadi kesalahan'}`);
+    
+    // Restore button jika error
+    saveButton.innerHTML = originalText;
+    saveButton.disabled = false;
     
   } finally {
-    // Restore button
-    const saveButton = document.querySelector('#matkulForm button[type="submit"]');
-    if (saveButton) {
-      saveButton.innerHTML = originalText;
-      saveButton.disabled = false;
-    }
+    // **JANGAN restore button di sini karena sudah ada di setTimeout**
+    // Biarkan button tetap loading sampai proses selesai
   }
 }
 
@@ -1760,7 +1851,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
 
-    // Pada bagian document.addEventListener("DOMContentLoaded", ...)
+
 // Pada bagian document.addEventListener("DOMContentLoaded", ...)
 document.addEventListener("DOMContentLoaded", function() {
   console.log('🚀 Dashboard loaded');
@@ -1789,6 +1880,28 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Tampilkan tab utama saat pertama kali load
   showContent('main', document.getElementById('mainLink'));
+});
+    // Di akhir file, tambahkan ini:
+document.addEventListener("DOMContentLoaded", function() {
+  console.log('🚀 Dashboard loaded');
+  
+  // Load data awal
+  loadDashboardTotals();
+  
+  // Setup real-time sync
+  setupRealtimeSync();
+  
+  // **DEBUG: Tambahkan event listener untuk melihat perubahan**
+  console.log('🔧 Debug mode aktif');
+  
+  // Test: Cek apakah data sudah ada saat load
+  setTimeout(() => {
+    console.log('📊 Cek data awal:');
+    console.log('- allMatkulData length:', allMatkulData.length);
+    if (allMatkulData.length > 0) {
+      console.log('- Sample data:', allMatkulData[0]);
+    }
+  }, 2000);
 });
   </script>
 </body>
