@@ -829,17 +829,20 @@
                             ${mhs.status || '-'}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-center text-sm border">
-                        <button onclick="showDetail('${mhs.npm}')" class="text-blue-600 hover:text-blue-900 mx-1">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button onclick="editMahasiswa('${mhs.npm}')" class="text-yellow-600 hover:text-yellow-900 mx-1">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="openDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama.replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-900 mx-1">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
+<td class="px-4 py-3 text-center text-sm border">
+    <div class="flex items-center justify-center space-x-2">
+        <button onclick="showDetail('${mhs.npm}')" class="text-blue-600 hover:text-blue-900">
+            <i class="fas fa-eye"></i>
+        </button>
+        <button onclick="editMahasiswa('${mhs.npm}')" class="text-yellow-600 hover:text-yellow-900">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button onclick="openDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama.replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-900">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
+
                 </tr>
             `;
         });
