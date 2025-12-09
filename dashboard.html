@@ -1348,52 +1348,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
-    
-    // Fungsi untuk debug - cek data di database
-async function debugCheckDatabase() {
-  try {
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .select('id, kode, nama, prodi, sks, semester')
-      .order('kode');
-    
-    if (error) {
-      console.error('Debug error:', error);
-      return;
-    }
-    
-    console.log('=== DEBUG DATA MATA KULIAH ===');
-    console.log('Total data:', data.length);
-    data.forEach((item, index) => {
-      console.log(`${index + 1}. ${item.kode} - ${item.nama}`);
-      console.log('   Prodi:', item.prodi);
-      console.log('   Semester:', item.semester);
-      console.log('   SKS:', item.sks);
-    });
-    console.log('==============================');
-    
-    // Tampilkan juga di alert untuk melihat
-    const sample = data.slice(0, 3);
-    let alertMsg = `Data di database: ${data.length} item\n\n`;
-    sample.forEach(item => {
-      alertMsg += `${item.kode} - ${item.nama}\nProdi: ${item.prodi || 'null'}\nSemester: ${item.semester || 'null'}\n\n`;
-    });
-    alert(alertMsg);
-    
-  } catch (err) {
-    console.error('Debug check error:', err);
-  }
-}
-
-// Panggil fungsi debug setelah page load
-document.addEventListener('DOMContentLoaded', function() {
-  // Tambahkan tombol debug sementara di navbar
-  const debugButton = document.createElement('button');
-  debugButton.textContent = 'Debug Data';
-  debugButton.className = 'bg-red-500 text-white px-3 py-1 rounded text-sm ml-4';
-  debugButton.onclick = debugCheckDatabase;
-  document.querySelector('nav .flex.items-center.space-x-4').prepend(debugButton);
-});
   </script>
 </body>
 </html>
