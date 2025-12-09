@@ -798,26 +798,51 @@ function renderMatkulTable(data) {
     }
 
     // FUNGSI CRUD LENGKAP
-    function openModal() {
-      document.getElementById('matkulModal').style.display = 'flex';
-    }
+    // FUNGSI CRUD LENGKAP - PERBAIKI BAGIAN INI
+function openModal() {
+  const modal = document.getElementById('matkulModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  } else {
+    console.error('❌ Modal tidak ditemukan!');
+  }
+}
 
-    function closeModal() {
-      document.getElementById('matkulModal').style.display = 'none';
-      resetForm();
-    }
+function closeModal() {
+  const modal = document.getElementById('matkulModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  resetForm();
+}
 
-    function resetForm() {
-      document.getElementById('matkulId').value = '';
-      document.getElementById('modalKode').value = '';
-      document.getElementById('modalNama').value = '';
-      document.getElementById('modalProdi').value = '';
-      document.getElementById('modalSKS').value = '';
-      document.getElementById('modalSemester').value = '';
-      document.getElementById('modalDeskripsi').value = '';
-      document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
-      document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
+function resetForm() {
+  // GUNAKAN NULL CHECK UNTUK SEMUA ELEMEN
+  const elements = [
+    'matkulId', 'modalKode', 'modalNama', 'modalProdi', 
+    'modalSKS', 'modalSemester', 'modalDeskripsi'
+  ];
+  
+  elements.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      if (id === 'matkulId') element.value = '';
+      else if (id === 'modalKode') element.value = '';
+      else if (id === 'modalNama') element.value = '';
+      else if (id === 'modalProdi') element.value = '';
+      else if (id === 'modalSKS') element.value = '';
+      else if (id === 'modalSemester') element.value = '';
+      else if (id === 'modalDeskripsi') element.value = '';
     }
+  });
+  
+  // PERBAIKI: Gunakan querySelector yang lebih aman
+  const modalTitle = document.getElementById('modalTitle');
+  const saveButtonText = document.getElementById('saveButtonText');
+  
+  if (modalTitle) modalTitle.textContent = 'Tambah Mata Kuliah Baru';
+  if (saveButtonText) saveButtonText.textContent = 'Simpan Mata Kuliah';
+}
 
     function addMatkul() {
       resetForm();
@@ -827,14 +852,19 @@ function renderMatkulTable(data) {
 async function editMatkul(id) {
   console.log('✏️ editMatkul dipanggil dengan ID:', id);
   
-  // Tampilkan loading di form
+  // Cari tombol save dengan cara yang lebih aman
   const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+  if (!saveButton) {
+    console.error('❌ Tombol save tidak ditemukan!');
+    return;
+  }
+  
   const originalText = saveButton.innerHTML;
   saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memuat...';
   saveButton.disabled = true;
   
   try {
-    // SELALU ambil data TERBARU dari database (jangan pakai cache)
+    // Ambil data dari database
     console.log('🔄 Mengambil data terbaru dari database...');
     const { data, error } = await supabaseClient
       .from('matakuliah')
@@ -854,33 +884,49 @@ async function editMatkul(id) {
     
     console.log('✅ Data ditemukan:', data);
     
-    // Pastikan semester ada nilai default jika null
-    const semesterValue = data.semester || '';
+    // PERBAIKI: Pastikan semua elemen ada sebelum mengisi
+    const elementsToFill = {
+      'matkulId': data.id,
+      'modalKode': data.kode || '',
+      'modalNama': data.nama || '',
+      'modalProdi': data.prodi || '',
+      'modalSKS': data.sks || '',
+      'modalSemester': data.semester || '',
+      'modalDeskripsi': data.deskripsi || ''
+    };
     
-    // Isi form dengan data yang benar
-    document.getElementById('matkulId').value = data.id;
-    document.getElementById('modalKode').value = data.kode || '';
-    document.getElementById('modalNama').value = data.nama || '';
-    document.getElementById('modalProdi').value = data.prodi || '';
-    document.getElementById('modalSKS').value = data.sks || '';
-    document.getElementById('modalSemester').value = semesterValue; // INI YANG DIPERBAIKI
-    document.getElementById('modalDeskripsi').value = data.deskripsi || '';
+    // Isi form dengan null check
+    Object.entries(elementsToFill).forEach(([id, value]) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.value = value;
+      } else {
+        console.warn(`⚠️ Element ${id} tidak ditemukan`);
+      }
+    });
     
-    document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-    document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+    // Update judul modal
+    const modalTitle = document.getElementById('modalTitle');
+    const saveButtonText = document.getElementById('saveButtonText');
     
-    console.log('✅ Form berhasil diisi. Semester:', semesterValue);
+    if (modalTitle) modalTitle.textContent = 'Edit Mata Kuliah';
+    if (saveButtonText) saveButtonText.textContent = 'Update Mata Kuliah';
+    
+    console.log('✅ Form berhasil diisi');
     
     // Buka modal
     openModal();
     
   } catch (error) {
     console.error('💥 Error saat edit:', error);
-    alert(`❌ Gagal memuat data: ${error.message}`);
+    // Gunakan alert yang lebih sederhana
+    alert('❌ Gagal memuat data: ' + (error.message || 'Terjadi kesalahan'));
   } finally {
-    // Restore button
-    saveButton.innerHTML = originalText;
-    saveButton.disabled = false;
+    // Restore button dengan null check
+    if (saveButton) {
+      saveButton.innerHTML = originalText;
+      saveButton.disabled = false;
+    }
   }
 }
     
@@ -888,69 +934,55 @@ async function saveMatkul(event) {
   event.preventDefault();
   console.log('💾 saveMatkul dipanggil');
   
-  // Ambil semua nilai form
-  const id = document.getElementById('matkulId').value;
-  const kode = document.getElementById('modalKode').value.trim();
-  const nama = document.getElementById('modalNama').value.trim();
-  const prodi = document.getElementById('modalProdi').value;
-  const sks = document.getElementById('modalSKS').value;
-  const semester = document.getElementById('modalSemester').value; // PASTIKAN INI ADA
-  const deskripsi = document.getElementById('modalDeskripsi').value.trim();
-  
-  console.log('📋 Data dari form:', { id, kode, nama, prodi, sks, semester, deskripsi });
-  
-  // VALIDASI LENGKAP
-  if (!kode) {
-    alert('❌ Kode mata kuliah tidak boleh kosong!');
-    document.getElementById('modalKode').focus();
-    return;
-  }
-  if (!nama) {
-    alert('❌ Nama mata kuliah tidak boleh kosong!');
-    document.getElementById('modalNama').focus();
-    return;
-  }
-  if (!prodi) {
-    alert('❌ Program studi harus dipilih!');
-    document.getElementById('modalProdi').focus();
-    return;
-  }
-  if (!sks) {
-    alert('❌ SKS harus dipilih!');
-    document.getElementById('modalSKS').focus();
-    return;
-  }
-  if (!semester) { // TAMBAHKAN VALIDASI SEMESTER
-    alert('❌ Semester harus dipilih!');
-    document.getElementById('modalSemester').focus();
-    return;
-  }
-  
-  // Siapkan data dengan TIPE yang benar
-  const matkulData = {
-    kode,
-    nama,
-    prodi,
-    sks: parseInt(sks) || 0,
-    semester: parseInt(semester) || 1, // PASTIKAN INTEGER
-    deskripsi: deskripsi || ''
-  };
-  
-  console.log('📤 Data yang akan disimpan:', matkulData);
-  
-  // Tampilkan loading
-  const saveButton = document.querySelector('#matkulForm button[type="submit"]');
-  const originalText = saveButton.innerHTML;
-  saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
-  saveButton.disabled = true;
-  
   try {
+    // Ambil nilai form dengan null check
+    const getValue = (id) => {
+      const element = document.getElementById(id);
+      return element ? element.value.trim() : '';
+    };
+    
+    const id = getValue('matkulId');
+    const kode = getValue('modalKode');
+    const nama = getValue('modalNama');
+    const prodi = getValue('modalProdi');
+    const sks = getValue('modalSKS');
+    const semester = getValue('modalSemester');
+    const deskripsi = getValue('modalDeskripsi');
+    
+    console.log('📋 Data dari form:', { id, kode, nama, prodi, sks, semester, deskripsi });
+    
+    // Validasi sederhana
+    if (!kode || !nama || !prodi || !sks || !semester) {
+      alert('❌ Harap lengkapi semua field yang wajib diisi!');
+      return;
+    }
+    
+    // Siapkan data
+    const matkulData = {
+      kode,
+      nama,
+      prodi,
+      sks: parseInt(sks) || 0,
+      semester: parseInt(semester) || 1,
+      deskripsi: deskripsi || ''
+    };
+    
+    console.log('📤 Data yang akan disimpan:', matkulData);
+    
+    // Tampilkan loading di button
+    const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+    const originalText = saveButton ? saveButton.innerHTML : '';
+    
+    if (saveButton) {
+      saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+      saveButton.disabled = true;
+    }
+    
     let result;
     
     if (id) {
-      // EDIT/UPDATE
+      // UPDATE
       console.log('🔄 Mode: UPDATE');
-      
       const { data, error } = await supabaseClient
         .from('matakuliah')
         .update(matkulData)
@@ -958,56 +990,43 @@ async function saveMatkul(event) {
         .select();
       
       if (error) throw error;
-      
       result = data;
       console.log('✅ Update berhasil:', result);
       
-      // Tampilkan notifikasi sukses
-      showNotification('✅ Mata kuliah berhasil diperbarui!', 'success');
-      
     } else {
-      // TAMBAH BARU
+      // INSERT
       console.log('🔄 Mode: INSERT');
-      
       const { data, error } = await supabaseClient
         .from('matakuliah')
         .insert([matkulData])
         .select();
       
       if (error) throw error;
-      
       result = data;
       console.log('✅ Insert berhasil:', result);
-      
-      // Tampilkan notifikasi sukses
-      showNotification('✅ Mata kuliah berhasil ditambahkan!', 'success');
     }
     
-    // TUTUP MODAL
+    // Tampilkan pesan sukses
+    alert(`✅ Mata kuliah ${id ? 'diperbarui' : 'ditambahkan'} dengan sukses!`);
+    
+    // Tutup modal
     closeModal();
     
-    // LOAD ULANG DATA DENGAN CARA YANG LEBIH BAIK
-    await refreshMatkulData();
+    // Load ulang data
+    await loadMatkulData();
+    await loadDashboardTotals();
     
   } catch (error) {
-    console.error('💥 Error detail:', error);
-    
-    // Tampilkan error yang lebih spesifik
-    let errorMessage = 'Gagal menyimpan data';
-    if (error.code === '23505') {
-      errorMessage = 'Kode mata kuliah sudah ada!';
-    } else if (error.message.includes('foreign key')) {
-      errorMessage = 'Data terkait tidak valid';
-    } else {
-      errorMessage = error.message;
-    }
-    
-    showNotification(`❌ ${errorMessage}`, 'error');
+    console.error('💥 Error saat menyimpan:', error);
+    alert(`❌ Gagal menyimpan data: ${error.message || 'Terjadi kesalahan'}`);
     
   } finally {
     // Restore button
-    saveButton.innerHTML = originalText;
-    saveButton.disabled = false;
+    const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+    if (saveButton) {
+      saveButton.innerHTML = originalText;
+      saveButton.disabled = false;
+    }
   }
 }
 
@@ -1061,34 +1080,6 @@ async function saveMatkul(event) {
   }
 }
 
-    function showNotification(message, type = 'success') {
-  // Hapus notifikasi sebelumnya
-  const existing = document.getElementById('custom-notification');
-  if (existing) existing.remove();
-  
-  // Buat notifikasi baru
-  const notification = document.createElement('div');
-  notification.id = 'custom-notification';
-  notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
-  notification.innerHTML = `
-    <div class="flex items-center">
-      <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-3"></i>
-      <span class="font-medium">${message}</span>
-      <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-  `;
-  
-  document.body.appendChild(notification);
-  
-  // Auto-hide setelah 4 detik
-  setTimeout(() => {
-    if (notification.parentNode) {
-      notification.remove();
-    }
-  }, 4000);
-}
 
     async function deleteMatkul(id) {
   if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
@@ -1167,26 +1158,59 @@ function setupRealtimeSubscription() {
 }
 
 // Fungsi untuk menampilkan notifikasi
-function showNotification(message) {
-  // Buat elemen notifikasi jika belum ada
-  let notification = document.getElementById('realtime-notification');
+// HAPUS fungsi showNotification yang lama, sisakan SATU saja:
+
+function showNotification(message, type = 'success') {
+  console.log(`📢 Notification: ${message} (${type})`);
   
-  if (!notification) {
-    notification = document.createElement('div');
-    notification.id = 'realtime-notification';
-    notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 hidden';
-    document.body.appendChild(notification);
+  // Buat notifikasi sederhana dulu
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: fadeIn 0.3s ease-out;
+  `;
+  
+  // Set warna berdasarkan type
+  if (type === 'success') {
+    notification.style.backgroundColor = '#10B981'; // green-500
+  } else if (type === 'error') {
+    notification.style.backgroundColor = '#EF4444'; // red-500
+  } else {
+    notification.style.backgroundColor = '#3B82F6'; // blue-500
   }
   
-  notification.textContent = message;
-  notification.classList.remove('hidden');
+  notification.innerHTML = `
+    <div style="display: flex; align-items: center;">
+      <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" 
+         style="margin-right: 10px;"></i>
+      <span>${message}</span>
+    </div>
+  `;
   
-  // Sembunyikan setelah 3 detik
+  // Tambahkan ke body
+  document.body.appendChild(notification);
+  
+  // Auto-hide setelah 4 detik
   setTimeout(() => {
-    notification.classList.add('hidden');
-  }, 3000);
+    if (notification.parentNode) {
+      notification.style.opacity = '0';
+      notification.style.transition = 'opacity 0.3s ease-out';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }
+  }, 4000);
 }
-
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
       if (!filteredMatkulData || filteredMatkulData.length === 0) {
@@ -1737,16 +1761,34 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
 
     // Pada bagian document.addEventListener("DOMContentLoaded", ...)
+// Pada bagian document.addEventListener("DOMContentLoaded", ...)
 document.addEventListener("DOMContentLoaded", function() {
   console.log('🚀 Dashboard loaded');
   
+  // Load data awal
   loadDashboardTotals();
-  setupRealtimeSync(); // PASTIKAN INI DIPANGGIL
   
-  // Setup untuk auto-refresh ketika kembali ke tab
-  document.getElementById('matkulLink').addEventListener('click', function() {
-    setTimeout(() => loadMatkulData(), 100);
-  });
+  // Setup real-time sync jika diperlukan
+  try {
+    setupRealtimeSync();
+  } catch (error) {
+    console.error('❌ Error setup real-time sync:', error);
+  }
+  
+  // Setup event listener untuk tab mata kuliah
+  const matkulLink = document.getElementById('matkulLink');
+  if (matkulLink) {
+    matkulLink.addEventListener('click', function() {
+      // Tunggu sebentar lalu load data
+      setTimeout(() => {
+        console.log('🔄 Loading data mata kuliah...');
+        loadMatkulData();
+      }, 100);
+    });
+  }
+  
+  // Tampilkan tab utama saat pertama kali load
+  showContent('main', document.getElementById('mainLink'));
 });
   </script>
 </body>
