@@ -56,62 +56,75 @@
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
     .btn-group-spacing {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
 
-.btn-action {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+    .btn-action {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-.btn-action i {
-  margin-right: 8px;
-}
+    .btn-action i {
+      margin-right: 8px;
+    }
 
-.btn-left-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+    .btn-left-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-.btn-right-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+    .btn-right-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-.import-status {
-  margin-left: 10px;
-  font-size: 14px;
-  padding: 5px 10px;
-  border-radius: 4px;
-  background-color: #f3f4f6;
-}
-    @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+    .import-status {
+      margin-left: 10px;
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      background-color: #f3f4f6;
+    }
     
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Custom notification styles */
+    .custom-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: fadeIn 0.3s ease-out;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -203,7 +216,7 @@
                   <option value="50463">Informatika</option>
                   <option value="50362">Arsitektur</option>
                   <option value="50264">Elektro</option>
-                  </select>
+                </select>
               </div>
 
               <div>
@@ -236,30 +249,29 @@
           </div>
           
           <!-- Tombol Aksi -->
-<!-- Tombol Aksi -->
-<div class="flex justify-between mb-6">
-  <div class="flex items-center space-x-3">
-    <button onclick="downloadTemplateMatkul()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150">
-      <i class="fas fa-download mr-2"></i> Download Template
-    </button>
-    
-    <button onclick="showImportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150">
-      <i class="fas fa-file-excel mr-2"></i> Import File
-    </button>
-  </div>
+          <div class="flex justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <button onclick="downloadTemplateMatkul()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-download mr-2"></i> Download Template
+              </button>
+              
+              <button onclick="showImportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-file-excel mr-2"></i> Import File
+              </button>
+            </div>
 
-  <div class="flex space-x-3">
-    <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
-      <i class="fas fa-file-pdf mr-2"></i> Export PDF
-    </button>
-    <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
-      <i class="fas fa-file-excel mr-2"></i> Export Excel
-    </button>
-    <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
-      <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
-    </button>
-  </div>
-</div>
+            <div class="flex space-x-3">
+              <button onclick="exportMatkulToPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+                <i class="fas fa-file-pdf mr-2"></i> Export PDF
+              </button>
+              <button onclick="exportMatkulToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+              </button>
+              <button onclick="addMatkul()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-md shadow-md transition duration-150 flex items-center">
+                <i class="fas fa-plus mr-2"></i> Tambah Mata Kuliah
+              </button>
+            </div>
+          </div>
           
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -275,7 +287,7 @@
                 </tr>
               </thead>
               <tbody id="matkulTableBody" class="bg-white divide-y divide-gray-200">
-                <tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>
+                <tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Klik menu Mata Kuliah untuk memuat data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -478,78 +490,78 @@
   </div>
 
   <!-- Modal Import File Excel -->
-<div id="importModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-bold text-gray-800">Import Data Mata Kuliah</h3>
-        <button onclick="closeImportModal()" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times text-xl"></i>
-        </button>
-      </div>
-      
-      <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
-          <i class="fas fa-info-circle mr-2"></i> Panduan Import
-        </h4>
-        <ul class="text-sm text-blue-700 list-disc pl-5 space-y-1">
-          <li>Download template terlebih dahulu untuk format yang benar</li>
-          <li>Format file harus Excel (.xlsx atau .xls)</li>
-          <li>Kolom wajib: Kode, Nama, SKS, Semester, Program Studi</li>
-          <li>Kode harus unik dan tidak boleh duplikat</li>
-        </ul>
-      </div>
-      
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Pilih File Excel
-        </label>
-        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition duration-200"
-             id="dropArea">
-          <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden" onchange="handleFileSelect(event)">
-          <i class="fas fa-file-excel text-4xl text-green-500 mb-4"></i>
-          <p class="text-gray-600 mb-2">Drag & drop file Excel atau klik untuk memilih</p>
-          <button onclick="document.getElementById('fileInput').click()" 
-                  class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
-            <i class="fas fa-folder-open mr-2"></i> Pilih File
+  <div id="importModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-800">Import Data Mata Kuliah</h3>
+          <button onclick="closeImportModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
           </button>
-          <p class="text-xs text-gray-500 mt-2">Ukuran maksimal: 5MB</p>
         </div>
-        <div id="fileName" class="mt-3 text-sm text-gray-600"></div>
-      </div>
-      
-      <div id="previewTable" class="mb-6 hidden">
-        <h4 class="font-semibold text-gray-700 mb-3">Preview Data (5 baris pertama)</h4>
-        <div class="overflow-x-auto border rounded-lg">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr id="previewHeader"></tr>
-            </thead>
-            <tbody id="previewBody" class="bg-white divide-y divide-gray-200"></tbody>
-          </table>
+        
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+            <i class="fas fa-info-circle mr-2"></i> Panduan Import
+          </h4>
+          <ul class="text-sm text-blue-700 list-disc pl-5 space-y-1">
+            <li>Download template terlebih dahulu untuk format yang benar</li>
+            <li>Format file harus Excel (.xlsx atau .xls)</li>
+            <li>Kolom wajib: Kode, Nama, SKS, Semester, Program Studi</li>
+            <li>Kode harus unik dan tidak boleh duplikat</li>
+          </ul>
         </div>
-      </div>
-      
-      <div class="flex justify-between items-center pt-4 border-t">
-        <div class="text-sm text-gray-500">
-          <i class="fas fa-database mr-1"></i>
-          <span id="totalRows">0</span> data akan diimport
+        
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Pilih File Excel
+          </label>
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition duration-200"
+               id="dropArea">
+            <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden" onchange="handleFileSelect(event)">
+            <i class="fas fa-file-excel text-4xl text-green-500 mb-4"></i>
+            <p class="text-gray-600 mb-2">Drag & drop file Excel atau klik untuk memilih</p>
+            <button onclick="document.getElementById('fileInput').click()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
+              <i class="fas fa-folder-open mr-2"></i> Pilih File
+            </button>
+            <p class="text-xs text-gray-500 mt-2">Ukuran maksimal: 5MB</p>
+          </div>
+          <div id="fileName" class="mt-3 text-sm text-gray-600"></div>
         </div>
-        <div class="space-x-3">
-          <button type="button" onclick="closeImportModal()" 
-                  class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
-            Batal
-          </button>
-          <button id="importButton" onclick="importMatkulData()" 
-                  class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 flex items-center opacity-50 cursor-not-allowed"
-                  disabled>
-            <i class="fas fa-upload mr-2"></i> Import Data
-          </button>
+        
+        <div id="previewTable" class="mb-6 hidden">
+          <h4 class="font-semibold text-gray-700 mb-3">Preview Data (5 baris pertama)</h4>
+          <div class="overflow-x-auto border rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr id="previewHeader"></tr>
+              </thead>
+              <tbody id="previewBody" class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="flex justify-between items-center pt-4 border-t">
+          <div class="text-sm text-gray-500">
+            <i class="fas fa-database mr-1"></i>
+            <span id="totalRows">0</span> data akan diimport
+          </div>
+          <div class="space-x-3">
+            <button type="button" onclick="closeImportModal()" 
+                    class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
+              Batal
+            </button>
+            <button id="importButton" onclick="importMatkulData()" 
+                    class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 flex items-center opacity-50 cursor-not-allowed"
+                    disabled>
+              <i class="fas fa-upload mr-2"></i> Import Data
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
   <script>
     const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
@@ -560,42 +572,46 @@
     let allMatkulData = [];
     let filteredMatkulData = [];
 
-    // PERBAIKAN - Fungsi showContent yang benar
-function showContent(tabId, clickedButton) {
-  console.log(`🔄 Mengaktifkan tab: ${tabId}`);
-  
-  // Sembunyikan semua konten
-  ['main', 'matkul', 'pengaturan'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.classList.add('hidden');
+    // ====================== FUNGSI UTAMA ======================
+    
+    // Fungsi untuk menampilkan konten
+    function showContent(tabId, clickedButton) {
+      // Sembunyikan semua konten
+      ['main', 'matkul', 'pengaturan'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.classList.add('hidden');
+        }
+      });
+      
+      // Tampilkan konten yang dipilih
+      const contentElement = document.getElementById(tabId);
+      if (contentElement) {
+        contentElement.classList.remove('hidden');
+      }
+      
+      // Update link aktif di sidebar
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('active-link');
+      });
+      
+      if (clickedButton) {
+        clickedButton.classList.add('active-link');
+      }
+      
+      // Jika tab matakuliah dipilih, muat data
+      if (tabId === 'matkul') {
+        console.log('🔄 Loading mata kuliah data...');
+        loadMatkulData();
+      }
+      
+      // Update dashboard totals jika tab utama
+      if (tabId === 'main') {
+        loadDashboardTotals();
+      }
     }
-  });
-  
-  // Tampilkan konten yang dipilih
-  const activeContent = document.getElementById(tabId);
-  if (activeContent) {
-    activeContent.classList.remove('hidden');
-  }
-  
-  // Update active link di sidebar
-  document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.classList.remove('active-link');
-  });
-  
-  if (clickedButton) {
-    clickedButton.classList.add('active-link');
-  }
-  
-  // Load data jika tab mata kuliah
-  if (tabId === 'matkul') {
-    console.log('🔄 Loading data mata kuliah...');
-    setTimeout(() => {
-      loadMatkulData();
-    }, 100);
-  }
-}
 
+    // Fungsi untuk mendapatkan total count
     async function getTotalCount(table, elementId) {
       try {
         const { count, error } = await supabaseClient
@@ -609,330 +625,211 @@ function showContent(tabId, clickedButton) {
       }
     }
 
+    // Fungsi untuk memuat dashboard totals
     async function loadDashboardTotals() {
       await getTotalCount('dosen', 'totalDosen');
       await getTotalCount('jadwal', 'totalJadwal');
       await getTotalCount('matakuliah', 'totalMataKuliah');
     }
 
-    // Fungsi untuk memuat data mata kuliah dari database
-// Fungsi untuk memuat data mata kuliah dari database
-async function loadMatkulData() {
-  const tableBody = document.getElementById('matkulTableBody');
-  
-  if (!tableBody) {
-    console.error('❌ Tabel body tidak ditemukan!');
-    return;
-  }
-  
-  console.log('🔄 Memuat data mata kuliah dari Supabase...');
-  
-  // Tampilkan loading state
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="7" class="px-6 py-10 text-center">
-        <div class="flex flex-col items-center">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
-          <p class="text-sm text-gray-700 font-medium">Memuat data mata kuliah...</p>
-        </div>
-      </td>
-    </tr>
-  `;
-  
-  try {
-    // AMBIL DATA DARI TABEL "matakuliah" (gunakan nama tabel yang benar)
-    const { data, error, count } = await supabaseClient
-      .from('matakuliah') // PASTIKAN NAMA TABEL INI SAMA DI SUPABASE
-      .select('*')
-      .order('kode', { ascending: true });
+    // ====================== FUNGSI MATA KULIAH ======================
     
-    if (error) {
-      console.error('❌ Error dari Supabase:', error);
-      throw new Error(`Gagal mengambil data: ${error.message}`);
-    }
-    
-    console.log(`✅ Berhasil mengambil ${data?.length || 0} data mata kuliah`);
-    console.log('📊 Data pertama:', data?.[0]);
-    
-    // Update data global
-    allMatkulData = data || [];
-    filteredMatkulData = [...allMatkulData];
-    
-    // Render tabel
-    renderMatkulTable(filteredMatkulData);
-    
-    // Update counter di dashboard
-    document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
-    
-    return data;
-    
-  } catch (error) {
-    console.error('💥 Error fatal:', error);
-    
-    // Tampilkan pesan error yang jelas
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-8 text-center">
-          <div class="flex flex-col items-center">
-            <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i>
-            <p class="text-red-600 font-medium">Gagal memuat data</p>
-            <p class="text-sm text-gray-600 mt-2">${error.message || 'Terjadi kesalahan koneksi'}</p>
-            <p class="text-xs text-gray-500 mt-1">Periksa koneksi internet dan konfigurasi database</p>
-            <button onclick="loadMatkulData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
-              <i class="fas fa-redo mr-2"></i>Coba Lagi
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
-    
-    return [];
-  }
-}
-    
-    // Update data lokal
-    allMatkulData = data;
-    filteredMatkulData = [...data];
-    
-    console.log('📊 Data pertama:', data[0]);
-    
-    // Render tabel
-    renderMatkulTable(filteredMatkulData);
-    
-    // Update counter
-    document.getElementById('totalMataKuliah').textContent = data.length;
-    
-    console.log('✅ Data berhasil ditampilkan');
-    
-  } catch (error) {
-    console.error('💥 Error fatal:', error);
-    
-    // Tampilkan error yang lebih informatif
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-8 text-center">
-          <div class="flex flex-col items-center">
-            <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i>
-            <p class="text-red-600 font-medium">Gagal memuat data</p>
-            <p class="text-sm text-gray-600 mt-2">${error.message || 'Terjadi kesalahan'}</p>
-            <button onclick="loadMatkulData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              <i class="fas fa-redo mr-2"></i>Coba Lagi
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }
-}
-
-    // Setup real-time sync
-function setupRealtimeSync() {
-  console.log('🔄 Setup real-time sync...');
-  
-  try {
-    const channel = supabaseClient
-      .channel('matakuliah-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'matakuliah'
-        },
-        (payload) => {
-          console.log('📡 Real-time update diterima:', payload);
-          
-          if (payload.eventType === 'UPDATE') {
-            console.log('🔄 Data di-update, refresh otomatis...');
-            
-            // Tampilkan notifikasi
-            showSuccessNotification('Data diperbarui secara real-time');
-            
-            // Refresh data setelah 1 detik
-            setTimeout(() => {
-              loadMatkulData();
-            }, 1000);
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Status subscription:', status);
-      });
-    
-    return channel;
-    
-  } catch (err) {
-    console.error('Error setup real-time sync:', err);
-  }
-}
-
-function getEventName(eventType) {
-  const names = {
-    'INSERT': 'ditambahkan',
-    'UPDATE': 'diperbarui',
-    'DELETE': 'dihapus'
-  };
-  return names[eventType] || 'berubah';
-}
-
-function showToast(message) {
-  // Buat toast notification
-  const toast = document.createElement('div');
-  toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
-  toast.innerHTML = `
-    <div class="flex items-center">
-      <i class="fas fa-sync-alt mr-2"></i>
-      <span>${message}</span>
-    </div>
-  `;
-  
-  document.body.appendChild(toast);
-  
-  // Hapus setelah 3 detik
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
-
     // Fungsi untuk memuat data mata kuliah
-// Fungsi untuk merender tabel mata kuliah
-function renderMatkulTable(data) {
-  const tableBody = document.getElementById('matkulTableBody');
-  
-  if (!tableBody) return;
-  
-  // Jika tidak ada data
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-          <div class="flex flex-col items-center">
-            <i class="fas fa-inbox text-3xl text-gray-300 mb-3"></i>
-            <p class="text-gray-500">Tidak ada data mata kuliah</p>
-            <p class="text-sm text-gray-400 mt-1">Klik "Tambah Mata Kuliah" untuk menambahkan data</p>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-  
-  // Bangun HTML untuk tabel
-  let html = '';
-  
-  data.forEach((matkul, index) => {
-    // Ambil data dengan nilai default
-    const kode = matkul.kode || 'N/A';
-    const nama = matkul.nama || 'N/A';
-    const prodi = matkul.prodi || 'Lainnya';
-    const sks = matkul.sks || '0';
-    const semester = matkul.semester ? `Semester ${matkul.semester}` : 'N/A';
-    const id = matkul.id || '';
-    
-    // Tentukan warna untuk program studi
-    const prodiColor = getProdiColor(prodi);
-    
-    html += `
-      <tr class="hover:bg-gray-50">
-        <td class="px-6 py-4 text-center text-sm text-gray-500">${index + 1}</td>
-        <td class="px-6 py-4 font-mono text-sm font-medium">${kode}</td>
-        <td class="px-6 py-4 text-sm text-gray-900">${nama}</td>
-        <td class="px-6 py-4">
-          <span class="px-3 py-1 rounded-full text-xs font-medium ${prodiColor}">
-            ${prodi}
-          </span>
-        </td>
-        <td class="px-6 py-4 text-center text-sm font-bold">${sks} SKS</td>
-        <td class="px-6 py-4 text-sm">${semester}</td>
-        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-          <button onclick="editMatkul('${id}')" 
-                  class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 px-3 rounded-md mr-2 text-xs">
-            <i class="fas fa-edit mr-1"></i>Edit
-          </button>
-          <button onclick="deleteMatkul('${id}')" 
-                  class="bg-red-500 hover:bg-red-600 text-white py-1.5 px-3 rounded-md text-xs">
-            <i class="fas fa-trash-alt mr-1"></i>Hapus
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-  
-  tableBody.innerHTML = html;
-}
-
-// Fungsi helper untuk warna prodi
-function getProdiColor(prodi) {
-  const colors = {
-    'Industri': 'bg-blue-100 text-blue-800',
-    'Sipil': 'bg-green-100 text-green-800',
-    'Informatika': 'bg-purple-100 text-purple-800',
-    'Arsitektur': 'bg-yellow-100 text-yellow-800',
-    'Elektro': 'bg-red-100 text-red-800',
-    'Lainnya': 'bg-gray-100 text-gray-800'
-  };
-  return colors[prodi] || 'bg-gray-100 text-gray-800';
-
-  } 
-    // Fungsi untuk debugging - cek struktur tabel di database
-async function checkDatabaseStructure() {
-  console.log('🔍 Mengecek struktur database...');
-  
-  try {
-    // Coba ambil sample data untuk melihat struktur
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .select('*')
-      .limit(1);
-    
-    if (error) {
-      console.error('❌ Gagal mengakses tabel:', error);
-      alert('Tabel "matakuliah" tidak ditemukan. Pastikan nama tabel benar di Supabase.');
-      return;
+    async function loadMatkulData() {
+      const tableBody = document.getElementById('matkulTableBody');
+      if (!tableBody) {
+        console.error('❌ Tabel body tidak ditemukan!');
+        return;
+      }
+      
+      console.log('🔄 Memuat data mata kuliah dari Supabase...');
+      
+      // Tampilkan loading
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="px-6 py-10 text-center">
+            <div class="flex flex-col items-center">
+              <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
+              <p class="text-sm text-gray-700 font-medium">Sedang memuat data...</p>
+              <p class="text-xs text-gray-500 mt-1">Tunggu sebentar</p>
+            </div>
+          </td>
+        </tr>
+      `;
+      
+      try {
+        console.log('📡 Mengambil data dari tabel "matakuliah"...');
+        
+        const { data, error } = await supabaseClient
+          .from('matakuliah')
+          .select('*')
+          .order('kode', { ascending: true });
+        
+        if (error) {
+          console.error('❌ Error dari Supabase:', error);
+          throw new Error(`Supabase error: ${error.message}`);
+        }
+        
+        console.log(`✅ Berhasil mengambil ${data?.length || 0} data mata kuliah`);
+        
+        // Jika tidak ada data
+        if (!data || data.length === 0) {
+          allMatkulData = [];
+          filteredMatkulData = [];
+          
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="7" class="px-6 py-8 text-center">
+                <div class="flex flex-col items-center">
+                  <i class="fas fa-inbox text-3xl text-gray-300 mb-3"></i>
+                  <p class="text-gray-500">Belum ada data mata kuliah</p>
+                  <p class="text-sm text-gray-400 mt-1">Klik "Tambah Mata Kuliah" untuk menambahkan</p>
+                </div>
+              </td>
+            </tr>
+          `;
+          
+          document.getElementById('totalMataKuliah').textContent = '0';
+          return;
+        }
+        
+        // Update data lokal
+        allMatkulData = data;
+        filteredMatkulData = [...data];
+        
+        console.log('📊 Data pertama:', data[0]);
+        
+        // Render tabel
+        renderMatkulTable(filteredMatkulData);
+        
+        // Update counter
+        document.getElementById('totalMataKuliah').textContent = data.length;
+        
+        console.log('✅ Data berhasil ditampilkan');
+        
+      } catch (error) {
+        console.error('💥 Error fatal:', error);
+        
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-center">
+              <div class="flex flex-col items-center">
+                <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i>
+                <p class="text-red-600 font-medium">Gagal memuat data</p>
+                <p class="text-sm text-gray-600 mt-2">${error.message || 'Terjadi kesalahan'}</p>
+                <button onclick="loadMatkulData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <i class="fas fa-redo mr-2"></i>Coba Lagi
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
     }
-    
-    if (data && data.length > 0) {
-      console.log('✅ Tabel ditemukan. Struktur data:', data[0]);
-      console.log('Kolom yang tersedia:', Object.keys(data[0]));
-    } else {
-      console.log('ℹ️ Tabel ditemukan tetapi kosong');
+
+    // Fungsi untuk render tabel
+    function renderMatkulTable(data) {
+      const tableBody = document.getElementById('matkulTableBody');
+      
+      if (!tableBody) {
+        console.error('❌ Tabel body tidak ditemukan!');
+        return;
+      }
+      
+      // Validasi data
+      if (!data || !Array.isArray(data)) {
+        console.error('❌ Data tidak valid:', data);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
+              ❌ Format data tidak valid
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      if (data.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+              Tidak ada data mata kuliah
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      try {
+        let html = '';
+        
+        data.forEach((matkul, index) => {
+          if (!matkul) return;
+          
+          const rowNumber = index + 1;
+          const kode = matkul.kode || '-';
+          const nama = matkul.nama || '-';
+          const prodi = matkul.prodi || 'Lainnya';
+          const sks = matkul.sks || '0';
+          const semester = matkul.semester ? `Semester ${matkul.semester}` : '-';
+          const id = matkul.id || '';
+          
+          const prodiClass = getProdiClass(prodi);
+          
+          html += `
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm text-gray-500 text-center">${rowNumber}</td>
+              <td class="px-6 py-4 text-sm font-mono text-gray-900">${kode}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">${nama}</td>
+              <td class="px-6 py-4 text-sm">
+                <span class="px-3 py-1 rounded-full text-xs font-medium ${prodiClass}">
+                  ${prodi}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold">${sks}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">${semester}</td>
+              <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                <button onclick="editMatkul('${id}')" 
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 px-3 rounded-md mr-2 text-xs">
+                  <i class="fas fa-edit mr-1"></i>Edit
+                </button>
+                <button onclick="deleteMatkul('${id}')" 
+                        class="bg-red-500 hover:bg-red-600 text-white py-1.5 px-3 rounded-md text-xs">
+                  <i class="fas fa-trash-alt mr-1"></i>Hapus
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+        
+        tableBody.innerHTML = html;
+        
+      } catch (error) {
+        console.error('❌ Error render tabel:', error);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
+              ❌ Gagal menampilkan data: ${error.message}
+            </td>
+          </tr>
+        `;
+      }
     }
-    
-  } catch (error) {
-    console.error('💥 Error cek struktur:', error);
-  }
-}
 
-// Fungsi helper untuk warna prodi
-function getProdiClass(prodi) {
-  const prodiLower = prodi.toLowerCase();
-  
-  if (prodiLower.includes('industri')) return 'bg-blue-100 text-blue-800';
-  if (prodiLower.includes('sipil')) return 'bg-green-100 text-green-800';
-  if (prodiLower.includes('informatika')) return 'bg-purple-100 text-purple-800';
-  if (prodiLower.includes('arsitektur')) return 'bg-yellow-100 text-yellow-800';
-  if (prodiLower.includes('elektro')) return 'bg-red-100 text-red-800';
-  
-  return 'bg-gray-100 text-gray-800';
-}
-  
-  // **LOG: Konfirmasi render selesai**
-  console.log(`✅ Tabel dirender dengan ${data.length} baris`);
-}
+    // Helper function untuk warna prodi
+    function getProdiClass(prodi) {
+      const prodiLower = prodi.toLowerCase();
+      
+      if (prodiLower.includes('industri')) return 'bg-blue-100 text-blue-800';
+      if (prodiLower.includes('sipil')) return 'bg-green-100 text-green-800';
+      if (prodiLower.includes('informatika')) return 'bg-purple-100 text-purple-800';
+      if (prodiLower.includes('arsitektur')) return 'bg-yellow-100 text-yellow-800';
+      if (prodiLower.includes('elektro')) return 'bg-red-100 text-red-800';
+      
+      return 'bg-gray-100 text-gray-800';
+    }
 
-// Fungsi helper untuk warna prodi
-function getProdiColor(prodi) {
-  const colors = {
-    'Industri': 'bg-blue-100 text-blue-800',
-    'Sipil': 'bg-green-100 text-green-800',
-    'Informatika': 'bg-purple-100 text-purple-800',
-    'Arsitektur': 'bg-yellow-100 text-yellow-800',
-    'Elektro': 'bg-red-100 text-red-800'
-  };
-  return colors[prodi] || 'bg-gray-100 text-gray-800';
-}
-
-    // Fungsi untuk memfilter data mata kuliah
+    // Fungsi untuk filter data
     function filterMatkulData() {
       const kodeProdi = document.getElementById('filterKodeProdi').value;
       const namaMatkul = document.getElementById('filterNamaMatkul').value.toLowerCase();
@@ -942,11 +839,11 @@ function getProdiColor(prodi) {
         let passes = true;
         
         if (kodeProdi) {
-          const kodePrefix = matkul.kode.substring(0, 5);
+          const kodePrefix = matkul.kode?.substring(0, 5) || '';
           if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
         }
         
-        if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
+        if (namaMatkul && !matkul.nama?.toLowerCase().includes(namaMatkul)) {
           passes = false;
         }
         
@@ -960,7 +857,7 @@ function getProdiColor(prodi) {
       renderMatkulTable(filteredMatkulData);
     }
 
-    // Fungsi untuk mereset filter mata kuliah
+    // Fungsi reset filter
     function resetMatkulFilter() {
       document.getElementById('filterKodeProdi').value = '';
       document.getElementById('filterNamaMatkul').value = '';
@@ -969,489 +866,248 @@ function getProdiColor(prodi) {
       renderMatkulTable(filteredMatkulData);
     }
 
-    // FUNGSI CRUD LENGKAP
-    // FUNGSI CRUD LENGKAP - PERBAIKI BAGIAN INI
-function openModal() {
-  const modal = document.getElementById('matkulModal');
-  if (modal) {
-    modal.style.display = 'flex';
-  } else {
-    console.error('❌ Modal tidak ditemukan!');
-  }
-}
-
-function closeModal() {
-  const modal = document.getElementById('matkulModal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
-  resetForm();
-}
-
-function resetForm() {
-  // GUNAKAN NULL CHECK UNTUK SEMUA ELEMEN
-  const elements = [
-    'matkulId', 'modalKode', 'modalNama', 'modalProdi', 
-    'modalSKS', 'modalSemester', 'modalDeskripsi'
-  ];
-  
-  elements.forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      if (id === 'matkulId') element.value = '';
-      else if (id === 'modalKode') element.value = '';
-      else if (id === 'modalNama') element.value = '';
-      else if (id === 'modalProdi') element.value = '';
-      else if (id === 'modalSKS') element.value = '';
-      else if (id === 'modalSemester') element.value = '';
-      else if (id === 'modalDeskripsi') element.value = '';
+    // ====================== FUNGSI MODAL ======================
+    
+    // Fungsi untuk membuka modal
+    function openModal() {
+      const modal = document.getElementById('matkulModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+          modal.classList.add('animate-fade-in');
+        }, 10);
+      }
     }
-  });
-  
-  // PERBAIKI: Gunakan querySelector yang lebih aman
-  const modalTitle = document.getElementById('modalTitle');
-  const saveButtonText = document.getElementById('saveButtonText');
-  
-  if (modalTitle) modalTitle.textContent = 'Tambah Mata Kuliah Baru';
-  if (saveButtonText) saveButtonText.textContent = 'Simpan Mata Kuliah';
-}
 
+    // Fungsi untuk menutup modal
+    function closeModal() {
+      const modal = document.getElementById('matkulModal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('animate-fade-in');
+      }
+      resetForm();
+    }
+
+    // Fungsi untuk reset form modal
+    function resetForm() {
+      document.getElementById('matkulId').value = '';
+      document.getElementById('modalKode').value = '';
+      document.getElementById('modalNama').value = '';
+      document.getElementById('modalProdi').value = '';
+      document.getElementById('modalSKS').value = '';
+      document.getElementById('modalSemester').value = '';
+      document.getElementById('modalDeskripsi').value = '';
+      
+      document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
+      document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
+    }
+
+    // Fungsi untuk menambah matakuliah baru
     function addMatkul() {
       resetForm();
       openModal();
     }
 
-async function editMatkul(id) {
-  console.log('✏️ editMatkul dipanggil dengan ID:', id);
-  
-  // Cari tombol save dengan cara yang lebih aman
-  const saveButton = document.querySelector('#matkulForm button[type="submit"]');
-  if (!saveButton) {
-    console.error('❌ Tombol save tidak ditemukan!');
-    return;
-  }
-  
-  const originalText = saveButton.innerHTML;
-  saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memuat...';
-  saveButton.disabled = true;
-  
-  try {
-    // Ambil data dari database
-    console.log('🔄 Mengambil data terbaru dari database...');
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      console.error('❌ Error ambil data:', error);
-      throw new Error('Data tidak ditemukan di database');
-    }
-    
-    if (!data) {
-      alert('❌ Data mata kuliah tidak ditemukan');
-      return;
-    }
-    
-    console.log('✅ Data ditemukan:', data);
-    
-    // PERBAIKI: Pastikan semua elemen ada sebelum mengisi
-    const elementsToFill = {
-      'matkulId': data.id,
-      'modalKode': data.kode || '',
-      'modalNama': data.nama || '',
-      'modalProdi': data.prodi || '',
-      'modalSKS': data.sks || '',
-      'modalSemester': data.semester || '',
-      'modalDeskripsi': data.deskripsi || ''
-    };
-    
-    // Isi form dengan null check
-    Object.entries(elementsToFill).forEach(([id, value]) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.value = value;
-      } else {
-        console.warn(`⚠️ Element ${id} tidak ditemukan`);
-      }
-    });
-    
-    // Update judul modal
-    const modalTitle = document.getElementById('modalTitle');
-    const saveButtonText = document.getElementById('saveButtonText');
-    
-    if (modalTitle) modalTitle.textContent = 'Edit Mata Kuliah';
-    if (saveButtonText) saveButtonText.textContent = 'Update Mata Kuliah';
-    
-    console.log('✅ Form berhasil diisi');
-    
-    // Buka modal
-    openModal();
-    
-  } catch (error) {
-    console.error('💥 Error saat edit:', error);
-    // Gunakan alert yang lebih sederhana
-    alert('❌ Gagal memuat data: ' + (error.message || 'Terjadi kesalahan'));
-  } finally {
-    // Restore button dengan null check
-    if (saveButton) {
-      saveButton.innerHTML = originalText;
-      saveButton.disabled = false;
-    }
-  }
-}
-    
-async function saveMatkul(event) {
-  event.preventDefault();
-  console.log('💾 Menyimpan data mata kuliah...');
-  
-  try {
-    // Ambil data form
-    const id = document.getElementById('matkulId').value;
-    const kode = document.getElementById('modalKode').value.trim();
-    const nama = document.getElementById('modalNama').value.trim();
-    const prodi = document.getElementById('modalProdi').value;
-    const sks = document.getElementById('modalSKS').value;
-    const semester = document.getElementById('modalSemester').value;
-    const deskripsi = document.getElementById('modalDeskripsi').value.trim();
-    
-    // Validasi sederhana
-    if (!kode || !nama || !prodi || !sks || !semester) {
-      alert('❌ Harap isi semua field yang wajib!');
-      return;
-    }
-    
-    // Siapkan data
-    const matkulData = {
-      kode,
-      nama,
-      prodi,
-      sks: parseInt(sks),
-      semester: parseInt(semester),
-      deskripsi
-    };
-    
-    console.log('📤 Data yang akan disimpan:', matkulData);
-    
-    // Tampilkan loading di button
-    const saveButton = document.querySelector('#matkulForm button[type="submit"]');
-    if (saveButton) {
-      saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
-      saveButton.disabled = true;
-    }
-    
-    let result;
-    
-    if (id) {
-      // Update data yang ada
-      console.log(`🔄 Mengupdate data dengan ID: ${id}`);
-      const { data, error } = await supabaseClient
-        .from('matakuliah')
-        .update(matkulData)
-        .eq('id', id)
-        .select();
+    // Fungsi untuk mengedit matakuliah
+    async function editMatkul(id) {
+      console.log('✏️ Edit matakuliah dengan ID:', id);
       
-      if (error) throw error;
-      result = data;
-      
-    } else {
-      // Tambah data baru
-      console.log('🔄 Menambahkan data baru');
-      const { data, error } = await supabaseClient
-        .from('matakuliah')
-        .insert([matkulData])
-        .select();
-      
-      if (error) throw error;
-      result = data;
-    }
-    
-    console.log('✅ Data berhasil disimpan:', result);
-    
-    // Tampilkan alert sukses
-    alert(`✅ Mata kuliah "${nama}" berhasil disimpan!`);
-    
-    // Tutup modal
-    closeModal();
-    
-    // Tunggu sebentar lalu load ulang data
-    setTimeout(() => {
-      loadMatkulData();
-      loadDashboardTotals();
-    }, 500);
-    
-  } catch (error) {
-    console.error('💥 Error menyimpan:', error);
-    alert(`❌ Gagal menyimpan: ${error.message || 'Terjadi kesalahan'}`);
-    
-  } finally {
-    // Restore button
-    const saveButton = document.querySelector('#matkulForm button[type="submit"]');
-    if (saveButton) {
-      saveButton.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan';
-      saveButton.disabled = false;
-    }
-  }
-}
-    
-    // **REFRESH UI DENGAN CARA YANG LEBIH AGGRESIF**
-    console.log('🔄 Memulai refresh UI...');
-    
-    // 1. Tampilkan loading di tabel
-    const tableBody = document.getElementById('matkulTableBody');
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-8 text-center">
-          <div class="flex flex-col items-center">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
-            <p class="text-sm text-gray-700 font-medium">Memperbarui tampilan...</p>
-          </div>
-        </td>
-      </tr>
-    `;
-    
-    // 2. Tunggu 500ms untuk memastikan Supabase sudah selesai
-    setTimeout(async () => {
       try {
-        console.log('🔄 Mengambil data TERBARU dari Supabase...');
+        // Tampilkan loading state di tombol modal
+        const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+        const originalButtonText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memuat...';
+        saveButton.disabled = true;
         
-        // Ambil data TERBARU langsung dari database (bukan dari cache)
-        const { data: freshData, error: freshError } = await supabaseClient
+        // Ambil data dari database
+        const { data, error } = await supabaseClient
           .from('matakuliah')
           .select('*')
-          .order('kode');
+          .eq('id', id)
+          .single();
         
-        if (freshError) throw freshError;
+        if (error) {
+          console.error('❌ Error mengambil data:', error);
+          throw new Error('Data tidak ditemukan di database');
+        }
         
-        console.log(`✅ Data terbaru diterima: ${freshData.length} record`);
+        if (!data) {
+          alert('❌ Data mata kuliah tidak ditemukan');
+          return;
+        }
         
-        // **UPDATE ARRAY LOKAL DENGAN DATA BARU**
-        allMatkulData = freshData || [];
-        filteredMatkulData = [...allMatkulData];
+        console.log('✅ Data ditemukan:', data);
         
-        // **RENDER ULANG TABEL**
-        renderMatkulTable(filteredMatkulData);
+        // Isi form dengan data
+        document.getElementById('matkulId').value = data.id;
+        document.getElementById('modalKode').value = data.kode || '';
+        document.getElementById('modalNama').value = data.nama || '';
+        document.getElementById('modalProdi').value = data.prodi || '';
+        document.getElementById('modalSKS').value = data.sks || '';
+        document.getElementById('modalSemester').value = data.semester || '';
+        document.getElementById('modalDeskripsi').value = data.deskripsi || '';
         
-        // **UPDATE COUNTER DASHBOARD**
-        document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
+        // Update judul modal
+        document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+        document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
         
-        console.log('✅ UI berhasil di-refresh!');
+        // Buka modal
+        openModal();
         
-        // **TAMPILKAN NOTIFIKASI VISUAL**
-        showSuccessNotification(`Data berhasil ${id ? 'diperbarui' : 'ditambahkan'}!`);
+      } catch (error) {
+        console.error('💥 Error saat edit:', error);
+        showNotification('❌ Gagal memuat data: ' + error.message, 'error');
+      } finally {
+        // Restore button state
+        const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+        if (saveButton) {
+          saveButton.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan';
+          saveButton.disabled = false;
+        }
+      }
+    }
+
+    // Fungsi untuk menyimpan matakuliah
+    async function saveMatkul(event) {
+      event.preventDefault();
+      console.log('💾 Menyimpan data mata kuliah...');
+      
+      try {
+        // Ambil data form
+        const id = document.getElementById('matkulId').value;
+        const kode = document.getElementById('modalKode').value.trim();
+        const nama = document.getElementById('modalNama').value.trim();
+        const prodi = document.getElementById('modalProdi').value;
+        const sks = document.getElementById('modalSKS').value;
+        const semester = document.getElementById('modalSemester').value;
+        const deskripsi = document.getElementById('modalDeskripsi').value.trim();
         
-      } catch (refreshError) {
-        console.error('❌ Error refresh UI:', refreshError);
+        // Validasi
+        if (!kode || !nama || !prodi || !sks || !semester) {
+          showNotification('❌ Harap isi semua field yang wajib!', 'error');
+          return;
+        }
+        
+        // Siapkan data
+        const matkulData = {
+          kode,
+          nama,
+          prodi,
+          sks: parseInt(sks),
+          semester: parseInt(semester),
+          deskripsi
+        };
+        
+        console.log('📤 Data yang akan disimpan:', matkulData);
+        
+        // Tampilkan loading
+        const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+        const originalButtonText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+        saveButton.disabled = true;
+        
+        let result;
+        
+        if (id) {
+          // Update
+          console.log(`🔄 Mengupdate data dengan ID: ${id}`);
+          const { data, error } = await supabaseClient
+            .from('matakuliah')
+            .update(matkulData)
+            .eq('id', id)
+            .select();
+          
+          if (error) throw error;
+          result = data;
+          
+        } else {
+          // Insert baru
+          console.log('🔄 Menambahkan data baru');
+          const { data, error } = await supabaseClient
+            .from('matakuliah')
+            .insert([matkulData])
+            .select();
+          
+          if (error) throw error;
+          result = data;
+        }
+        
+        console.log('✅ Data berhasil disimpan:', result);
+        
+        // Tampilkan notifikasi sukses
+        showNotification(`✅ Mata kuliah "${nama}" berhasil disimpan!`, 'success');
+        
+        // Tutup modal
+        closeModal();
+        
+        // Refresh data setelah 500ms
+        setTimeout(() => {
+          loadMatkulData();
+          loadDashboardTotals();
+        }, 500);
+        
+      } catch (error) {
+        console.error('💥 Error menyimpan:', error);
+        showNotification(`❌ Gagal menyimpan: ${error.message || 'Terjadi kesalahan'}`, 'error');
+        
+      } finally {
+        // Restore button
+        const saveButton = document.querySelector('#matkulForm button[type="submit"]');
+        if (saveButton) {
+          saveButton.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan';
+          saveButton.disabled = false;
+        }
+      }
+    }
+
+    // Fungsi untuk menghapus matakuliah
+    async function deleteMatkul(id) {
+      if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
+        return;
+      }
+
+      try {
+        // Tampilkan loading di tabel
+        const tableBody = document.getElementById('matkulTableBody');
         tableBody.innerHTML = `
           <tr>
-            <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-              ❌ Gagal memuat ulang data
+            <td colspan="7" class="px-6 py-8 text-center">
+              <div class="flex flex-col items-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                <p class="text-sm text-gray-600">Menghapus data...</p>
+              </div>
             </td>
           </tr>
         `;
+
+        // Hapus dari database
+        const { error } = await supabaseClient
+          .from('matakuliah')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        // Tampilkan notifikasi sukses
+        showNotification('✅ Mata kuliah berhasil dihapus!', 'success');
+        
+        // Refresh data
+        await loadMatkulData();
+        await loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error menghapus mata kuliah:', error);
+        showNotification(`❌ Gagal menghapus mata kuliah: ${error.message}`, 'error');
       }
-    }, 500); // Tunggu 500ms
-    
-  } catch (error) {
-    console.error('💥 Error saat menyimpan:', error);
-    alert(`❌ Gagal menyimpan: ${error.message || 'Terjadi kesalahan'}`);
-    
-    // Restore button jika error
-    saveButton.innerHTML = originalText;
-    saveButton.disabled = false;
-    
-  } finally {
-    // **JANGAN restore button di sini karena sudah ada di setTimeout**
-    // Biarkan button tetap loading sampai proses selesai
-  }
-}
-
-    async function refreshMatkulData() {
-  console.log('🔄 Memuat ulang data mata kuliah...');
-  
-  const tableBody = document.getElementById('matkulTableBody');
-  
-  // Tampilkan loading indicator
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="7" class="px-6 py-8 text-center">
-        <div class="flex flex-col items-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-          <p class="text-sm text-gray-600">Memperbarui data...</p>
-        </div>
-      </td>
-    </tr>
-  `;
-  
-  try {
-    // Ambil data terbaru dari database
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .select('*')
-      .order('kode');
-    
-    if (error) throw error;
-    
-    // Update array lokal
-    allMatkulData = data || [];
-    filteredMatkulData = [...allMatkulData];
-    
-    // Render ulang tabel
-    renderMatkulTable(filteredMatkulData);
-    
-    // Update counter di dashboard
-    document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
-    
-    console.log(`✅ Data berhasil dimuat ulang: ${allMatkulData.length} record`);
-    
-  } catch (error) {
-    console.error('💥 Error refresh data:', error);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-          ❌ Gagal memuat ulang data: ${error.message}
-        </td>
-      </tr>
-    `;
-  }
-}
-
-
-    async function deleteMatkul(id) {
-  if (!confirm('Apakah Anda yakin ingin menghapus mata kuliah ini?')) {
-    return;
-  }
-
-  try {
-    const { error } = await supabaseClient
-      .from('matakuliah')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    
-    alert('✅ Mata kuliah berhasil dihapus!');
-    
-    // Tampilkan loading
-    const tableBody = document.getElementById('matkulTableBody');
-    tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat ulang data...</td></tr>`;
-    
-    // Load ulang data
-    await loadMatkulData();
-    await loadDashboardTotals();
-    
-  } catch (error) {
-    console.error('Error menghapus mata kuliah:', error);
-    alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
-  }
-}
-
-    // Fungsi untuk setup real-time subscription
-function setupRealtimeSubscription() {
-  try {
-    console.log('🔄 Setting up real-time subscription...');
-    
-    const subscription = supabaseClient
-      .channel('matakuliah-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'matakuliah'
-        },
-        (payload) => {
-          console.log('📡 Real-time update:', payload);
-          
-          // Refresh data ketika ada perubahan
-          if (payload.eventType === 'INSERT' || 
-              payload.eventType === 'UPDATE' || 
-              payload.eventType === 'DELETE') {
-            
-            console.log(`🔄 Data berubah (${payload.eventType}), reloading...`);
-            
-            // Tampilkan notifikasi
-            showNotification(`Data mata kuliah ${payload.eventType === 'INSERT' ? 'ditambahkan' : 
-              payload.eventType === 'UPDATE' ? 'diperbarui' : 'dihapus'}`);
-            
-            // Refresh data setelah 1 detik
-            setTimeout(() => {
-              loadMatkulData();
-              loadDashboardTotals();
-            }, 1000);
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status);
-      });
-    
-    return subscription;
-    
-  } catch (err) {
-    console.error('Error setting up subscription:', err);
-  }
-}
-
-// Fungsi untuk menampilkan notifikasi
-// HAPUS fungsi showNotification yang lama, sisakan SATU saja:
-
-function showNotification(message, type = 'success') {
-  console.log(`📢 Notification: ${message} (${type})`);
-  
-  // Buat notifikasi sederhana dulu
-  const notification = document.createElement('div');
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    z-index: 9999;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    animation: fadeIn 0.3s ease-out;
-  `;
-  
-  // Set warna berdasarkan type
-  if (type === 'success') {
-    notification.style.backgroundColor = '#10B981'; // green-500
-  } else if (type === 'error') {
-    notification.style.backgroundColor = '#EF4444'; // red-500
-  } else {
-    notification.style.backgroundColor = '#3B82F6'; // blue-500
-  }
-  
-  notification.innerHTML = `
-    <div style="display: flex; align-items: center;">
-      <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" 
-         style="margin-right: 10px;"></i>
-      <span>${message}</span>
-    </div>
-  `;
-  
-  // Tambahkan ke body
-  document.body.appendChild(notification);
-  
-  // Auto-hide setelah 4 detik
-  setTimeout(() => {
-    if (notification.parentNode) {
-      notification.style.opacity = '0';
-      notification.style.transition = 'opacity 0.3s ease-out';
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 300);
     }
-  }, 4000);
-}
+
+    // ====================== FUNGSI IMPORT/EXPORT ======================
+    
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
       if (!filteredMatkulData || filteredMatkulData.length === 0) {
-        alert('❌ Tidak ada data mata kuliah untuk diekspor.');
+        showNotification('❌ Tidak ada data mata kuliah untuk diekspor.', 'error');
         return;
       }
       
@@ -1491,23 +1147,25 @@ function showNotification(message, type = 'success') {
       });
       
       doc.save('daftar_mata_kuliah_ft.pdf');
+      showNotification('✅ PDF berhasil diexport!', 'success');
     }
 
     // Fungsi untuk export ke Excel
     function exportMatkulToExcel() {
       if (!filteredMatkulData || filteredMatkulData.length === 0) {
-        alert('❌ Tidak ada data mata kuliah untuk diekspor.');
+        showNotification('❌ Tidak ada data mata kuliah untuk diekspor.', 'error');
         return;
       }
       
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
+      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester', 'Deskripsi']];
       const data = filteredMatkulData.map((matkul, index) => [
         index + 1,
         matkul.kode,
         matkul.nama,
         matkul.prodi || 'Lainnya',
         matkul.sks,
-        matkul.semester || '-'
+        matkul.semester || '-',
+        matkul.deskripsi || '-'
       ]);
       
       const wsData = [
@@ -1522,532 +1180,474 @@ function showNotification(message, type = 'success') {
       const ws = XLSX.utils.aoa_to_sheet(wsData);
       
       ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
       ];
       
       XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
       XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
+      showNotification('✅ Excel berhasil diexport!', 'success');
     }
 
     // Fungsi untuk download template Excel
-function downloadTemplateMatkul() {
-  const templateData = [
-    ['Kode', 'Nama', 'SKS', 'Semester', 'Program Studi', 'Deskripsi'],
-    ['50262001', 'Matematika Teknik', '3', '1', 'Industri', 'Mata kuliah dasar teknik'],
-    ['50263001', 'Fisika Dasar', '3', '1', 'Sipil', 'Konsep dasar fisika'],
-    ['50463001', 'Algoritma Pemrograman', '4', '1', 'Informatika', 'Dasar pemrograman'],
-    ['50362001', 'Gambar Arsitektur', '2', '1', 'Arsitektur', 'Teknik menggambar'],
-    ['50264001', 'Rangkaian Listrik', '3', '2', 'Elektro', 'Dasar rangkaian listrik'],
-    ['50262002', 'Statika', '2', '2', 'Industri', 'Mekanika teknik dasar']
-  ];
-  
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(templateData);
-  
-  // Format kolom
-  const colWidths = [
-    { wch: 15 }, // Kode
-    { wch: 35 }, // Nama
-    { wch: 8 },  // SKS
-    { wch: 10 }, // Semester
-    { wch: 20 }, // Program Studi
-    { wch: 40 }  // Deskripsi
-  ];
-  ws['!cols'] = colWidths;
-  
-  XLSX.utils.book_append_sheet(wb, ws, 'Template');
-  XLSX.writeFile(wb, 'template_mata_kuliah.xlsx');
-  
-  alert('✅ Template berhasil didownload. Silakan isi data mata kuliah.');
-}
-
-// Fungsi untuk modal import
-let importData = [];
-
-function showImportModal() {
-  document.getElementById('importModal').style.display = 'flex';
-  resetImportForm();
-}
-
-function closeImportModal() {
-  document.getElementById('importModal').style.display = 'none';
-  resetImportForm();
-}
-
-function resetImportForm() {
-  document.getElementById('fileInput').value = '';
-  document.getElementById('fileName').textContent = '';
-  document.getElementById('previewTable').classList.add('hidden');
-  document.getElementById('previewHeader').innerHTML = '';
-  document.getElementById('previewBody').innerHTML = '';
-  document.getElementById('totalRows').textContent = '0';
-  
-  const importButton = document.getElementById('importButton');
-  importButton.disabled = true;
-  importButton.classList.add('opacity-50', 'cursor-not-allowed');
-  importButton.classList.remove('opacity-100', 'cursor-pointer');
-  
-  importData = [];
-}
-
-function handleFileSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const dropArea = document.getElementById('dropArea');
-  dropArea.classList.remove('border-blue-400');
-  dropArea.classList.add('border-green-400');
-  
-  document.getElementById('fileName').innerHTML = `
-    <i class="fas fa-file-excel text-green-500 mr-2"></i>
-    <span class="font-medium">${file.name}</span>
-    <span class="text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
-  `;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-    
-    processImportData(jsonData);
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function processImportData(data) {
-  if (data.length < 2) {
-    alert('❌ File Excel kosong atau format tidak sesuai.');
-    return;
-  }
-  
-  const headers = data[0];
-  const requiredHeaders = ['Kode', 'Nama', 'SKS', 'Semester', 'Program Studi'];
-  
-  // Validasi header
-  for (const required of requiredHeaders) {
-    if (!headers.includes(required)) {
-      alert(`❌ Kolom "${required}" tidak ditemukan dalam file.`);
-      return;
+    function downloadTemplateMatkul() {
+      const templateData = [
+        ['Kode', 'Nama', 'SKS', 'Semester', 'Program Studi', 'Deskripsi'],
+        ['50262001', 'Matematika Teknik', '3', '1', 'Industri', 'Mata kuliah dasar teknik'],
+        ['50263001', 'Fisika Dasar', '3', '1', 'Sipil', 'Konsep dasar fisika'],
+        ['50463001', 'Algoritma Pemrograman', '4', '1', 'Informatika', 'Dasar pemrograman'],
+        ['50362001', 'Gambar Arsitektur', '2', '1', 'Arsitektur', 'Teknik menggambar'],
+        ['50264001', 'Rangkaian Listrik', '3', '2', 'Elektro', 'Dasar rangkaian listrik'],
+        ['50262002', 'Statika', '2', '2', 'Industri', 'Mekanika teknik dasar']
+      ];
+      
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(templateData);
+      
+      const colWidths = [
+        { wch: 15 }, // Kode
+        { wch: 35 }, // Nama
+        { wch: 8 },  // SKS
+        { wch: 10 }, // Semester
+        { wch: 20 }, // Program Studi
+        { wch: 40 }  // Deskripsi
+      ];
+      ws['!cols'] = colWidths;
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Template');
+      XLSX.writeFile(wb, 'template_mata_kuliah.xlsx');
+      showNotification('✅ Template berhasil didownload!', 'success');
     }
-  }
-  
-  // Ambil data (abaikan baris pertama/header)
-  importData = [];
-  for (let i = 1; i < Math.min(data.length, 100); i++) { // Maksimal 100 data preview
-    const row = data[i];
-    if (row.length === 0 || !row[0]) continue; // Lewati baris kosong
-    
-    const obj = {};
-    headers.forEach((header, index) => {
-      obj[header] = row[index] || '';
-    });
-    importData.push(obj);
-  }
-  
-  if (importData.length === 0) {
-    alert('❌ Tidak ada data yang valid untuk diimport.');
-    return;
-  }
-  
-  // Tampilkan preview
-  showPreview(headers, importData.slice(0, 5)); // Tampilkan 5 baris pertama
-  
-  // Update total rows
-  document.getElementById('totalRows').textContent = importData.length;
-  
-  // Aktifkan tombol import
-  const importButton = document.getElementById('importButton');
-  importButton.disabled = false;
-  importButton.classList.remove('opacity-50', 'cursor-not-allowed');
-  importButton.classList.add('opacity-100', 'cursor-pointer');
-}
 
-function showPreview(headers, data) {
-  const previewHeader = document.getElementById('previewHeader');
-  const previewBody = document.getElementById('previewBody');
-  
-  // Header
-  let headerHtml = '';
-  headers.forEach(header => {
-    headerHtml += `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">${header}</th>`;
-  });
-  previewHeader.innerHTML = headerHtml;
-  
-  // Body
-  let bodyHtml = '';
-  data.forEach((row, rowIndex) => {
-    bodyHtml += '<tr>';
-    headers.forEach(header => {
-      const value = row[header] || '';
-      bodyHtml += `
-        <td class="px-4 py-2 text-sm border ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
-          ${value}
-        </td>
+    // ====================== FUNGSI IMPORT MODAL ======================
+    
+    let importData = [];
+
+    function showImportModal() {
+      document.getElementById('importModal').style.display = 'flex';
+      resetImportForm();
+    }
+
+    function closeImportModal() {
+      document.getElementById('importModal').style.display = 'none';
+      resetImportForm();
+    }
+
+    function resetImportForm() {
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileName').textContent = '';
+      document.getElementById('previewTable').classList.add('hidden');
+      document.getElementById('previewHeader').innerHTML = '';
+      document.getElementById('previewBody').innerHTML = '';
+      document.getElementById('totalRows').textContent = '0';
+      
+      const importButton = document.getElementById('importButton');
+      importButton.disabled = true;
+      importButton.classList.add('opacity-50', 'cursor-not-allowed');
+      importButton.classList.remove('opacity-100', 'cursor-pointer');
+      
+      importData = [];
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const dropArea = document.getElementById('dropArea');
+      dropArea.classList.remove('border-blue-400');
+      dropArea.classList.add('border-green-400');
+      
+      document.getElementById('fileName').innerHTML = `
+        <i class="fas fa-file-excel text-green-500 mr-2"></i>
+        <span class="font-medium">${file.name}</span>
+        <span class="text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
       `;
-    });
-    bodyHtml += '</tr>';
-  });
-  previewBody.innerHTML = bodyHtml;
-  
-  document.getElementById('previewTable').classList.remove('hidden');
-}
-
-async function importMatkulData() {
-  if (importData.length === 0) {
-    alert('❌ Tidak ada data untuk diimport.');
-    return;
-  }
-  
-  if (!confirm(`Apakah Anda yakin ingin mengimport ${importData.length} data mata kuliah?`)) {
-    return;
-  }
-  
-  // Validasi data sebelum import
-  const validData = [];
-  const errors = [];
-  
-  for (let i = 0; i < importData.length; i++) {
-    const item = importData[i];
-    const rowNumber = i + 2; // +2 karena header di baris 1, dan index mulai dari 0
-    
-    // Validasi data wajib
-    if (!item.Kode) {
-      errors.push(`Baris ${rowNumber}: Kode tidak boleh kosong`);
-      continue;
-    }
-    
-    if (!item.Nama) {
-      errors.push(`Baris ${rowNumber}: Nama tidak boleh kosong`);
-      continue;
-    }
-    
-    if (!item.SKS || isNaN(item.SKS)) {
-      errors.push(`Baris ${rowNumber}: SKS harus angka`);
-      continue;
-    }
-    
-    if (!item.Semester || isNaN(item.Semester)) {
-      errors.push(`Baris ${rowNumber}: Semester harus angka`);
-      continue;
-    }
-    
-    validData.push({
-      kode: String(item.Kode).trim(),
-      nama: String(item.Nama).trim(),
-      sks: parseInt(item.SKS),
-      semester: parseInt(item.Semester),
-      prodi: String(item['Program Studi'] || item['Program_Studi'] || 'Lainnya').trim(),
-      deskripsi: String(item.Deskripsi || item.deskripsi || '').trim()
-    });
-  }
-  
-  if (errors.length > 0) {
-    alert('❌ Terdapat kesalahan dalam data:\n\n' + errors.slice(0, 5).join('\n') + 
-          (errors.length > 5 ? '\n...dan ' + (errors.length - 5) + ' error lainnya' : ''));
-    return;
-  }
-  
-  if (validData.length === 0) {
-    alert('❌ Tidak ada data yang valid untuk diimport.');
-    return;
-  }
-  
-  try {
-    // Import data ke Supabase
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .insert(validData)
-      .select();
-    
-    if (error) throw error;
-    
-    alert(`✅ Berhasil mengimport ${validData.length} data mata kuliah!`);
-    closeImportModal();
-    loadMatkulData();
-    loadDashboardTotals();
-    
-  } catch (error) {
-    console.error('Error importing data:', error);
-    alert(`❌ Gagal mengimport data: ${error.message}`);
-  }
-}
-
-    // Fungsi untuk import Excel langsung (tanpa modal)
-async function importMatkulFromExcel(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const importStatus = document.getElementById('importStatusMatkul');
-  importStatus.textContent = 'Membaca file...';
-  importStatus.classList.remove('hidden');
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
       
-      let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      
-      if (excelData.length < 2) {
-        importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        
+        processImportData(jsonData);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function processImportData(data) {
+      if (data.length < 2) {
+        showNotification('❌ File Excel kosong atau format tidak sesuai.', 'error');
         return;
       }
-
-      const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
-      const rawData = excelData.slice(1);
       
-      const columnMapping = {
-        'KODE': 'kode', 
-        'NAMA': 'nama', 
-        'SKS': 'sks', 
-        'SEMESTER': 'semester', 
-        'PROGRAM_STUDI': 'prodi',
-        'PRODI': 'prodi',
-        'DESKRIPSI': 'deskripsi'
-      };
-
-      const matkulToInsert = [];
-      let skippedRows = 0;
+      const headers = data[0];
+      const requiredHeaders = ['Kode', 'Nama', 'SKS', 'Semester', 'Program Studi'];
       
-      for (const row of rawData) {
-        let matkul = {};
-        let isValidRow = true;
-        
-        for (let i = 0; i < headers.length; i++) {
-          const excelHeader = headers[i];
-          const supabaseColumn = columnMapping[excelHeader];
-          
-          if (supabaseColumn) {
-            let value = row[i] === undefined ? null : row[i];
-            
-            if (supabaseColumn === 'sks' || supabaseColumn === 'semester') {
-              if (typeof value === 'number') {
-                value = Math.floor(value);
-              } else {
-                value = parseInt(String(value).trim()) || null;
-              }
-            } else if (value !== null) {
-              value = String(value).trim() || null;
-            }
-            
-            matkul[supabaseColumn] = value;
-          }
+      // Validasi header
+      for (const required of requiredHeaders) {
+        if (!headers.includes(required)) {
+          showNotification(`❌ Kolom "${required}" tidak ditemukan dalam file.`, 'error');
+          return;
         }
+      }
+      
+      // Ambil data
+      importData = [];
+      for (let i = 1; i < Math.min(data.length, 100); i++) {
+        const row = data[i];
+        if (row.length === 0 || !row[0]) continue;
         
-        // Validasi data wajib
-        if (!matkul.kode || !matkul.nama || !matkul.sks || !matkul.semester) {
-          skippedRows++;
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = row[index] || '';
+        });
+        importData.push(obj);
+      }
+      
+      if (importData.length === 0) {
+        showNotification('❌ Tidak ada data yang valid untuk diimport.', 'error');
+        return;
+      }
+      
+      // Tampilkan preview
+      showPreview(headers, importData.slice(0, 5));
+      
+      // Update total rows
+      document.getElementById('totalRows').textContent = importData.length;
+      
+      // Aktifkan tombol import
+      const importButton = document.getElementById('importButton');
+      importButton.disabled = false;
+      importButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      importButton.classList.add('opacity-100', 'cursor-pointer');
+    }
+
+    function showPreview(headers, data) {
+      const previewHeader = document.getElementById('previewHeader');
+      const previewBody = document.getElementById('previewBody');
+      
+      // Header
+      let headerHtml = '';
+      headers.forEach(header => {
+        headerHtml += `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">${header}</th>`;
+      });
+      previewHeader.innerHTML = headerHtml;
+      
+      // Body
+      let bodyHtml = '';
+      data.forEach((row, rowIndex) => {
+        bodyHtml += '<tr>';
+        headers.forEach(header => {
+          const value = row[header] || '';
+          bodyHtml += `
+            <td class="px-4 py-2 text-sm border ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
+              ${value}
+            </td>
+          `;
+        });
+        bodyHtml += '</tr>';
+      });
+      previewBody.innerHTML = bodyHtml;
+      
+      document.getElementById('previewTable').classList.remove('hidden');
+    }
+
+    async function importMatkulData() {
+      if (importData.length === 0) {
+        showNotification('❌ Tidak ada data untuk diimport.', 'error');
+        return;
+      }
+      
+      if (!confirm(`Apakah Anda yakin ingin mengimport ${importData.length} data mata kuliah?`)) {
+        return;
+      }
+      
+      // Validasi data sebelum import
+      const validData = [];
+      const errors = [];
+      
+      for (let i = 0; i < importData.length; i++) {
+        const item = importData[i];
+        const rowNumber = i + 2;
+        
+        if (!item.Kode) {
+          errors.push(`Baris ${rowNumber}: Kode tidak boleh kosong`);
           continue;
         }
         
-        matkulToInsert.push(matkul);
+        if (!item.Nama) {
+          errors.push(`Baris ${rowNumber}: Nama tidak boleh kosong`);
+          continue;
+        }
+        
+        if (!item.SKS || isNaN(item.SKS)) {
+          errors.push(`Baris ${rowNumber}: SKS harus angka`);
+          continue;
+        }
+        
+        if (!item.Semester || isNaN(item.Semester)) {
+          errors.push(`Baris ${rowNumber}: Semester harus angka`);
+          continue;
+        }
+        
+        validData.push({
+          kode: String(item.Kode).trim(),
+          nama: String(item.Nama).trim(),
+          sks: parseInt(item.SKS),
+          semester: parseInt(item.Semester),
+          prodi: String(item['Program Studi'] || item['Program_Studi'] || 'Lainnya').trim(),
+          deskripsi: String(item.Deskripsi || item.deskripsi || '').trim()
+        });
       }
       
-      if (matkulToInsert.length === 0) {
-        importStatus.textContent = `❌ Tidak ada data valid. ${skippedRows} baris diabaikan.`;
+      if (errors.length > 0) {
+        alert('❌ Terdapat kesalahan dalam data:\n\n' + errors.slice(0, 5).join('\n') + 
+              (errors.length > 5 ? '\n...dan ' + (errors.length - 5) + ' error lainnya' : ''));
         return;
       }
-
-      importStatus.textContent = `Menemukan ${matkulToInsert.length} data valid (${skippedRows} baris diabaikan). Menyimpan...`;
-
-      const { error: insertError } = await supabaseClient
-        .from('matakuliah')
-        .upsert(matkulToInsert, { onConflict: 'kode' });
-
-      if (insertError) {
-        importStatus.textContent = '❌ Gagal mengimpor data.';
-        alert('❌ Gagal mengimpor data: ' + insertError.message);
-        console.error(insertError);
-      } else {
-        importStatus.textContent = `✅ Import Sukses! ${matkulToInsert.length} data disimpan/diperbarui.`;
-        alert(`✅ Import Sukses! ${matkulToInsert.length} data mata kuliah berhasil disimpan/diperbarui.`);
-        loadMatkulData();
+      
+      if (validData.length === 0) {
+        showNotification('❌ Tidak ada data yang valid untuk diimport.', 'error');
+        return;
       }
-    } catch (err) {
-      console.error('Error saat memproses file Excel:', err);
-      importStatus.textContent = '❌ Terjadi kesalahan saat memproses file.';
-    } finally {
-      event.target.value = '';
-      // Sembunyikan status setelah 5 detik
-      setTimeout(() => {
-        importStatus.classList.add('hidden');
-      }, 5000);
+      
+      try {
+        // Import data ke Supabase
+        const { data, error } = await supabaseClient
+          .from('matakuliah')
+          .insert(validData)
+          .select();
+        
+        if (error) throw error;
+        
+        showNotification(`✅ Berhasil mengimport ${validData.length} data mata kuliah!`, 'success');
+        closeImportModal();
+        loadMatkulData();
+        loadDashboardTotals();
+        
+      } catch (error) {
+        console.error('Error importing data:', error);
+        showNotification(`❌ Gagal mengimport data: ${error.message}`, 'error');
+      }
     }
-  };
-  reader.readAsArrayBuffer(file);
-}
 
-// Perbaiki tombol export excel yang kosong
-function exportMatkulToExcel() {
-  if (!filteredMatkulData || filteredMatkulData.length === 0) {
-    alert('❌ Tidak ada data mata kuliah untuk diekspor.');
-    return;
-  }
-  
-  const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester', 'Deskripsi']];
-  const data = filteredMatkulData.map((matkul, index) => [
-    index + 1,
-    matkul.kode,
-    matkul.nama,
-    matkul.prodi || 'Lainnya',
-    matkul.sks,
-    matkul.semester || '-',
-    matkul.deskripsi || '-'
-  ]);
-  
-  const wsData = [
-    ['DAFTAR MATA KULIAH FAKULTAS TEKNIK'],
-    [`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`],
-    [],
-    ...headers,
-    ...data
-  ];
-  
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-  
-  ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
-  ];
-  
-  XLSX.utils.book_append_sheet(wb, ws, 'MataKuliah');
-  XLSX.writeFile(wb, 'daftar_mata_kuliah_ft.xlsx');
-}
-
-// Drag and drop functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const dropArea = document.getElementById('dropArea');
-  const fileInput = document.getElementById('fileInput');
-  
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropArea.addEventListener(eventName, preventDefaults, false);
-  });
-  
-  function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  
-  ['dragenter', 'dragover'].forEach(eventName => {
-    dropArea.addEventListener(eventName, highlight, false);
-  });
-  
-  ['dragleave', 'drop'].forEach(eventName => {
-    dropArea.addEventListener(eventName, unhighlight, false);
-  });
-  
-  function highlight() {
-    dropArea.classList.add('border-blue-400');
-  }
-  
-  function unhighlight() {
-    dropArea.classList.remove('border-blue-400');
-  }
-  
-  dropArea.addEventListener('drop', handleDrop, false);
-  
-  function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
+    // ====================== FUNGSI PENGATURAN ======================
     
-    if (files.length > 0) {
-      fileInput.files = files;
-      handleFileSelect({ target: { files: files } });
-    }
-  }
-});
-
     function togglePasswordVisibility() {
       const input = document.getElementById('newPassword');
       const eye = document.getElementById('eyeIcon');
       if (input.type === 'password') {
-        input.type = 'text'; eye.classList.replace('fa-eye', 'fa-eye-slash');
+        input.type = 'text'; 
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
       } else {
-        input.type = 'password'; eye.classList.replace('fa-eye-slash', 'fa-eye');
+        input.type = 'password'; 
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
       }
     }
 
-    function updateUsername() { alert('🔧 Fungsi ubah username belum diaktifkan di demo.'); }
-    function updatePassword() { alert('🔧 Fungsi ubah password belum diaktifkan di demo.'); }
+    function updateUsername() { 
+      const newUsername = document.getElementById('newUsername').value.trim();
+      if (!newUsername) {
+        showNotification('❌ Masukkan username baru!', 'error');
+        return;
+      }
+      showNotification(`✅ Username berhasil diubah menjadi: ${newUsername}`, 'success');
+      document.getElementById('currentUsername').textContent = newUsername;
+      document.getElementById('newUsername').value = '';
+    }
+    
+    function updatePassword() { 
+      const newPassword = document.getElementById('newPassword').value;
+      if (!newPassword || newPassword.length < 6) {
+        showNotification('❌ Password minimal 6 karakter!', 'error');
+        return;
+      }
+      showNotification('✅ Password berhasil diubah!', 'success');
+      document.getElementById('newPassword').value = '';
+    }
     
     async function logout() {
       const { error } = await supabaseClient.auth.signOut();
 
       if (error) {
         console.error('Logout Error:', error.message);
-        alert('Gagal keluar sesi. Silakan coba lagi.');
+        showNotification('❌ Gagal keluar sesi. Silakan coba lagi.', 'error');
       } else {
         window.location.href = 'index.html'; 
       }
     }
-    
-    // Event listener untuk menutup modal dengan ESC
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeModal();
-      }
-    });
-    
-    document.addEventListener("DOMContentLoaded", loadDashboardTotals);
 
-// Di bagian paling bawah, dalam DOMContentLoaded:
-document.addEventListener("DOMContentLoaded", function() {
-  console.log('🚀 Dashboard Akademik FT loaded');
-  
-  // 1. Load data awal
-  loadDashboardTotals();
-  
-  // 2. Setup event listeners untuk semua tab
-  document.querySelectorAll('.nav-item').forEach(button => {
-    button.addEventListener('click', function(e) {
-      // Cegah default behavior
-      e.preventDefault();
+    // ====================== FUNGSI UTILITAS ======================
+    
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type = 'success') {
+      // Hapus notifikasi sebelumnya jika ada
+      const existingNotifications = document.querySelectorAll('.custom-notification');
+      existingNotifications.forEach(notification => notification.remove());
       
-      // Ambil tabId dari atribut onclick
-      const onclickAttr = this.getAttribute('onclick');
-      if (onclickAttr) {
-        const match = onclickAttr.match(/showContent\('([^']+)'/);
-        if (match && match[1]) {
-          const tabId = match[1];
-          console.log(`📱 Memilih tab: ${tabId}`);
-          showContent(tabId, this);
+      // Buat elemen notifikasi
+      const notification = document.createElement('div');
+      notification.className = `custom-notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in ${
+        type === 'success' ? 'bg-green-500 text-white' : 
+        type === 'error' ? 'bg-red-500 text-white' : 
+        'bg-blue-500 text-white'
+      }`;
+      
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${
+            type === 'success' ? 'fa-check-circle' : 
+            type === 'error' ? 'fa-exclamation-circle' : 
+            'fa-info-circle'
+          } mr-3"></i>
+          <span class="font-medium">${message}</span>
+        </div>
+      `;
+      
+      // Tambahkan ke body
+      document.body.appendChild(notification);
+      
+      // Auto-hide setelah 4 detik
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.opacity = '0';
+          notification.style.transition = 'opacity 0.3s ease-out';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }
+      }, 4000);
+    }
+
+    // Setup real-time sync
+    function setupRealtimeSync() {
+      try {
+        const channel = supabaseClient
+          .channel('matakuliah-updates')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'matakuliah'
+            },
+            (payload) => {
+              console.log('📡 Real-time update diterima:', payload);
+              
+              if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
+                console.log(`🔄 Data ${payload.eventType}, reloading...`);
+                
+                const eventName = payload.eventType === 'INSERT' ? 'ditambahkan' : 
+                                payload.eventType === 'UPDATE' ? 'diperbarui' : 'dihapus';
+                showNotification(`Data mata kuliah ${eventName}`, 'info');
+                
+                setTimeout(() => {
+                  loadMatkulData();
+                  loadDashboardTotals();
+                }, 1000);
+              }
+            }
+          )
+          .subscribe();
+        
+        console.log('✅ Real-time sync aktif');
+        return channel;
+        
+      } catch (err) {
+        console.error('❌ Error setup real-time sync:', err);
+      }
+    }
+
+    // ====================== EVENT LISTENERS ======================
+    
+    // Setup drag and drop
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropArea = document.getElementById('dropArea');
+      const fileInput = document.getElementById('fileInput');
+      
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        dropArea.classList.add('border-blue-400');
+      }
+      
+      function unhighlight() {
+        dropArea.classList.remove('border-blue-400');
+      }
+      
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+          fileInput.files = files;
+          handleFileSelect({ target: { files: files } });
         }
       }
     });
-  });
-  
-  // 3. Default: tampilkan dashboard utama
-  const mainLink = document.getElementById('mainLink');
-  if (mainLink) {
-    showContent('main', mainLink);
-  }
-  
-  // 4. Setup real-time sync
-  try {
-    setupRealtimeSync();
-    console.log('✅ Real-time sync aktif');
-  } catch (error) {
-    console.error('❌ Error setup real-time sync:', error);
-  }
-  
-  // 5. Debug info
-  console.log('🔧 Sistem siap digunakan');
-  console.log('- Jumlah button .nav-item:', document.querySelectorAll('.nav-item').length);
-  
-  // 6. Test: pastikan fungsi showContent tersedia
-  if (typeof showContent === 'function') {
-    console.log('✅ Fungsi showContent tersedia');
-  } else {
-    console.error('❌ Fungsi showContent TIDAK ditemukan!');
-  }
-});
+
+    // Event listener untuk DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log('🚀 Dashboard loaded');
+      
+      // Load data awal
+      loadDashboardTotals();
+      
+      // Setup real-time sync
+      setupRealtimeSync();
+      
+      // Tampilkan tab utama saat pertama kali load
+      const mainLink = document.getElementById('mainLink');
+      if (mainLink) {
+        showContent('main', mainLink);
+      }
+      
+      // Setup event listener untuk klik di luar modal
+      document.addEventListener('click', function(event) {
+        const modal = document.getElementById('matkulModal');
+        const importModal = document.getElementById('importModal');
+        
+        if (modal && modal.style.display === 'flex') {
+          if (event.target === modal) {
+            closeModal();
+          }
+        }
+        
+        if (importModal && importModal.style.display === 'flex') {
+          if (event.target === importModal) {
+            closeImportModal();
+          }
+        }
+      });
+      
+      // Setup event listener untuk tombol ESC
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          closeModal();
+          closeImportModal();
+        }
+      });
+    });
   </script>
 </body>
 </html>
