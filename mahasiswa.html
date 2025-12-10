@@ -1135,80 +1135,89 @@
     }
 
     // ==================== REKAPITULASI ====================
-    async function loadRekapitulasi() {
-        const { data, error } = await supabaseClient.from("mahasiswa").select("*");
-        if (error) {
-            console.error(error);
-            return;
+async function loadRekapitulasi() {
+    const { data, error } = await supabaseClient.from("mahasiswa").select("*");
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    // Grouping berdasarkan prodi + tahun masuk
+    const grouped = {};
+
+    data.forEach(m => {
+        const key = `${m.prodi} - ${m.tahun_masuk}`;
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                prodi_tahun: key,
+                total: 0,
+                aktif: 0,
+                lulus: 0,
+                nonaktif: 0,
+                do: 0,
+                meninggal: 0
+            };
         }
 
-        // Grouping berdasarkan prodi + tahun masuk
-        const grouped = {};
+        grouped[key].total++;
 
-        data.forEach(m => {
-            const key = `${m.prodi} - ${m.tahun_masuk}`;
+        // PERBAIKAN LOGIKA KLASIFIKASI STATUS
+        const status = String(m.status).toLowerCase().trim();
+        
+        if (status === "aktif") {
+            grouped[key].aktif++;
+        } else if (status === "lulus") {
+            grouped[key].lulus++;
+        } else if (status === "drop out" || status === "do" || status === "mundur" || status === "mundur/do") {
+            grouped[key].do++; // Pindahkan ke kolom DO
+        } else if (status === "meninggal" || status === "meninggal dunia") {
+            grouped[key].meninggal++;
+        } else if (status === "nonaktif") {
+            grouped[key].nonaktif++; // Hanya status "nonaktif" yang masuk sini
+        } else {
+            // Untuk status lain yang tidak terdefinisi, masuk ke nonaktif
+            grouped[key].nonaktif++;
+        }
+    });
 
-            if (!grouped[key]) {
-                grouped[key] = {
-                    prodi_tahun: key,
-                    total: 0,
-                    aktif: 0,
-                    lulus: 0,
-                    nonaktif: 0,
-                    do: 0,
-                    meninggal: 0
-                };
-            }
+    // Update kartu ringkasan
+    const totalMhs = data.length;
+    const totalAktif = data.filter(m => m.status.toLowerCase() === 'aktif').length;
+    const totalLulus = data.filter(m => m.status.toLowerCase() === 'lulus').length;
+    const totalDO = data.filter(m => {
+        const status = String(m.status).toLowerCase().trim();
+        return status === "drop out" || status === "do" || status === "mundur" || status === "mundur/do";
+    }).length;
+    const totalNonaktif = data.filter(m => m.status.toLowerCase() === 'nonaktif').length;
 
-            grouped[key].total++;
+    document.getElementById('totalMhs').textContent = totalMhs;
+    document.getElementById('totalAktif').textContent = totalAktif;
+    document.getElementById('totalLulus').textContent = totalLulus;
+    document.getElementById('totalNonaktifCard').textContent = totalNonaktif + totalDO; // Tampilkan gabungan di kartu
 
-            switch (m.status.toLowerCase()) {
-                case "aktif": grouped[key].aktif++; break;
-                case "lulus": grouped[key].lulus++; break;
-                case "nonaktif": grouped[key].nonaktif++; break;
-                case "mundur": 
-                case "do":
-                case "mundur/do":
-                    grouped[key].do++; 
-                    break;
-                case "meninggal": grouped[key].meninggal++; break;
-                default: grouped[key].nonaktif++; break;
-            }
-        });
+    // Tampilkan hasil ke tabel
+    const tbody = document.getElementById("rekap-body");
+    tbody.innerHTML = "";
 
-        // Update kartu ringkasan
-        const totalMhs = data.length;
-        const totalAktif = data.filter(m => m.status === 'Aktif').length;
-        const totalLulus = data.filter(m => m.status === 'Lulus').length;
-        const totalNonaktif = totalMhs - totalAktif - totalLulus;
+    let index = 1;
 
-        document.getElementById('totalMhs').textContent = totalMhs;
-        document.getElementById('totalAktif').textContent = totalAktif;
-        document.getElementById('totalLulus').textContent = totalLulus;
-        document.getElementById('totalNonaktifCard').textContent = totalNonaktif;
+    Object.values(grouped).forEach(row => {
+        tbody.innerHTML += `
+        <tr class="hover:bg-gray-100 text-xs">
+            <td class="border px-4 py-2 text-center">${index++}</td>
+            <td class="border px-4 py-2">${row.prodi_tahun}</td>
+            <td class="border px-4 py-2 text-center">${row.total}</td>
+            <td class="border px-4 py-2 text-center">${row.aktif}</td>
+            <td class="border px-4 py-2 text-center">${row.lulus}</td>
+            <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
+            <td class="border px-4 py-2 text-center">${row.do}</td>
+            <td class="border px-4 py-2 text-center">${row.meninggal}</td>
+        </tr>`;
+    });
 
-        // Tampilkan hasil ke tabel
-        const tbody = document.getElementById("rekap-body");
-        tbody.innerHTML = "";
-
-        let index = 1;
-
-        Object.values(grouped).forEach(row => {
-            tbody.innerHTML += `
-            <tr class="hover:bg-gray-100 text-xs">
-                <td class="border px-4 py-2 text-center">${index++}</td>
-                <td class="border px-4 py-2">${row.prodi_tahun}</td>
-                <td class="border px-4 py-2 text-center">${row.total}</td>
-                <td class="border px-4 py-2 text-center">${row.aktif}</td>
-                <td class="border px-4 py-2 text-center">${row.lulus}</td>
-                <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
-                <td class="border px-4 py-2 text-center">${row.do}</td>
-                <td class="border px-4 py-2 text-center">${row.meninggal}</td>
-            </tr>`;
-        });
-
-        recapData = grouped;
-    }
+    recapData = grouped;
+}
 
     // ==================== EXPORT FUNCTIONS ====================
     function downloadTemplate() {
