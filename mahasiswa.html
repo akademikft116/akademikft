@@ -295,7 +295,6 @@
                                         <option value="Nonaktif">Nonaktif</option>
                                         <option value="Lulus">Lulus</option>
                                         <option value="Drop Out">Drop Out</option>
-                                        <option value="Meninggal">Meninggal Dunia</option>
                                     </select>
                                 </div>
                                 
@@ -398,7 +397,6 @@
                                     <option value="Nonaktif">Nonaktif</option>
                                     <option value="Mengundurkan diri">Mengundurkan diri</option>
                                     <option value="Drop Out">Drop Out</option>
-                                    <option value="Meninggal Dunia">Meninggal Dunia</option>
                                 </select>
                             </div>
 
@@ -528,7 +526,6 @@
                                     <th class="px-6 py-3 text-center text-xs font-medium">Lulus</th>
                                     <th class="px-6 py-3 text-center text-xs font-medium">Nonaktif</th>
                                     <th class="px-6 py-3 text-center text-xs font-medium">Mundur/DO</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium">Meninggal</th>
                                 </tr>
                             </thead>
                             <tbody id="rekap-body" class="bg-white divide-y divide-gray-200">
@@ -1159,7 +1156,6 @@ async function loadRekapitulasi() {
                 lulus: 0,
                 nonaktif: 0,
                 do: 0,
-                meninggal: 0
             };
         }
 
@@ -1173,9 +1169,7 @@ async function loadRekapitulasi() {
         } else if (status === "lulus") {
             grouped[key].lulus++;
         } else if (status === "drop out" || status === "do" || status === "mundur" || status === "mundur/do") {
-            grouped[key].do++; // Pindahkan ke kolom DO
-        } else if (status === "meninggal" || status === "meninggal dunia") {
-            grouped[key].meninggal++;
+            grouped[key].do++;
         } else if (status === "nonaktif") {
             grouped[key].nonaktif++; // Hanya status "nonaktif" yang masuk sini
         } else {
@@ -1215,7 +1209,6 @@ async function loadRekapitulasi() {
             <td class="border px-4 py-2 text-center">${row.lulus}</td>
             <td class="border px-4 py-2 text-center">${row.nonaktif}</td>
             <td class="border px-4 py-2 text-center">${row.do}</td>
-            <td class="border px-4 py-2 text-center">${row.meninggal}</td>
         </tr>`;
     });
 
@@ -1351,7 +1344,7 @@ async function loadRekapitulasi() {
             return;
         }
 
-        const headers = ["No", "Prodi / Tahun Masuk", "Total", "Aktif", "Lulus", "Nonaktif", "Mundur/DO", "Meninggal"];
+        const headers = ["No", "Prodi / Tahun Masuk", "Total", "Aktif", "Lulus", "Nonaktif", "Mundur/DO"];
         const data = [];
         
         let index = 1;
@@ -1364,7 +1357,6 @@ async function loadRekapitulasi() {
                 row.lulus,
                 row.nonaktif,
                 row.do,
-                row.meninggal
             ]);
         });
         
@@ -1394,7 +1386,7 @@ async function loadRekapitulasi() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); 
 
-        const head = [["No", "Prodi / Tahun Masuk", "Total", "Aktif", "Lulus", "Nonaktif", "Mundur/DO", "Meninggal"]];
+        const head = [["No", "Prodi / Tahun Masuk", "Total", "Aktif", "Lulus", "Nonaktif", "Mundur/DO"]];
         const body = [];
         
         let index = 1;
@@ -1407,7 +1399,6 @@ async function loadRekapitulasi() {
                 row.lulus,
                 row.nonaktif,
                 row.do,
-                row.meninggal
             ]);
         });
 
