@@ -773,43 +773,61 @@ function renderMatkulTable(data) {
 
     // Ganti fungsi editMatkul untuk ambil data langsung dari database
 async function editMatkul(id) {
+  console.log('🔍 EDIT MATAKULIAH - ID:', id);
+  
   try {
-    // Ambil data langsung dari database, bukan dari allMatkulData
+    // AMBIL DATA LANGSUNG DARI DATABASE
     const { data: matkul, error } = await supabaseClient
       .from('matakuliah')
       .select('*')
       .eq('id', id)
       .single();
     
-    if (error || !matkul) {
-      console.error('Error ambil data:', error);
-      alert('Data tidak ditemukan');
+    if (error) {
+      console.error('❌ Error ambil data dari DB:', error);
+      alert('Error: ' + error.message);
       return;
     }
     
-    console.log('Data dari database:', matkul);
+    if (!matkul) {
+      alert('❌ Data tidak ditemukan di database');
+      return;
+    }
     
-    // Isi form - PERHATIKAN: matkul.Prodi bukan matkul.prodi
+    console.log('📦 Data dari database:', matkul);
+    console.log('📋 Prodi value:', matkul.Prodi, 'Semester:', matkul.semester);
+    
+    // ISI FORM DENGAN DATA DARI DATABASE
     document.getElementById('matkulId').value = matkul.id;
-    document.getElementById('modalKode').value = matkul.kode;
-    document.getElementById('modalNama').value = matkul.nama;
-    document.getElementById('modalProdi').value = matkul.Prodi || ''; // ← INI YANG PENTING
-    document.getElementById('modalSKS').value = matkul.sks;
+    document.getElementById('modalKode').value = matkul.kode || '';
+    document.getElementById('modalNama').value = matkul.nama || '';
+    
+    // PERHATIKAN: Gunakan matkul.Prodi (huruf besar P)
+    document.getElementById('modalProdi').value = matkul.Prodi || matkul.prodi || '';
+    
+    document.getElementById('modalSKS').value = matkul.sks || '';
     document.getElementById('modalSemester').value = matkul.semester || '';
     document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
     
     document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
     document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
     
+    console.log('✅ Form berhasil diisi');
+    console.log('📝 Form values:', {
+      prodi: document.getElementById('modalProdi').value,
+      semester: document.getElementById('modalSemester').value
+    });
+    
     openModal();
     
   } catch (err) {
-    console.error('Error:', err);
-    alert('Gagal mengambil data untuk edit');
+    console.error('❌ Exception di editMatkul:', err);
+    alert('Terjadi kesalahan saat mengambil data');
   }
 }
 async function saveMatkul(event) {
   event.preventDefault();
+  console.log('💾 SAVE MATAKULIAH DIPANGGIL');
   
   const id = document.getElementById('matkulId').value;
   const kode = document.getElementById('modalKode').value.trim();
@@ -819,9 +837,7 @@ async function saveMatkul(event) {
   const semester = document.getElementById('modalSemester').value;
   const deskripsi = document.getElementById('modalDeskripsi').value.trim();
 
-  console.log('=== SAVE/UPDATE DEBUG ===');
-  console.log('ID:', id);
-  console.log('Form values:', { kode, nama, prodi, sks, semester, deskripsi });
+  console.log('📥 Form input:', { id, kode, nama, prodi, sks, semester, deskripsi });
 
   // Validasi
   if (!kode || !nama || !prodi || !sks || !semester) {
@@ -829,70 +845,75 @@ async function saveMatkul(event) {
     return;
   }
 
+  // PASTIKAN MENGGUNAKAN 'Prodi' bukan 'prodi'
   const matkulData = {
-    kode,
-    nama,
-    Prodi: prodi, // PASTIKAN 'Prodi' bukan 'prodi'
+    kode: kode,
+    nama: nama,
+    Prodi: prodi, // ← INI YANG PENTING: 'Prodi'
     sks: parseInt(sks) || 0,
     semester: parseInt(semester) || 0,
     deskripsi: deskripsi || null
   };
 
-  console.log('Data untuk Supabase:', matkulData);
+  console.log('📤 Data untuk Supabase:', JSON.stringify(matkulData, null, 2));
 
   try {
-    let result;
-    
     if (id) {
-      console.log('Mode: UPDATE');
-      console.log('Mengupdate ID:', id);
+      console.log('🔄 MODE UPDATE untuk ID:', id);
       
-      // Cek dulu apakah data dengan ID ini ada
-      const { data: checkData, error: checkError } = await supabaseClient
-        .from('matakuliah')
-        .select('id, kode')
-        .eq('id', id)
-        .single();
+      // TEST: Coba update dengan cara lain
+      const updateResult = await updateMatkulDirect(id, matkulData);
       
-      if (checkError) {
-        console.error('Error cek data:', checkError);
+      if (updateResult.success) {
+        alert('✅ Mata kuliah berhasil diperbarui!');
+        closeModal();
+        await loadMatkulData();
+        await loadDashboardTotals();
       } else {
-        console.log('Data ditemukan untuk update:', checkData);
+        alert('❌ Gagal update: ' + updateResult.error);
       }
-      
-      // Update data
-      const { data, error } = await supabaseClient
-        .from('matakuliah')
-        .update(matkulData)
-        .eq('id', id) // Pastikan ini kolom yang benar
-        .select();
-      
-      if (error) {
-        console.error('Update error:', error);
-        console.error('Error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details
-        });
-        throw error;
-      }
-      
-      result = data;
-      console.log('Update berhasil:', result);
-      alert('✅ Mata kuliah berhasil diperbarui!');
       
     } else {
-      console.log('Mode: INSERT');
-      // Insert baru...
+      console.log('➕ MODE INSERT');
+      // Insert logic...
     }
     
-    closeModal();
-    await loadMatkulData(); // Tunggu data dimuat ulang
-    await loadDashboardTotals();
-    
   } catch (error) {
-    console.error('Error detail:', error);
+    console.error('❌ Error saveMatkul:', error);
     alert(`❌ Gagal menyimpan: ${error.message}`);
+  }
+}
+
+// FUNGSI BANTUAN UNTUK UPDATE LANGSUNG
+async function updateMatkulDirect(id, data) {
+  console.log('🎯 updateMatkulDirect dipanggil');
+  console.log('ID:', id);
+  console.log('Data:', data);
+  
+  try {
+    const { data: result, error } = await supabaseClient
+      .from('matakuliah')
+      .update(data)
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('❌ Supabase update error:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      return { success: false, error: error.message };
+    }
+    
+    console.log('✅ Update berhasil:', result);
+    return { success: true, data: result };
+    
+  } catch (err) {
+    console.error('❌ Exception updateMatkulDirect:', err);
+    return { success: false, error: err.message };
   }
 }
 
