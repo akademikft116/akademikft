@@ -46,38 +46,91 @@
         cursor: default;
     }
     
-    /* BAGIAN YANG DIUBAH: Ukuran teks dalam tabel diperkecil */
+    /* === TABEL KOMPAK & TIDAK LEBAR === */
     table {
-        font-size: 12px !important; /* Teks dalam tabel dibuat lebih kecil */
+        font-size: 11px !important;
+        width: 100%;
+        table-layout: fixed; /* Mencegah sel melebar berlebihan */
+    }
+
+    th, td {
+        font-size: 11px !important;
+        padding: 4px 6px !important; /* Padding lebih kecil */
+        vertical-align: middle;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Atur lebar kolom untuk tabel CRUD */
+    .table-small th:nth-child(1) { width: 40px; } /* No */
+    .table-small th:nth-child(2) { width: 100px; } /* NPM */
+    .table-small th:nth-child(3) { width: 150px; } /* Nama */
+    .table-small th:nth-child(4) { width: 120px; } /* Prodi */
+    .table-small th:nth-child(5) { width: 60px; }  /* Kelas */
+    .table-small th:nth-child(6) { width: 80px; }  /* Tahun Masuk */
+    .table-small th:nth-child(7) { width: 90px; }  /* Status */
+    .table-small th:nth-child(8) { width: 100px; } /* Aksi */
+
+    /* Atur lebar kolom untuk tabel Rekap */
+    #rekap-body th:nth-child(1) { width: 40px; }  /* No */
+    #rekap-body th:nth-child(2) { width: 150px; } /* Prodi / Tahun Masuk */
+    #rekap-body th:nth-child(3),
+    #rekap-body th:nth-child(4),
+    #rekap-body th:nth-child(5),
+    #rekap-body th:nth-child(6),
+    #rekap-body th:nth-child(7),
+    #rekap-body th:nth-child(8) { 
+        width: 70px; /* Kolom angka lebih sempit */
+    }
+
+    /* Tombol aksi dalam tabel lebih kecil */
+    .table-small td:last-child button {
+        padding: 3px 6px !important;
+        font-size: 10px !important;
+        margin: 0 2px;
+    }
+
+    /* Container tabel dengan scroll horizontal jika perlu */
+    #mahasiswa-table-container,
+    #content-rekap .overflow-x-auto {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Pastikan tabel tidak melebihi container */
+    .min-w-full {
+        min-width: auto !important;
+    }
+
+    /* Perbaiki tampilan status badge */
+    .table-small td:nth-child(7) span {
+        padding: 2px 6px !important;
+        font-size: 10px !important;
     }
     
-    th, td {
-        font-size: 12px !important; /* Memastikan semua teks dalam tabel kecil */
+    /* === NOTIFIKASI MODERN === */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 14px 18px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 9999;
     }
 
-    /* === NOTIFIKASI MODERN === */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 14px 18px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 9999;
-}
+    .notification.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-.notification.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.notification.success { background-color: #16a34a; }  /* hijau */
-.notification.error { background-color: #dc2626; }    /* merah */
+    .notification.success { background-color: #16a34a; }  /* hijau */
+    .notification.error { background-color: #dc2626; }    /* merah */
     
   </style>
 </head>
