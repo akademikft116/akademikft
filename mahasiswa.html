@@ -1065,38 +1065,41 @@
     }
 
     // ==================== MODAL FUNCTIONS ====================
-    async function showDetail(npm) {
-        const { data: mhs, error } = await supabaseClient
-            .from('mahasiswa')
-            .select('*')
-            .eq('npm', npm)
-            .single();
+async function showDetail(npm) {
+    const { data: mhs, error } = await supabaseClient
+        .from('mahasiswa')
+        .select('*')
+        .eq('npm', npm)
+        .single();
 
-        if (error || !mhs) {
-            alert("Data tidak ditemukan.");
-            return;
-        }
-
-        const statusColor =
-            mhs.status === 'Aktif' ? 'text-green-600' :
-            mhs.status === 'Lulus' ? 'text-blue-600' :
-            'text-red-600';
-
-        document.getElementById("detailContent").innerHTML = `
-            <p><strong>NPM:</strong> ${mhs.npm}</p>
-            <p><strong>Nama:</strong> ${mhs.nama}</p>
-            <p><strong>Prodi:</strong> ${mhs.prodi}</p>
-            <p><strong>Kelas:</strong> ${mhs.kelas || '-'}</p>
-            <p><strong>Tahun Masuk:</strong> ${mhs.tahun_masuk}</p>
-            <p><strong>Status:</strong> <span class="${statusColor} font-bold">${mhs.status}</span></p>
-            <p><strong>Tanggal Lahir:</strong> ${mhs.ttl || '-'}</p>
-            <p><strong>No. HP:</strong> ${mhs.no_hp || '-'}</p>
-            <p><strong>NIK:</strong> ${mhs.nik_mahasiswa || '-'}</p>
-            <p><strong>Alamat:</strong> ${mhs.alamat || '-'}</p>
-        `;
-
-        document.getElementById("detailModal").classList.remove("hidden");
+    if (error || !mhs) {
+        alert("Data tidak ditemukan.");
+        return;
     }
+
+    const statusColor =
+        mhs.status === 'Aktif' ? 'text-green-600' :
+        mhs.status === 'Lulus' ? 'text-blue-600' :
+        'text-red-600';
+
+    // TAMBAHKAN NOMOR IJAZAH DAN JUDUL SKRIPSI
+    document.getElementById("detailContent").innerHTML = `
+        <p><strong>NPM:</strong> ${mhs.npm}</p>
+        <p><strong>Nama:</strong> ${mhs.nama}</p>
+        <p><strong>Prodi:</strong> ${mhs.prodi}</p>
+        <p><strong>Kelas:</strong> ${mhs.kelas || '-'}</p>
+        <p><strong>Tahun Masuk:</strong> ${mhs.tahun_masuk}</p>
+        <p><strong>Status:</strong> <span class="${statusColor} font-bold">${mhs.status}</span></p>
+        <p><strong>Tanggal Lahir:</strong> ${mhs.ttl || '-'}</p>
+        <p><strong>No. HP:</strong> ${mhs.no_hp || '-'}</p>
+        <p><strong>NIK:</strong> ${mhs.nik_mahasiswa || '-'}</p>
+        <p><strong>Nomor Ijazah:</strong> ${mhs.nomor_ijazah || '-'}</p>
+        <p><strong>Judul Skripsi:</strong> ${mhs.judul_skripsi || '-'}</p>
+        <p><strong>Alamat:</strong> ${mhs.alamat || '-'}</p>
+    `;
+
+    document.getElementById("detailModal").classList.remove("hidden");
+}
 
     function closeDetailModal() {
         document.getElementById('detailModal').classList.add('hidden');
