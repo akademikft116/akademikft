@@ -92,6 +92,13 @@
         }
     }
 
+.bg-purple-500 {
+    background-color: #8b5cf6;
+}
+.bg-purple-500:hover {
+    background-color: #7c3aed;
+}
+
   </style>
 </head>
 <body class="bg-gray-100">
@@ -249,7 +256,10 @@
       <button onclick="exportPDF()" class="bg-red-500 text-white rounded icon-btn" title="Export ke PDF">
         <i class="fas fa-file-pdf"></i>
       </button>
-      </div>
+       <button onclick="showImportModal()" class="bg-purple-500 text-white rounded icon-btn" title="Import dari Excel">
+    <i class="fas fa-file-import"></i>
+  </button>
+</div>
     <div class="overflow-x-auto">
       <table id="tabelJadwal" class="min-w-full border border-gray-400 text-sm">
         <thead class="bg-gray-200">
@@ -443,6 +453,367 @@
     let semuaData = []; 
     let dataYangDitampilkan = []; 
     let mataKuliahData = []; 
+
+let importData = [];
+let currentFile = null;
+
+// Modal Functions
+function showImportModal() {
+    document.getElementById('importModal').classList.remove('hidden');
+    document.getElementById('importModal').classList.add('flex');
+    
+    // Setup file input listener
+    document.getElementById('importFileInput').addEventListener('change', handleFileSelect);
+}
+
+function hideImportModal() {
+    document.getElementById('importModal').classList.add('hidden');
+    document.getElementById('importModal').classList.remove('flex');
+    clearImportFile();
+}
+
+function clearImportFile() {
+    document.getElementById('importFileInput').value = '';
+    document.getElementById('filePreview').classList.add('hidden');
+    document.getElementById('processImportBtn').disabled = true;
+    currentFile = null;
+    importData = [];
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validasi ukuran file (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast("Ukuran file terlalu besar. Maksimal 5MB", 'error');
+        clearImportFile();
+        return;
+    }
+    
+    // Validasi ekstensi file
+    const validExtensions = ['.xlsx', '.xls'];
+    const fileName = file.name.toLowerCase();
+    const isValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!isValidExtension) {
+        showToast("Format file tidak didukung. Gunakan .xlsx atau .xls", 'error');
+        clearImportFile();
+        return;
+    }
+    
+    currentFile = file;
+    
+    // Tampilkan preview file
+    const filePreview = document.getElementById('filePreview');
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    filePreview.classList.remove('hidden');
+    
+    // Aktifkan tombol proses
+    document.getElementById('processImportBtn').disabled = false;
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Download Template Excel
+function downloadImportTemplate() {
+    // Header template Excel
+    const headers = [
+        ['TEMPLATE IMPORT JADWAL KULIAH'],
+        ['Catatan:'],
+        ['1. Jangan ubah nama kolom'],
+        ['2. Data wajib diisi: Kode, Mata Kuliah, Prodi, Hari, Jam Mulai, Jam Akhir, SKS, Dosen, Semester, Kelas, Ruangan, Tahun Akademik'],
+        ['3. Format Jam: HH:mm (24 jam)'],
+        ['4. Prodi harus sesuai: Industri, Sipil, Arsitektur, Elektro, Informatika'],
+        ['5. Hari: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu atau -'],
+        [''],
+        ['Kode', 'Mata Kuliah', 'Prodi', 'Hari', 'Jam Mulai', 'Jam Akhir', 'SKS', 'Dosen', 'Asisten', 'Semester', 'Kelas', 'Ruangan', 'Tahun Akademik']
+    ];
+    
+    // Contoh data
+    const sampleData = [
+        ['MK001', 'Algoritma Pemrograman', 'Informatika', 'Senin', '08:00', '10:00', '3', 'Dr. Ahmad', 'Budi', '1', 'A', 'R101', '2025/2026 Ganjil'],
+        ['MK002', 'Kalkulus', 'Informatika', 'Senin', '10:00', '12:00', '3', 'Dr. Siti', 'Ani', '1', 'A', 'R102', '2025/2026 Ganjil'],
+        ['MK003', 'Fisika Dasar', 'Industri', 'Selasa', '08:00', '10:00', '3', 'Dr. Rina', 'Citra', '1', 'B', 'R201', '2025/2026 Ganjil']
+    ];
+    
+    // Gabungkan header dan data
+    const dataForSheet = [...headers, ...sampleData];
+    
+    // Buat worksheet
+    const ws = XLSX.utils.aoa_to_sheet(dataForSheet);
+    
+    // Atur lebar kolom
+    const wscols = [
+        {wch: 10}, // Kode
+        {wch: 25}, // Mata Kuliah
+        {wch: 15}, // Prodi
+        {wch: 10}, // Hari
+        {wch: 10}, // Jam Mulai
+        {wch: 10}, // Jam Akhir
+        {wch: 5},  // SKS
+        {wch: 20}, // Dosen
+        {wch: 15}, // Asisten
+        {wch: 8},  // Semester
+        {wch: 8},  // Kelas
+        {wch: 10}, // Ruangan
+        {wch: 20}  // Tahun Akademik
+    ];
+    ws['!cols'] = wscols;
+    
+    // Buat workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    
+    // Simpan file
+    XLSX.writeFile(wb, "Template_Import_Jadwal.xlsx");
+    showToast("Template berhasil didownload", 'success');
+}
+
+// Proses Import Excel
+async function processImport() {
+    if (!currentFile) {
+        showToast("Pilih file terlebih dahulu", 'warning');
+        return;
+    }
+    
+    // Tampilkan progress bar
+    const progressSection = document.getElementById('importProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressMessage = document.getElementById('progressMessage');
+    
+    progressSection.classList.remove('hidden');
+    progressBar.style.width = '10%';
+    progressPercentage.textContent = '10%';
+    progressMessage.textContent = 'Membaca file Excel...';
+    
+    // Nonaktifkan tombol
+    document.getElementById('processImportBtn').disabled = true;
+    
+    try {
+        // Baca file Excel
+        const reader = new FileReader();
+        
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                progressBar.style.width = '30%';
+                progressPercentage.textContent = '30%';
+                progressMessage.textContent = 'Memproses data...';
+                
+                // Ambil data dari sheet pertama
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                // Cari baris header (baris dengan kolom "Kode")
+                let headerRowIndex = -1;
+                for (let i = 0; i < rawData.length; i++) {
+                    if (rawData[i].includes('Kode')) {
+                        headerRowIndex = i;
+                        break;
+                    }
+                }
+                
+                if (headerRowIndex === -1) {
+                    throw new Error('Format file tidak sesuai. Template tidak ditemukan.');
+                }
+                
+                // Ambil header
+                const headers = rawData[headerRowIndex];
+                const expectedHeaders = ['Kode', 'Mata Kuliah', 'Prodi', 'Hari', 'Jam Mulai', 'Jam Akhir', 'SKS', 'Dosen', 'Asisten', 'Semester', 'Kelas', 'Ruangan', 'Tahun Akademik'];
+                
+                // Validasi header
+                const isValidHeader = expectedHeaders.every(header => headers.includes(header));
+                if (!isValidHeader) {
+                    throw new Error('Format kolom tidak sesuai dengan template');
+                }
+                
+                progressBar.style.width = '50%';
+                progressPercentage.textContent = '50%';
+                progressMessage.textContent = 'Memvalidasi data...';
+                
+                // Proses data setelah header
+                const rows = rawData.slice(headerRowIndex + 1);
+                const validData = [];
+                const errors = [];
+                
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    // Mapping kolom berdasarkan header
+                    const rowData = {};
+                    headers.forEach((header, index) => {
+                        rowData[header.toLowerCase().replace(/ /g, '_')] = row[index] || '';
+                    });
+                    
+                    // Validasi data wajib
+                    if (!rowData.kode || !rowData.mata_kuliah || !rowData.prodi || 
+                        !rowData.hari || !rowData.jam_mulai || !rowData.jam_akhir || 
+                        !rowData.sks || !rowData.dosen || !rowData.semester || 
+                        !rowData.kelas || !rowData.ruangan || !rowData.tahun_akademik) {
+                        errors.push(`Baris ${i + headerRowIndex + 2}: Data wajib belum lengkap`);
+                        continue;
+                    }
+                    
+                    // Validasi format jam
+                    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+                    if (!timeRegex.test(rowData.jam_mulai) || !timeRegex.test(rowData.jam_akhir)) {
+                        errors.push(`Baris ${i + headerRowIndex + 2}: Format jam tidak valid (gunakan HH:mm)`);
+                        continue;
+                    }
+                    
+                    // Validasi jam mulai < jam akhir
+                    if (rowData.jam_mulai >= rowData.jam_akhir) {
+                        errors.push(`Baris ${i + headerRowIndex + 2}: Jam Mulai harus lebih awal dari Jam Akhir`);
+                        continue;
+                    }
+                    
+                    // Validasi prodi
+                    const validProdi = ['Industri', 'Sipil', 'Arsitektur', 'Elektro', 'Informatika'];
+                    if (!validProdi.includes(rowData.prodi)) {
+                        errors.push(`Baris ${i + headerRowIndex + 2}: Prodi tidak valid`);
+                        continue;
+                    }
+                    
+                    validData.push({
+                        kode_matkul: rowData.kode,
+                        mata_kuliah: rowData.mata_kuliah,
+                        prodi: rowData.prodi,
+                        hari: rowData.hari,
+                        jam_mulai: rowData.jam_mulai,
+                        jam_akhir: rowData.jam_akhir,
+                        sks: parseInt(rowData.sks),
+                        dosen: rowData.dosen,
+                        asisten: rowData.asisten || '-',
+                        semester: parseInt(rowData.semester),
+                        kelas: rowData.kelas,
+                        ruangan: rowData.ruangan,
+                        tahun_akademik: rowData.tahun_akademik
+                    });
+                }
+                
+                progressBar.style.width = '70%';
+                progressPercentage.textContent = '70%';
+                progressMessage.textContent = `Validasi selesai. ${validData.length} data valid, ${errors.length} error`;
+                
+                // Tampilkan error jika ada
+                if (errors.length > 0) {
+                    const errorMessage = errors.slice(0, 5).join('\n');
+                    if (errors.length > 5) {
+                        errorMessage += `\n...dan ${errors.length - 5} error lainnya`;
+                    }
+                    
+                    if (!confirm(`Terdapat ${errors.length} error dalam data:\n\n${errorMessage}\n\nLanjutkan import data yang valid?`)) {
+                        hideImportModal();
+                        return;
+                    }
+                }
+                
+                if (validData.length === 0) {
+                    showToast("Tidak ada data yang valid untuk diimport", 'warning');
+                    hideImportModal();
+                    return;
+                }
+                
+                progressBar.style.width = '80%';
+                progressPercentage.textContent = '80%';
+                progressMessage.textContent = 'Menyimpan data ke database...';
+                
+                // Ambil user_id
+                const { data: userData } = await supabaseClient.auth.getUser();
+                const user = userData.user;
+                
+                if (!user) {
+                    throw new Error('User tidak ditemukan. Silakan login ulang.');
+                }
+                
+                // Tambahkan user_id ke setiap data
+                const dataToImport = validData.map(item => ({
+                    ...item,
+                    user_id: user.id
+                }));
+                
+                // Import data ke database (batch insert)
+                const batchSize = 10;
+                let successCount = 0;
+                let errorCount = 0;
+                
+                for (let i = 0; i < dataToImport.length; i += batchSize) {
+                    const batch = dataToImport.slice(i, i + batchSize);
+                    
+                    try {
+                        const { error } = await supabaseClient
+                            .from("jadwal")
+                            .insert(batch);
+                        
+                        if (error) {
+                            console.error('Error batch insert:', error);
+                            errorCount += batch.length;
+                        } else {
+                            successCount += batch.length;
+                        }
+                        
+                        // Update progress
+                        const progress = 80 + Math.floor((i / dataToImport.length) * 20);
+                        progressBar.style.width = `${progress}%`;
+                        progressPercentage.textContent = `${progress}%`;
+                        progressMessage.textContent = `Menyimpan: ${successCount + errorCount}/${dataToImport.length} data...`;
+                        
+                    } catch (batchError) {
+                        errorCount += batch.length;
+                        console.error('Batch error:', batchError);
+                    }
+                }
+                
+                progressBar.style.width = '100%';
+                progressPercentage.textContent = '100%';
+                
+                // Tampilkan hasil
+                if (errorCount > 0) {
+                    progressMessage.textContent = `Import selesai dengan ${errorCount} error`;
+                    showToast(`Import selesai. ${successCount} berhasil, ${errorCount} gagal`, 'warning');
+                } else {
+                    progressMessage.textContent = 'Import berhasil!';
+                    showToast(`Berhasil mengimport ${successCount} data jadwal`, 'success');
+                }
+                
+                // Tunggu 2 detik lalu refresh
+                setTimeout(() => {
+                    hideImportModal();
+                    loadData(); // Refresh data
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error processing file:', error);
+                showToast(`Error: ${error.message}`, 'error');
+                hideImportModal();
+            }
+        };
+        
+        reader.onerror = function() {
+            showToast("Gagal membaca file", 'error');
+            hideImportModal();
+        };
+        
+        reader.readAsArrayBuffer(currentFile);
+        
+    } catch (error) {
+        console.error('Import error:', error);
+        showToast(`Error: ${error.message}`, 'error');
+        hideImportModal();
+    }
+}
 
     // --- FUNGSI Memuat opsi pilihan (Disesuaikan untuk TomSelect) ---
     async function loadReferences() {
@@ -1140,5 +1511,80 @@
     }
     
   </script>
+
+<div id="importModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <h2 class="text-xl font-bold mb-4">Import Jadwal dari Excel</h2>
+      
+      <!-- Download Template -->
+      <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+        <h3 class="font-semibold mb-2">Langkah Import:</h3>
+        <ol class="list-decimal pl-5 text-sm text-gray-700 space-y-1 mb-4">
+          <li>Download template Excel terlebih dahulu</li>
+          <li>Isi data jadwal sesuai format template</li>
+          <li>Upload file Excel yang telah diisi</li>
+        </ol>
+        <button onclick="downloadImportTemplate()" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
+          <i class="fas fa-download mr-2"></i>Download Template Excel
+        </button>
+      </div>
+      
+      <!-- Upload Area -->
+      <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
+        <i class="fas fa-file-excel text-green-500 text-4xl mb-3"></i>
+        <p class="text-gray-600 mb-2">Drag & drop file Excel atau</p>
+        <input type="file" id="importFileInput" accept=".xlsx, .xls" class="hidden">
+        <button onclick="document.getElementById('importFileInput').click()" 
+                class="bg-green-500 text-white py-2 px-6 rounded hover:bg-green-600 transition">
+          Pilih File
+        </button>
+        <p class="text-xs text-gray-500 mt-2">Format: .xlsx atau .xls (max 5MB)</p>
+      </div>
+      
+      <!-- Preview File -->
+      <div id="filePreview" class="hidden mb-4">
+        <h4 class="font-semibold mb-2">File yang dipilih:</h4>
+        <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+          <div class="flex items-center">
+            <i class="fas fa-file-excel text-green-500 text-xl mr-3"></i>
+            <div>
+              <p id="fileName" class="font-medium"></p>
+              <p id="fileSize" class="text-xs text-gray-500"></p>
+            </div>
+          </div>
+          <button onclick="clearImportFile()" class="text-red-500 hover:text-red-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div id="importProgress" class="hidden mb-4">
+        <div class="flex justify-between mb-1">
+          <span class="text-sm font-medium">Mengimport data...</span>
+          <span id="progressPercentage" class="text-sm font-medium">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div id="progressBar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+        </div>
+        <p id="progressMessage" class="text-xs text-gray-600 mt-1"></p>
+      </div>
+      
+      <!-- Tombol Aksi -->
+      <div class="flex justify-end space-x-2 mt-6">
+        <button onclick="hideImportModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          Batal
+        </button>
+        <button onclick="processImport()" id="processImportBtn" 
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+          Proses Import
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+  
 </body>
 </html>
