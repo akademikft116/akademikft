@@ -131,6 +131,22 @@
 
     .notification.success { background-color: #16a34a; }  /* hijau */
     .notification.error { background-color: #dc2626; }    /* merah */
+
+    /* === JUMLAH MAHASISWA INFO === */
+#jumlah-info {
+    transition: all 0.3s ease;
+}
+
+#jumlah-info.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    display: none;
+}
+
+#jumlah-info:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+}
     
   </style>
 </head>
@@ -354,6 +370,21 @@
                 <!-- Daftar Mahasiswa -->
                 <div id="mahasiswa-list-container" class="bg-white p-6 rounded-lg shadow-lg">
                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
+
+                  <!-- INFORMASI JUMLAH MAHASISWA -->
+    <div id="jumlah-info" class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200 hidden">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600">
+                    <span class="font-semibold text-blue-700" id="jumlah-mahasiswa">0</span> data mahasiswa ditemukan
+                    <span id="filter-info" class="text-gray-500 text-xs ml-2"></span>
+                </p>
+            </div>
+            <button onclick="resetSearch()" class="text-xs text-blue-600 hover:text-blue-800 flex items-center">
+                <i class="fas fa-undo mr-1"></i> Reset Filter
+            </button>
+        </div>
+    </div>
 
                     <!-- Filter Pencarian -->
                     <div class="mb-6 border p-4 rounded-lg bg-gray-50">
@@ -839,64 +870,95 @@
     }
 
     function showDefaultMessage() {
-        const tableContainer = document.getElementById('mahasiswa-table-container');
-        const defaultMessage = document.getElementById('default-message');
-        
-        tableContainer.classList.add('hidden');
-        defaultMessage.classList.remove('hidden');
-    }
-
+    const tableContainer = document.getElementById('mahasiswa-table-container');
+    const defaultMessage = document.getElementById('default-message');
+    const jumlahInfo = document.getElementById('jumlah-info');
+    
+    tableContainer.classList.add('hidden');
+    defaultMessage.classList.remove('hidden');
+    jumlahInfo.classList.add('hidden'); // Sembunyikan info jumlah
+}
     function renderMahasiswaTable(data) {
-        const tableBody = document.getElementById('mahasiswa-table-body');
+    const tableBody = document.getElementById('mahasiswa-table-body');
+    const jumlahInfo = document.getElementById('jumlah-info');
+    const jumlahMahasiswa = document.getElementById('jumlah-mahasiswa');
+    const filterInfo = document.getElementById('filter-info');
+    
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8 text-gray-500">
+                    📭 Tidak ada data mahasiswa yang sesuai dengan filter pencarian
+                </td>
+            </tr>
+        `;
         
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-8 text-gray-500">
-                        📭 Tidak ada data mahasiswa yang sesuai dengan filter pencarian
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        let html = '';
-        data.forEach((mhs, index) => {
-            html += `
-                <tr class="hover:bg-gray-100 text-xs">
-                    <td class="px-6 py-4 text-center text-sm border">${index + 1}</td>
-                    <td class="px-6 py-4 text-sm border">${mhs.npm || '-'}</td>
-                    <td class="px-6 py-4 text-sm border">${mhs.nama || '-'}</td>
-                    <td class="px-6 py-4 text-sm border">${mhs.prodi || '-'}</td>
-                    <td class="px-6 py-4 text-center text-sm border">${mhs.kelas || '-'}</td>
-                    <td class="px-6 py-4 text-center text-sm border">${mhs.tahun_masuk || '-'}</td>
-                    <td class="px-6 py-4 text-center text-sm border">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium ${
-                            mhs.status === 'Aktif' ? 'bg-green-100 text-green-800' :
-                            mhs.status === 'Lulus' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                        }">
-                            ${mhs.status || '-'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-center text-sm border">
-                        <button onclick="showDetail('${mhs.npm}')" class="text-blue-600 hover:text-blue-900 mx-1">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button onclick="editMahasiswa('${mhs.npm}')" class="text-yellow-600 hover:text-yellow-900 mx-1">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="openDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama.replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-900 mx-1">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        tableBody.innerHTML = html;
-        console.log('Data rendered:', data.length, 'records');
+        // Sembunyikan info jumlah
+        jumlahInfo.classList.add('hidden');
+        return;
     }
+
+    // Tampilkan info jumlah
+    jumlahMahasiswa.textContent = data.length;
+    jumlahInfo.classList.remove('hidden');
+    
+    // Tampilkan informasi filter yang aktif
+    const filters = [];
+    const searchProdi = document.getElementById('searchProdi').value;
+    const searchKelas = document.getElementById('searchKelas').value;
+    const searchStatus = document.getElementById('searchStatus').value;
+    const searchTahun = document.getElementById('searchTahun').value;
+    const searchKeyword = document.getElementById('searchKeyword').value;
+    
+    if (searchKeyword) filters.push(`Kata kunci: "${searchKeyword}"`);
+    if (searchProdi) filters.push(`Prodi: ${searchProdi}`);
+    if (searchKelas) filters.push(`Kelas: ${searchKelas}`);
+    if (searchStatus) filters.push(`Status: ${searchStatus}`);
+    if (searchTahun) filters.push(`Tahun Masuk: ${searchTahun}`);
+    
+    if (filters.length > 0) {
+        filterInfo.textContent = `(Filter: ${filters.join(', ')})`;
+    } else {
+        filterInfo.textContent = '(Semua data)';
+    }
+
+    let html = '';
+    data.forEach((mhs, index) => {
+        html += `
+            <tr class="hover:bg-gray-100 text-xs">
+                <td class="px-6 py-4 text-center text-sm border">${index + 1}</td>
+                <td class="px-6 py-4 text-sm border">${mhs.npm || '-'}</td>
+                <td class="px-6 py-4 text-sm border">${mhs.nama || '-'}</td>
+                <td class="px-6 py-4 text-sm border">${mhs.prodi || '-'}</td>
+                <td class="px-6 py-4 text-center text-sm border">${mhs.kelas || '-'}</td>
+                <td class="px-6 py-4 text-center text-sm border">${mhs.tahun_masuk || '-'}</td>
+                <td class="px-6 py-4 text-center text-sm border">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                        mhs.status === 'Aktif' ? 'bg-green-100 text-green-800' :
+                        mhs.status === 'Lulus' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                    }">
+                        ${mhs.status || '-'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-center text-sm border">
+                    <button onclick="showDetail('${mhs.npm}')" class="text-blue-600 hover:text-blue-900 mx-1">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="editMahasiswa('${mhs.npm}')" class="text-yellow-600 hover:text-yellow-900 mx-1">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="openDeleteModal('${mhs.id}', '${mhs.npm}', '${mhs.nama.replace(/'/g, "\\'")}')" class="text-red-600 hover:text-red-900 mx-1">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tableBody.innerHTML = html;
+    console.log('Data rendered:', data.length, 'records');
+}
 
     // ==================== FILTER & SEARCH ====================
     function performSearch() {
@@ -913,11 +975,15 @@
 }
 
     function resetSearch() {
-    document.getElementById('searchKeyword').value = ''; // Tambahkan ini
+    document.getElementById('searchKeyword').value = '';
     document.getElementById('searchProdi').value = '';
     document.getElementById('searchKelas').value = '';
     document.getElementById('searchStatus').value = '';
     document.getElementById('searchTahun').value = '';
+    
+    // Sembunyikan info jumlah
+    document.getElementById('jumlah-info').classList.add('hidden');
+    
     showDefaultMessage();
 }
 
