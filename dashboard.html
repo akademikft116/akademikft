@@ -594,8 +594,10 @@
     }
 
     // Fungsi untuk memuat data mata kuliah dari database
+// Fungsi untuk memuat data mata kuliah dari database
 async function loadMatkulData() {
   const tableBody = document.getElementById('matkulTableBody');
+  
   if (!tableBody) {
     console.error('❌ Tabel body tidak ditemukan!');
     return;
@@ -603,56 +605,68 @@ async function loadMatkulData() {
   
   console.log('🔄 Memuat data mata kuliah dari Supabase...');
   
-  // Tampilkan loading yang lebih jelas
+  // Tampilkan loading state
   tableBody.innerHTML = `
     <tr>
       <td colspan="7" class="px-6 py-10 text-center">
         <div class="flex flex-col items-center">
           <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
-          <p class="text-sm text-gray-700 font-medium">Sedang memuat data...</p>
-          <p class="text-xs text-gray-500 mt-1">Tunggu sebentar</p>
+          <p class="text-sm text-gray-700 font-medium">Memuat data mata kuliah...</p>
         </div>
       </td>
     </tr>
   `;
   
   try {
-    console.log('📡 Mengambil data dari tabel "matakuliah"...');
-    
-    // Coba ambil data dari Supabase
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
+    // AMBIL DATA DARI TABEL "matakuliah" (gunakan nama tabel yang benar)
+    const { data, error, count } = await supabaseClient
+      .from('matakuliah') // PASTIKAN NAMA TABEL INI SAMA DI SUPABASE
       .select('*')
       .order('kode', { ascending: true });
     
     if (error) {
       console.error('❌ Error dari Supabase:', error);
-      throw new Error(`Supabase error: ${error.message}`);
+      throw new Error(`Gagal mengambil data: ${error.message}`);
     }
     
     console.log(`✅ Berhasil mengambil ${data?.length || 0} data mata kuliah`);
+    console.log('📊 Data pertama:', data?.[0]);
     
-    // Jika tidak ada data, tampilkan pesan kosong
-    if (!data || data.length === 0) {
-      allMatkulData = [];
-      filteredMatkulData = [];
-      
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" class="px-6 py-8 text-center">
-            <div class="flex flex-col items-center">
-              <i class="fas fa-inbox text-3xl text-gray-300 mb-3"></i>
-              <p class="text-gray-500">Belum ada data mata kuliah</p>
-              <p class="text-sm text-gray-400 mt-1">Klik "Tambah Mata Kuliah" untuk menambahkan</p>
-            </div>
-          </td>
-        </tr>
-      `;
-      
-      // Update counter
-      document.getElementById('totalMataKuliah').textContent = '0';
-      return;
-    }
+    // Update data global
+    allMatkulData = data || [];
+    filteredMatkulData = [...allMatkulData];
+    
+    // Render tabel
+    renderMatkulTable(filteredMatkulData);
+    
+    // Update counter di dashboard
+    document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
+    
+    return data;
+    
+  } catch (error) {
+    console.error('💥 Error fatal:', error);
+    
+    // Tampilkan pesan error yang jelas
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="px-6 py-8 text-center">
+          <div class="flex flex-col items-center">
+            <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-3"></i>
+            <p class="text-red-600 font-medium">Gagal memuat data</p>
+            <p class="text-sm text-gray-600 mt-2">${error.message || 'Terjadi kesalahan koneksi'}</p>
+            <p class="text-xs text-gray-500 mt-1">Periksa koneksi internet dan konfigurasi database</p>
+            <button onclick="loadMatkulData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+              <i class="fas fa-redo mr-2"></i>Coba Lagi
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+    
+    return [];
+  }
+}
     
     // Update data lokal
     allMatkulData = data;
@@ -759,94 +773,111 @@ function showToast(message) {
 }
 
     // Fungsi untuk memuat data mata kuliah
+// Fungsi untuk merender tabel mata kuliah
 function renderMatkulTable(data) {
   const tableBody = document.getElementById('matkulTableBody');
   
-  if (!tableBody) {
-    console.error('❌ Tabel body tidak ditemukan!');
-    return;
-  }
+  if (!tableBody) return;
   
-  // Validasi data
-  if (!data || !Array.isArray(data)) {
-    console.error('❌ Data tidak valid:', data);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-          ❌ Format data tidak valid
-        </td>
-      </tr>
-    `;
-    return;
-  }
-  
-  if (data.length === 0) {
+  // Jika tidak ada data
+  if (!data || data.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-          Tidak ada data mata kuliah
+          <div class="flex flex-col items-center">
+            <i class="fas fa-inbox text-3xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500">Tidak ada data mata kuliah</p>
+            <p class="text-sm text-gray-400 mt-1">Klik "Tambah Mata Kuliah" untuk menambahkan data</p>
+          </div>
         </td>
       </tr>
     `;
     return;
   }
   
-  try {
-    let html = '';
+  // Bangun HTML untuk tabel
+  let html = '';
+  
+  data.forEach((matkul, index) => {
+    // Ambil data dengan nilai default
+    const kode = matkul.kode || 'N/A';
+    const nama = matkul.nama || 'N/A';
+    const prodi = matkul.prodi || 'Lainnya';
+    const sks = matkul.sks || '0';
+    const semester = matkul.semester ? `Semester ${matkul.semester}` : 'N/A';
+    const id = matkul.id || '';
     
-    data.forEach((matkul, index) => {
-      // Pastikan data ada
-      if (!matkul) return;
-      
-      // Format data dengan default value
-      const rowNumber = index + 1;
-      const kode = matkul.kode || '-';
-      const nama = matkul.nama || '-';
-      const prodi = matkul.prodi || 'Lainnya';
-      const sks = matkul.sks || '0';
-      const semester = matkul.semester ? `Semester ${matkul.semester}` : '-';
-      const id = matkul.id || '';
-      
-      // Warna untuk prodi
-      const prodiClass = getProdiClass(prodi);
-      
-      html += `
-        <tr class="hover:bg-gray-50">
-          <td class="px-6 py-4 text-sm text-gray-500 text-center">${rowNumber}</td>
-          <td class="px-6 py-4 text-sm font-mono text-gray-900">${kode}</td>
-          <td class="px-6 py-4 text-sm text-gray-900">${nama}</td>
-          <td class="px-6 py-4 text-sm">
-            <span class="px-3 py-1 rounded-full text-xs font-medium ${prodiClass}">
-              ${prodi}
-            </span>
-          </td>
-          <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold">${sks}</td>
-          <td class="px-6 py-4 text-sm text-gray-900">${semester}</td>
-          <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-            <button onclick="editMatkul('${id}')" 
-                    class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 px-3 rounded-md mr-2 text-xs">
-              <i class="fas fa-edit mr-1"></i>Edit
-            </button>
-            <button onclick="deleteMatkul('${id}')" 
-                    class="bg-red-500 hover:bg-red-600 text-white py-1.5 px-3 rounded-md text-xs">
-              <i class="fas fa-trash-alt mr-1"></i>Hapus
-            </button>
-          </td>
-        </tr>
-      `;
-    });
+    // Tentukan warna untuk program studi
+    const prodiColor = getProdiColor(prodi);
     
-    tableBody.innerHTML = html;
-    
-  } catch (error) {
-    console.error('❌ Error render tabel:', error);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-          ❌ Gagal menampilkan data: ${error.message}
+    html += `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 text-center text-sm text-gray-500">${index + 1}</td>
+        <td class="px-6 py-4 font-mono text-sm font-medium">${kode}</td>
+        <td class="px-6 py-4 text-sm text-gray-900">${nama}</td>
+        <td class="px-6 py-4">
+          <span class="px-3 py-1 rounded-full text-xs font-medium ${prodiColor}">
+            ${prodi}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-center text-sm font-bold">${sks} SKS</td>
+        <td class="px-6 py-4 text-sm">${semester}</td>
+        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+          <button onclick="editMatkul('${id}')" 
+                  class="bg-yellow-500 hover:bg-yellow-600 text-white py-1.5 px-3 rounded-md mr-2 text-xs">
+            <i class="fas fa-edit mr-1"></i>Edit
+          </button>
+          <button onclick="deleteMatkul('${id}')" 
+                  class="bg-red-500 hover:bg-red-600 text-white py-1.5 px-3 rounded-md text-xs">
+            <i class="fas fa-trash-alt mr-1"></i>Hapus
+          </button>
         </td>
       </tr>
     `;
+  });
+  
+  tableBody.innerHTML = html;
+}
+
+// Fungsi helper untuk warna prodi
+function getProdiColor(prodi) {
+  const colors = {
+    'Industri': 'bg-blue-100 text-blue-800',
+    'Sipil': 'bg-green-100 text-green-800',
+    'Informatika': 'bg-purple-100 text-purple-800',
+    'Arsitektur': 'bg-yellow-100 text-yellow-800',
+    'Elektro': 'bg-red-100 text-red-800',
+    'Lainnya': 'bg-gray-100 text-gray-800'
+  };
+  return colors[prodi] || 'bg-gray-100 text-gray-800';
+
+  } 
+    // Fungsi untuk debugging - cek struktur tabel di database
+async function checkDatabaseStructure() {
+  console.log('🔍 Mengecek struktur database...');
+  
+  try {
+    // Coba ambil sample data untuk melihat struktur
+    const { data, error } = await supabaseClient
+      .from('matakuliah')
+      .select('*')
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Gagal mengakses tabel:', error);
+      alert('Tabel "matakuliah" tidak ditemukan. Pastikan nama tabel benar di Supabase.');
+      return;
+    }
+    
+    if (data && data.length > 0) {
+      console.log('✅ Tabel ditemukan. Struktur data:', data[0]);
+      console.log('Kolom yang tersedia:', Object.keys(data[0]));
+    } else {
+      console.log('ℹ️ Tabel ditemukan tetapi kosong');
+    }
+    
+  } catch (error) {
+    console.error('💥 Error cek struktur:', error);
   }
 }
 
@@ -1975,26 +2006,35 @@ document.addEventListener("DOMContentLoaded", function() {
   showContent('main', document.getElementById('mainLink'));
 });
     // Di akhir file, tambahkan ini:
+// Di bagian paling bawah, dalam DOMContentLoaded:
 document.addEventListener("DOMContentLoaded", function() {
   console.log('🚀 Dashboard loaded');
   
-  // Load data awal
+  // Load data dashboard
   loadDashboardTotals();
   
   // Setup real-time sync
   setupRealtimeSync();
   
-  // **DEBUG: Tambahkan event listener untuk melihat perubahan**
-  console.log('🔧 Debug mode aktif');
+  // Debug: Cek struktur database (opsional)
+  // setTimeout(() => checkDatabaseStructure(), 1000);
   
-  // Test: Cek apakah data sudah ada saat load
-  setTimeout(() => {
-    console.log('📊 Cek data awal:');
-    console.log('- allMatkulData length:', allMatkulData.length);
-    if (allMatkulData.length > 0) {
-      console.log('- Sample data:', allMatkulData[0]);
-    }
-  }, 2000);
+  // Setup event listener untuk tab mata kuliah
+  const matkulLink = document.getElementById('matkulLink');
+  if (matkulLink) {
+    matkulLink.addEventListener('click', function() {
+      console.log('📚 Tab mata kuliah diklik');
+      setTimeout(() => {
+        loadMatkulData();
+      }, 100);
+    });
+  }
+  
+  // Load data mata kuliah jika sudah di tab yang benar
+  const currentTab = window.location.hash || '#main';
+  if (currentTab === '#matkul') {
+    setTimeout(() => loadMatkulData(), 500);
+  }
 });
   </script>
 </body>
