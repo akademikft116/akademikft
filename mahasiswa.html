@@ -621,6 +621,13 @@
     let recapData = {}; 
     let prodiSelect, tahunMasukSelect, searchTahunSelect, statusSelect;
     let deleteMahasiswaId = null;
+    let currentFilters = {
+    keyword: '',
+    prodi: '',
+    kelas: '',
+    status: '',
+    tahun: ''
+};
 
     // ==================== INISIALISASI ====================
     document.addEventListener('DOMContentLoaded', function() {
@@ -806,68 +813,79 @@
 
     // ==================== FUNGSI UTAMA LOAD DATA ====================
     async function loadMahasiswaData(filters = {}) {
-        console.log('Loading mahasiswa data...', filters);
+    console.log('Loading mahasiswa data...', filters);
+    
+    const tableBody = document.getElementById('mahasiswa-table-body');
+    const tableContainer = document.getElementById('mahasiswa-table-container');
+    const defaultMessage = document.getElementById('default-message');
+    
+    if (!tableBody) {
+        console.error('Table body not found!');
+        return;
+    }
+
+    // Tampilkan loading
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center py-8 text-gray-500">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data mahasiswa...
+            </td>
+        </tr>
+    `;
+
+    // Sembunyikan pesan default dan tampilkan tabel
+    defaultMessage.classList.add('hidden');
+    tableContainer.classList.remove('hidden');
+
+    try {
+        let query = supabaseClient.from('mahasiswa').select('*');
         
-        const tableBody = document.getElementById('mahasiswa-table-body');
-        const tableContainer = document.getElementById('mahasiswa-table-container');
-        const defaultMessage = document.getElementById('default-message');
+        // UPDATE FILTER SAAT INI
+        if (Object.keys(filters).length > 0) {
+            currentFilters = filters;
+        }
         
-        if (!tableBody) {
-            console.error('Table body not found!');
-            return;
+        // Terapkan filter (gunakan currentFilters jika filters kosong)
+        const activeFilters = Object.keys(filters).length > 0 ? filters : currentFilters;
+        
+        if (activeFilters.prodi && activeFilters.prodi !== '') {
+            query = query.eq('prodi', activeFilters.prodi);
+        }
+        if (activeFilters.kelas && activeFilters.kelas !== '') {
+            query = query.ilike('kelas', `%${activeFilters.kelas}%`);
+        }
+        if (activeFilters.status && activeFilters.status !== '') {
+            query = query.eq('status', activeFilters.status);
+        }
+        if (activeFilters.tahun && activeFilters.tahun !== '') {
+            query = query.eq('tahun_masuk', parseInt(activeFilters.tahun));
+        }
+        if (activeFilters.keyword && activeFilters.keyword !== '') {
+            query = query.or(`nama.ilike.%${activeFilters.keyword}%,npm.ilike.%${activeFilters.keyword}%`);
         }
 
-        // Tampilkan loading
+        // TAMBAHKAN SORTING DEFAULT: Urutkan berdasarkan NPM atau Tahun Masuk
+        query = query.order('tahun_masuk', { ascending: false })
+                     .order('npm', { ascending: true });
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        currentMahasiswaData = data || [];
+        renderMahasiswaTable(currentMahasiswaData);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="text-center py-8 text-gray-500">
-                    <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data mahasiswa...
+                <td colspan="8" class="text-center py-8 text-red-500">
+                    ❌ Gagal memuat data: ${error.message}
                 </td>
             </tr>
         `;
-
-        // Sembunyikan pesan default dan tampilkan tabel
-        defaultMessage.classList.add('hidden');
-        tableContainer.classList.remove('hidden');
-
-        try {
-            let query = supabaseClient.from('mahasiswa').select('*');
-            
-            // Terapkan filter
-            if (filters.prodi && filters.prodi !== '') {
-                query = query.eq('prodi', filters.prodi);
-            }
-            if (filters.kelas && filters.kelas !== '') {
-                query = query.ilike('kelas', `%${filters.kelas}%`);
-            }
-            if (filters.status && filters.status !== '') {
-                query = query.eq('status', filters.status);
-            }
-            if (filters.tahun && filters.tahun !== '') {
-                query = query.eq('tahun_masuk', parseInt(filters.tahun));
-            }
-
-            if (filters.keyword && filters.keyword !== '') {
-            query = query.or(`nama.ilike.%${filters.keyword}%,npm.ilike.%${filters.keyword}%`);
-        }
-            const { data, error } = await query;
-
-            if (error) throw error;
-
-            currentMahasiswaData = data || [];
-            renderMahasiswaTable(currentMahasiswaData);
-            
-        } catch (error) {
-            console.error('Error loading data:', error);
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-8 text-red-500">
-                        ❌ Gagal memuat data: ${error.message}
-                    </td>
-                </tr>
-            `;
-        }
     }
+}
 
     function showDefaultMessage() {
     const tableContainer = document.getElementById('mahasiswa-table-container');
@@ -968,8 +986,12 @@
         kelas: document.getElementById('searchKelas').value.trim(),
         status: document.getElementById('searchStatus').value,
         tahun: document.getElementById('searchTahun').value,
-        keyword: keyword // Tambahkan keyword pencarian
+        keyword: keyword
     };
+    
+    // SIMPAN FILTER SAAT INI
+    currentFilters = filters;
+    
     console.log('Search with filters:', filters);
     loadMahasiswaData(filters);
 }
@@ -981,100 +1003,135 @@
     document.getElementById('searchStatus').value = '';
     document.getElementById('searchTahun').value = '';
     
+    // RESET JUGA FILTER YANG DISIMPAN
+    currentFilters = {
+        keyword: '',
+        prodi: '',
+        kelas: '',
+        status: '',
+        tahun: ''
+    };
+    
     // Sembunyikan info jumlah
     document.getElementById('jumlah-info').classList.add('hidden');
     
     showDefaultMessage();
 }
 
+    // Fungsi untuk mempertahankan urutan saat edit
+function maintainOrderAfterEdit(updatedData) {
+    // Ambil semua filter yang aktif
+    const activeProdi = document.getElementById('searchProdi').value;
+    const activeStatus = document.getElementById('searchStatus').value;
+    const activeTahun = document.getElementById('searchTahun').value;
+    const activeKelas = document.getElementById('searchKelas').value;
+    const activeKeyword = document.getElementById('searchKeyword').value;
+    
+    // Urutkan berdasarkan: 1. Status 2. Tahun Masuk 3. NPM
+    return updatedData.sort((a, b) => {
+        // Urutkan berdasarkan status (Aktif di atas)
+        if (a.status === 'Aktif' && b.status !== 'Aktif') return -1;
+        if (a.status !== 'Aktif' && b.status === 'Aktif') return 1;
+        
+        // Urutkan berdasarkan tahun masuk (terbaru di atas)
+        if (a.tahun_masuk > b.tahun_masuk) return -1;
+        if (a.tahun_masuk < b.tahun_masuk) return 1;
+        
+        // Urutkan berdasarkan NPM
+        return a.npm.localeCompare(b.npm);
+    });
+}
+  
     // ==================== CRUD OPERATIONS ====================
     async function saveMahasiswa() {
-        const npm = document.getElementById('npm').value;
-        const nama = document.getElementById('nama').value;
-        const prodi = prodiSelect.getValue();
-        const jenisKelamin = document.getElementById('jenisKelamin').value; 
-        const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
-        const statusMhs = statusSelect.getValue(); 
-        
-        const kelas = document.getElementById('kelas').value || null;
-        const nik = document.getElementById('nik').value || null;
-        const nohp = document.getElementById('nohp').value || null;
-        const nomorIjazah = document.getElementById('nomorIjazah').value || null;
-        const judulskripsi = document.getElementById('judulskripsi').value || null;
-        
-        const namaAyah = document.getElementById('namaayah').value || null;
-        const namaIbu = document.getElementById('namaibu').value || null;
-        const ttl = document.getElementById('ttl').value || null;
-        const alamat = document.getElementById('alamat').value || null;
-        const kelurahan = document.getElementById('kelurahan').value || null;
-        const kecamatan = document.getElementById('kecamatan').value || null;
-        
-        const semester = null; 
+    const npm = document.getElementById('npm').value;
+    const nama = document.getElementById('nama').value;
+    const prodi = prodiSelect.getValue();
+    const jenisKelamin = document.getElementById('jenisKelamin').value; 
+    const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
+    const statusMhs = statusSelect.getValue(); 
+    
+    const kelas = document.getElementById('kelas').value || null;
+    const nik = document.getElementById('nik').value || null;
+    const nohp = document.getElementById('nohp').value || null;
+    const nomorIjazah = document.getElementById('nomorIjazah').value || null;
+    const judulskripsi = document.getElementById('judulskripsi').value || null;
+    
+    const namaAyah = document.getElementById('namaayah').value || null;
+    const namaIbu = document.getElementById('namaibu').value || null;
+    const ttl = document.getElementById('ttl').value || null;
+    const alamat = document.getElementById('alamat').value || null;
+    const kelurahan = document.getElementById('kelurahan').value || null;
+    const kecamatan = document.getElementById('kecamatan').value || null;
+    
+    const semester = null; 
 
-        // Validasi input wajib
-        if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
-            alert('❌ Pastikan NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
-            switchFormTab('akademik');
-            return;
-        }
-
-        const mahasiswaData = {
-            npm: npm, 
-            nama: nama, 
-            prodi: prodi, 
-            jenis_kelamin: jenisKelamin, 
-            semester: semester, 
-            tahun_masuk: tahunmasuk, 
-            kelas: kelas, 
-            nik_mahasiswa: nik, 
-            no_hp: nohp,
-            nomor_ijazah: nomorIjazah, 
-            judul_skripsi: judulskripsi, 
-            status: statusMhs,
-            nama_ayah: namaAyah, 
-            nama_ibu: namaIbu, 
-            ttl: ttl, 
-            alamat: alamat,
-            kelurahan: kelurahan, 
-            kecamatan: kecamatan,
-        };
-
-        try {
-            if (isEditMode && currentMahasiswaId) {
-                // UPDATE data existing
-                const { error: updateError } = await supabaseClient
-                    .from('mahasiswa')
-                    .update(mahasiswaData)
-                    .eq('id', currentMahasiswaId);
-
-                if (updateError) {
-                    throw updateError;
-                }
-                
-                showNotif(`Data mahasiswa ${nama} berhasil diperbarui :3`, "success");
-
-                resetForm();
-                loadMahasiswaData();
-                
-            } else {
-                // INSERT data baru
-                const { error: insertError } = await supabaseClient
-                    .from('mahasiswa')
-                    .insert([mahasiswaData]);
-
-                if (insertError) {
-                    throw insertError;
-                }
-                
-                showNotif(`Data mahasiswa ${nama} berhasil ditambahkan!`, "success");
-                resetForm();
-                loadMahasiswaData();
-            }
-        } catch (error) {
-    console.error('Error saving data:', error);
-    showNotif("Gagal menyimpan data: " + error.message, "error");
-}
+    // Validasi input wajib
+    if (!npm || !nama || !prodi || !jenisKelamin || isNaN(tahunmasuk) || !statusMhs) {
+        alert('❌ Pastikan NPM, Nama, Prodi, Jenis Kelamin, Tahun Masuk, dan Status Mahasiswa pada tab Data Akademik terisi dengan benar.');
+        switchFormTab('akademik');
+        return;
     }
+
+    const mahasiswaData = {
+        npm: npm, 
+        nama: nama, 
+        prodi: prodi, 
+        jenis_kelamin: jenisKelamin, 
+        semester: semester, 
+        tahun_masuk: tahunmasuk, 
+        kelas: kelas, 
+        nik_mahasiswa: nik, 
+        no_hp: nohp,
+        nomor_ijazah: nomorIjazah, 
+        judul_skripsi: judulskripsi, 
+        status: statusMhs,
+        nama_ayah: namaAyah, 
+        nama_ibu: namaIbu, 
+        ttl: ttl, 
+        alamat: alamat,
+        kelurahan: kelurahan, 
+        kecamatan: kecamatan,
+    };
+
+    try {
+        if (isEditMode && currentMahasiswaId) {
+            // UPDATE data existing
+            const { error: updateError } = await supabaseClient
+                .from('mahasiswa')
+                .update(mahasiswaData)
+                .eq('id', currentMahasiswaId);
+
+            if (updateError) {
+                throw updateError;
+            }
+            
+            showNotif(`Data mahasiswa ${nama} berhasil diperbarui :3`, "success");
+
+            resetForm();
+            
+            // GUNAKAN FILTER YANG SAMA SETELAH UPDATE
+            loadMahasiswaData(currentFilters);
+            
+        } else {
+            // INSERT data baru
+            const { error: insertError } = await supabaseClient
+                .from('mahasiswa')
+                .insert([mahasiswaData]);
+
+            if (insertError) {
+                throw insertError;
+            }
+            
+            showNotif(`Data mahasiswa ${nama} berhasil ditambahkan!`, "success");
+            resetForm();
+            loadMahasiswaData(currentFilters);
+        }
+    } catch (error) {
+        console.error('Error saving data:', error);
+        showNotif("Gagal menyimpan data: " + error.message, "error");
+    }
+}
 
     async function editMahasiswa(npm) {
         const { data: mhs, error } = await supabaseClient
