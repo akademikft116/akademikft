@@ -626,7 +626,7 @@ async function loadMatkulData() {
         id: matkul.id,
         kode: matkul.kode || '',
         nama: matkul.nama || '',
-        prodi: matkul.prodi || 'Lainnya',
+        prodi: matkul.Prodi || 'Lainnya',
         sks: matkul.sks || 0,
         semester: matkul.semester || 0,
         deskripsi: matkul.deskripsi || ''
@@ -812,13 +812,13 @@ async function saveMatkul(event) {
   }
 
   const matkulData = {
-    kode,
-    nama,
-    prodi,
-    sks: parseInt(sks) || 0,
-    semester: parseInt(semester) || 0,
-    deskripsi: deskripsi || null
-  };
+  kode,
+  nama,
+  Prodi: prodi, // GANTI: 'prodi' -> 'Prodi'
+  sks: parseInt(sks) || 0,
+  semester: parseInt(semester) || 0,
+  deskripsi: deskripsi || null
+};
 
   // Debug data yang akan disimpan
   console.log('Data yang akan disimpan:', matkulData);
