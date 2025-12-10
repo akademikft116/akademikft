@@ -560,17 +560,39 @@
     let allMatkulData = [];
     let filteredMatkulData = [];
 
-    function showContent(tabId, clickedButton) {
-  ['main', 'matkul', 'pengaturan'].forEach(id => {
-    document.getElementById(id)?.classList.add('hidden');
-  });
-  document.getElementById(tabId)?.classList.remove('hidden');
-  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active-link'));
-  clickedButton?.classList.add('active-link');
+    // PERBAIKAN - Fungsi showContent yang benar
+function showContent(tabId, clickedButton) {
+  console.log(`🔄 Mengaktifkan tab: ${tabId}`);
   
+  // Sembunyikan semua konten
+  ['main', 'matkul', 'pengaturan'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.classList.add('hidden');
+    }
+  });
+  
+  // Tampilkan konten yang dipilih
+  const activeContent = document.getElementById(tabId);
+  if (activeContent) {
+    activeContent.classList.remove('hidden');
+  }
+  
+  // Update active link di sidebar
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.remove('active-link');
+  });
+  
+  if (clickedButton) {
+    clickedButton.classList.add('active-link');
+  }
+  
+  // Load data jika tab mata kuliah
   if (tabId === 'matkul') {
-    console.log('🔄 Loading mata kuliah data...');
-    loadMatkulData();
+    console.log('🔄 Loading data mata kuliah...');
+    setTimeout(() => {
+      loadMatkulData();
+    }, 100);
   }
 }
 
@@ -1975,65 +1997,55 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.addEventListener("DOMContentLoaded", loadDashboardTotals);
 
-
-// Pada bagian document.addEventListener("DOMContentLoaded", ...)
+// Di bagian paling bawah, dalam DOMContentLoaded:
 document.addEventListener("DOMContentLoaded", function() {
-  console.log('🚀 Dashboard loaded');
+  console.log('🚀 Dashboard Akademik FT loaded');
   
-  // Load data awal
+  // 1. Load data awal
   loadDashboardTotals();
   
-  // Setup real-time sync jika diperlukan
+  // 2. Setup event listeners untuk semua tab
+  document.querySelectorAll('.nav-item').forEach(button => {
+    button.addEventListener('click', function(e) {
+      // Cegah default behavior
+      e.preventDefault();
+      
+      // Ambil tabId dari atribut onclick
+      const onclickAttr = this.getAttribute('onclick');
+      if (onclickAttr) {
+        const match = onclickAttr.match(/showContent\('([^']+)'/);
+        if (match && match[1]) {
+          const tabId = match[1];
+          console.log(`📱 Memilih tab: ${tabId}`);
+          showContent(tabId, this);
+        }
+      }
+    });
+  });
+  
+  // 3. Default: tampilkan dashboard utama
+  const mainLink = document.getElementById('mainLink');
+  if (mainLink) {
+    showContent('main', mainLink);
+  }
+  
+  // 4. Setup real-time sync
   try {
     setupRealtimeSync();
+    console.log('✅ Real-time sync aktif');
   } catch (error) {
     console.error('❌ Error setup real-time sync:', error);
   }
   
-  // Setup event listener untuk tab mata kuliah
-  const matkulLink = document.getElementById('matkulLink');
-  if (matkulLink) {
-    matkulLink.addEventListener('click', function() {
-      // Tunggu sebentar lalu load data
-      setTimeout(() => {
-        console.log('🔄 Loading data mata kuliah...');
-        loadMatkulData();
-      }, 100);
-    });
-  }
+  // 5. Debug info
+  console.log('🔧 Sistem siap digunakan');
+  console.log('- Jumlah button .nav-item:', document.querySelectorAll('.nav-item').length);
   
-  // Tampilkan tab utama saat pertama kali load
-  showContent('main', document.getElementById('mainLink'));
-});
-    // Di akhir file, tambahkan ini:
-// Di bagian paling bawah, dalam DOMContentLoaded:
-document.addEventListener("DOMContentLoaded", function() {
-  console.log('🚀 Dashboard loaded');
-  
-  // Load data dashboard
-  loadDashboardTotals();
-  
-  // Setup real-time sync
-  setupRealtimeSync();
-  
-  // Debug: Cek struktur database (opsional)
-  // setTimeout(() => checkDatabaseStructure(), 1000);
-  
-  // Setup event listener untuk tab mata kuliah
-  const matkulLink = document.getElementById('matkulLink');
-  if (matkulLink) {
-    matkulLink.addEventListener('click', function() {
-      console.log('📚 Tab mata kuliah diklik');
-      setTimeout(() => {
-        loadMatkulData();
-      }, 100);
-    });
-  }
-  
-  // Load data mata kuliah jika sudah di tab yang benar
-  const currentTab = window.location.hash || '#main';
-  if (currentTab === '#matkul') {
-    setTimeout(() => loadMatkulData(), 500);
+  // 6. Test: pastikan fungsi showContent tersedia
+  if (typeof showContent === 'function') {
+    console.log('✅ Fungsi showContent tersedia');
+  } else {
+    console.error('❌ Fungsi showContent TIDAK ditemukan!');
   }
 });
   </script>
