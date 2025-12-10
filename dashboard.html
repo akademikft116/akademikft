@@ -771,48 +771,42 @@ function renderMatkulTable(data) {
       openModal();
     }
 
-    async function editMatkul(id) {
-  console.log('=== EDIT MATAKULIAH DEBUG ===');
-  console.log('ID yang diklik:', id);
-  
-  // Cari data di allMatkulData
-  const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
-  console.log('Data ditemukan:', matkul);
-  
-  if (!matkul) {
-    alert('Data mata kuliah tidak ditemukan');
-    return;
+    // Ganti fungsi editMatkul untuk ambil data langsung dari database
+async function editMatkul(id) {
+  try {
+    // Ambil data langsung dari database, bukan dari allMatkulData
+    const { data: matkul, error } = await supabaseClient
+      .from('matakuliah')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error || !matkul) {
+      console.error('Error ambil data:', error);
+      alert('Data tidak ditemukan');
+      return;
+    }
+    
+    console.log('Data dari database:', matkul);
+    
+    // Isi form - PERHATIKAN: matkul.Prodi bukan matkul.prodi
+    document.getElementById('matkulId').value = matkul.id;
+    document.getElementById('modalKode').value = matkul.kode;
+    document.getElementById('modalNama').value = matkul.nama;
+    document.getElementById('modalProdi').value = matkul.Prodi || ''; // ← INI YANG PENTING
+    document.getElementById('modalSKS').value = matkul.sks;
+    document.getElementById('modalSemester').value = matkul.semester || '';
+    document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
+    
+    document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+    document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+    
+    openModal();
+    
+  } catch (err) {
+    console.error('Error:', err);
+    alert('Gagal mengambil data untuk edit');
   }
-
-  // Debug isi data
-  console.log('Nilai matkul:', {
-    id: matkul.id,
-    kode: matkul.kode,
-    nama: matkul.nama,
-    prodi: matkul.prodi, // atau matkul.Prodi
-    sks: matkul.sks,
-    semester: matkul.semester,
-    deskripsi: matkul.deskripsi
-  });
-
-  // Isi form
-  document.getElementById('matkulId').value = matkul.id || matkul.kode;
-  document.getElementById('modalKode').value = matkul.kode;
-  document.getElementById('modalNama').value = matkul.nama;
-  document.getElementById('modalProdi').value = matkul.prodi || ''; // Perhatikan ini
-  document.getElementById('modalSKS').value = matkul.sks;
-  document.getElementById('modalSemester').value = matkul.semester || '';
-  document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
-  
-  document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-  document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
-  
-  console.log('Form diisi dengan:', {
-    prodiValue: document.getElementById('modalProdi').value,
-    semesterValue: document.getElementById('modalSemester').value
-  });
-  
-  openModal();
 }
 async function saveMatkul(event) {
   event.preventDefault();
