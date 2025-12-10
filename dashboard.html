@@ -94,6 +94,27 @@
   border-radius: 4px;
   background-color: #f3f4f6;
 }
+
+    /* Tambahkan di bagian <style> */
+table.min-w-full {
+  table-layout: fixed;
+  width: 100%;
+}
+
+th, td {
+  word-wrap: break-word;
+}
+
+/* Pastikan kolom prodi dan semester cukup lebar */
+th:nth-child(4), td:nth-child(4) { /* Kolom Program Studi */
+  width: 120px;
+  min-width: 120px;
+}
+
+th:nth-child(6), td:nth-child(6) { /* Kolom Semester */
+  width: 100px;
+  min-width: 100px;
+}
   </style>
 </head>
 <body class="bg-gray-100">
@@ -581,7 +602,7 @@ async function loadMatkulData() {
   tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
   
   try {
-    console.log('Memulai load data mata kuliah...');
+    console.log('=== DEBUG: Memulai load data mata kuliah ===');
     
     // Ambil data dari database
     const { data, error } = await supabaseClient
@@ -601,26 +622,30 @@ async function loadMatkulData() {
       return;
     }
     
-    console.log('Data diterima dari Supabase:', data);
+    // DEBUG: Tampilkan semua data dengan detail
+    console.log('=== DATA DARI SUPABASE ===');
+    console.log('Jumlah data:', data.length);
+    if (data.length > 0) {
+      console.log('Data pertama (lengkap):', data[0]);
+      console.log('Prodi pada data pertama:', data[0].prodi);
+      console.log('Semester pada data pertama:', data[0].semester);
+      console.log('Tipe data semester:', typeof data[0].semester);
+    }
     
     // Simpan data
     allMatkulData = data || [];
     
-    // Format data untuk tampilan
-    allMatkulData = allMatkulData.map(matkul => {
-      // Jika prodi tidak ada di database, coba tentukan dari kode
-      if (!matkul.prodi && matkul.kode) {
-        const kodePrefix = matkul.kode.substring(0, 5);
-        let prodi = 'Lainnya';
-        
-        if (kodePrefix === '50262') prodi = 'Industri';
-        else if (kodePrefix === '50263') prodi = 'Sipil';
-        else if (kodePrefix === '50463') prodi = 'Informatika';
-        else if (kodePrefix === '50362') prodi = 'Arsitektur';
-        else if (kodePrefix === '50264') prodi = 'Elektro';
-        
-        matkul.prodi = prodi;
-      }
+    // DEBUG: Cek mapping
+    console.log('=== SETELAH MAPPING ===');
+    const mappedData = allMatkulData.map((matkul, index) => {
+      console.log(`Data ${index + 1}:`, {
+        id: matkul.id,
+        kode: matkul.kode,
+        nama: matkul.nama,
+        prodi: matkul.prodi,
+        semester: matkul.semester,
+        sks: matkul.sks
+      });
       
       return {
         id: matkul.id,
@@ -628,23 +653,24 @@ async function loadMatkulData() {
         nama: matkul.nama || '',
         prodi: matkul.prodi || 'Lainnya',
         sks: matkul.sks || 0,
-        semester: matkul.semester || 0,
+        semester: matkul.semester || 0, // Pastikan ini ada
         deskripsi: matkul.deskripsi || ''
       };
     });
     
-    console.log('Data setelah mapping:', allMatkulData);
-    
-    // Salin untuk filter
+    allMatkulData = mappedData;
     filteredMatkulData = [...allMatkulData];
+    
+    // DEBUG: Cek data sebelum render
+    console.log('=== DATA SEBELUM RENDER ===');
+    console.log(filteredMatkulData);
     
     // Render tabel
     renderMatkulTable(filteredMatkulData);
     
-    // Update total
     document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
     
-    console.log(`✅ Load data selesai. Total: ${allMatkulData.length} data`);
+    console.log('=== LOAD SELESAI ===');
     
   } catch (err) {
     console.error('Unexpected error:', err);
@@ -657,8 +683,6 @@ async function loadMatkulData() {
     `;
   }
 }
-
-    // Fungsi untuk memuat data mata kuliah
 function renderMatkulTable(data) {
   const tableBody = document.getElementById('matkulTableBody');
   
@@ -673,16 +697,13 @@ function renderMatkulTable(data) {
     return;
   }
 
-  console.log('📋 Data untuk render:', data);
-
   let html = '';
   data.forEach((matkul, index) => {
-    console.log(`Baris ${index + 1}:`, {
-      id: matkul.id,
+    // DEBUG: Tampilkan data per baris
+    console.log(`Rendering baris ${index + 1}:`, {
       kode: matkul.kode,
       nama: matkul.nama,
       prodi: matkul.prodi,
-      sks: matkul.sks,
       semester: matkul.semester
     });
     
@@ -713,6 +734,7 @@ function renderMatkulTable(data) {
   });
 
   tableBody.innerHTML = html;
+  console.log('=== RENDER SELESAI ===');
 }
 
     // Fungsi untuk memfilter data mata kuliah
