@@ -542,6 +542,28 @@
     let allMatkulData = [];
     let filteredMatkulData = [];
 
+    // FUNGSI MODAL - Tambahkan di bagian atas script
+function openModal() {
+  document.getElementById('matkulModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('matkulModal').style.display = 'none';
+  resetForm();
+}
+
+function resetForm() {
+  document.getElementById('matkulId').value = '';
+  document.getElementById('modalKode').value = '';
+  document.getElementById('modalNama').value = '';
+  document.getElementById('modalProdi').value = '';
+  document.getElementById('modalSKS').value = '';
+  document.getElementById('modalSemester').value = '';
+  document.getElementById('modalDeskripsi').value = '';
+  document.getElementById('modalTitle').textContent = 'Tambah Mata Kuliah Baru';
+  document.getElementById('saveButtonText').textContent = 'Simpan Mata Kuliah';
+}
+
     function showContent(tabId, clickedButton) {
       ['main', 'matkul', 'pengaturan'].forEach(id => {
         document.getElementById(id)?.classList.add('hidden');
@@ -654,12 +676,14 @@
   data.forEach((matkul, index) => {
     html += `
       <tr class="hover:bg-gray-50">
+    html += `
+      <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 text-sm text-gray-500">${index + 1}</td>
         <td class="px-6 py-4 text-sm text-gray-900 font-mono">${matkul.kode || ''}</td>
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama || ''}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
           <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            ${matkul.prodi || 'Lainnya'}  <!-- PERBAIKAN: Gunakan matkul.prodi -->
+            ${matkul.prodi || 'Lainnya'}
           </span>
         </td>
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
@@ -675,45 +699,57 @@
           </button>
         </td>
       </tr>
-    `;
+`;
   });
 
   tableBody.innerHTML = html;
 }
 
     // Fungsi edit alternatif dengan kode
+// Fungsi edit dengan kode - PASTIKAN di global scope
 async function editMatkulByKode(kode) {
   const cleanKode = kode.trim();
   console.log('🔍 Mencari dengan kode:', cleanKode);
   
   // Cari di data yang sudah dimuat
-  let matkul = allMatkulData.find(m => m.kode.trim() === cleanKode);
+  let matkul = allMatkulData.find(m => m.kode && m.kode.trim() === cleanKode);
   
   if (!matkul) {
     console.log('❌ Tidak ditemukan di cache, mencari di database...');
     
-    // Cari langsung di database
-    const { data, error } = await supabaseClient
-      .from('matakuliah')
-      .select('*')
-      .eq('kode', cleanKode)
-      .maybeSingle();
-    
-    if (error || !data) {
-      console.error('❌ Tidak ditemukan di database');
-      alert('Data tidak ditemukan');
+    try {
+      // Cari langsung di database
+      const { data, error } = await supabaseClient
+        .from('matakuliah')
+        .select('*')
+        .eq('kode', cleanKode)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('❌ Error query database:', error);
+        alert('Error mengambil data dari database');
+        return;
+      }
+      
+      if (!data) {
+        alert('Data tidak ditemukan di database');
+        return;
+      }
+      
+      matkul = {
+        id: data.id,
+        kode: data.kode,
+        nama: data.nama,
+        prodi: data.Prodi || data.prodi,
+        sks: data.sks,
+        semester: data.semester,
+        deskripsi: data.deskripsi
+      };
+    } catch (err) {
+      console.error('❌ Exception:', err);
+      alert('Terjadi kesalahan saat mengambil data');
       return;
     }
-    
-    matkul = {
-      id: data.id,
-      kode: data.kode,
-      nama: data.nama,
-      prodi: data.Prodi || data.prodi,
-      sks: data.sks,
-      semester: data.semester,
-      deskripsi: data.deskripsi
-    };
   }
   
   console.log('📋 Data ditemukan (via kode):', matkul);
@@ -722,17 +758,33 @@ async function editMatkulByKode(kode) {
   document.getElementById('matkulId').value = matkul.id;
   document.getElementById('modalKode').value = matkul.kode;
   document.getElementById('modalNama').value = matkul.nama;
-  document.getElementById('modalProdi').value = matkul.prodi;
-  document.getElementById('modalSKS').value = matkul.sks;
+  document.getElementById('modalProdi').value = matkul.prodi || '';
+  document.getElementById('modalSKS').value = matkul.sks || '';
   document.getElementById('modalSemester').value = matkul.semester || '';
   document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
   
   document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
   document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
   
-  openModal();
+  // PASTIKAN openModal() ada
+  if (typeof openModal === 'function') {
+    openModal();
+  } else {
+    console.error('❌ openModal is not a function');
+    // Fallback: tampilkan modal manual
+    document.getElementById('matkulModal').style.display = 'flex';
+  }
 }
 
+    function addMatkul() {
+  resetForm();
+  if (typeof openModal === 'function') {
+    openModal();
+  } else {
+    document.getElementById('matkulModal').style.display = 'flex';
+  }
+}
+  
     async function editMatkul(id) {
   console.log('🔍 Mencari mata kuliah dengan ID:', id);
   console.log('Type of ID:', typeof id);
