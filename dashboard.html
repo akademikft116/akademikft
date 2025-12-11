@@ -580,6 +580,7 @@
     }
 
     // Fungsi untuk memuat data mata kuliah dari database
+a// Di fungsi loadMatkulData():
 async function loadMatkulData() {
   const tableBody = document.getElementById('matkulTableBody');
   tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-sm text-gray-500 text-center">Memuat data...</td></tr>`;
@@ -595,41 +596,61 @@ async function loadMatkulData() {
     
     if (error) {
       console.error('Error load data dari Supabase:', error);
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
+            ❌ Error: ${error.message}
+          </td>
+        </tr>
+      `;
       return;
     }
     
-    console.log('Data MENTAH dari Supabase:', data);
-    console.log('Kolom yang tersedia:', data.length > 0 ? Object.keys(data[0]) : 'Tidak ada data');
-    
-    // Debug: Tampilkan data pertama
-    if (data.length > 0) {
-      console.log('Data pertama:', data[0]);
-      console.log('Semester data pertama:', data[0].semester);
-      console.log('Tipe data semester:', typeof data[0].semester);
-    }
+    console.log('Data diterima dari Supabase:', data);
     
     // Simpan data
     allMatkulData = data || [];
     
     // Format data untuk tampilan
     allMatkulData = allMatkulData.map(matkul => {
-      console.log('Mapping matkul:', matkul.kode, 'semester:', matkul.semester);
+      // Debug: lihat struktur data dari Supabase
+      console.log('Data matkul dari Supabase:', matkul);
+      console.log('Prodi dari Supabase:', matkul.Prodi);
+      
+      // Jika Prodi tidak ada di database, coba tentukan dari kode
+      let prodiValue = matkul.Prodi || 'Lainnya'; // GANTI: matkul.prodi -> matkul.Prodi
+      
+      if (prodiValue === 'Lainnya' && matkul.kode) {
+        const kodePrefix = matkul.kode.substring(0, 5);
+        
+        if (kodePrefix === '50262') prodiValue = 'Industri';
+        else if (kodePrefix === '50263') prodiValue = 'Sipil';
+        else if (kodePrefix === '50463') prodiValue = 'Informatika';
+        else if (kodePrefix === '50362') prodiValue = 'Arsitektur';
+        else if (kodePrefix === '50264') prodiValue = 'Elektro';
+      }
       
       return {
         id: matkul.id,
         kode: matkul.kode || '',
         nama: matkul.nama || '',
-        Prodi: matkul.prodi || 'Lainnya',
+        prodi: prodiValue, // Sudah menggunakan nilai yang benar
         sks: matkul.sks || 0,
-        semester: matkul.semester || 0, // <-- INI YANG PERLU DIPERIKSA
+        semester: matkul.semester || 0,
         deskripsi: matkul.deskripsi || ''
       };
     });
     
     console.log('Data setelah mapping:', allMatkulData);
     
+    // Salin untuk filter
+    filteredMatkulData = [...allMatkulData];
+    
     // Render tabel
-    renderMatkulTable(allMatkulData);
+    renderMatkulTable(filteredMatkulData);
+    
+    // Update total
+    document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
     
   } catch (err) {
     console.error('Unexpected error:', err);
@@ -693,31 +714,31 @@ function renderMatkulTable(data) {
 }
     // Fungsi untuk memfilter data mata kuliah
     function filterMatkulData() {
-      const kodeProdi = document.getElementById('filterKodeProdi').value;
-      const namaMatkul = document.getElementById('filterNamaMatkul').value.toLowerCase();
-      const sks = document.getElementById('filterSKS').value;
-      
-      filteredMatkulData = allMatkulData.filter(matkul => {
-        let passes = true;
-        
-        if (kodeProdi) {
-          const kodePrefix = matkul.kode.substring(0, 5);
-          if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
-        }
-        
-        if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
-          passes = false;
-        }
-        
-        if (sks && matkul.sks != sks) {
-          passes = false;
-        }
-        
-        return passes;
-      });
-      
-      renderMatkulTable(filteredMatkulData);
+  const kodeProdi = document.getElementById('filterKodeProdi').value;
+  const namaMatkul = document.getElementById('filterNamaMatkul').value.toLowerCase();
+  const sks = document.getElementById('filterSKS').value;
+  
+  filteredMatkulData = allMatkulData.filter(matkul => {
+    let passes = true;
+    
+    if (kodeProdi) {
+      const kodePrefix = matkul.kode.substring(0, 5);
+      if (kodePrefix !== kodeProdi.substring(0, 5)) passes = false;
     }
+    
+    if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
+      passes = false;
+    }
+    
+    if (sks && matkul.sks != sks) {
+      passes = false;
+    }
+    
+    return passes;
+  });
+  
+  renderMatkulTable(filteredMatkulData);
+}
 
     // Fungsi untuk mereset filter mata kuliah
     function resetMatkulFilter() {
@@ -798,7 +819,7 @@ async function saveMatkul(event) {
   const matkulData = {
   kode,
   nama,
-  Prodi: prodi, // GANTI: 'prodi' -> 'Prodi'
+  Prodi: prodi,
   sks: parseInt(sks) || 0,
   semester: parseInt(semester) || 0,
   deskripsi: deskripsi || null
@@ -1156,13 +1177,13 @@ async function importMatkulData() {
     }
     
     validData.push({
-      kode: String(item.Kode).trim(),
-      nama: String(item.Nama).trim(),
-      sks: parseInt(item.SKS),
-      semester: parseInt(item.Semester),
-      prodi: String(item['Program Studi'] || item['Program_Studi'] || 'Lainnya').trim(),
-      deskripsi: String(item.Deskripsi || item.deskripsi || '').trim()
-    });
+  kode: String(item.Kode).trim(),
+  nama: String(item.Nama).trim(),
+  sks: parseInt(item.SKS),
+  semester: parseInt(item.Semester),
+  Prodi: String(item['Program Studi'] || item['Program_Studi'] || 'Lainnya').trim(), // GANTI: prodi -> Prodi
+  deskripsi: String(item.Deskripsi || item.deskripsi || '').trim()
+});
   }
   
   if (errors.length > 0) {
@@ -1224,14 +1245,14 @@ async function importMatkulFromExcel(event) {
       const rawData = excelData.slice(1);
       
       const columnMapping = {
-        'KODE': 'kode', 
-        'NAMA': 'nama', 
-        'SKS': 'sks', 
-        'SEMESTER': 'semester', 
-        'PROGRAM_STUDI': 'prodi',
-        'PRODI': 'prodi',
-        'DESKRIPSI': 'deskripsi'
-      };
+  'KODE': 'kode', 
+  'NAMA': 'nama', 
+  'SKS': 'sks', 
+  'SEMESTER': 'semester', 
+  'PROGRAM_STUDI': 'Prodi', // GANTI: 'prodi' -> 'Prodi'
+  'PRODI': 'Prodi', // GANTI: 'prodi' -> 'Prodi'
+  'DESKRIPSI': 'deskripsi'
+};
 
       const matkulToInsert = [];
       let skippedRows = 0;
