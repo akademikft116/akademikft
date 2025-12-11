@@ -583,7 +583,6 @@
   try {
     console.log('Memulai load data mata kuliah...');
     
-    // Ambil data dari database
     const { data, error } = await supabaseClient
       .from('matakuliah')
       .select('*')
@@ -603,32 +602,24 @@
     
     console.log('Data diterima dari Supabase:', data);
     
-    // Simpan data
-    allMatkulData = data || [];
-    
-    // Format data untuk tampilan
-    allMatkulData = allMatkulData.map(matkul => {
+    // PERBAIKAN: Bersihkan newline (\n) dari semua data
+    allMatkulData = (data || []).map(matkul => {
       return {
         id: matkul.id,
-        kode: matkul.kode || '',
-        nama: matkul.nama || '',
-        // PERBAIKAN: Ambil dari 'Prodi' (huruf P besar)
-        prodi: matkul.Prodi || 'Lainnya',
-        sks: matkul.sks || 0,
-        semester: matkul.semester || 0,
-        deskripsi: matkul.deskripsi || ''
+        // Bersihkan newline dengan .trim()
+        kode: (matkul.kode || '').trim(),
+        nama: (matkul.nama || '').trim(),
+        prodi: (matkul.Prodi || matkul.prodi || 'Lainnya').trim(),
+        sks: parseInt(matkul.sks) || 0,
+        semester: parseInt(matkul.semester) || 0,
+        deskripsi: (matkul.deskripsi || '').trim()
       };
     });
     
-    console.log('Data setelah mapping:', allMatkulData);
+    console.log('Data setelah cleaning:', allMatkulData);
     
-    // Salin untuk filter
     filteredMatkulData = [...allMatkulData];
-    
-    // Render tabel
     renderMatkulTable(filteredMatkulData);
-    
-    // Update total
     document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
     
     console.log(`✅ Load data selesai. Total: ${allMatkulData.length} data`);
@@ -753,22 +744,28 @@
 
     async function editMatkul(id) {
   console.log('🔍 Mencari mata kuliah dengan ID:', id);
+  console.log('Type of ID:', typeof id);
   
-  const matkul = allMatkulData.find(m => m.id == id);
+  // Konversi ID ke number jika perlu
+  const numericId = parseInt(id);
+  console.log('Numeric ID:', numericId);
+  
+  // Cari dengan ID numerik
+  const matkul = allMatkulData.find(m => m.id == numericId || m.id == id);
   
   if (!matkul) {
-    console.error('❌ Data tidak ditemukan');
-    alert('Data mata kuliah tidak ditemukan');
+    console.error('❌ Data tidak ditemukan untuk ID:', id);
+    console.error('Semua ID yang ada:', allMatkulData.map(m => ({ id: m.id, kode: m.kode })));
+    alert(`Data mata kuliah dengan ID ${id} tidak ditemukan`);
     return;
   }
 
   console.log('📋 Data ditemukan:', matkul);
 
-  // PERBAIKAN: Isi form dengan data yang benar
+  // Isi form modal
   document.getElementById('matkulId').value = matkul.id;
   document.getElementById('modalKode').value = matkul.kode || '';
   document.getElementById('modalNama').value = matkul.nama || '';
-  // PERBAIKAN: Gunakan matkul.prodi (bukan matkul.Prodi || matkul.prodi)
   document.getElementById('modalProdi').value = matkul.prodi || '';
   document.getElementById('modalSKS').value = matkul.sks || '';
   document.getElementById('modalSemester').value = matkul.semester || '';
@@ -780,10 +777,63 @@
   openModal();
 }
 
-    async function saveMatkul(event) {
+    // Fungsi untuk membersihkan semua data di database (jalankan sekali saja)
+async function cleanupDatabase() {
+  if (!confirm('⚠️ Hati-hati! Ini akan membersihkan semua newline di database. Lanjutkan?')) {
+    return;
+  }
+  
+  try {
+    console.log('🔄 Memulai cleanup database...');
+    
+    // Ambil semua data
+    const { data: allData, error: fetchError } = await supabaseClient
+      .from('matakuliah')
+      .select('*');
+    
+    if (fetchError) throw fetchError;
+    
+    console.log('Data sebelum cleanup:', allData);
+    
+    // Bersihkan setiap data
+    const cleanedData = allData.map(matkul => ({
+      id: matkul.id,
+      kode: (matkul.kode || '').trim(),
+      nama: (matkul.nama || '').trim(),
+      Prodi: (matkul.Prodi || '').trim(),
+      sks: matkul.sks,
+      semester: matkul.semester,
+      deskripsi: (matkul.deskripsi || '').trim()
+    }));
+    
+    console.log('Data setelah cleanup:', cleanedData);
+    
+    // Update database
+    for (const matkul of cleanedData) {
+      const { error: updateError } = await supabaseClient
+        .from('matakuliah')
+        .update(matkul)
+        .eq('id', matkul.id);
+      
+      if (updateError) {
+        console.error(`Error update id ${matkul.id}:`, updateError);
+      }
+    }
+    
+    alert('✅ Database berhasil dibersihkan!');
+    loadMatkulData();
+    
+  } catch (error) {
+    console.error('❌ Error cleanup:', error);
+    alert('Gagal membersihkan database');
+  }
+}
+
+   async function saveMatkul(event) {
   event.preventDefault();
   
   const id = document.getElementById('matkulId').value;
+  // PERBAIKAN: Tambahkan .trim() di semua input
   const kode = document.getElementById('modalKode').value.trim();
   const nama = document.getElementById('modalNama').value.trim();
   const prodi = document.getElementById('modalProdi').value;
@@ -796,17 +846,16 @@
     return;
   }
 
-  // PERBAIKAN: Gunakan 'Prodi' (huruf P besar) sesuai database
   const matkulData = {
     kode: kode,
     nama: nama,
-    Prodi: prodi,  // <-- PASTIKAN 'Prodi' (huruf P besar)
+    Prodi: prodi.trim(),  // Bersihkan prodi juga
     sks: parseInt(sks) || 0,
     semester: parseInt(semester) || 0,
     deskripsi: deskripsi || null
   };
 
-  console.log('💾 Data yang akan disimpan:', matkulData);
+  console.log('💾 Data yang akan disimpan (setelah trim):', matkulData);
   console.log('🆔 ID untuk update:', id);
 
   try {
@@ -815,13 +864,25 @@
     if (id) {
       console.log('🔄 Melakukan UPDATE dengan ID:', id);
       
+      // Debug: Cek apakah ID ada di database
+      console.log('Mencari ID di allMatkulData:', allMatkulData.find(m => m.id == id));
+      
       const { data, error } = await supabaseClient
         .from('matakuliah')
         .update(matkulData)
         .eq('id', id)
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error UPDATE:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
       
       result = data;
       console.log('✅ Update berhasil:', result);
@@ -843,7 +904,7 @@
     }
     
     closeModal();
-    await loadMatkulData(); // Reload data
+    await loadMatkulData(); // Reload data dengan cleaning
     await loadDashboardTotals();
     
   } catch (error) {
