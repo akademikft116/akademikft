@@ -772,13 +772,13 @@ function renderMatkulTable(data) {
     }
 
     async function editMatkul(id) {
-      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+      const matkul = allMatkulData.find(m => m.id == id);
       if (!matkul) {
         alert('Data mata kuliah tidak ditemukan');
         return;
       }
 
-      document.getElementById('matkulId').value = matkul.id || matkul.kode;
+      document.getElementById('matkulId').value = matkul.id;
       document.getElementById('modalKode').value = matkul.kode;
       document.getElementById('modalNama').value = matkul.nama;
       document.getElementById('modalProdi').value = matkul.prodi || '';
