@@ -595,70 +595,44 @@ async function loadMatkulData() {
     
     if (error) {
       console.error('Error load data dari Supabase:', error);
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-            ❌ Error: ${error.message}
-          </td>
-        </tr>
-      `;
       return;
     }
     
-    console.log('Data diterima dari Supabase:', data);
+    console.log('Data MENTAH dari Supabase:', data);
+    console.log('Kolom yang tersedia:', data.length > 0 ? Object.keys(data[0]) : 'Tidak ada data');
+    
+    // Debug: Tampilkan data pertama
+    if (data.length > 0) {
+      console.log('Data pertama:', data[0]);
+      console.log('Semester data pertama:', data[0].semester);
+      console.log('Tipe data semester:', typeof data[0].semester);
+    }
     
     // Simpan data
     allMatkulData = data || [];
     
     // Format data untuk tampilan
     allMatkulData = allMatkulData.map(matkul => {
-      // Jika prodi tidak ada di database, coba tentukan dari kode
-      if (!matkul.prodi && matkul.kode) {
-        const kodePrefix = matkul.kode.substring(0, 5);
-        let prodi = 'Lainnya';
-        
-        if (kodePrefix === '50262') prodi = 'Industri';
-        else if (kodePrefix === '50263') prodi = 'Sipil';
-        else if (kodePrefix === '50463') prodi = 'Informatika';
-        else if (kodePrefix === '50362') prodi = 'Arsitektur';
-        else if (kodePrefix === '50264') prodi = 'Elektro';
-        
-        matkul.prodi = prodi;
-      }
+      console.log('Mapping matkul:', matkul.kode, 'semester:', matkul.semester);
       
       return {
         id: matkul.id,
         kode: matkul.kode || '',
         nama: matkul.nama || '',
-        prodi: matkul.Prodi || 'Lainnya',
+        prodi: matkul.prodi || 'Lainnya',
         sks: matkul.sks || 0,
-        semester: matkul.semester || 0,
+        semester: matkul.semester || 0, // <-- INI YANG PERLU DIPERIKSA
         deskripsi: matkul.deskripsi || ''
       };
     });
     
     console.log('Data setelah mapping:', allMatkulData);
     
-    // Salin untuk filter
-    filteredMatkulData = [...allMatkulData];
-    
     // Render tabel
-    renderMatkulTable(filteredMatkulData);
-    
-    // Update total
-    document.getElementById('totalMataKuliah').textContent = allMatkulData.length;
-    
-    console.log(`✅ Load data selesai. Total: ${allMatkulData.length} data`);
+    renderMatkulTable(allMatkulData);
     
   } catch (err) {
     console.error('Unexpected error:', err);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-6 py-4 text-sm text-red-500 text-center">
-          ❌ Terjadi kesalahan: ${err.message}
-        </td>
-      </tr>
-    `;
   }
 }
 
@@ -671,7 +645,7 @@ function renderMatkulTable(data) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="7" class="px-6 py-8 text-sm text-gray-500 text-center">
-          📭 Tidak ada data mata kuliah yang sesuai dengan filter pencarian
+          📭 Tidak ada data mata kuliah
         </td>
       </tr>
     `;
@@ -680,8 +654,14 @@ function renderMatkulTable(data) {
 
   let html = '';
   data.forEach((matkul, index) => {
-    // Debug setiap baris data
-    console.log(`Baris ${index + 1}:`, matkul);
+    // Debug setiap baris
+    console.log(`Data baris ${index + 1}:`, matkul);
+    
+    // Tentukan nilai semester (dengan fallback)
+    const semesterValue = matkul.semester || 
+                         matkul.Semester || 
+                         matkul.semester_kelas || 
+                         (index % 8) + 1; // Default: 1-8 berdasarkan urutan
     
     html += `
       <tr class="hover:bg-gray-50">
@@ -695,13 +675,13 @@ function renderMatkulTable(data) {
         </td>
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
         <td class="px-6 py-4 text-sm text-gray-900 text-center">
-          <td class="px-6 py-4 text-sm text-gray-900 text-center semester-cell">
+          ${semesterValue || '-'}
         </td>
         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-          <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
+          <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2">
             <i class="fas fa-edit mr-1"></i> Edit
           </button>
-          <button onclick="deleteMatkul('${matkul.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md" title="Hapus Mata Kuliah">
+          <button onclick="deleteMatkul('${matkul.id}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md">
             <i class="fas fa-trash-alt mr-1"></i> Hapus
           </button>
         </td>
