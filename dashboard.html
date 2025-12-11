@@ -94,6 +94,10 @@
   border-radius: 4px;
   background-color: #f3f4f6;
 }
+    .semester-cell {
+  text-align: center;
+  font-weight: 600;
+}
   </style>
 </head>
 <body class="bg-gray-100">
@@ -252,7 +256,7 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Mata Kuliah</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKS</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
               </thead>
@@ -659,6 +663,7 @@ async function loadMatkulData() {
 }
 
     // Fungsi untuk memuat data mata kuliah
+// Fungsi untuk memuat data mata kuliah
 function renderMatkulTable(data) {
   const tableBody = document.getElementById('matkulTableBody');
   
@@ -689,8 +694,8 @@ function renderMatkulTable(data) {
           </span>
         </td>
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
-        <td class="px-6 py-4 text-sm text-gray-900">
-          ${matkul.semester ? `Semester ${matkul.semester}` : '-'}
+        <td class="px-6 py-4 text-sm text-gray-900 text-center">
+          <td class="px-6 py-4 text-sm text-gray-900 text-center semester-cell">
         </td>
         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
           <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
@@ -706,7 +711,6 @@ function renderMatkulTable(data) {
 
   tableBody.innerHTML = html;
 }
-
     // Fungsi untuk memfilter data mata kuliah
     function filterMatkulData() {
       const kodeProdi = document.getElementById('filterKodeProdi').value;
@@ -885,49 +889,50 @@ async function saveMatkul(event) {
     }
 
     // Fungsi untuk export ke PDF
-    function exportMatkulToPDF() {
-      if (!filteredMatkulData || filteredMatkulData.length === 0) {
-        alert('❌ Tidak ada data mata kuliah untuk diekspor.');
-        return;
-      }
-      
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      
-      const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
-      const body = filteredMatkulData.map((matkul, index) => [
-        index + 1,
-        matkul.kode,
-        matkul.nama,
-        matkul.prodi || 'Lainnya',
-        matkul.sks,
-        matkul.semester || '-'
-      ]);
-      
-      doc.setFontSize(16);
-      doc.text('Daftar Mata Kuliah Fakultas Teknik', 14, 15);
-      doc.setFontSize(10);
-      doc.text(`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`, 14, 22);
-      
-      doc.autoTable({
-        head: headers,
-        body: body,
-        startY: 30,
-        theme: 'grid',
-        styles: { fontSize: 9, cellPadding: 2 },
-        headStyles: { fillColor: [30, 64, 175] },
-        columnStyles: {
-          0: { cellWidth: 10 },
-          1: { cellWidth: 25 },
-          2: { halign: 'left', cellWidth: 70 },
-          3: { cellWidth: 30 },
-          4: { cellWidth: 15 },
-          5: { cellWidth: 20 }
-        }
-      });
-      
-      doc.save('daftar_mata_kuliah_ft.pdf');
+    // Fungsi untuk export ke PDF
+function exportMatkulToPDF() {
+  if (!filteredMatkulData || filteredMatkulData.length === 0) {
+    alert('❌ Tidak ada data mata kuliah untuk diekspor.');
+    return;
+  }
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  const headers = [['No', 'Kode', 'Nama Mata Kuliah', 'Program Studi', 'SKS', 'Semester']];
+  const body = filteredMatkulData.map((matkul, index) => [
+    index + 1,
+    matkul.kode,
+    matkul.nama,
+    matkul.prodi || 'Lainnya',
+    matkul.sks,
+    matkul.semester || '-'
+  ]);
+  
+  doc.setFontSize(16);
+  doc.text('Daftar Mata Kuliah Fakultas Teknik', 14, 15);
+  doc.setFontSize(10);
+  doc.text(`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`, 14, 22);
+  
+  doc.autoTable({
+    head: headers,
+    body: body,
+    startY: 30,
+    theme: 'grid',
+    styles: { fontSize: 9, cellPadding: 2 },
+    headStyles: { fillColor: [30, 64, 175] },
+    columnStyles: {
+      0: { cellWidth: 10 },
+      1: { cellWidth: 25 },
+      2: { halign: 'left', cellWidth: 70 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 15 },
+      5: { cellWidth: 15, halign: 'center' } // Lebar kolom semester diperkecil dan di-center
     }
+  });
+  
+  doc.save('daftar_mata_kuliah_ft.pdf');
+}
 
     // Fungsi untuk export ke Excel
     function exportMatkulToExcel() {
