@@ -626,7 +626,7 @@ async function loadMatkulData() {
         id: matkul.id,
         kode: matkul.kode || '',
         nama: matkul.nama || '',
-        prodi: matkul.Prodi || 'Lainnya',
+        prodi: matkul.Prodi || matkul.prodi || 'Lainnya',
         sks: matkul.sks || 0,
         semester: matkul.semester || 0,
         deskripsi: matkul.deskripsi || ''
@@ -685,7 +685,7 @@ function renderMatkulTable(data) {
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.nama || ''}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
           <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            ${matkul.prodi || 'Lainnya'}
+            ${matkul.Prodi || matkul.prodi || 'Lainnya'}
           </span>
         </td>
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
@@ -802,7 +802,6 @@ async function editMatkul(id) {
     document.getElementById('modalKode').value = matkul.kode || '';
     document.getElementById('modalNama').value = matkul.nama || '';
     
-    // PERHATIKAN: Gunakan matkul.Prodi (huruf besar P)
     document.getElementById('modalProdi').value = matkul.Prodi || matkul.prodi || '';
     
     document.getElementById('modalSKS').value = matkul.sks || '';
@@ -845,16 +844,14 @@ async function saveMatkul(event) {
     return;
   }
 
-  // PASTIKAN MENGGUNAKAN 'Prodi' bukan 'prodi'
   const matkulData = {
-    kode: kode,
-    nama: nama,
-    Prodi: prodi, // ← INI YANG PENTING: 'Prodi'
-    sks: parseInt(sks) || 0,
-    semester: parseInt(semester) || 0,
-    deskripsi: deskripsi || null
-  };
-
+  kode,
+  nama,
+  Prodi: prodi, 
+  sks: parseInt(sks) || 0,
+  semester: parseInt(semester) || 0,
+  deskripsi: deskripsi || null
+};
   console.log('📤 Data untuk Supabase:', JSON.stringify(matkulData, null, 2));
 
   try {
