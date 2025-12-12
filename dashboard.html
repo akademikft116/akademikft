@@ -658,7 +658,6 @@ async function loadMatkulData() {
   }
 }
 
-    // Fungsi untuk memuat data mata kuliah
 function renderMatkulTable(data) {
   const tableBody = document.getElementById('matkulTableBody');
   
@@ -690,7 +689,7 @@ function renderMatkulTable(data) {
         </td>
         <td class="px-6 py-4 text-sm text-gray-900">${matkul.sks || 0}</td>
         <td class="px-6 py-4 text-sm text-gray-900">
-          ${matkul.semester ? `Semester ${matkul.semester}` : '-'}
+          ${matkul.semester || '-'}
         </td>
         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
           <button onclick="editMatkul('${matkul.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md mr-2" title="Edit Mata Kuliah">
