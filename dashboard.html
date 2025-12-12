@@ -617,18 +617,18 @@ async function loadMatkulData() {
       console.log('Data matkul dari Supabase:', matkul);
       console.log('Prodi dari Supabase:', matkul.Prodi);
       
-      // Jika Prodi tidak ada di database, coba tentukan dari kode
       let prodiValue = matkul.Prodi || 'Lainnya';
-      
-      if (prodiValue === 'Lainnya' && matkul.kode) {
-        const kodePrefix = matkul.kode.substring(0, 5);
-        
-        if (kodePrefix === '50262') prodiValue = 'Industri';
-        else if (kodePrefix === '50263') prodiValue = 'Sipil';
-        else if (kodePrefix === '50463') prodiValue = 'Informatika';
-        else if (kodePrefix === '50362') prodiValue = 'Arsitektur';
-        else if (kodePrefix === '50264') prodiValue = 'Elektro';
-      }
+
+if (prodiValue === 'Lainnya' && matkul.kode) {
+  const kodePrefix = matkul.kode.substring(0, 5);
+  
+  if (kodePrefix === '50262') prodiValue = 'Industri';
+  else if (kodePrefix === '50263') prodiValue = 'Sipil';
+  else if (kodePrefix === '50463') prodiValue = 'Informatika';
+  else if (kodePrefix === '50362') prodiValue = 'Arsitektur';
+  else if (kodePrefix === '50264') prodiValue = 'Elektro';
+}
+
       
       return {
         id: matkul.id,
