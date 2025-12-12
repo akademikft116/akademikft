@@ -618,7 +618,7 @@ async function loadMatkulData() {
       console.log('Prodi dari Supabase:', matkul.Prodi);
       
       // Jika Prodi tidak ada di database, coba tentukan dari kode
-      let prodiValue = matkul.Prodi || 'Lainnya'; // GANTI: matkul.prodi -> matkul.Prodi
+      let prodiValue = matkul.Prodi || 'Lainnya';
       
       if (prodiValue === 'Lainnya' && matkul.kode) {
         const kodePrefix = matkul.kode.substring(0, 5);
@@ -634,7 +634,7 @@ async function loadMatkulData() {
         id: matkul.id,
         kode: matkul.kode || '',
         nama: matkul.nama || '',
-        prodi: prodiValue, // Sudah menggunakan nilai yang benar
+        prodi: prodiValue,
         sks: matkul.sks || 0,
         semester: matkul.semester || 0,
         deskripsi: matkul.deskripsi || ''
@@ -905,7 +905,7 @@ function exportMatkulToPDF() {
     index + 1,
     matkul.kode,
     matkul.nama,
-    matkul.prodi || 'Lainnya',
+    matkul.Prodi || 'Lainnya',
     matkul.sks,
     matkul.semester || '-'
   ]);
@@ -947,7 +947,7 @@ function exportMatkulToPDF() {
         index + 1,
         matkul.kode,
         matkul.nama,
-        matkul.prodi || 'Lainnya',
+        matkul.Prodi || 'Lainnya',
         matkul.sks,
         matkul.semester || '-'
       ]);
@@ -1337,7 +1337,7 @@ function exportMatkulToExcel() {
     index + 1,
     matkul.kode,
     matkul.nama,
-    matkul.prodi || 'Lainnya',
+    matkul.Prodi || 'Lainnya',
     matkul.sks,
     matkul.semester || '-',
     matkul.deskripsi || '-'
