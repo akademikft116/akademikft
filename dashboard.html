@@ -94,6 +94,149 @@
   border-radius: 4px;
   background-color: #f3f4f6;
 }
+    /* Notification System */
+  .notification-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+  }
+
+  .notification {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border-left: 4px solid;
+    animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+  }
+
+  .notification.success {
+    border-left-color: #10b981;
+    background: linear-gradient(to right, #f0fdf4, white);
+  }
+
+  .notification.error {
+    border-left-color: #ef4444;
+    background: linear-gradient(to right, #fef2f2, white);
+  }
+
+  .notification.warning {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, #fffbeb, white);
+  }
+
+  .notification.info {
+    border-left-color: #3b82f6;
+    background: linear-gradient(to right, #eff6ff, white);
+  }
+
+  .notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .notification.success .notification-icon {
+    background-color: #10b981;
+    color: white;
+  }
+
+  .notification.error .notification-icon {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .notification.warning .notification-icon {
+    background-color: #f59e0b;
+    color: white;
+  }
+
+  .notification.info .notification-icon {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .notification-content {
+    flex-grow: 1;
+  }
+
+  .notification-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+    font-size: 15px;
+  }
+
+  .notification-message {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .notification-close {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    margin-left: 8px;
+    transition: color 0.2s;
+  }
+
+  .notification-close:hover {
+    color: #374151;
+  }
+
+  .notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: currentColor;
+    opacity: 0.3;
+    border-radius: 0 0 0 12px;
+    animation: progressBar 5s linear forwards;
+  }
+
+  @keyframes slideIn {
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideOut {
+    to {
+      transform: translateX(120%);
+    }
+  }
+
+  @keyframes progressBar {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
+  }
+
+  .notification.slide-out {
+    animation: slideOut 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+  }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -806,7 +949,7 @@ async function saveMatkul(event) {
 
   // Validasi
   if (!kode || !nama || !prodi || !sks || !semester) {
-    alert('❌ Harap isi semua field yang wajib!');
+    showError('Harap isi semua field yang wajib!');
     return;
   }
 
@@ -835,7 +978,7 @@ async function saveMatkul(event) {
       
       if (error) throw error;
       result = data;
-      alert('✅ Mata kuliah berhasil diperbarui!');
+      showSuccess('Mata kuliah berhasil diperbarui!');
     } else {
       // Insert baru
       const { data, error } = await supabaseClient
@@ -845,7 +988,7 @@ async function saveMatkul(event) {
       
       if (error) throw error;
       result = data;
-      alert('✅ Mata kuliah berhasil ditambahkan!');
+      showSuccess('Mata kuliah berhasil ditambahkan!');
     }
     
     console.log('Result setelah save:', result);
@@ -856,7 +999,7 @@ async function saveMatkul(event) {
     
   } catch (error) {
     console.error('Error detail:', error);
-    alert(`❌ Gagal menyimpan: ${error.message}\n\nPeriksa console untuk detail.`);
+    showError(`Gagal menyimpan: ${error.message}`);
   }
 }
 
@@ -873,15 +1016,84 @@ async function saveMatkul(event) {
 
         if (error) throw error;
         
-        alert('✅ Mata kuliah berhasil dihapus!');
+        showSuccess('Mata kuliah berhasil dihapus!');
         loadMatkulData();
         loadDashboardTotals();
         
       } catch (error) {
         console.error('Error menghapus mata kuliah:', error);
-        alert(`❌ Gagal menghapus mata kuliah: ${error.message}`);
+        showError(`Gagal menghapus mata kuliah: ${error.message}`);
       }
     }
+
+    // Notification System
+function showNotification(title, message, type = 'info') {
+  const container = document.getElementById('notificationContainer');
+  const notificationId = 'notification-' + Date.now();
+  
+  const icons = {
+    success: 'fa-check-circle',
+    error: 'fa-times-circle',
+    warning: 'fa-exclamation-triangle',
+    info: 'fa-info-circle'
+  };
+  
+  const notification = document.createElement('div');
+  notification.id = notificationId;
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-icon">
+      <i class="fas ${icons[type]}"></i>
+    </div>
+    <div class="notification-content">
+      <div class="notification-title">${title}</div>
+      <div class="notification-message">${message}</div>
+    </div>
+    <button class="notification-close" onclick="removeNotification('${notificationId}')">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="notification-progress"></div>
+  `;
+  
+  container.appendChild(notification);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    removeNotification(notificationId);
+  }, 5000);
+}
+
+function removeNotification(id) {
+  const notification = document.getElementById(id);
+  if (notification) {
+    notification.classList.add('slide-out');
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 500);
+  }
+}
+
+// Success notification
+function showSuccess(message) {
+  showNotification('Berhasil!', message, 'success');
+}
+
+// Error notification
+function showError(message) {
+  showNotification('Gagal!', message, 'error');
+}
+
+// Warning notification
+function showWarning(message) {
+  showNotification('Peringatan!', message, 'warning');
+}
+
+// Info notification
+function showInfo(message) {
+  showNotification('Informasi', message, 'info');
+}
 
     // Fungsi untuk export ke PDF
     function exportMatkulToPDF() {
@@ -994,7 +1206,7 @@ function downloadTemplateMatkul() {
   XLSX.utils.book_append_sheet(wb, ws, 'Template');
   XLSX.writeFile(wb, 'template_mata_kuliah.xlsx');
   
-  alert('✅ Template berhasil didownload. Silakan isi data mata kuliah.');
+  showSuccess('Template berhasil didownload. Silakan isi data mata kuliah.');
 }
 
 // Fungsi untuk modal import
@@ -1443,5 +1655,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
   </script>
+  <div id="notificationContainer" class="notification-container"></div>
 </body>
 </html>
