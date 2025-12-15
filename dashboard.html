@@ -811,34 +811,21 @@ async function loadMatkulData() {
     // Format data untuk tampilan
     // Di dalam loadMatkulData(), perbaiki mapping ini:
 // Di dalam loadMatkulData(), pastikan mapping data benar:
+// Di dalam loadMatkulData(), perbaiki mapping:
 allMatkulData = allMatkulData.map(matkul => {
-  // Debug: Lihat data asli
-  console.log('Data asli dari DB:', matkul);
+  console.log('Data asli dari DB (SEBELUM mapping):', matkul);
   
-  // Jika prodi sudah ada, gunakan yang ada
-  // Jika tidak, tentukan dari kode
-  let prodi = matkul.prodi || matkul.Prodi || 'Lainnya';
+  // Gunakan Prodi (dengan P besar) karena itu nama kolom di database
+  let prodi = matkul.Prodi || matkul.prodi || 'Lainnya';
   
-  // Coba tentukan dari kode jika belum ada
-  if ((!prodi || prodi === 'Lainnya') && matkul.kode) {
-    const kodePrefix = matkul.kode.substring(0, 5);
-    
-    const mapping = {
-      '50262': 'Industri',
-      '50263': 'Sipil',
-      '50463': 'Informatika',
-      '50362': 'Arsitektur',
-      '50264': 'Elektro'
-    };
-    
-    prodi = mapping[kodePrefix] || 'Lainnya';
-  }
+  console.log('Prodi setelah mapping:', prodi);
   
   return {
     id: matkul.id,
     kode: matkul.kode || '',
     nama: matkul.nama || '',
-    prodi: prodi,
+    Prodi: prodi, // Simpan dengan nama yang sama seperti di database
+    prodi: prodi, // Simpan juga dengan lowercase untuk kompatibilitas
     sks: matkul.sks || 0,
     semester: matkul.semester || 0,
     deskripsi: matkul.deskripsi || ''
@@ -985,26 +972,25 @@ if (kodeProdi) {
       openModal();
     }
 
-    async function editMatkul(id) {
+async function editMatkul(id) {
   const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
   if (!matkul) {
     alert('Data mata kuliah tidak ditemukan');
     return;
   }
 
-  // Debug: Lihat data apa yang didapat
-  console.log('Data mata kuliah untuk edit:', matkul);
-  console.log('Prodi dari data:', matkul.prodi);
-  console.log('Prodi dari database (original):', matkul.Prodi);
-
-  // Set nilai form
+  console.log('DEBUG: Data matkul untuk edit:', matkul);
+  console.log('DEBUG: Prodi dari data:', matkul.prodi);
+  console.log('DEBUG: Prodi (capital) dari data:', matkul.Prodi);
+  
   document.getElementById('matkulId').value = matkul.id || matkul.kode;
   document.getElementById('modalKode').value = matkul.kode;
   document.getElementById('modalNama').value = matkul.nama;
   
-  // PERBAIKAN: Coba kedua kemungkinan field prodi
-  const prodiValue = matkul.prodi || matkul.Prodi || '';
-  console.log('Prodi value yang akan diset:', prodiValue);
+  // PERBAIKAN: Gunakan matkul.Prodi (dengan P besar) karena itu nama kolom di database
+  // Juga cek semua kemungkinan
+  let prodiValue = matkul.Prodi || matkul.prodi || '';
+  console.log('DEBUG: Prodi value yang akan diset:', prodiValue);
   
   document.getElementById('modalProdi').value = prodiValue;
   document.getElementById('modalSKS').value = matkul.sks;
@@ -1015,7 +1001,8 @@ if (kodeProdi) {
   
   // Debug: Cek apakah value berhasil diset
   setTimeout(() => {
-    console.log('Value di select prodi setelah set:', document.getElementById('modalProdi').value);
+    console.log('DEBUG: Value di select prodi setelah set:', document.getElementById('modalProdi').value);
+    console.log('DEBUG: Selected option:', document.getElementById('modalProdi').selectedOptions[0]?.text);
   }, 100);
   
   openModal();
