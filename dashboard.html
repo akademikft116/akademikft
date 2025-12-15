@@ -986,25 +986,40 @@ if (kodeProdi) {
     }
 
     async function editMatkul(id) {
-      const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
-      if (!matkul) {
-        alert('Data mata kuliah tidak ditemukan');
-        return;
-      }
+  const matkul = allMatkulData.find(m => m.id == id || m.kode == id);
+  if (!matkul) {
+    alert('Data mata kuliah tidak ditemukan');
+    return;
+  }
 
-      document.getElementById('matkulId').value = matkul.id || matkul.kode;
-      document.getElementById('modalKode').value = matkul.kode;
-      document.getElementById('modalNama').value = matkul.nama;
-      document.getElementById('modalProdi').value = matkul.prodi || '';
-      document.getElementById('modalSKS').value = matkul.sks;
-      document.getElementById('modalSemester').value = matkul.semester || '';
-      document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
-      document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-      document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
-      
-      openModal();
-    }
+  // Debug: Lihat data apa yang didapat
+  console.log('Data mata kuliah untuk edit:', matkul);
+  console.log('Prodi dari data:', matkul.prodi);
+  console.log('Prodi dari database (original):', matkul.Prodi);
 
+  // Set nilai form
+  document.getElementById('matkulId').value = matkul.id || matkul.kode;
+  document.getElementById('modalKode').value = matkul.kode;
+  document.getElementById('modalNama').value = matkul.nama;
+  
+  // PERBAIKAN: Coba kedua kemungkinan field prodi
+  const prodiValue = matkul.prodi || matkul.Prodi || '';
+  console.log('Prodi value yang akan diset:', prodiValue);
+  
+  document.getElementById('modalProdi').value = prodiValue;
+  document.getElementById('modalSKS').value = matkul.sks;
+  document.getElementById('modalSemester').value = matkul.semester || '';
+  document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
+  document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
+  document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
+  
+  // Debug: Cek apakah value berhasil diset
+  setTimeout(() => {
+    console.log('Value di select prodi setelah set:', document.getElementById('modalProdi').value);
+  }, 100);
+  
+  openModal();
+}
 async function saveMatkul(event) {
   event.preventDefault();
   
