@@ -900,12 +900,12 @@ function renderMatkulTable(data) {
         <td class="text-center text-gray-900">${matkul.semester || '-'}</td>
         <td class="text-center whitespace-nowrap">
           <button onclick="editMatkul('${matkul.id}')" 
-                  class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded-md text-xs"
+                  class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
                   title="Edit Mata Kuliah">
             <i class="fas fa-edit"></i>
           </button>
           <button onclick="deleteMatkul('${matkul.id}')" 
-                  class="bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-md text-xs ml-1"
+                  class="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors ml-2"
                   title="Hapus Mata Kuliah">
             <i class="fas fa-trash-alt"></i>
           </button>
@@ -916,7 +916,6 @@ function renderMatkulTable(data) {
 
   tableBody.innerHTML = html;
 }
-
 
     // Fungsi untuk memfilter data mata kuliah
     function filterMatkulData() {
