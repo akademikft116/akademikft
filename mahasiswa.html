@@ -649,7 +649,43 @@
         }
     });
 
+    // ==================== FUNGSI TAHUN UNTUK FORM & FILTER ====================
+    // Untuk form tahun masuk (hanya 2018-sekarang)
+    function populateFormYearSelect(selectInstance) {
+        const currentYear = new Date().getFullYear();
+        const options = [];
+        
+        for (let i = currentYear; i >= 2018; i--) {
+            options.push({ value: i.toString(), text: i.toString() });
+        }
+        
+        selectInstance.clear();
+        selectInstance.addOptions(options);
+    }
+
+    // Untuk filter pencarian (2010-sekarang)
+    function populateFilterYearSelect(selectInstance, includeAllOption = false) {
+        const currentYear = new Date().getFullYear();
+        const options = [];
+        
+        if (includeAllOption) {
+            options.push({ value: '', text: 'Semua Tahun' });
+        }
+        
+        for (let i = currentYear; i >= 2010; i--) {
+            options.push({ value: i.toString(), text: i.toString() });
+        }
+        
+        selectInstance.clear();
+        selectInstance.addOptions(options);
+        
+        if (includeAllOption) {
+            selectInstance.setValue('');
+        }
+    }
+
     function initializeTomSelect() {
+        console.log('Initializing TomSelect...');
         // Form input
         prodiSelect = new TomSelect("#prodi", { 
             create: false,
@@ -666,8 +702,8 @@
             placeholder: "Pilih Status"
         });
 
-        // Isi tahun untuk form
-        populateYearSelect(tahunMasukSelect);
+        // PERUBAHAN DI SINI: Isi tahun untuk form (2018-sekarang)
+        populateFormYearSelect(tahunMasukSelect);
 
         // Filter search
         new TomSelect("#searchProdi", {
@@ -685,28 +721,8 @@
             placeholder: "Semua Tahun"
         });
         
-        // Isi tahun untuk filter
-        populateYearSelect(searchTahunSelect, true);
-    }
-
-    function populateYearSelect(selectInstance, includeAllOption = false) {
-        const currentYear = new Date().getFullYear();
-        const options = [];
-        
-        if (includeAllOption) {
-            options.push({ value: '', text: 'Semua Tahun' });
-        }
-        
-        for (let i = currentYear; i >= 2018; i--) {
-            options.push({ value: i.toString(), text: i.toString() });
-        }
-        
-        selectInstance.clear();
-        selectInstance.addOptions(options);
-        
-        if (includeAllOption) {
-            selectInstance.setValue('');
-        }
+        // PERUBAHAN DI SINI: Isi tahun untuk filter (2010-sekarang)
+        populateFilterYearSelect(searchTahunSelect, true);
     }
 
     // ==================== NAVIGASI TAB ====================
