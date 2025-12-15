@@ -979,31 +979,54 @@ async function editMatkul(id) {
     return;
   }
 
-  console.log('DEBUG: Data matkul untuk edit:', matkul);
-  console.log('DEBUG: Prodi dari data:', matkul.prodi);
-  console.log('DEBUG: Prodi (capital) dari data:', matkul.Prodi);
+  console.log('=== DEBUG EDIT ===');
+  console.log('Matkul data:', matkul);
+  
+  // Gunakan Prodi dari data
+  let prodiValue = matkul.prodi || matkul.Prodi || '';
+  console.log('Original prodi value:', prodiValue);
+  
+  // Normalisasi value (trim, capitalize first letter)
+  if (prodiValue) {
+    prodiValue = prodiValue.trim();
+    // Buat huruf pertama kapital, sisanya kecil
+    prodiValue = prodiValue.charAt(0).toUpperCase() + prodiValue.slice(1).toLowerCase();
+  }
+  console.log('Normalized prodi value:', prodiValue);
   
   document.getElementById('matkulId').value = matkul.id || matkul.kode;
   document.getElementById('modalKode').value = matkul.kode;
   document.getElementById('modalNama').value = matkul.nama;
   
-  // PERBAIKAN: Gunakan matkul.Prodi (dengan P besar) karena itu nama kolom di database
-  // Juga cek semua kemungkinan
-  let prodiValue = matkul.Prodi || matkul.prodi || '';
-  console.log('DEBUG: Prodi value yang akan diset:', prodiValue);
+  // Set value dengan normalisasi
+  const prodiSelect = document.getElementById('modalProdi');
+  prodiSelect.value = prodiValue;
   
-  document.getElementById('modalProdi').value = prodiValue;
+  // Jika tidak ada yang cocok, cari partial match
+  if (!prodiSelect.value && prodiValue) {
+    console.log('No exact match, looking for partial match...');
+    
+    // Cari option yang mengandung value (case insensitive)
+    const options = Array.from(prodiSelect.options);
+    const matchedOption = options.find(opt => 
+      opt.value.toLowerCase().includes(prodiValue.toLowerCase()) ||
+      prodiValue.toLowerCase().includes(opt.value.toLowerCase())
+    );
+    
+    if (matchedOption) {
+      console.log('Found partial match:', matchedOption.value);
+      prodiSelect.value = matchedOption.value;
+    } else {
+      console.log('No match found, setting to Lainnya');
+      prodiSelect.value = 'Lainnya';
+    }
+  }
+  
+  console.log('Final prodi select value:', prodiSelect.value);
+  
   document.getElementById('modalSKS').value = matkul.sks;
   document.getElementById('modalSemester').value = matkul.semester || '';
   document.getElementById('modalDeskripsi').value = matkul.deskripsi || '';
-  document.getElementById('modalTitle').textContent = 'Edit Mata Kuliah';
-  document.getElementById('saveButtonText').textContent = 'Update Mata Kuliah';
-  
-  // Debug: Cek apakah value berhasil diset
-  setTimeout(() => {
-    console.log('DEBUG: Value di select prodi setelah set:', document.getElementById('modalProdi').value);
-    console.log('DEBUG: Selected option:', document.getElementById('modalProdi').selectedOptions[0]?.text);
-  }, 100);
   
   openModal();
 }
