@@ -868,12 +868,12 @@ function renderMatkulTable(data) {
     let passes = true;
     
     // Filter berdasarkan kode prodi
-    if (kodeProdi) {
-      const kodePrefix = matkul.kode ? matkul.kode.substring(0, 5) : '';
-      if (kodePrefix !== kodeProdi) {
-        passes = false;
-      }
-    }
+    // Di filterMatkulData()
+if (kodeProdi) {
+  if (matkul.prodi !== kodeProdi) {
+    passes = false;
+  }
+}
     
     // Filter berdasarkan nama mata kuliah
     if (namaMatkul && !matkul.nama.toLowerCase().includes(namaMatkul)) {
