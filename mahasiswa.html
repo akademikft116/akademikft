@@ -650,12 +650,13 @@
     });
 
     // ==================== FUNGSI TAHUN UNTUK FORM & FILTER ====================
-    // Untuk form tahun masuk (hanya 2018-sekarang)
+    // Untuk form tahun masuk (2010-sekarang) - PERUBAHAN DI SINI
     function populateFormYearSelect(selectInstance) {
         const currentYear = new Date().getFullYear();
         const options = [];
         
-        for (let i = currentYear; i >= 2018; i--) {
+        // PERUBAHAN: dari i >= 2018 menjadi i >= 2010
+        for (let i = currentYear; i >= 2010; i--) {
             options.push({ value: i.toString(), text: i.toString() });
         }
         
@@ -663,7 +664,7 @@
         selectInstance.addOptions(options);
     }
 
-    // Untuk filter pencarian (2010-sekarang)
+    // Untuk filter pencarian (2010-sekarang) - sudah benar
     function populateFilterYearSelect(selectInstance, includeAllOption = false) {
         const currentYear = new Date().getFullYear();
         const options = [];
@@ -702,7 +703,7 @@
             placeholder: "Pilih Status"
         });
 
-        // PERUBAHAN DI SINI: Isi tahun untuk form (2018-sekarang)
+        // Isi tahun untuk form (2010-sekarang)
         populateFormYearSelect(tahunMasukSelect);
 
         // Filter search
@@ -721,7 +722,7 @@
             placeholder: "Semua Tahun"
         });
         
-        // PERUBAHAN DI SINI: Isi tahun untuk filter (2010-sekarang)
+        // Isi tahun untuk filter (2010-sekarang)
         populateFilterYearSelect(searchTahunSelect, true);
     }
 
