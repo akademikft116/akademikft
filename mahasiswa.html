@@ -245,6 +245,9 @@
                                 <button type="button" id="tab-personal" onclick="switchFormTab('personal')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
                                     <i class="fas fa-id-card mr-2"></i> Data Personal & Orang Tua
                                 </button>
+                                <button type="button" id="tab-tanggal" onclick="switchFormTab('tanggal')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                    <i class="fas fa-calendar-day mr-2"></i> Tanggal Lahir
+                                </button>
                             </nav>
                         </div>
 
@@ -281,12 +284,7 @@
                                         <option value="Laki-laki">Laki-laki</option>
                                         <option value="Perempuan">Perempuan</option>
                                     </select>
-                                </div>
-
-                                <div>
-                                    <label for="ttl" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-                                    <input type="text" id="ttl" placeholder="Contoh: Jakarta, 01-01-2000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                </div>                    
+                                </div>                   
                                 <div>
                                     <label for="tahunmasuk" class="block text-sm font-medium text-gray-700">Tahun Masuk <span class="text-red-500">*</span></label>
                                     <select id="tahunmasuk" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -326,6 +324,17 @@
                             </div>
                           <hr class="my-8 border-t-2 border-gray-200">
                         </div>
+
+                        <div id="content-tanggal" class="tab-content hidden">
+    <p class="text-sm text-gray-600 mb-4">Masukkan tanggal lahir mahasiswa.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label for="ttl" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+            <input type="date" id="ttl" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+    </div>
+    <hr class="my-8 border-t-2 border-gray-200">
+</div>
 
                         <div id="content-personal" class="tab-content hidden">
                             <p class="text-sm text-gray-600 mb-4">Lengkapi data personal dan orang tua (dapat dikosongkan).</p>
@@ -1076,7 +1085,18 @@ function maintainOrderAfterEdit(updatedData) {
     
     const namaAyah = document.getElementById('namaayah').value || null;
     const namaIbu = document.getElementById('namaibu').value || null;
-    const ttl = document.getElementById('ttl').value || null;
+    // Ambil nilai dari input date
+const ttlInput = document.getElementById('ttl').value;
+let ttl = null;
+
+if (ttlInput) {
+    // Format dari YYYY-MM-DD ke DD/MM/YYYY
+    const date = new Date(ttlInput);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    ttl = `${day}/${month}/${year}`; // Hanya tanggal saja
+}
     const alamat = document.getElementById('alamat').value || null;
     const kelurahan = document.getElementById('kelurahan').value || null;
     const kecamatan = document.getElementById('kecamatan').value || null;
@@ -1170,6 +1190,20 @@ function maintainOrderAfterEdit(updatedData) {
         document.getElementById('mahasiswaId').value = mhs.id;
         document.getElementById('npm').value = mhs.npm;
         document.getElementById('nama').value = mhs.nama;
+
+        // Format tanggal untuk input type="date" (YYYY-MM-DD)
+if (mhs.ttl) {
+    // Jika ttl berformat "BANDUNG, 15/06/2000"
+    const ttlParts = mhs.ttl.split(', ');
+    if (ttlParts.length > 1) {
+        const dateParts = ttlParts[1].split('/');
+        if (dateParts.length === 3) {
+            // Format menjadi YYYY-MM-DD untuk input type="date"
+            const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            document.getElementById('ttl').value = formattedDate;
+        }
+    }
+}
         
         prodiSelect.setValue(mhs.prodi);
         document.getElementById('kelas').value = mhs.kelas || '';
@@ -1227,7 +1261,7 @@ async function showDetail(npm) {
         <p><strong>Kelas:</strong> ${mhs.kelas || '-'}</p>
         <p><strong>Tahun Masuk:</strong> ${mhs.tahun_masuk}</p>
         <p><strong>Status:</strong> <span class="${statusColor} font-bold">${mhs.status}</span></p>
-        <p><strong>Tanggal Lahir:</strong> ${mhs.ttl || '-'}</p>
+        <p><strong>Tanggal Lahir:</strong> ${mhs.ttl ? mhs.ttl.split(', ')[1] || mhs.ttl : '-'}</p>
         <p><strong>No. HP:</strong> ${mhs.no_hp || '-'}</p>
         <p><strong>NIK:</strong> ${mhs.nik_mahasiswa || '-'}</p>
         <p><strong>Nomor Ijazah:</strong> ${mhs.nomor_ijazah || '-'}</p>
