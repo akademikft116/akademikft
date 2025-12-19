@@ -323,55 +323,67 @@
     }
 
     /* Warna untuk setiap prodi di tabel mahasiswa sesuai permintaan */
-.prodi-industri {
+/* Semua sel dalam baris prodi akan berwarna sama */
+
+/* INDUSTRI - Ungu */
+.prodi-industri-row td:not(:first-child) {
   background-color: #e9d5ff !important; /* Ungu muda */
   color: #6b21a8 !important;
-  font-weight: 600;
 }
 
-.prodi-sipil {
+.prodi-industri-row:hover td:not(:first-child) {
+  background-color: #d8b4fe !important; /* Ungu lebih terang saat hover */
+}
+
+/* SIPIL - Biru muda */
+.prodi-sipil-row td:not(:first-child) {
   background-color: #dbeafe !important; /* Biru muda */
   color: #1e40af !important;
-  font-weight: 600;
 }
 
-.prodi-arsitektur {
+.prodi-sipil-row:hover td:not(:first-child) {
+  background-color: #bfdbfe !important; /* Biru lebih terang saat hover */
+}
+
+/* ARSITEKTUR - Hijau */
+.prodi-arsitektur-row td:not(:first-child) {
   background-color: #d1fae5 !important; /* Hijau muda */
   color: #065f46 !important;
-  font-weight: 600;
 }
 
-.prodi-elektro {
-  background-color: #fef3c7 !important; /* Coklat muda/kuning pucat */
-  color: #92400e !important;
-  font-weight: 600;
+.prodi-arsitektur-row:hover td:not(:first-child) {
+  background-color: #a7f3d0 !important; /* Hijau lebih terang saat hover */
 }
 
-.prodi-informatika {
+/* ELEKTRO - Coklat tua (sesuai permintaan) */
+.prodi-elektro-row td:not(:first-child) {
+  background-color: #92400e !important; /* Coklat tua */
+  color: white !important; /* Warna teks putih agar kontras */
+}
+
+.prodi-elektro-row:hover td:not(:first-child) {
+  background-color: #78350f !important; /* Coklat tua lebih gelap saat hover */
+}
+
+/* INFORMATIKA - Kuning */
+.prodi-informatika-row td:not(:first-child) {
   background-color: #fef9c3 !important; /* Kuning cerah */
   color: #854d0e !important;
-  font-weight: 600;
 }
 
-    /* Efek hover untuk baris prodi */
-.prodi-industri:hover {
-  background-color: #d8b4fe !important;
+.prodi-informatika-row:hover td:not(:first-child) {
+  background-color: #fef08a !important; /* Kuning lebih cerah saat hover */
 }
 
-.prodi-sipil:hover {
-  background-color: #bfdbfe !important;
-}
-
-.prodi-arsitektur:hover {
-  background-color: #a7f3d0 !important;
-}
-
-.prodi-elektro:hover {
-  background-color: #fde68a !important;
-}
-
-.prodi-informatika:hover {
-  background-color: #fef08a !important;
+/* Sel NO tetap putih */
+.prodi-industri-row td:first-child,
+.prodi-sipil-row td:first-child,
+.prodi-arsitektur-row td:first-child,
+.prodi-elektro-row td:first-child,
+.prodi-informatika-row td:first-child {
+  background-color: white !important;
+  color: #6b7280 !important;
+  font-weight: normal;
 }
   </style>
 </head>
@@ -1956,34 +1968,34 @@
   let html = '';
   data.forEach((item) => {
     // Tentukan class CSS berdasarkan prodi
-    let prodiClass = '';
+    let rowClass = '';
     switch(item.prodi.toLowerCase()) {
       case 'industri':
-        prodiClass = 'prodi-industri';
+        rowClass = 'prodi-industri-row';
         break;
       case 'sipil':
-        prodiClass = 'prodi-sipil';
+        rowClass = 'prodi-sipil-row';
         break;
       case 'arsitektur':
-        prodiClass = 'prodi-arsitektur';
+        rowClass = 'prodi-arsitektur-row';
         break;
       case 'elektro':
-        prodiClass = 'prodi-elektro';
+        rowClass = 'prodi-elektro-row';
         break;
       case 'informatika':
-        prodiClass = 'prodi-informatika';
+        rowClass = 'prodi-informatika-row';
         break;
     }
     
     html += `
-      <tr class="hover:bg-gray-50">
+      <tr class="hover:bg-gray-50 ${rowClass}">
         <td class="px-4 py-3 text-sm text-center border border-gray-300">${item.no}</td>
-        <td class="px-4 py-3 text-sm font-medium border border-gray-300 ${prodiClass}">
+        <td class="px-4 py-3 text-sm font-medium border border-gray-300">
           ${item.prodi}
         </td>
         ${[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024]
           .map(year => `
-            <td class="px-4 py-3 text-sm text-center border border-gray-300 ${item.tahun[year] === 0 ? 'text-gray-400' : 'text-gray-900'}">
+            <td class="px-4 py-3 text-sm text-center border border-gray-300">
               ${item.tahun[year] || 0}
             </td>
           `).join('')}
@@ -1993,7 +2005,7 @@
   
   tableBody.innerHTML = html;
   
-  // Render total row
+  // Render total row (khusus untuk baris TOTAL tetap dengan background biru)
   let totalHtml = `
     <td class="px-4 py-3 text-sm font-bold text-center border border-gray-300" colspan="2">TOTAL MAHASISWA</td>
   `;
@@ -2024,34 +2036,33 @@
 }
     // Fungsi filter
     function filterMahasiswa() {
-      const tahunFilter = document.getElementById('tahunFilter').value;
-      const prodiFilter = document.getElementById('prodiFilter').value;
-      
-      let filteredData = [...mahasiswaData];
-      
-      // Filter berdasarkan prodi
-      if (prodiFilter !== 'all') {
-        filteredData = filteredData.filter(item => 
-          item.prodi.toLowerCase() === prodiFilter.toLowerCase()
-        );
-      }
-      
-      // Filter berdasarkan tahun (jika bukan "all")
-      if (tahunFilter !== 'all') {
-        const year = parseInt(tahunFilter);
-        // Buat data baru yang hanya menampilkan kolom tahun yang dipilih
-        filteredData = filteredData.map(item => {
-          return {
-            no: item.no,
-            prodi: item.prodi,
-            tahun: { [year]: item.tahun[year] || 0 }
-          };
-        });
-      }
-      
-      renderMahasiswaTable(filteredData);
-    }
-
+  const tahunFilter = document.getElementById('tahunFilter').value;
+  const prodiFilter = document.getElementById('prodiFilter').value;
+  
+  let filteredData = [...mahasiswaData];
+  
+  // Filter berdasarkan prodi
+  if (prodiFilter !== 'all') {
+    filteredData = filteredData.filter(item => 
+      item.prodi.toLowerCase() === prodiFilter.toLowerCase()
+    );
+  }
+  
+  // Filter berdasarkan tahun (jika bukan "all")
+  if (tahunFilter !== 'all') {
+    const year = parseInt(tahunFilter);
+    // Buat data baru yang hanya menampilkan kolom tahun yang dipilih
+    filteredData = filteredData.map(item => {
+      return {
+        no: item.no,
+        prodi: item.prodi,
+        tahun: { [year]: item.tahun[year] || 0 }
+      };
+    });
+  }
+  
+  renderMahasiswaTable(filteredData);
+}
     // Fungsi reset filter
     function resetMahasiswaFilter() {
       document.getElementById('tahunFilter').value = 'all';
