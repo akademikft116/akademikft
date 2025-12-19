@@ -321,6 +321,58 @@
     .table-mahasiswa tfoot tr {
       background-color: #dbeafe;
     }
+
+    /* Warna untuk setiap prodi di tabel mahasiswa sesuai permintaan */
+.prodi-industri {
+  background-color: #e9d5ff !important; /* Ungu muda */
+  color: #6b21a8 !important;
+  font-weight: 600;
+}
+
+.prodi-sipil {
+  background-color: #dbeafe !important; /* Biru muda */
+  color: #1e40af !important;
+  font-weight: 600;
+}
+
+.prodi-arsitektur {
+  background-color: #d1fae5 !important; /* Hijau muda */
+  color: #065f46 !important;
+  font-weight: 600;
+}
+
+.prodi-elektro {
+  background-color: #fef3c7 !important; /* Coklat muda/kuning pucat */
+  color: #92400e !important;
+  font-weight: 600;
+}
+
+.prodi-informatika {
+  background-color: #fef9c3 !important; /* Kuning cerah */
+  color: #854d0e !important;
+  font-weight: 600;
+}
+
+    /* Efek hover untuk baris prodi */
+.prodi-industri:hover {
+  background-color: #d8b4fe !important;
+}
+
+.prodi-sipil:hover {
+  background-color: #bfdbfe !important;
+}
+
+.prodi-arsitektur:hover {
+  background-color: #a7f3d0 !important;
+}
+
+.prodi-elektro:hover {
+  background-color: #fde68a !important;
+}
+
+.prodi-informatika:hover {
+  background-color: #fef08a !important;
+}
   </style>
 </head>
 <body class="bg-gray-100">
@@ -1886,69 +1938,90 @@
 
     // Fungsi untuk merender tabel mahasiswa
     function renderMahasiswaTable(data = mahasiswaData) {
-      const tableBody = document.getElementById('mahasiswaTableBody');
-      const totalRow = document.getElementById('totalMahasiswaRow');
-      
-      if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="17" class="px-4 py-6 text-center text-gray-500">
-              Tidak ada data mahasiswa
-            </td>
-          </tr>
-        `;
-        return;
-      }
-      
-      // Render data per prodi
-      let html = '';
-      data.forEach((item) => {
-        html += `
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 text-sm text-center border border-gray-300">${item.no}</td>
-            <td class="px-4 py-3 text-sm font-medium text-gray-900 border border-gray-300">${item.prodi}</td>
-            ${[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024]
-              .map(year => `
-                <td class="px-4 py-3 text-sm text-center border border-gray-300 ${item.tahun[year] === 0 ? 'text-gray-400' : 'text-gray-900'}">
-                  ${item.tahun[year] || 0}
-                </td>
-              `).join('')}
-          </tr>
-        `;
-      });
-      
-      tableBody.innerHTML = html;
-      
-      // Render total row
-      let totalHtml = `
-        <td class="px-4 py-3 text-sm font-bold text-center border border-gray-300" colspan="2">TOTAL MAHASISWA</td>
-      `;
-      
-      let grandTotal = 0;
-      const years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
-      
-      years.forEach(year => {
-        // Hitung total per tahun dari semua prodi
-        let totalPerTahun = 0;
-        data.forEach(item => {
-          totalPerTahun += item.tahun[year] || 0;
-        });
-        grandTotal += totalPerTahun;
-        
-        totalHtml += `
-          <td class="px-4 py-3 text-sm font-bold text-center border border-gray-300 bg-blue-50">
-            ${totalPerTahun}
-          </td>
-        `;
-      });
-      
-      totalRow.innerHTML = totalHtml;
-      
-      // Update info total
-      document.getElementById('totalMahasiswaInfo').textContent = 
-        `Total Mahasiswa: ${grandTotal.toLocaleString('id-ID')}`;
+  const tableBody = document.getElementById('mahasiswaTableBody');
+  const totalRow = document.getElementById('totalMahasiswaRow');
+  
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="17" class="px-4 py-6 text-center text-gray-500">
+          Tidak ada data mahasiswa
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  // Render data per prodi
+  let html = '';
+  data.forEach((item) => {
+    // Tentukan class CSS berdasarkan prodi
+    let prodiClass = '';
+    switch(item.prodi.toLowerCase()) {
+      case 'industri':
+        prodiClass = 'prodi-industri';
+        break;
+      case 'sipil':
+        prodiClass = 'prodi-sipil';
+        break;
+      case 'arsitektur':
+        prodiClass = 'prodi-arsitektur';
+        break;
+      case 'elektro':
+        prodiClass = 'prodi-elektro';
+        break;
+      case 'informatika':
+        prodiClass = 'prodi-informatika';
+        break;
     }
-
+    
+    html += `
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-3 text-sm text-center border border-gray-300">${item.no}</td>
+        <td class="px-4 py-3 text-sm font-medium border border-gray-300 ${prodiClass}">
+          ${item.prodi}
+        </td>
+        ${[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024]
+          .map(year => `
+            <td class="px-4 py-3 text-sm text-center border border-gray-300 ${item.tahun[year] === 0 ? 'text-gray-400' : 'text-gray-900'}">
+              ${item.tahun[year] || 0}
+            </td>
+          `).join('')}
+      </tr>
+    `;
+  });
+  
+  tableBody.innerHTML = html;
+  
+  // Render total row
+  let totalHtml = `
+    <td class="px-4 py-3 text-sm font-bold text-center border border-gray-300" colspan="2">TOTAL MAHASISWA</td>
+  `;
+  
+  let grandTotal = 0;
+  const years = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+  
+  years.forEach(year => {
+    // Hitung total per tahun dari semua prodi
+    let totalPerTahun = 0;
+    data.forEach(item => {
+      totalPerTahun += item.tahun[year] || 0;
+    });
+    grandTotal += totalPerTahun;
+    
+    totalHtml += `
+      <td class="px-4 py-3 text-sm font-bold text-center border border-gray-300 bg-blue-50">
+        ${totalPerTahun}
+      </td>
+    `;
+  });
+  
+  totalRow.innerHTML = totalHtml;
+  
+  // Update info total
+  document.getElementById('totalMahasiswaInfo').textContent = 
+    `Total Mahasiswa: ${grandTotal.toLocaleString('id-ID')}`;
+}
     // Fungsi filter
     function filterMahasiswa() {
       const tahunFilter = document.getElementById('tahunFilter').value;
