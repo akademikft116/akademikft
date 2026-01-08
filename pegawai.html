@@ -1,1 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Pegawai - Fakultas Teknik</title>
 
+  <!-- Tailwind -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<nav class="bg-blue-800 h-16 flex items-center justify-between px-6 fixed top-0 left-0 right-0 z-10">
+  <h1 class="text-white text-xl font-bold">DATA PEGAWAI FT</h1>
+  <a href="dashboard.html" class="text-white text-sm hover:underline">
+    ← Kembali ke Dashboard
+  </a>
+</nav>
+
+<!-- CONTENT -->
+<div class="pt-20 px-8">
+
+  <div class="bg-white p-6 rounded-lg shadow-xl">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Daftar Pegawai</h2>
+      <button onclick="openModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md">
+        + Tambah Pegawai
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full border text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-2 py-2">No</th>
+            <th class="border px-2 py-2">NIP</th>
+            <th class="border px-2 py-2">Nama</th>
+            <th class="border px-2 py-2">Jabatan</th>
+            <th class="border px-2 py-2">Unit</th>
+            <th class="border px-2 py-2">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="pegawaiTable">
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">
+              Memuat data...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div id="pegawaiModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg w-full max-w-md p-6">
+    <h3 class="text-xl font-bold mb-4" id="modalTitle">Tambah Pegawai</h3>
+
+    <input type="hidden" id="pegawaiId">
+
+    <div class="space-y-3">
+      <input id="nip" class="w-full border p-2 rounded" placeholder="NIP">
+      <input id="nama" class="w-full border p-2 rounded" placeholder="Nama">
+      <input id="jabatan" class="w-full border p-2 rounded" placeholder="Jabatan">
+      <input id="unit" class="w-full border p-2 rounded" placeholder="Unit Kerja">
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button onclick="closeModal()" class="px-4 py-2 border rounded">Batal</button>
+      <button onclick="savePegawai()" class="px-4 py-2 bg-blue-600 text-white rounded">
+        Simpan
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
+const SUPABASE_KEY = "PASTE_API_KEY_KAMU";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let pegawaiData = [];
+
+// LOAD DATA
+async function loadPegawai() {
+  const { data, error } = await supabaseClient
+    .from('pegawai')
+    .select('*')
+    .order('nama');
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  pegawaiData = data;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('pegawaiTable');
+  tbody.innerHTML = '';
+
+  if (pegawaiData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center">Data kosong</td></tr>`;
+    return;
+  }
+
+  pegawaiData.forEach((p, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td class="border px-2 py-1 text-center">${i + 1}</td>
+        <td class="border px-2 py-1">${p.nip}</td>
+        <td class="border px-2 py-1">${p.nama}</td>
+        <td class="border px-2 py-1">${p.jabatan}</td>
+        <td class="border px-2 py-1">${p.unit}</td>
+        <td class="border px-2 py-1 text-center">
+          <button onclick="editPegawai('${p.id}')" class="text-blue-600">Edit</button>
+          <button onclick="hapusPegawai('${p.id}')" class="text-red-600 ml-2">Hapus</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// MODAL
+function openModal() {
+  document.getElementById('pegawaiModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('pegawaiModal').classList.add('hidden');
+  document.getElementById('pegawaiId').value = '';
+  nip.value = nama.value = jabatan.value = unit.value = '';
+}
+
+// SAVE
+async function savePegawai() {
+  const id = pegawaiId.value;
+  const data = {
+    nip: nip.value,
+    nama: nama.value,
+    jabatan: jabatan.value,
+    unit: unit.value
+  };
+
+  if (id) {
+    await supabaseClient.from('pegawai').update(data).eq('id', id);
+  } else {
+    await supabaseClient.from('pegawai').insert([data]);
+  }
+
+  closeModal();
+  loadPegawai();
+}
+
+function editPegawai(id) {
+  const p = pegawaiData.find(x => x.id === id);
+  pegawaiId.value = p.id;
+  nip.value = p.nip;
+  nama.value = p.nama;
+  jabatan.value = p.jabatan;
+  unit.value = p.unit;
+  openModal();
+}
+
+async function hapusPegawai(id) {
+  if (!confirm('Hapus pegawai ini?')) return;
+  await supabaseClient.from('pegawai').delete().eq('id', id);
+  loadPegawai();
+}
+
+loadPegawai();
+</script>
+
+</body>
+</html>
