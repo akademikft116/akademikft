@@ -661,12 +661,14 @@
 
     // ==================== FUNGSI TAHUN UNTUK FORM & FILTER ====================
 // Untuk form tahun masuk (1995-tahun sekarang)
+// ==================== FUNGSI TAHUN UNTUK FORM & FILTER ====================
+// Untuk form tahun masuk (1995-tahun sekarang)
 function populateFormYearSelect(selectInstance) {
     const currentYear = new Date().getFullYear();
     const options = [];
     
-    // PERUBAHAN: dari 1995 sampai tahun sekarang + 1 (tahun depan)
-    for (let i = currentYear + 1; i >= 1995; i--) {
+    // Dari tahun sekarang mundur ke 1995
+    for (let i = currentYear; i >= 1995; i--) {
         options.push({ value: i.toString(), text: i.toString() });
     }
     
@@ -683,8 +685,8 @@ function populateFilterYearSelect(selectInstance, includeAllOption = false) {
         options.push({ value: '', text: 'Semua Tahun' });
     }
     
-    // PERUBAHAN: dari 1995 sampai tahun sekarang + 1 (tahun depan)
-    for (let i = currentYear + 1; i >= 1995; i--) {
+    // Dari tahun sekarang mundur ke 1995
+    for (let i = currentYear; i >= 1995; i--) {
         options.push({ value: i.toString(), text: i.toString() });
     }
     
