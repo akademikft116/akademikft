@@ -660,41 +660,41 @@
     });
 
     // ==================== FUNGSI TAHUN UNTUK FORM & FILTER ====================
-    // Untuk form tahun masuk (2010-sekarang) - PERUBAHAN DI SINI
-    function populateFormYearSelect(selectInstance) {
-        const currentYear = new Date().getFullYear();
-        const options = [];
-        
-        // PERUBAHAN: dari i >= 2018 menjadi i >= 2010
-        for (let i = currentYear; i >= 2010; i--) {
-            options.push({ value: i.toString(), text: i.toString() });
-        }
-        
-        selectInstance.clear();
-        selectInstance.addOptions(options);
+// Untuk form tahun masuk (1995-tahun sekarang)
+function populateFormYearSelect(selectInstance) {
+    const currentYear = new Date().getFullYear();
+    const options = [];
+    
+    // PERUBAHAN: dari 1995 sampai tahun sekarang + 1 (tahun depan)
+    for (let i = currentYear + 1; i >= 1995; i--) {
+        options.push({ value: i.toString(), text: i.toString() });
     }
+    
+    selectInstance.clear();
+    selectInstance.addOptions(options);
+}
 
-    // Untuk filter pencarian (2010-sekarang) - sudah benar
-    function populateFilterYearSelect(selectInstance, includeAllOption = false) {
-        const currentYear = new Date().getFullYear();
-        const options = [];
-        
-        if (includeAllOption) {
-            options.push({ value: '', text: 'Semua Tahun' });
-        }
-        
-        for (let i = currentYear; i >= 2010; i--) {
-            options.push({ value: i.toString(), text: i.toString() });
-        }
-        
-        selectInstance.clear();
-        selectInstance.addOptions(options);
-        
-        if (includeAllOption) {
-            selectInstance.setValue('');
-        }
+// Untuk filter pencarian (1995-tahun sekarang)
+function populateFilterYearSelect(selectInstance, includeAllOption = false) {
+    const currentYear = new Date().getFullYear();
+    const options = [];
+    
+    if (includeAllOption) {
+        options.push({ value: '', text: 'Semua Tahun' });
     }
-
+    
+    // PERUBAHAN: dari 1995 sampai tahun sekarang + 1 (tahun depan)
+    for (let i = currentYear + 1; i >= 1995; i--) {
+        options.push({ value: i.toString(), text: i.toString() });
+    }
+    
+    selectInstance.clear();
+    selectInstance.addOptions(options);
+    
+    if (includeAllOption) {
+        selectInstance.setValue('');
+    }
+}
     function initializeTomSelect() {
         console.log('Initializing TomSelect...');
         // Form input
@@ -1078,6 +1078,14 @@ function maintainOrderAfterEdit(updatedData) {
     const tahunmasuk = parseInt(tahunMasukSelect.getValue()); 
     const statusMhs = statusSelect.getValue(); 
     
+    // Validasi tahun masuk
+    const currentYear = new Date().getFullYear();
+    if (isNaN(tahunmasuk) || tahunmasuk < 1995 || tahunmasuk > currentYear + 1) {
+        alert(`❌ Tahun masuk harus antara 1995 dan ${currentYear + 1}`);
+        switchFormTab('akademik');
+        return;
+    }
+    
     const kelas = document.getElementById('kelas').value || null;
     const nik = document.getElementById('nik').value || null;
     const nohp = document.getElementById('nohp').value || null;
@@ -1087,17 +1095,17 @@ function maintainOrderAfterEdit(updatedData) {
     const namaAyah = document.getElementById('namaayah').value || null;
     const namaIbu = document.getElementById('namaibu').value || null;
     // Ambil nilai dari input date
-const ttlInput = document.getElementById('ttl').value;
-let ttl = null;
+    const ttlInput = document.getElementById('ttl').value;
+    let ttl = null;
 
-if (ttlInput) {
-    // Format dari YYYY-MM-DD ke DD/MM/YYYY
-    const date = new Date(ttlInput);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    ttl = `${day}/${month}/${year}`; // Hanya tanggal saja
-}
+    if (ttlInput) {
+        // Format dari YYYY-MM-DD ke DD/MM/YYYY
+        const date = new Date(ttlInput);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        ttl = `${day}/${month}/${year}`; // Hanya tanggal saja
+    }
     const alamat = document.getElementById('alamat').value || null;
     const kelurahan = document.getElementById('kelurahan').value || null;
     const kecamatan = document.getElementById('kecamatan').value || null;
@@ -1623,107 +1631,117 @@ async function loadRekapitulasi() {
 
     // ==================== IMPORT EXCEL ====================
     async function importFromExcel(event) {
-        const file = event.target.files[0];
-        if (!file) { return; }
+    const file = event.target.files[0];
+    if (!file) { return; }
 
-        const importStatus = document.getElementById('importStatus');
-        importStatus.textContent = 'Membaca file...';
+    const importStatus = document.getElementById('importStatus');
+    importStatus.textContent = 'Membaca file...';
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                
-                let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                if (excelData.length < 2) {
-                    importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
-                    return;
-                }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            let excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            if (excelData.length < 2) {
+                importStatus.textContent = '❌ File Excel kosong atau hanya berisi header.';
+                return;
+            }
 
-                const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
-                const rawData = excelData.slice(1);
-                
-                const columnMapping = {
-                    'NPM': 'npm', 'NAMA': 'nama', 'PRODI': 'prodi', 'JENIS_KELAMIN': 'jenis_kelamin', 
-                    'TAHUN_MASUK': 'tahun_masuk', 'STATUS': 'status', 'KELAS': 'kelas',
-                    'NIK': 'nik_mahasiswa', 'NO_HP': 'no_hp', 'NOMOR_IJAZAH': 'nomor_ijazah', 
-                    'JUDUL_SKRIPSI': 'judul_skripsi', 'NAMA_AYAH': 'nama_ayah', 'NAMA_IBU': 'nama_ibu',
-                    'TTL': 'ttl', 'ALAMAT': 'alamat', 'KELURAHAN': 'kelurahan', 'KECAMATAN': 'kecamatan',
-                };
+            const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
+            const rawData = excelData.slice(1);
+            
+            const columnMapping = {
+                'NPM': 'npm', 'NAMA': 'nama', 'PRODI': 'prodi', 'JENIS_KELAMIN': 'jenis_kelamin', 
+                'TAHUN_MASUK': 'tahun_masuk', 'STATUS': 'status', 'KELAS': 'kelas',
+                'NIK': 'nik_mahasiswa', 'NO_HP': 'no_hp', 'NOMOR_IJAZAH': 'nomor_ijazah', 
+                'JUDUL_SKRIPSI': 'judul_skripsi', 'NAMA_AYAH': 'nama_ayah', 'NAMA_IBU': 'nama_ibu',
+                'TTL': 'ttl', 'ALAMAT': 'alamat', 'KELURAHAN': 'kelurahan', 'KECAMATAN': 'kecamatan',
+            };
 
-                const studentsToInsert = [];
+            const studentsToInsert = [];
+            
+            for (const row of rawData) {
+                let student = {};
+                let isValidRow = true;
                 
-                for (const row of rawData) {
-                    let student = {};
-                    let isValidRow = true;
+                for (let i = 0; i < headers.length; i++) {
+                    const excelHeader = headers[i];
+                    const supabaseColumn = columnMapping[excelHeader];
                     
-                    for (let i = 0; i < headers.length; i++) {
-                        const excelHeader = headers[i];
-                        const supabaseColumn = columnMapping[excelHeader];
-                        
-                        if (supabaseColumn) {
-                             let value = row[i] === undefined ? null : row[i];
-                             
-                             if (supabaseColumn === 'tahun_masuk') {
-                                 if (typeof value === 'number') {
-                                     value = Math.floor(value);
-                                 } else {
-                                     value = parseInt(String(value).trim()) || null;
-                                 }
-                             } else if (value !== null) {
-                                 value = String(value).trim() || null;
+                    if (supabaseColumn) {
+                         let value = row[i] === undefined ? null : row[i];
+                         
+                         if (supabaseColumn === 'tahun_masuk') {
+                             if (typeof value === 'number') {
+                                 value = Math.floor(value);
+                             } else {
+                                 value = parseInt(String(value).trim()) || null;
                              }
                              
-                             student[supabaseColumn] = value;
-                        }
-                    }
-                    
-                    if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
-                         console.warn('Baris diabaikan karena data wajib tidak lengkap:', student);
-                         isValidRow = false; 
-                    }
-                    
-                    student.semester = null; 
-                    student.status = student.status || 'Aktif'; 
-
-                    if (isValidRow) {
-                        studentsToInsert.push(student);
+                             // ============ TAMBAHKAN VALIDASI DI SINI ============
+                             // Validasi tahun masuk
+                             const currentYear = new Date().getFullYear();
+                             if (value !== null && (value < 1995 || value > currentYear + 1)) {
+                                 console.warn(`Tahun masuk ${value} di luar rentang valid (1995-${currentYear + 1}). Baris diabaikan.`);
+                                 isValidRow = false;
+                                 break; // Keluar dari loop jika tahun tidak valid
+                             }
+                             // ============ END VALIDASI ============
+                         } else if (value !== null) {
+                             value = String(value).trim() || null;
+                         }
+                         
+                         student[supabaseColumn] = value;
                     }
                 }
                 
-                if (studentsToInsert.length === 0) {
-                    importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib terisi.';
-                    return;
+                if (!student.npm || !student.nama || !student.prodi || !student.jenis_kelamin || !student.tahun_masuk) {
+                     console.warn('Baris diabaikan karena data wajib tidak lengkap:', student);
+                     isValidRow = false; 
                 }
+                
+                student.semester = null; 
+                student.status = student.status || 'Aktif'; 
 
-                importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
-
-                const { error: insertError } = await supabaseClient
-                    .from('mahasiswa')
-                    .upsert(studentsToInsert, { onConflict: 'npm' }); 
-
-                if (insertError) {
-                    alert('❌ Gagal mengimpor data. Pesan: ' + insertError.message);
-                    importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
-                    console.error(insertError);
-                } else {
-                    alert(`✅ Import Sukses! ${studentsToInsert.length} data mahasiswa berhasil disimpan/diperbarui.`);
-                    importStatus.textContent = `✅ Import Sukses. ${studentsToInsert.length} data disimpan/diperbarui.`;
-                    loadMahasiswaData();
+                if (isValidRow) {
+                    studentsToInsert.push(student);
                 }
-            } catch (err) {
-                console.error('Error saat memproses file Excel:', err);
-                importStatus.textContent = '❌ Terjadi kesalahan saat memproses file. Pastikan format file .xlsx/.xls benar.';
-            } finally {
-                event.target.value = '';
             }
-        };
-        reader.readAsArrayBuffer(file);
-    }
+            
+            if (studentsToInsert.length === 0) {
+                importStatus.textContent = '❌ Tidak ada data mahasiswa valid yang ditemukan untuk diimpor. Pastikan kolom wajib terisi.';
+                return;
+            }
+
+            importStatus.textContent = `Menemukan ${studentsToInsert.length} data valid. Menyimpan ke database...`;
+
+            const { error: insertError } = await supabaseClient
+                .from('mahasiswa')
+                .upsert(studentsToInsert, { onConflict: 'npm' }); 
+
+            if (insertError) {
+                alert('❌ Gagal mengimpor data. Pesan: ' + insertError.message);
+                importStatus.textContent = '❌ Import Gagal. Cek Konsol untuk detail error.';
+                console.error(insertError);
+            } else {
+                alert(`✅ Import Sukses! ${studentsToInsert.length} data mahasiswa berhasil disimpan/diperbarui.`);
+                importStatus.textContent = `✅ Import Sukses. ${studentsToInsert.length} data disimpan/diperbarui.`;
+                loadMahasiswaData();
+            }
+        } catch (err) {
+            console.error('Error saat memproses file Excel:', err);
+            importStatus.textContent = '❌ Terjadi kesalahan saat memproses file. Pastikan format file .xlsx/.xls benar.';
+        } finally {
+            event.target.value = '';
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
 
     function quickSearch() {
     const keyword = document.getElementById('quickSearch').value.trim().toLowerCase();
