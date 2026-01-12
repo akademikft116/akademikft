@@ -177,7 +177,6 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <input id="nip" class="border p-2 rounded" placeholder="NIP" required>
         <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap" required>
-        <input id="tempat_lahir" class="border p-2 rounded" placeholder="Tempat Lahir">
         <input id="tanggal_lahir" type="date" class="border p-2 rounded">
         
         <select id="jabatan" class="border p-2 rounded" required>
@@ -373,7 +372,6 @@ function openModal(pegawai = null) {
     
     document.getElementById("nip").value = pegawai.nip || '';
     document.getElementById("nama").value = pegawai.nama || '';
-    document.getElementById("tempat_lahir").value = pegawai.tempat_lahir || '';
     document.getElementById("tanggal_lahir").value = pegawai.tanggal_lahir || '';
     document.getElementById("jabatan").value = pegawai.jabatan || '';
     document.getElementById("unit").value = pegawai.unit || '';
@@ -405,7 +403,6 @@ async function savePegawai(e) {
   const pegawaiData = {
     nip: toNullIfEmpty(document.getElementById("nip").value),
     nama: toNullIfEmpty(document.getElementById("nama").value),
-    tempat_lahir: toNullIfEmpty(document.getElementById("tempat_lahir").value),
     tanggal_lahir: toNullIfEmpty(document.getElementById("tanggal_lahir").value),
     jabatan: toNullIfEmpty(document.getElementById("jabatan").value),
     unit: toNullIfEmpty(document.getElementById("unit").value),
@@ -484,7 +481,6 @@ function showDetail(id) {
     <h3 class="text-xl font-bold text-blue-700 mb-4">${pegawai.nama || 'Nama Pegawai'}</h3>
     <div class="space-y-2">
       ${detailRow('NIP', pegawai.nip)}
-      ${detailRow('Tempat Lahir', pegawai.tempat_lahir)}
       ${detailRow('Tanggal Lahir', pegawai.tanggal_lahir)}
       ${detailRow('Jabatan', pegawai.jabatan)}
       ${detailRow('Unit Kerja', pegawai.unit)}
@@ -509,7 +505,6 @@ function getDetailDataForExport() {
   return [
     ['Nama Pegawai', p.nama || '-'],
     ['NIP', p.nip || '-'],
-    ['Tempat Lahir', p.tempat_lahir || '-'],
     ['Tanggal Lahir', p.tanggal_lahir || '-'],
     ['Jabatan', p.jabatan || '-'],
     ['Unit Kerja', p.unit || '-'],
@@ -570,13 +565,12 @@ function exportAllToPdf() {
 
   const doc = new jsPDF('l', 'mm', 'a4');
   
-  const headers = ["No", "NIP", "Nama", "Tempat Lahir", "Tanggal Lahir", "Jabatan", "Unit", "Status", "No Telp", "Email", "Tgl Masuk", "Alamat"];
+  const headers = ["No", "NIP", "Nama", "Tanggal Lahir", "Jabatan", "Unit", "Status", "No Telp", "Email", "Tgl Masuk", "Alamat"];
   
   const data = allPegawaiData.map((p, index) => [
     index + 1,
     p.nip || '-',
     p.nama || '-',
-    p.tempat_lahir || '-',
     p.tanggal_lahir || '-',
     p.jabatan || '-',
     p.unit || '-',
@@ -601,15 +595,14 @@ function exportAllToPdf() {
       0: { cellWidth: 8 },
       1: { cellWidth: 20 },
       2: { cellWidth: 30 },
-      3: { cellWidth: 25 },
-      4: { cellWidth: 20 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 25 },
       5: { cellWidth: 25 },
-      6: { cellWidth: 25 },
-      7: { cellWidth: 15 },
-      8: { cellWidth: 20 },
-      9: { cellWidth: 30 },
-      10: { cellWidth: 20 },
-      11: { cellWidth: 40 },
+      6: { cellWidth: 15 },
+      7: { cellWidth: 20 },
+      8: { cellWidth: 30 },
+      9: { cellWidth: 20 },
+      10: { cellWidth: 40 },
     }
   });
 
@@ -619,11 +612,11 @@ function exportAllToPdf() {
 function exportAllToExcel() {
   if (allPegawaiData.length === 0) return alert("Tidak ada data pegawai untuk diekspor.");
   
-  const headers = ["No", "NIP", "Nama", "Tempat Lahir", "Tanggal Lahir", "Jabatan", "Unit Kerja", "Status", "No Telp", "Email", "Tanggal Masuk", "Alamat"];
+  const headers = ["No", "NIP", "Nama", "Tanggal Lahir", "Jabatan", "Unit Kerja", "Status", "No Telp", "Email", "Tanggal Masuk", "Alamat"];
   
   const rows = allPegawaiData.map((p, index) => [
     index + 1,
-    p.nip, p.nama, p.tempat_lahir, p.tanggal_lahir, p.jabatan, p.unit, p.status, 
+    p.nip, p.nama, p.tanggal_lahir, p.jabatan, p.unit, p.status, 
     p.no_telp, p.email, p.tgl_masuk, p.alamat
   ]);
   
