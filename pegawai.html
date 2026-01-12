@@ -1,183 +1,653 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Data Pegawai - Fakultas Teknik</title>
-
-  <!-- Tailwind -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="logo/jpeg" href="./images/logo.jpeg">
+  <title>Manajemen Data Pegawai - Fakultas Teknik</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  
+  <style>
+    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; }
+    .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+    .detail-label { font-weight: 600; width: 140px; display: inline-block; }
+    
+    /* === TABEL KOMPAK SAMA DENGAN DOSEN === */
+    table {
+        font-size: 11px !important;
+        width: 100%;
+        table-layout: fixed;
+    }
 
+    th, td {
+        font-size: 11px !important;
+        padding: 4px 6px !important;
+        vertical-align: middle;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Atur lebar kolom untuk tabel pegawai */
+    thead th:nth-child(1) { width: 60px; }  /* No */
+    thead th:nth-child(2) { width: 120px; } /* NIP */
+    thead th:nth-child(3) { width: 180px; } /* Nama */
+    thead th:nth-child(4) { width: 150px; } /* Jabatan */
+    thead th:nth-child(5) { width: 150px; } /* Unit Kerja */
+    thead th:nth-child(6) { width: 100px; } /* Status */
+    thead th:nth-child(7) { width: 100px; } /* Aksi */
+
+    /* Tombol aksi dalam tabel lebih kecil */
+    td:last-child button {
+        padding: 3px 6px !important;
+        font-size: 10px !important;
+        margin: 0 2px;
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
 
-<!-- NAVBAR -->
-<nav class="bg-blue-800 h-16 flex items-center justify-between px-6 fixed top-0 left-0 right-0 z-10">
-  <h1 class="text-white text-xl font-bold">DATA PEGAWAI FT</h1>
-  <a href="dashboard.html" class="text-white text-sm hover:underline">
-    ← Kembali ke Dashboard
-  </a>
+<nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
+  <div class="flex items-center space-x-3">
+    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
+    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
+  </div>
+  <div class="flex items-center space-x-4">
+    <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
+  </div>
 </nav>
 
-<!-- CONTENT -->
-<div class="pt-20 px-8">
-
-  <div class="bg-white p-6 rounded-lg shadow-xl">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold">Daftar Pegawai</h2>
-      <button onclick="openModal()" class="bg-blue-600 text-white px-4 py-2 rounded-md">
-        + Tambah Pegawai
-      </button>
+<div class="flex pt-16 main-content">
+  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
+    <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
+      <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span>
+      </a>
+      <a href="main.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span>
+      </a>
+      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span>
+      </a>
+      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span>
+      </a>
+      <a href="pegawai.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
+        <i class="fas fa-users w-5"></i><span>Data Pegawai</span>
+      </a>
+      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-book w-5"></i><span>Mata Kuliah</span>
+      </a>
+      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+        <i class="fas fa-cog w-5"></i><span>Pengaturan</span>
+      </a>  
+    </nav>
+    <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
+      <p>&copy; 2025 Akademik FT</p>
+      <p>Designed by Shidqi</p>
     </div>
+  </aside>
 
-    <div class="overflow-x-auto">
-      <table class="min-w-full border text-sm">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="border px-2 py-2">No</th>
-            <th class="border px-2 py-2">NIP</th>
-            <th class="border px-2 py-2">Nama</th>
-            <th class="border px-2 py-2">Jabatan</th>
-            <th class="border px-2 py-2">Unit</th>
-            <th class="border px-2 py-2">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="pegawaiTable">
-          <tr>
-            <td colspan="6" class="text-center py-4 text-gray-500">
-              Memuat data...
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+    <div class="container mx-auto">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Manajemen Data Pegawai</h1>
+
+      <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-semibold mb-3 text-gray-700">Filter Data Pegawai</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Cari berdasarkan NIP</label>
+            <input type="text" id="filterNip" placeholder="Masukkan NIP..." onkeyup="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Cari berdasarkan Nama</label>
+            <input type="text" id="filterNama" placeholder="Masukkan Nama Pegawai..." onkeyup="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Filter Jabatan</label>
+            <select id="filterJabatan" onchange="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
+              <option value="">Semua Jabatan</option>
+              <option value="Staff">Staff</option>
+              <option value="Administrasi">Administrasi</option>
+              <option value="Teknisi">Teknisi</option>
+              <option value="Koordinator">Koordinator</option>
+              <option value="Kepala">Kepala Bagian</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button onclick="resetFilter()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md">
+            <i class="fas fa-undo mr-2"></i>Reset Filter
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex justify-between mb-4">
+          <h2 class="text-2xl font-semibold text-gray-700">Daftar Pegawai</h2>
+          <div class="flex space-x-2">
+            <button onclick="exportAllToPdf()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
+              <i class="fas fa-file-pdf mr-2"></i>PDF Semua
+            </button>
+            <button onclick="exportAllToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+              <i class="fas fa-file-excel mr-2"></i>Excel Semua
+            </button>
+            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+              <i class="fas fa-plus-circle mr-2"></i>Tambah Pegawai
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">No</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIP</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit Kerja</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="pegawai-table-body" class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td colspan="7" class="text-center py-4 text-gray-500">Memuat data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
-
+  </main>
 </div>
 
-<!-- MODAL -->
-<div id="pegawaiModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg w-full max-w-md p-6">
-    <h3 class="text-xl font-bold mb-4" id="modalTitle">Tambah Pegawai</h3>
+<!-- MODAL TAMBAH/EDIT -->
+<div id="pegawaiModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle" class="text-2xl font-semibold mb-4">Tambah Pegawai</h2>
+    <form id="pegawaiForm" class="space-y-3">
+      <input type="hidden" id="pegawaiId">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input id="nip" class="border p-2 rounded" placeholder="NIP" required>
+        <input id="nama" class="border p-2 rounded" placeholder="Nama Lengkap" required>
+        <input id="tempat_lahir" class="border p-2 rounded" placeholder="Tempat Lahir">
+        <input id="tanggal_lahir" type="date" class="border p-2 rounded">
+        
+        <select id="jabatan" class="border p-2 rounded" required>
+          <option value="" disabled selected>Pilih Jabatan</option>
+          <option value="Staff Administrasi">Staff Administrasi</option>
+          <option value="Staff Teknis">Staff Teknis</option>
+          <option value="Koordinator">Koordinator</option>
+          <option value="Kepala Bagian">Kepala Bagian</option>
+          <option value="Sekretaris">Sekretaris</option>
+          <option value="Bendahara">Bendahara</option>
+        </select>
+        
+        <select id="unit" class="border p-2 rounded" required>
+          <option value="" disabled selected>Pilih Unit Kerja</option>
+          <option value="Akademik">Akademik</option>
+          <option value="Keuangan">Keuangan</option>
+          <option value="Laboratorium">Laboratorium</option>
+          <option value="Perpustakaan">Perpustakaan</option>
+          <option value="Kemahasiswaan">Kemahasiswaan</option>
+          <option value="TU Fakultas">TU Fakultas</option>
+        </select>
+        
+        <select id="status" class="border p-2 rounded" required>
+          <option value="" disabled selected>Pilih Status</option>
+          <option value="Aktif">Aktif</option>
+          <option value="Pensiun">Pensiun</option>
+          <option value="Pindah">Pindah</option>
+          <option value="Keluar">Keluar</option>
+        </select>
+        
+        <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
+        <input id="email" type="email" class="border p-2 rounded" placeholder="Email">
+        <input id="tgl_masuk" type="date" class="border p-2 rounded" placeholder="Tanggal Masuk">
+      </div>
+      
+      <textarea id="alamat" class="border p-2 rounded w-full" placeholder="Alamat Lengkap" rows="2"></textarea>
+      
+      <div class="flex justify-end space-x-3 mt-4">
+        <button type="button" onclick="closeModal('pegawaiModal')" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">
+          Batal
+        </button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
-    <input type="hidden" id="pegawaiId">
-
-    <div class="space-y-3">
-      <input id="nip" class="w-full border p-2 rounded" placeholder="NIP">
-      <input id="nama" class="w-full border p-2 rounded" placeholder="Nama">
-      <input id="jabatan" class="w-full border p-2 rounded" placeholder="Jabatan">
-      <input id="unit" class="w-full border p-2 rounded" placeholder="Unit Kerja">
+<!-- MODAL DETAIL -->
+<div id="detailPegawaiModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4 border-b pb-2">
+      <h2 class="text-2xl font-semibold text-gray-800">Detail Pegawai</h2>
+      <button onclick="closeModal('detailPegawaiModal')" class="text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times text-xl"></i>
+      </button>
     </div>
-
-    <div class="flex justify-end gap-2 mt-4">
-      <button onclick="closeModal()" class="px-4 py-2 border rounded">Batal</button>
-      <button onclick="savePegawai()" class="px-4 py-2 bg-blue-600 text-white rounded">
-        Simpan
+    <div id="detailContent" class="space-y-3 text-gray-700">
+      <p class="text-center py-4">Memuat detail...</p>
+    </div>
+    <div class="flex justify-end space-x-3 mt-6 border-t pt-4">
+      <button onclick="exportDetailToPdf()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
+        <i class="fas fa-file-pdf mr-2"></i>PDF
+      </button>
+      <button onclick="exportDetailToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+        <i class="fas fa-file-excel mr-2"></i>Excel
       </button>
     </div>
   </div>
 </div>
 
 <script>
+// KONFIGURASI SUPABASE
 const SUPABASE_URL = "https://bnslruddgegoeexbjwgr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJuc2xydWRkZ2Vnb2VleGJqd2dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4ODkyMTMsImV4cCI6MjA3NTQ2NTIxM30.V50LK0cosSOdZEpU96A5CM41vzapQJoB1MvJkPQE03o";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let pegawaiData = [];
+const { jsPDF } = window.jspdf; 
+let allPegawaiData = [];
+let editMode = false;
+let currentPegawaiDetail = null;
 
-// LOAD DATA
-async function loadPegawai() {
-  const { data, error } = await supabaseClient
-    .from('pegawai')
-    .select('*')
-    .order('nama');
+document.addEventListener("DOMContentLoaded", loadPegawaiData);
+document.getElementById("pegawaiForm").addEventListener("submit", savePegawai);
 
+// Helper function
+const toNullIfEmpty = (val) => {
+  if (typeof val === 'string') {
+    const trimmedVal = val.trim();
+    return trimmedVal === "" || trimmedVal === "Pilih Jabatan" || 
+           trimmedVal === "Pilih Unit Kerja" || trimmedVal === "Pilih Status" ? 
+           null : trimmedVal;
+  }
+  return val;
+};
+
+function closeModal(modalId = 'pegawaiModal') {
+  document.getElementById(modalId).style.display = "none";
+}
+
+// ==================== LOAD DATA ====================
+async function loadPegawaiData() {
+  const tbody = document.getElementById("pegawai-table-body");
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`;
+  
+  const { data, error } = await supabaseClient.from("pegawai").select("*").order("nama");
+  
   if (error) {
-    alert(error.message);
+    console.error("Gagal memuat data pegawai:", error);
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
     return;
   }
-
-  pegawaiData = data;
-  renderTable();
+  
+  allPegawaiData = data;
+  renderTable(data);
 }
 
-function renderTable() {
-  const tbody = document.getElementById('pegawaiTable');
-  tbody.innerHTML = '';
-
-  if (pegawaiData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center">Data kosong</td></tr>`;
+function renderTable(data) {
+  const tbody = document.getElementById("pegawai-table-body");
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Data pegawai tidak ditemukan.</td></tr>`;
     return;
   }
+  
+  tbody.innerHTML = data.map((p, index) => `
+    <tr class="hover:bg-gray-100">
+      <td class="px-4 py-4 text-sm border text-center">${index + 1}</td>
+      <td class="px-4 py-4 text-sm border">${p.nip || '-'}</td>
+      <td class="px-4 py-4 text-sm border">${p.nama || '-'}</td>
+      <td class="px-4 py-4 text-sm border">${p.jabatan || '-'}</td>
+      <td class="px-4 py-4 text-sm border">${p.unit || '-'}</td>
+      <td class="px-4 py-4 text-center text-sm border">
+        <span class="px-2 py-1 rounded-full text-xs font-medium ${
+          p.status === 'Aktif' ? 'bg-green-100 text-green-800' :
+          p.status === 'Pensiun' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-gray-100 text-gray-800'
+        }">
+          ${p.status || '-'}
+        </span>
+      </td>
+      <td class="px-4 py-4 text-center text-sm border space-x-2">
+        <button class="text-blue-600 hover:text-blue-800" onclick="showDetail('${p.id}')" title="Detail">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="text-yellow-600 hover:text-yellow-800" onclick="editPegawai('${p.id}')" title="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="text-red-600 hover:text-red-800" onclick="deletePegawai('${p.id}')" title="Hapus">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
 
-  pegawaiData.forEach((p, i) => {
-    tbody.innerHTML += `
-      <tr>
-        <td class="border px-2 py-1 text-center">${i + 1}</td>
-        <td class="border px-2 py-1">${p.nip}</td>
-        <td class="border px-2 py-1">${p.nama}</td>
-        <td class="border px-2 py-1">${p.jabatan}</td>
-        <td class="border px-2 py-1">${p.unit}</td>
-        <td class="border px-2 py-1 text-center">
-          <button onclick="editPegawai('${p.id}')" class="text-blue-600">Edit</button>
-          <button onclick="hapusPegawai('${p.id}')" class="text-red-600 ml-2">Hapus</button>
-        </td>
-      </tr>
-    `;
+function applyFilter() {
+  const filterNip = document.getElementById('filterNip').value.toLowerCase();
+  const filterNama = document.getElementById('filterNama').value.toLowerCase();
+  const filterJabatan = document.getElementById('filterJabatan').value;
+  
+  let filteredData = allPegawaiData.filter(pegawai => {
+    const matchNip = (pegawai.nip || '').toLowerCase().includes(filterNip);
+    const matchNama = (pegawai.nama || '').toLowerCase().includes(filterNama);
+    const matchJabatan = !filterJabatan || pegawai.jabatan === filterJabatan;
+    
+    return matchNip && matchNama && matchJabatan;
   });
+  
+  renderTable(filteredData);
 }
 
-// MODAL
-function openModal() {
-  document.getElementById('pegawaiModal').classList.remove('hidden');
+function resetFilter() {
+  document.getElementById('filterNip').value = '';
+  document.getElementById('filterNama').value = '';
+  document.getElementById('filterJabatan').value = '';
+  renderTable(allPegawaiData);
 }
 
-function closeModal() {
-  document.getElementById('pegawaiModal').classList.add('hidden');
-  document.getElementById('pegawaiId').value = '';
-  nip.value = nama.value = jabatan.value = unit.value = '';
-}
-
-// SAVE
-async function savePegawai() {
-  const id = pegawaiId.value;
-  const data = {
-    nip: nip.value,
-    nama: nama.value,
-    jabatan: jabatan.value,
-    unit: unit.value
-  };
-
-  if (id) {
-    await supabaseClient.from('pegawai').update(data).eq('id', id);
-  } else {
-    await supabaseClient.from('pegawai').insert([data]);
+// ==================== MODAL TAMBAH/EDIT ====================
+function openModal(pegawai = null) {
+  document.getElementById("pegawaiForm").reset();
+  document.getElementById("pegawaiId").value = "";
+  document.getElementById("modalTitle").textContent = "Tambah Pegawai";
+  document.getElementById("jabatan").value = "";
+  document.getElementById("unit").value = "";
+  document.getElementById("status").value = "";
+  editMode = false;
+  
+  if (pegawai) {
+    document.getElementById("pegawaiId").value = pegawai.id;
+    document.getElementById("modalTitle").textContent = "Edit Pegawai: " + (pegawai.nama || pegawai.nip);
+    
+    document.getElementById("nip").value = pegawai.nip || '';
+    document.getElementById("nama").value = pegawai.nama || '';
+    document.getElementById("tempat_lahir").value = pegawai.tempat_lahir || '';
+    document.getElementById("tanggal_lahir").value = pegawai.tanggal_lahir || '';
+    document.getElementById("jabatan").value = pegawai.jabatan || '';
+    document.getElementById("unit").value = pegawai.unit || '';
+    document.getElementById("status").value = pegawai.status || '';
+    document.getElementById("no_telp").value = pegawai.no_telp || '';
+    document.getElementById("email").value = pegawai.email || '';
+    document.getElementById("tgl_masuk").value = pegawai.tgl_masuk || '';
+    document.getElementById("alamat").value = pegawai.alamat || '';
+    
+    editMode = true;
   }
-
-  closeModal();
-  loadPegawai();
+  
+  document.getElementById("pegawaiModal").style.display = "flex";
 }
 
 function editPegawai(id) {
-  const p = pegawaiData.find(x => x.id === id);
-  pegawaiId.value = p.id;
-  nip.value = p.nip;
-  nama.value = p.nama;
-  jabatan.value = p.jabatan;
-  unit.value = p.unit;
-  openModal();
+  const pegawai = allPegawaiData.find(p => p.id == id);
+  if (!pegawai) {
+    alert("Data pegawai tidak ditemukan.");
+    return;
+  }
+  openModal(pegawai);
 }
 
-async function hapusPegawai(id) {
-  if (!confirm('Hapus pegawai ini?')) return;
-  await supabaseClient.from('pegawai').delete().eq('id', id);
-  loadPegawai();
+// ==================== SIMPAN DATA ====================
+async function savePegawai(e) {
+  e.preventDefault();
+  
+  const pegawaiData = {
+    nip: toNullIfEmpty(document.getElementById("nip").value),
+    nama: toNullIfEmpty(document.getElementById("nama").value),
+    tempat_lahir: toNullIfEmpty(document.getElementById("tempat_lahir").value),
+    tanggal_lahir: toNullIfEmpty(document.getElementById("tanggal_lahir").value),
+    jabatan: toNullIfEmpty(document.getElementById("jabatan").value),
+    unit: toNullIfEmpty(document.getElementById("unit").value),
+    status: toNullIfEmpty(document.getElementById("status").value),
+    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
+    email: toNullIfEmpty(document.getElementById("email").value),
+    tgl_masuk: toNullIfEmpty(document.getElementById("tgl_masuk").value),
+    alamat: toNullIfEmpty(document.getElementById("alamat").value),
+  };
+  
+  if (!pegawaiData.nip || !pegawaiData.nama) {
+    alert("❌ Mohon isi NIP dan Nama Pegawai.");
+    return;
+  }
+
+  let result;
+  if (editMode) {
+    result = await supabaseClient
+      .from("pegawai")
+      .update(pegawaiData)
+      .eq("id", document.getElementById("pegawaiId").value)
+      .select();
+  } else {
+    result = await supabaseClient.from("pegawai").insert([pegawaiData]).select();
+  }
+  
+  if (result.error) {
+    alert("❌ Operasi GAGAL. Pesan: " + result.error.message);
+    console.error("Supabase Error:", result.error);
+  } else {
+    alert(editMode ? "✅ Data pegawai berhasil diperbarui!" : "✅ Pegawai baru berhasil ditambahkan!");
+    closeModal('pegawaiModal');
+    loadPegawaiData();
+  }
 }
 
-loadPegawai();
+// ==================== HAPUS DATA ====================
+async function deletePegawai(id) {
+  const pegawai = allPegawaiData.find(p => p.id == id);
+  const nama = pegawai ? pegawai.nama || pegawai.nip : 'ini';
+
+  if (!confirm(`Yakin ingin menghapus data pegawai "${nama}"?`)) return;
+  
+  const { error } = await supabaseClient
+    .from("pegawai")
+    .delete()
+    .eq("id", id);
+  
+  if (error) {
+    alert("❌ Gagal menghapus: " + error.message);
+    console.error("Hapus Error:", error);
+  } else {
+    alert(`✅ Data pegawai "${nama}" berhasil dihapus!`);
+    loadPegawaiData();
+  }
+}
+
+// ==================== DETAIL ====================
+function showDetail(id) {
+  const pegawai = allPegawaiData.find(p => p.id == id);
+  if (!pegawai) {
+    alert("Data pegawai tidak ditemukan.");
+    return;
+  }
+  
+  currentPegawaiDetail = pegawai;
+
+  const detailRow = (label, value) => {
+    return `<p class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <span class="detail-label">${label}</span>
+              <span class="col-span-2 break-words">: ${value || '-'}</span>
+            </p>`;
+  };
+
+  const detailContent = `
+    <h3 class="text-xl font-bold text-blue-700 mb-4">${pegawai.nama || 'Nama Pegawai'}</h3>
+    <div class="space-y-2">
+      ${detailRow('NIP', pegawai.nip)}
+      ${detailRow('Tempat Lahir', pegawai.tempat_lahir)}
+      ${detailRow('Tanggal Lahir', pegawai.tanggal_lahir)}
+      ${detailRow('Jabatan', pegawai.jabatan)}
+      ${detailRow('Unit Kerja', pegawai.unit)}
+      ${detailRow('Status', pegawai.status)}
+      ${detailRow('No. Telepon', pegawai.no_telp)}
+      ${detailRow('Email', pegawai.email)}
+      ${detailRow('Tanggal Masuk', pegawai.tgl_masuk)}
+      <hr class="my-2 border-gray-200">
+      <p><span class="detail-label block mb-1">Alamat:</span> ${pegawai.alamat || '-'}</p>
+    </div>
+  `;
+
+  document.getElementById('detailContent').innerHTML = detailContent;
+  document.getElementById('detailPegawaiModal').style.display = 'flex';
+}
+
+// ==================== EXPORT FUNCTIONS ====================
+function getDetailDataForExport() {
+  if (!currentPegawaiDetail) return [];
+
+  const p = currentPegawaiDetail;
+  return [
+    ['Nama Pegawai', p.nama || '-'],
+    ['NIP', p.nip || '-'],
+    ['Tempat Lahir', p.tempat_lahir || '-'],
+    ['Tanggal Lahir', p.tanggal_lahir || '-'],
+    ['Jabatan', p.jabatan || '-'],
+    ['Unit Kerja', p.unit || '-'],
+    ['Status', p.status || '-'],
+    ['No. Telepon', p.no_telp || '-'],
+    ['Email', p.email || '-'],
+    ['Tanggal Masuk', p.tgl_masuk || '-'],
+    ['Alamat', p.alamat || '-'],
+  ];
+}
+
+function exportDetailToPdf() {
+  if (!currentPegawaiDetail) return alert("Tidak ada data detail untuk diekspor.");
+  if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat.");
+
+  const doc = new jsPDF();
+  const data = getDetailDataForExport();
+  const namaFile = `Detail Pegawai - ${currentPegawaiDetail.nama || currentPegawaiDetail.nip || 'Data'}.pdf`;
+
+  doc.setFontSize(16);
+  doc.text("Data Detail Pegawai", 14, 20);
+  
+  doc.autoTable({
+    startY: 30,
+    head: [['Field', 'Value']],
+    body: data,
+    theme: 'grid',
+    styles: { fontSize: 10, cellPadding: 2 },
+    headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 50, fontStyle: 'bold' },
+      1: { cellWidth: 'auto' }
+    }
+  });
+
+  doc.save(namaFile);
+}
+
+function exportDetailToExcel() {
+  if (!currentPegawaiDetail) return alert("Tidak ada data detail untuk diekspor.");
+  
+  const data = getDetailDataForExport();
+  const worksheetData = [['Data Detail Pegawai'], [''], ...data];
+  
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+  
+  ws['!cols'] = [{ wch: 25 }, { wch: 50 }];
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+  
+  XLSX.utils.book_append_sheet(wb, ws, "Detail Pegawai");
+  XLSX.writeFile(wb, `Detail Pegawai - ${currentPegawaiDetail.nama || 'Data'}.xlsx`);
+}
+
+function exportAllToPdf() {
+  if (allPegawaiData.length === 0) return alert("Tidak ada data pegawai untuk diekspor.");
+  if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat.");
+
+  const doc = new jsPDF('l', 'mm', 'a4');
+  
+  const headers = ["No", "NIP", "Nama", "Tempat Lahir", "Tanggal Lahir", "Jabatan", "Unit", "Status", "No Telp", "Email", "Tgl Masuk", "Alamat"];
+  
+  const data = allPegawaiData.map((p, index) => [
+    index + 1,
+    p.nip || '-',
+    p.nama || '-',
+    p.tempat_lahir || '-',
+    p.tanggal_lahir || '-',
+    p.jabatan || '-',
+    p.unit || '-',
+    p.status || '-',
+    p.no_telp || '-',
+    p.email || '-',
+    p.tgl_masuk || '-',
+    p.alamat || '-',
+  ]);
+
+  doc.setFontSize(14);
+  doc.text("Data Seluruh Pegawai Fakultas Teknik", 14, 20);
+
+  doc.autoTable({
+    startY: 25,
+    head: [headers],
+    body: data,
+    theme: 'striped',
+    styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
+    headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 8 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 20 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 25 },
+      7: { cellWidth: 15 },
+      8: { cellWidth: 20 },
+      9: { cellWidth: 30 },
+      10: { cellWidth: 20 },
+      11: { cellWidth: 40 },
+    }
+  });
+
+  doc.save("data_pegawai_all.pdf");
+}
+
+function exportAllToExcel() {
+  if (allPegawaiData.length === 0) return alert("Tidak ada data pegawai untuk diekspor.");
+  
+  const headers = ["No", "NIP", "Nama", "Tempat Lahir", "Tanggal Lahir", "Jabatan", "Unit Kerja", "Status", "No Telp", "Email", "Tanggal Masuk", "Alamat"];
+  
+  const rows = allPegawaiData.map((p, index) => [
+    index + 1,
+    p.nip, p.nama, p.tempat_lahir, p.tanggal_lahir, p.jabatan, p.unit, p.status, 
+    p.no_telp, p.email, p.tgl_masuk, p.alamat
+  ]);
+  
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, "Pegawai");
+  XLSX.writeFile(wb, "data_pegawai_all.xlsx");
+}
+
+// Update nama user di navbar
+async function updateUserName() {
+  const { data: userData } = await supabaseClient.auth.getUser();
+  const user = userData.user;
+  const userNameElement = document.getElementById('userNameNav');
+  
+  if (userNameElement && user?.email) {
+    const namePart = user.email.split('@')[0];
+    const displayUsername = namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
+    userNameElement.textContent = `Halo, ${displayUsername}`;
+  }
+}
+
+// Panggil saat load
+updateUserName();
 </script>
-
 </body>
 </html>
