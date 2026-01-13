@@ -400,6 +400,123 @@
   </div>
 </div>
 
+  <!-- MODAL DETAIL SKL -->
+<div id="detailSKLModal" class="modal">
+  <div class="modal-content max-w-3xl">
+    <div class="flex justify-between items-center mb-4 border-b pb-2">
+      <h2 class="text-2xl font-semibold text-gray-800">
+        <i class="fas fa-file-certificate mr-2 text-purple-600"></i> Detail Surat Keterangan Lulus (SKL)
+      </h2>
+      <button onclick="closeModal('detailSKLModal')" class="text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+    
+    <div id="detailSKLContent" class="space-y-4 text-gray-700">
+      <!-- Data akan diisi oleh JavaScript -->
+    </div>
+    
+    <div class="flex justify-between items-center mt-6 border-t pt-4">
+      <div class="text-sm text-gray-500">
+        <i class="fas fa-info-circle mr-1"></i> Fakultas Teknik - Universitas Langlangbuana
+      </div>
+      <div class="flex space-x-3">
+        <button onclick="exportSKLDetailToPDF(currentSKLDetail)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+          <i class="fas fa-file-pdf mr-2"></i>PDF
+        </button>
+        <button onclick="editSKL(currentSKLDetail)" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm">
+          <i class="fas fa-edit mr-2"></i>Edit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- MODAL EDIT SKL -->
+<div id="editSKLModal" class="modal">
+  <div class="modal-content max-w-2xl">
+    <div class="flex justify-between items-center mb-4 border-b pb-2">
+      <h2 class="text-2xl font-semibold text-gray-800">
+        <i class="fas fa-edit mr-2 text-yellow-600"></i> Edit Surat Keterangan Lulus
+      </h2>
+      <button onclick="closeModal('editSKLModal')" class="text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+    
+    <form id="editSKLForm" class="space-y-4">
+      <input type="hidden" id="editSKLId">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="editNomorSKL" class="block text-sm font-medium text-gray-700 mb-1">Nomor SKL *</label>
+          <input type="text" id="editNomorSKL" required class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editNamaPegawai" class="block text-sm font-medium text-gray-700 mb-1">Nama Pegawai *</label>
+          <input type="text" id="editNamaPegawai" required class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editNIP" class="block text-sm font-medium text-gray-700 mb-1">NIP/NPM *</label>
+          <input type="text" id="editNIP" required class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editJabatan" class="block text-sm font-medium text-gray-700 mb-1">Jabatan *</label>
+          <select id="editJabatan" required class="w-full border border-gray-300 rounded-md p-2">
+            <option value="MAHASISWA">MAHASISWA</option>
+            <option value="DOSEN">DOSEN</option>
+            <option value="STAFF">STAFF</option>
+            <option value="ADMINISTRASI">ADMINISTRASI</option>
+            <option value="TEKNISI">TEKNISI</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="editJurusan" class="block text-sm font-medium text-gray-700 mb-1">Jurusan/Prodi</label>
+          <input type="text" id="editJurusan" class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editTempatLahir" class="block text-sm font-medium text-gray-700 mb-1">Tempat Lahir</label>
+          <input type="text" id="editTempatLahir" class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editTanggalLahir" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+          <input type="date" id="editTanggalLahir" class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editTanggalLulus" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lulus *</label>
+          <input type="date" id="editTanggalLulus" required class="w-full border border-gray-300 rounded-md p-2">
+        </div>
+        
+        <div>
+          <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+          <select id="editStatus" required class="w-full border border-gray-300 rounded-md p-2">
+            <option value="LULUS">LULUS</option>
+            <option value="SELESAI">SELESAI</option>
+            <option value="BERHASIL">BERHASIL</option>
+            <option value="KOMPETEN">KOMPETEN</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="flex justify-end space-x-3 mt-6 border-t pt-4">
+        <button type="button" onclick="closeModal('editSKLModal')" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md">
+          Batal
+        </button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+          <i class="fas fa-save mr-2"></i>Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- MODAL DETAIL -->
 <div id="detailPegawaiModal" class="modal">
   <div class="modal-content">
@@ -433,6 +550,9 @@ const { jsPDF } = window.jspdf;
 let allPegawaiData = [];
 let editMode = false;
 let currentPegawaiDetail = null;
+let currentSKLDetail = null;
+let allSKLData = [];
+
 
 document.addEventListener("DOMContentLoaded", function() {
   loadPegawaiData();
@@ -626,6 +746,263 @@ function tambahSK() {
 function tambahSKL() {
   alert('Fitur "Tambah SKL" akan dikembangkan lebih lanjut.');
 }
+
+  // Variabel global untuk detail SKL
+let currentSKLDetail = null;
+let allSKLData = [];
+
+// ==================== FUNGSI DETAIL SKL ====================
+function viewSKLDetail(sklId) {
+    // Cari data SKL berdasarkan ID
+    const row = document.querySelector(`tr[data-skl-id="${sklId}"]`);
+    if (!row) {
+        // Coba ambil dari data contoh
+        const exampleSKL = {
+            id: '1',
+            nomor_skl: '313/UNLA/FT/PP/XI/2025',
+            nama_pegawai: 'RYAN RIZKI PRATAMA',
+            nip: '41155055220085',
+            tempat_lahir: 'BANDUNG',
+            tanggal_lahir: '1998-02-05',
+            jabatan: 'MAHASISWA',
+            jurusan: 'TEKNIK INFORMATIKA',
+            tanggal_lulus: '2025-10-27',
+            status: 'LULUS'
+        };
+        currentSKLDetail = exampleSKL;
+    } else {
+        currentSKLDetail = JSON.parse(row.getAttribute('data-skl'));
+    }
+    
+    // Tampilkan detail dalam modal
+    const detailContent = document.getElementById('detailSKLContent');
+    
+    const detailRow = (label, value) => {
+        return `<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <span class="font-semibold text-gray-600 col-span-1">${label}</span>
+                  <span class="col-span-2 text-gray-800">: ${value || '-'}</span>
+                </div>`;
+    };
+
+    const detailHTML = `
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h3 class="text-xl font-bold text-purple-700 mb-1">${currentSKLDetail.nama_pegawai || 'Nama Pegawai'}</h3>
+            <p class="text-gray-500">${currentSKLDetail.nomor_skl || 'Nomor SKL'}</p>
+        </div>
+        
+        <div class="space-y-3">
+            ${detailRow('Nomor SKL', currentSKLDetail.nomor_skl)}
+            ${detailRow('Nama Lengkap', currentSKLDetail.nama_pegawai)}
+            ${detailRow('NIP/NPM', currentSKLDetail.nip)}
+            ${detailRow('Tempat Lahir', currentSKLDetail.tempat_lahir)}
+            ${detailRow('Tanggal Lahir', currentSKLDetail.tanggal_lahir ? formatTanggalIndonesia(currentSKLDetail.tanggal_lahir) : '-')}
+            ${detailRow('Jabatan', currentSKLDetail.jabatan)}
+            ${detailRow('Jurusan/Prodi', currentSKLDetail.jurusan)}
+            ${detailRow('Tanggal Lulus', currentSKLDetail.tanggal_lulus ? formatTanggalIndonesia(currentSKLDetail.tanggal_lulus) : '-')}
+            ${detailRow('Status', `<span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">${currentSKLDetail.status}</span>`)}
+        </div>
+        
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h4 class="font-bold text-blue-700 mb-2">Keterangan:</h4>
+            <p class="text-sm text-gray-600">
+                Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah asli masih dalam proses penerbitan.
+            </p>
+        </div>
+    `;
+
+    detailContent.innerHTML = detailHTML;
+    document.getElementById('detailSKLModal').style.display = 'flex';
+}
+
+// ==================== FUNGSI EDIT SKL ====================
+function editSKL(sklData) {
+    if (!sklData) {
+        alert('Data SKL tidak ditemukan');
+        return;
+    }
+    
+    // Isi form edit dengan data SKL
+    document.getElementById('editSKLId').value = sklData.id || '';
+    document.getElementById('editNomorSKL').value = sklData.nomor_skl || '';
+    document.getElementById('editNamaPegawai').value = sklData.nama_pegawai || '';
+    document.getElementById('editNIP').value = sklData.nip || '';
+    document.getElementById('editJabatan').value = sklData.jabatan || 'MAHASISWA';
+    document.getElementById('editJurusan').value = sklData.jurusan || '';
+    document.getElementById('editTempatLahir').value = sklData.tempat_lahir || '';
+    
+    // Format tanggal lahir untuk input date
+    if (sklData.tanggal_lahir) {
+        document.getElementById('editTanggalLahir').value = sklData.tanggal_lahir;
+    }
+    
+    // Format tanggal lulus untuk input date
+    if (sklData.tanggal_lulus) {
+        const tanggalLulus = new Date(sklData.tanggal_lulus);
+        const formattedDate = tanggalLulus.toISOString().split('T')[0];
+        document.getElementById('editTanggalLulus').value = formattedDate;
+    }
+    
+    document.getElementById('editStatus').value = sklData.status || 'LULUS';
+    
+    // Tampilkan modal edit
+    document.getElementById('editSKLModal').style.display = 'flex';
+}
+
+// ==================== SIMPAN EDIT SKL ====================
+document.getElementById('editSKLForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const sklId = document.getElementById('editSKLId').value;
+    const updatedData = {
+        nomor_skl: document.getElementById('editNomorSKL').value,
+        nama_pegawai: document.getElementById('editNamaPegawai').value,
+        nip: document.getElementById('editNIP').value,
+        jabatan: document.getElementById('editJabatan').value,
+        jurusan: document.getElementById('editJurusan').value,
+        tempat_lahir: document.getElementById('editTempatLahir').value,
+        tanggal_lahir: document.getElementById('editTanggalLahir').value,
+        tanggal_lulus: document.getElementById('editTanggalLulus').value,
+        status: document.getElementById('editStatus').value
+    };
+    
+    try {
+        // Simpan ke database atau update state
+        // NOTE: Ini contoh, sesuaikan dengan struktur database Anda
+        console.log('Menyimpan perubahan SKL:', updatedData);
+        
+        alert('✅ Data SKL berhasil diperbarui!');
+        closeModal('editSKLModal');
+        
+        // Refresh data SKL
+        loadDataSKL();
+        
+        // Tampilkan detail yang sudah diupdate
+        if (sklId) {
+            setTimeout(() => viewSKLDetail(sklId), 500);
+        }
+        
+    } catch (error) {
+        console.error('Error updating SKL:', error);
+        alert('❌ Gagal memperbarui data SKL');
+    }
+});
+
+// ==================== UPDATE LOAD DATA SKL ====================
+async function loadDataSKL() {
+    try {
+        // Data contoh - ganti dengan fetch ke database Anda
+        const sklData = [
+            { 
+                id: '1', 
+                nomor_skl: '313/UNLA/FT/PP/XI/2025', 
+                nama_pegawai: 'RYAN RIZKI PRATAMA',
+                nip: '41155055220085',
+                tempat_lahir: 'BANDUNG',
+                tanggal_lahir: '1998-02-05',
+                jabatan: 'MAHASISWA',
+                jurusan: 'TEKNIK INFORMATIKA',
+                tanggal_lulus: '2025-10-27',
+                status: 'LULUS'
+            }
+        ];
+        
+        allSKLData = sklData;
+        
+        // Update statistik
+        document.getElementById('totalSKL').textContent = sklData.length;
+        document.getElementById('sklTahunIni').textContent = sklData.filter(d => 
+            new Date(d.tanggal_lulus).getFullYear() === new Date().getFullYear()
+        ).length;
+        document.getElementById('pegawaiLulus').textContent = sklData.length;
+        
+        // Render tabel dengan tombol aksi lengkap
+        const tbody = document.getElementById('skl-table-body');
+        tbody.innerHTML = sklData.map((skl, index) => `
+            <tr class="hover:bg-gray-100" data-skl='${JSON.stringify(skl)}' data-skl-id="${skl.id}">
+                <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
+                <td class="px-6 py-3 text-sm border font-medium">${skl.nomor_skl}</td>
+                <td class="px-6 py-3 text-sm border">${skl.nama_pegawai}</td>
+                <td class="px-6 py-3 text-sm border">${skl.jabatan}</td>
+                <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(skl.tanggal_lulus)}</td>
+                <td class="px-6 py-3 text-center text-sm border">
+                    <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${skl.status}</span>
+                </td>
+                <td class="px-6 py-3 text-center text-sm border space-x-1">
+    <button onclick="viewSKLDetail('${skl.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Detail">
+        <i class="fas fa-eye"></i>
+    </button>
+    <button onclick="editSKL(${JSON.stringify(skl)})" class="text-yellow-600 hover:text-yellow-800 mx-1" title="Edit">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button onclick="exportSingleSKLToPDF('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="PDF">
+        <i class="fas fa-file-pdf"></i>
+    </button>
+    <button onclick="deleteSKL('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Hapus">
+        <i class="fas fa-trash"></i>
+    </button>
+</td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error("Error loading SKL data:", error);
+    }
+}
+
+// ==================== FUNGSI HAPUS SKL ====================
+function deleteSKL(sklId) {
+    if (confirm('Apakah Anda yakin ingin menghapus data SKL ini?')) {
+        // Logika hapus SKL
+        console.log('Menghapus SKL dengan ID:', sklId);
+        alert('SKL berhasil dihapus!');
+        loadDataSKL(); // Refresh data
+    }
+}
+
+// ==================== UPDATE FUNGSI CLOSE MODAL ====================
+function closeModal(modalId = 'pegawaiModal') {
+    const modals = ['pegawaiModal', 'detailPegawaiModal', 'detailSKLModal', 'editSKLModal'];
+    
+    if (modalId === 'all') {
+        modals.forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = "none";
+        });
+    } else {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = "none";
+    }
+}
+
+// ==================== FUNGSI EXPORT DETAIL SKL KE PDF ====================
+function exportSKLDetailToPDF(sklData) {
+    if (!sklData) {
+        sklData = currentSKLDetail;
+    }
+    
+    if (!sklData) {
+        alert('Tidak ada data SKL untuk diekspor');
+        return;
+    }
+    
+    // Gunakan fungsi yang sudah ada
+    createSKLPdfDocument(sklData);
+}
+
+// Event listener untuk form edit SKL
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('editSKLForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        console.log('Data SKL yang akan disimpan:', data);
+        alert('Data SKL berhasil diperbarui!');
+        closeModal('editSKLModal');
+        loadDataSKL();
+    });
+});
 
   // Fungsi untuk export single SKL
 async function exportSingleSKLToPDF(sklId) {
