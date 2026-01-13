@@ -63,6 +63,61 @@
         transform: rotate(180deg);
         transition: transform 0.3s ease;
     }
+    
+    /* Header Surat Keterangan */
+    .surat-header {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        border-radius: 12px 12px 0 0;
+        padding: 1.5rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .surat-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        transform: translate(40%, -40%);
+    }
+    
+    .surat-body {
+        padding: 2rem;
+        background: white;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .badge-active {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+    
+    .badge-lulus {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+    }
+    
+    .badge-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -151,6 +206,7 @@
 
       <!-- Content CRUD Pegawai -->
       <div id="content-crud" class="main-content-section">
+        <!-- [Kode sebelumnya untuk data pegawai tetap sama] -->
         <div class="bg-white p-4 rounded-lg shadow mb-6">
           <h2 class="text-xl font-semibold mb-3 text-gray-700">Filter Data Pegawai</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -222,118 +278,255 @@
 
       <!-- Content Surat Keterangan (SK) -->
       <div id="content-surat-keterangan" class="main-content-section hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-semibold text-gray-700 mb-4">
-            <i class="fas fa-file-contract mr-2"></i> Surat Keterangan (SK)
-          </h2>
-          <p class="text-gray-600 mb-6">Halaman untuk mengelola Surat Keterangan (SK) Pegawai. Fitur ini akan dikembangkan lebih lanjut.</p>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-              <p class="text-sm font-medium text-gray-500">Total SK Aktif</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-file-alt mr-2 text-blue-500"></i> <span id="totalSK">0</span></p>
-            </div>
-            <div class="bg-green-50 p-6 rounded-lg border border-green-200">
-              <p class="text-sm font-medium text-gray-500">SK Bulan Ini</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-calendar-check mr-2 text-green-500"></i> <span id="skBulanIni">0</span></p>
-            </div>
-            <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-              <p class="text-sm font-medium text-gray-500">Pegawai dengan SK</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-users mr-2 text-yellow-500"></i> <span id="pegawaiDenganSK">0</span></p>
+        <div class="mb-8">
+          <!-- Header Surat Keterangan -->
+          <div class="surat-header">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <div class="bg-white p-2 rounded-lg">
+                  <img src="logo.jpeg" alt="Logo" class="h-12 w-auto">
+                </div>
+                <div>
+                  <h1 class="text-2xl font-bold">SURAT KETERANGAN</h1>
+                  <p class="text-blue-100">Nomor: SK/FT/2025/001-100</p>
+                  <p class="text-sm text-blue-200 mt-1">Fakultas Teknik - Universitas</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="badge-status badge-active">STATUS AKTIF</div>
+                <p class="text-sm text-blue-200 mt-2">Terbit: Maret 2025</p>
+              </div>
             </div>
           </div>
           
-          <!-- Tombol Aksi -->
-          <div class="flex space-x-3 mb-6">
-            <button onclick="tambahSK()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
-              <i class="fas fa-plus-circle mr-2"></i> Tambah SK
-            </button>
-            <button onclick="exportSKToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
-              <i class="fas fa-file-excel mr-2"></i> Export Excel
-            </button>
-          </div>
-          
-          <!-- Tabel SK -->
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">No</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nomor SK</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pegawai</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tanggal Terbit</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="sk-table-body" class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td colspan="7" class="text-center py-8 text-gray-500">
-                    <i class="fas fa-info-circle mr-2"></i> Data Surat Keterangan akan ditampilkan di sini
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- Body Surat Keterangan -->
+          <div class="surat-body">
+            <div class="mb-8">
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-file-contract mr-2 text-blue-600"></i> Manajemen Surat Keterangan Pegawai
+              </h2>
+              <p class="text-gray-600 mb-6">Kelola seluruh Surat Keterangan (SK) pegawai Fakultas Teknik. Fitur ini memungkinkan pembuatan, monitoring, dan arsip digital SK secara terintegrasi.</p>
+              
+              <!-- Statistik -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-blue-700">Total SK Aktif</p>
+                      <p class="text-3xl font-bold text-gray-900 mt-1">12</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                      <i class="fas fa-file-alt text-2xl text-blue-600"></i>
+                    </div>
+                  </div>
+                  <p class="text-xs text-blue-600 mt-2">+2 dari bulan lalu</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-green-700">SK Bulan Ini</p>
+                      <p class="text-3xl font-bold text-gray-900 mt-1">3</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                      <i class="fas fa-calendar-check text-2xl text-green-600"></i>
+                    </div>
+                  </div>
+                  <p class="text-xs text-green-600 mt-2">Maret 2025</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-purple-700">Pegawai dengan SK</p>
+                      <p class="text-3xl font-bold text-gray-900 mt-1">8</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                      <i class="fas fa-users text-2xl text-purple-600"></i>
+                    </div>
+                  </div>
+                  <p class="text-xs text-purple-600 mt-2">67% dari total pegawai</p>
+                </div>
+              </div>
+              
+              <!-- Tombol Aksi -->
+              <div class="flex flex-wrap gap-3 mb-6">
+                <button onclick="tambahSK()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-plus-circle mr-2"></i> Buat SK Baru
+                </button>
+                <button onclick="exportSKToExcel()" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-file-excel mr-2"></i> Export Excel
+                </button>
+                <button onclick="cetakSK()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-print mr-2"></i> Cetak Laporan
+                </button>
+                <button onclick="arsipSK()" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-archive mr-2"></i> Arsip Digital
+                </button>
+              </div>
+            </div>
+            
+            <!-- Tabel SK -->
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-blue-600 to-blue-700">
+                  <tr>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">No</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Nomor SK</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Nama Pegawai</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Jabatan</th>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Tanggal Terbit</th>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="sk-table-body" class="bg-white divide-y divide-gray-200">
+                  <!-- Data akan diisi oleh JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Footer Tabel -->
+            <div class="mt-4 flex justify-between items-center text-sm text-gray-500">
+              <div>
+                Menampilkan <span class="font-semibold" id="totalSKDisplay">0</span> Surat Keterangan
+              </div>
+              <div class="flex items-center space-x-2">
+                <button class="p-2 rounded-lg border border-gray-300 hover:bg-gray-50">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg">1</span>
+                <button class="p-2 rounded-lg border border-gray-300 hover:bg-gray-50">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Content Surat Keterangan Lulus (SKL) -->
       <div id="content-surat-keterangan-lulus" class="main-content-section hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-semibold text-gray-700 mb-4">
-            <i class="fas fa-file-certificate mr-2"></i> Surat Keterangan Lulus (SKL)
-          </h2>
-          <p class="text-gray-600 mb-6">Halaman untuk mengelola Surat Keterangan Lulus (SKL) Pegawai. Fitur ini akan dikembangkan lebih lanjut.</p>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
-              <p class="text-sm font-medium text-gray-500">Total SKL</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-certificate mr-2 text-purple-500"></i> <span id="totalSKL">0</span></p>
-            </div>
-            <div class="bg-red-50 p-6 rounded-lg border border-red-200">
-              <p class="text-sm font-medium text-gray-500">SKL Tahun Ini</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-calendar-alt mr-2 text-red-500"></i> <span id="sklTahunIni">0</span></p>
-            </div>
-            <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
-              <p class="text-sm font-medium text-gray-500">Pegawai Lulus</p>
-              <p class="text-3xl font-bold text-gray-900 mt-1"><i class="fas fa-user-graduate mr-2 text-indigo-500"></i> <span id="pegawaiLulus">0</span></p>
+        <div class="mb-8">
+          <!-- Header Surat Keterangan Lulus -->
+          <div class="surat-header" style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <div class="bg-white p-2 rounded-lg">
+                  <img src="logo.jpeg" alt="Logo" class="h-12 w-auto">
+                </div>
+                <div>
+                  <h1 class="text-2xl font-bold">SURAT KETERANGAN LULUS</h1>
+                  <p class="text-purple-100">Nomor: SKL/FT/2025/001-050</p>
+                  <p class="text-sm text-purple-200 mt-1">Fakultas Teknik - Universitas</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="badge-status badge-lulus">STATUS LULUS</div>
+                <p class="text-sm text-purple-200 mt-2">Tahun Akademik 2024/2025</p>
+              </div>
             </div>
           </div>
           
-          <!-- Tombol Aksi -->
-          <div class="flex space-x-3 mb-6">
-            <button onclick="tambahSKL()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
-              <i class="fas fa-plus-circle mr-2"></i> Tambah SKL
-            </button>
-            <button onclick="exportSKLToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
-              <i class="fas fa-file-excel mr-2"></i> Export Excel
-            </button>
-          </div>
-          
-          <!-- Tabel SKL -->
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">No</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nomor SKL</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Pegawai</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jabatan</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Tanggal Lulus</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="skl-table-body" class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td colspan="7" class="text-center py-8 text-gray-500">
-                    <i class="fas fa-info-circle mr-2"></i> Data Surat Keterangan Lulus akan ditampilkan di sini
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- Body Surat Keterangan Lulus -->
+          <div class="surat-body">
+            <div class="mb-8">
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-file-certificate mr-2 text-purple-600"></i> Manajemen Surat Keterangan Lulus Pegawai
+              </h2>
+              <p class="text-gray-600 mb-6">Kelola Surat Keterangan Lulus (SKL) pegawai yang telah menyelesaikan masa tugas atau program tertentu di Fakultas Teknik.</p>
+              
+              <!-- Statistik -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-purple-700">Total SKL</p>
+                      <p class="text-3xl font-bold text-gray-900 mt-1">8</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                      <i class="fas fa-certificate text-2xl text-purple-600"></i>
+                    </div>
+                  </div>
+                  <p class="text-xs text-purple-600 mt-2">Tercatat hingga Maret 2025</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-red-700">SKL Tahun Ini</p>
+                      <p class="text-3xl font-bold text-gray-900 mt-1">5</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                      <i class="fas fa-calendar-alt text-2xl text-red-600"></i>
+                    </div>
+                  </div>
+                  <p class="text-xs text-red-600 mt-2">2024/2025</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl border border-indigo-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-indigo-700">Pegawai Lulus</p>
+                      <p class="text-3xl font-bold text-gray-900 mt-1">6</p>
+                    </div>
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                      <i class="fas fa-user-graduate text-2xl text-indigo-600"></i>
+                    </div>
+                  </div>
+                  <p class="text-xs text-indigo-600 mt-2">75% dari total SKL</p>
+                </div>
+              </div>
+              
+              <!-- Tombol Aksi -->
+              <div class="flex flex-wrap gap-3 mb-6">
+                <button onclick="tambahSKL()" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-plus-circle mr-2"></i> Buat SKL Baru
+                </button>
+                <button onclick="exportSKLToExcel()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-file-excel mr-2"></i> Export Excel
+                </button>
+                <button onclick="cetakDiploma()" class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center shadow-lg transition transform hover:-translate-y-1">
+                  <i class="fas fa-scroll mr-2"></i> Cetak Diploma
+                </button>
+              </div>
+            </div>
+            
+            <!-- Tabel SKL -->
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-purple-600 to-purple-700">
+                  <tr>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">No</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Nomor SKL</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Nama Pegawai</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">Jabatan</th>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Tanggal Lulus</th>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-center text-xs font-medium text-white uppercase tracking-wider">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="skl-table-body" class="bg-white divide-y divide-gray-200">
+                  <!-- Data akan diisi oleh JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Footer Tabel -->
+            <div class="mt-4 flex justify-between items-center text-sm text-gray-500">
+              <div>
+                Menampilkan <span class="font-semibold" id="totalSKLDisplay">0</span> Surat Keterangan Lulus
+              </div>
+              <div class="flex items-center space-x-2">
+                <button class="p-2 rounded-lg border border-gray-300 hover:bg-gray-50">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg">1</span>
+                <button class="p-2 rounded-lg border border-gray-300 hover:bg-gray-50">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -444,6 +637,14 @@ document.addEventListener("DOMContentLoaded", function() {
     submenu.classList.remove('hidden');
     icon.classList.add('rotate-180'); 
   }
+  
+  // Inisialisasi data SK dan SKL
+  if (document.getElementById('content-surat-keterangan').classList.contains('hidden') === false) {
+    loadDataSK();
+  }
+  if (document.getElementById('content-surat-keterangan-lulus').classList.contains('hidden') === false) {
+    loadDataSKL();
+  }
 });
 
 // ==================== FUNGSI NAVIGASI ====================
@@ -499,86 +700,104 @@ function showMainTab(tab) {
 
 // ==================== FUNGSI SURAT KETERANGAN ====================
 function loadDataSK() {
-  // Fungsi untuk memuat data SK (placeholder untuk pengembangan)
-  document.getElementById('totalSK').textContent = '12';
-  document.getElementById('skBulanIni').textContent = '3';
-  document.getElementById('pegawaiDenganSK').textContent = '8';
-  
   // Contoh data tabel SK
-  const tbody = document.getElementById('sk-table-body');
   const exampleData = [
-    { no: 'SK/2025/001', nama: 'Budi Santoso', jabatan: 'Staff Administrasi', tgl: '2025-03-01', status: 'Aktif' },
-    { no: 'SK/2025/002', nama: 'Siti Rahayu', jabatan: 'Koordinator', tgl: '2025-03-15', status: 'Aktif' },
-    { no: 'SK/2025/003', nama: 'Ahmad Fauzi', jabatan: 'Staff Teknis', tgl: '2025-04-01', status: 'Aktif' },
+    { no: 'SK/FT/2025/001', nama: 'Budi Santoso', jabatan: 'Staff Administrasi', tgl: '2025-03-01', status: 'Aktif' },
+    { no: 'SK/FT/2025/002', nama: 'Siti Rahayu', jabatan: 'Koordinator', tgl: '2025-03-15', status: 'Aktif' },
+    { no: 'SK/FT/2025/003', nama: 'Ahmad Fauzi', jabatan: 'Staff Teknis', tgl: '2025-04-01', status: 'Aktif' },
+    { no: 'SK/FT/2025/004', nama: 'Dewi Lestari', jabatan: 'Sekretaris', tgl: '2025-02-20', status: 'Aktif' },
+    { no: 'SK/FT/2025/005', nama: 'Rudi Hartono', jabatan: 'Bendahara', tgl: '2025-01-15', status: 'Aktif' },
+    { no: 'SK/FT/2025/006', nama: 'Maya Indah', jabatan: 'Staff Administrasi', tgl: '2025-03-10', status: 'Aktif' },
+    { no: 'SK/FT/2025/007', nama: 'Joko Widodo', jabatan: 'Koordinator', tgl: '2025-02-28', status: 'Aktif' },
+    { no: 'SK/FT/2025/008', nama: 'Sri Mulyani', jabatan: 'Kepala Bagian', tgl: '2025-01-10', status: 'Aktif' },
+    { no: 'SK/FT/2025/009', nama: 'Agus Salim', jabatan: 'Staff Teknis', tgl: '2025-03-22', status: 'Aktif' },
+    { no: 'SK/FT/2025/010', nama: 'Linda Sari', jabatan: 'Administrasi', tgl: '2025-04-05', status: 'Aktif' },
+    { no: 'SK/FT/2025/011', nama: 'Bambang Pamungkas', jabatan: 'Koordinator', tgl: '2025-02-15', status: 'Aktif' },
+    { no: 'SK/FT/2025/012', nama: 'Rina Melati', jabatan: 'Staff Administrasi', tgl: '2025-03-30', status: 'Aktif' },
   ];
   
+  const tbody = document.getElementById('sk-table-body');
+  document.getElementById('totalSKDisplay').textContent = exampleData.length;
+  
   tbody.innerHTML = exampleData.map((sk, index) => `
-    <tr class="hover:bg-gray-100">
-      <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
-      <td class="px-6 py-3 text-sm border font-medium">${sk.no}</td>
-      <td class="px-6 py-3 text-sm border">${sk.nama}</td>
-      <td class="px-6 py-3 text-sm border">${sk.jabatan}</td>
-      <td class="px-6 py-3 text-center text-sm border">${sk.tgl}</td>
-      <td class="px-6 py-3 text-center text-sm border">
-        <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">${sk.status}</span>
+    <tr class="hover:bg-gray-50 transition duration-150">
+      <td class="px-6 py-4 text-center text-sm border">${index + 1}</td>
+      <td class="px-6 py-4 text-sm border font-mono font-medium text-blue-600">${sk.no}</td>
+      <td class="px-6 py-4 text-sm border font-medium">${sk.nama}</td>
+      <td class="px-6 py-4 text-sm border">${sk.jabatan}</td>
+      <td class="px-6 py-4 text-center text-sm border">${sk.tgl}</td>
+      <td class="px-6 py-4 text-center text-sm border">
+        <span class="badge-status badge-active">${sk.status}</span>
       </td>
-      <td class="px-6 py-3 text-center text-sm border">
-        <button class="text-blue-600 hover:text-blue-800 mx-1">
-          <i class="fas fa-eye"></i>
-        </button>
-        <button class="text-yellow-600 hover:text-yellow-800 mx-1">
-          <i class="fas fa-edit"></i>
-        </button>
-        <button class="text-red-600 hover:text-red-800 mx-1">
-          <i class="fas fa-trash"></i>
-        </button>
+      <td class="px-6 py-4 text-center text-sm border">
+        <div class="flex justify-center space-x-2">
+          <button class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50" title="Lihat Detail">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="text-yellow-600 hover:text-yellow-800 p-2 rounded-full hover:bg-yellow-50" title="Edit">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50" title="Hapus">
+            <i class="fas fa-trash"></i>
+          </button>
+          <button class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50" title="Download">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
       </td>
     </tr>
   `).join('');
 }
 
 function loadDataSKL() {
-  // Fungsi untuk memuat data SKL (placeholder untuk pengembangan)
-  document.getElementById('totalSKL').textContent = '8';
-  document.getElementById('sklTahunIni').textContent = '5';
-  document.getElementById('pegawaiLulus').textContent = '6';
-  
   // Contoh data tabel SKL
-  const tbody = document.getElementById('skl-table-body');
   const exampleData = [
-    { no: 'SKL/2025/001', nama: 'Dewi Lestari', jabatan: 'Staff Administrasi', tgl: '2025-01-15', status: 'Lulus' },
-    { no: 'SKL/2025/002', nama: 'Rudi Hartono', jabatan: 'Koordinator', tgl: '2025-02-20', status: 'Lulus' },
-    { no: 'SKL/2025/003', nama: 'Maya Indah', jabatan: 'Staff Teknis', tgl: '2025-03-10', status: 'Lulus' },
+    { no: 'SKL/FT/2025/001', nama: 'Dewi Lestari', jabatan: 'Staff Administrasi', tgl: '2025-01-15', status: 'Lulus' },
+    { no: 'SKL/FT/2025/002', nama: 'Rudi Hartono', jabatan: 'Koordinator', tgl: '2025-02-20', status: 'Lulus' },
+    { no: 'SKL/FT/2025/003', nama: 'Maya Indah', jabatan: 'Staff Teknis', tgl: '2025-03-10', status: 'Lulus' },
+    { no: 'SKL/FT/2025/004', nama: 'Budi Santoso', jabatan: 'Staff Administrasi', tgl: '2025-01-30', status: 'Lulus' },
+    { no: 'SKL/FT/2025/005', nama: 'Siti Rahayu', jabatan: 'Koordinator', tgl: '2025-02-25', status: 'Lulus' },
+    { no: 'SKL/FT/2025/006', nama: 'Ahmad Fauzi', jabatan: 'Staff Teknis', tgl: '2025-03-15', status: 'Lulus' },
+    { no: 'SKL/FT/2025/007', nama: 'Joko Widodo', jabatan: 'Koordinator', tgl: '2025-01-20', status: 'Lulus' },
+    { no: 'SKL/FT/2025/008', nama: 'Sri Mulyani', jabatan: 'Kepala Bagian', tgl: '2025-02-10', status: 'Lulus' },
   ];
   
+  const tbody = document.getElementById('skl-table-body');
+  document.getElementById('totalSKLDisplay').textContent = exampleData.length;
+  
   tbody.innerHTML = exampleData.map((skl, index) => `
-    <tr class="hover:bg-gray-100">
-      <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
-      <td class="px-6 py-3 text-sm border font-medium">${skl.no}</td>
-      <td class="px-6 py-3 text-sm border">${skl.nama}</td>
-      <td class="px-6 py-3 text-sm border">${skl.jabatan}</td>
-      <td class="px-6 py-3 text-center text-sm border">${skl.tgl}</td>
-      <td class="px-6 py-3 text-center text-sm border">
-        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${skl.status}</span>
+    <tr class="hover:bg-gray-50 transition duration-150">
+      <td class="px-6 py-4 text-center text-sm border">${index + 1}</td>
+      <td class="px-6 py-4 text-sm border font-mono font-medium text-purple-600">${skl.no}</td>
+      <td class="px-6 py-4 text-sm border font-medium">${skl.nama}</td>
+      <td class="px-6 py-4 text-sm border">${skl.jabatan}</td>
+      <td class="px-6 py-4 text-center text-sm border">${skl.tgl}</td>
+      <td class="px-6 py-4 text-center text-sm border">
+        <span class="badge-status badge-lulus">${skl.status}</span>
       </td>
-      <td class="px-6 py-3 text-center text-sm border">
-        <button class="text-blue-600 hover:text-blue-800 mx-1">
-          <i class="fas fa-eye"></i>
-        </button>
-        <button class="text-green-600 hover:text-green-800 mx-1">
-          <i class="fas fa-download"></i>
-        </button>
+      <td class="px-6 py-4 text-center text-sm border">
+        <div class="flex justify-center space-x-2">
+          <button class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50" title="Lihat Detail">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50" title="Download SKL">
+            <i class="fas fa-file-download"></i>
+          </button>
+          <button class="text-purple-600 hover:text-purple-800 p-2 rounded-full hover:bg-purple-50" title="Cetak Diploma">
+            <i class="fas fa-scroll"></i>
+          </button>
+        </div>
       </td>
     </tr>
   `).join('');
 }
 
 function tambahSK() {
-  alert('Fitur "Tambah SK" akan dikembangkan lebih lanjut.');
+  alert('Fitur "Buat SK Baru" akan dikembangkan lebih lanjut. Anda dapat menambahkan form untuk membuat Surat Keterangan baru.');
 }
 
 function tambahSKL() {
-  alert('Fitur "Tambah SKL" akan dikembangkan lebih lanjut.');
+  alert('Fitur "Buat SKL Baru" akan dikembangkan lebih lanjut. Anda dapat menambahkan form untuk membuat Surat Keterangan Lulus baru.');
 }
 
 function exportSKToExcel() {
@@ -589,6 +808,20 @@ function exportSKLToExcel() {
   alert('Fitur "Export Excel SKL" akan dikembangkan lebih lanjut.');
 }
 
+function cetakSK() {
+  alert('Fitur "Cetak Laporan SK" akan dikembangkan lebih lanjut.');
+}
+
+function arsipSK() {
+  alert('Fitur "Arsip Digital SK" akan dikembangkan lebih lanjut.');
+}
+
+function cetakDiploma() {
+  alert('Fitur "Cetak Diploma" akan dikembangkan lebih lanjut.');
+}
+
+// ==================== FUNGSI UTAMA (sisa kode tetap sama) ====================
+// [Kode JavaScript untuk CRUD pegawai tetap sama seperti sebelumnya]
 // Helper function
 const toNullIfEmpty = (val) => {
   if (typeof val === 'string') {
