@@ -63,6 +63,66 @@
         transform: rotate(180deg);
         transition: transform 0.3s ease;
     }
+    
+    /* Style untuk form SK dan SKL */
+    #sk-form-container, #skl-form-container {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Style untuk tab buttons */
+    .tab-button {
+      transition: all 0.2s ease-in-out;
+      padding: 12px 16px;
+    }
+
+    .tab-button:hover {
+      border-color: #d1d5db;
+    }
+
+    /* Style untuk form inputs */
+    .form-input {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      width: 100%;
+      transition: border-color 0.15s ease-in-out;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    /* NOTIFICATION */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 14px 18px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 9999;
+    }
+
+    .notification.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .notification.success { background-color: #16a34a; }
+    .notification.error { background-color: #dc2626; }
+    .notification.warning { background-color: #f59e0b; }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -166,11 +226,12 @@
               <label class="block text-sm text-gray-600 mb-1">Filter Jabatan</label>
               <select id="filterJabatan" onchange="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
                 <option value="">Semua Jabatan</option>
-                <option value="Staff">Staff</option>
-                <option value="Administrasi">Administrasi</option>
-                <option value="Teknisi">Teknisi</option>
+                <option value="Staff Administrasi">Staff Administrasi</option>
+                <option value="Staff Teknis">Staff Teknis</option>
                 <option value="Koordinator">Koordinator</option>
-                <option value="Kepala">Kepala Bagian</option>
+                <option value="Kepala Bagian">Kepala Bagian</option>
+                <option value="Sekretaris">Sekretaris</option>
+                <option value="Bendahara">Bendahara</option>
               </select>
             </div>
           </div>
@@ -222,7 +283,93 @@
 
       <!-- Content Surat Keterangan (SK) -->
       <div id="content-surat-keterangan" class="main-content-section hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <!-- Form SK -->
+        <div id="sk-form-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
+          <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="skFormTitle">Tambah Surat Keterangan (SK)</h2>
+          <form id="skForm" onsubmit="event.preventDefault(); saveSK();">
+            <!-- Tab Navigation -->
+            <div class="border-b border-gray-200 mb-4">
+              <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button type="button" id="tab-sk-dasar" onclick="switchSKTab('dasar')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
+                  <i class="fas fa-info-circle mr-2"></i> Data Dasar
+                </button>
+                <button type="button" id="tab-sk-detail" onclick="switchSKTab('detail')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                  <i class="fas fa-file-alt mr-2"></i> Detail SK
+                </button>
+              </nav>
+            </div>
+
+            <!-- Tab Content Data Dasar -->
+            <div id="content-sk-dasar" class="tab-content">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="skNomor" class="block text-sm font-medium text-gray-700">Nomor SK <span class="text-red-500">*</span></label>
+                  <input type="text" id="skNomor" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="skPegawai" class="block text-sm font-medium text-gray-700">Pegawai <span class="text-red-500">*</span></label>
+                  <select id="skPegawai" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <option value="">Pilih Pegawai</option>
+                    <!-- Data pegawai akan diisi oleh JavaScript -->
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="skJabatan" class="block text-sm font-medium text-gray-700">Jabatan <span class="text-red-500">*</span></label>
+                  <input type="text" id="skJabatan" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="skTanggal" class="block text-sm font-medium text-gray-700">Tanggal Terbit <span class="text-red-500">*</span></label>
+                  <input type="date" id="skTanggal" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="skStatus" class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
+                  <select id="skStatus" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <option value="Aktif">Aktif</option>
+                    <option value="Tidak Aktif">Tidak Aktif</option>
+                    <option value="Kadaluarsa">Kadaluarsa</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Content Detail SK -->
+            <div id="content-sk-detail" class="tab-content hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="skUnitKerja" class="block text-sm font-medium text-gray-700">Unit Kerja</label>
+                  <input type="text" id="skUnitKerja" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="skMasaBerlaku" class="block text-sm font-medium text-gray-700">Masa Berlaku</label>
+                  <input type="date" id="skMasaBerlaku" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div class="md:col-span-2">
+                  <label for="skKeterangan" class="block text-sm font-medium text-gray-700">Keterangan</label>
+                  <textarea id="skKeterangan" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <input type="hidden" id="skId" value="">
+            <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
+              <button type="submit" id="skSubmitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-save mr-2"></i> Simpan SK
+              </button>
+              <button type="button" onclick="hideSKForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-times mr-2"></i> Batal
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Daftar SK -->
+        <div id="sk-list-container" class="bg-white p-6 rounded-lg shadow-lg">
           <h2 class="text-2xl font-semibold text-gray-700 mb-4">
             <i class="fas fa-file-contract mr-2"></i> Surat Keterangan (SK)
           </h2>
@@ -244,7 +391,7 @@
           
           <!-- Tombol Aksi -->
           <div class="flex space-x-3 mb-6">
-            <button onclick="tambahSK()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
+            <button onclick="showSKForm()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
               <i class="fas fa-plus-circle mr-2"></i> Tambah SK
             </button>
             <button onclick="exportSKToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
@@ -283,7 +430,115 @@
 
       <!-- Content Surat Keterangan Lulus (SKL) -->
       <div id="content-surat-keterangan-lulus" class="main-content-section hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <!-- Form SKL -->
+        <div id="skl-form-container" class="bg-white p-6 rounded-lg shadow-lg mb-8 hidden">
+          <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="sklFormTitle">Tambah Surat Keterangan Lulus (SKL)</h2>
+          <form id="sklForm" onsubmit="event.preventDefault(); saveSKL();">
+            <!-- Tab Navigation -->
+            <div class="border-b border-gray-200 mb-4">
+              <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button type="button" id="tab-skl-dasar" onclick="switchSKLTab('dasar')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600">
+                  <i class="fas fa-info-circle mr-2"></i> Data Dasar
+                </button>
+                <button type="button" id="tab-skl-akademik" onclick="switchSKLTab('akademik')" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                  <i class="fas fa-graduation-cap mr-2"></i> Data Akademik
+                </button>
+              </nav>
+            </div>
+
+            <!-- Tab Content Data Dasar -->
+            <div id="content-skl-dasar" class="tab-content">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="sklNomor" class="block text-sm font-medium text-gray-700">Nomor SKL <span class="text-red-500">*</span></label>
+                  <input type="text" id="sklNomor" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="sklPegawai" class="block text-sm font-medium text-gray-700">Pegawai/Mahasiswa <span class="text-red-500">*</span></label>
+                  <select id="sklPegawai" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <option value="">Pilih Pegawai/Mahasiswa</option>
+                    <!-- Data akan diisi oleh JavaScript -->
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="sklNIP" class="block text-sm font-medium text-gray-700">NIP/NPM <span class="text-red-500">*</span></label>
+                  <input type="text" id="sklNIP" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="sklJabatan" class="block text-sm font-medium text-gray-700">Jabatan/Status <span class="text-red-500">*</span></label>
+                  <select id="sklJabatan" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <option value="MAHASISWA">MAHASISWA</option>
+                    <option value="DOSEN">DOSEN</option>
+                    <option value="STAFF">STAFF</option>
+                    <option value="ADMINISTRASI">ADMINISTRASI</option>
+                    <option value="TEKNISI">TEKNISI</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="sklStatus" class="block text-sm font-medium text-gray-700">Status Kelulusan <span class="text-red-500">*</span></label>
+                  <select id="sklStatus" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    <option value="LULUS">LULUS</option>
+                    <option value="SELESAI">SELESAI</option>
+                    <option value="BERHASIL">BERHASIL</option>
+                    <option value="KOMPETEN">KOMPETEN</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="sklTanggalLulus" class="block text-sm font-medium text-gray-700">Tanggal Lulus <span class="text-red-500">*</span></label>
+                  <input type="date" id="sklTanggalLulus" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Content Data Akademik -->
+            <div id="content-skl-akademik" class="tab-content hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="sklJurusan" class="block text-sm font-medium text-gray-700">Jurusan/Prodi</label>
+                  <input type="text" id="sklJurusan" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="sklTempatLahir" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
+                  <input type="text" id="sklTempatLahir" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="sklTanggalLahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+                  <input type="date" id="sklTanggalLahir" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                </div>
+                
+                <div>
+                  <label for="sklTanggalSurat" class="block text-sm font-medium text-gray-700">Tanggal Surat</label>
+                  <input type="date" id="sklTanggalSurat" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" value="">
+                </div>
+                
+                <div class="md:col-span-2">
+                  <label for="sklKeterangan" class="block text-sm font-medium text-gray-700">Keterangan Tambahan</label>
+                  <textarea id="sklKeterangan" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <input type="hidden" id="sklId" value="">
+            <div class="mt-6 pt-4 border-t flex space-x-3 justify-end">
+              <button type="submit" id="sklSubmitBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-save mr-2"></i> Simpan SKL
+              </button>
+              <button type="button" onclick="hideSKLForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-150">
+                <i class="fas fa-times mr-2"></i> Batal
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Daftar SKL -->
+        <div id="skl-list-container" class="bg-white p-6 rounded-lg shadow-lg">
           <h2 class="text-2xl font-semibold text-gray-700 mb-4">
             <i class="fas fa-file-certificate mr-2"></i> Surat Keterangan Lulus (SKL)
           </h2>
@@ -305,7 +560,7 @@
           
           <!-- Tombol Aksi -->
           <div class="flex space-x-3 mb-6">
-            <button onclick="tambahSKL()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
+            <button onclick="showSKLForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
               <i class="fas fa-plus-circle mr-2"></i> Tambah SKL
             </button>
             <button onclick="exportSKLToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md flex items-center shadow-md transition">
@@ -556,12 +811,19 @@ let currentPegawaiDetail = null;
 let currentSKLDetail = null;
 let allSKLData = [];
 let allSKData = [];
+let currentSKDetail = null;
 
-// Di DOMContentLoaded, tambahkan:
+// ==================== FUNGSI UTAMA ====================
 document.addEventListener("DOMContentLoaded", function() {
   loadPegawaiData();
   document.getElementById("pegawaiForm").addEventListener("submit", savePegawai);
   document.getElementById("editSKLForm").addEventListener("submit", saveEditSKL);
+  
+  // Set tanggal default untuk form SK dan SKL
+  const today = new Date().toISOString().split('T')[0];
+  if (document.getElementById('sklTanggalSurat')) {
+    document.getElementById('sklTanggalSurat').value = today;
+  }
   
   // Pastikan submenu Data Pegawai terbuka
   const submenu = document.getElementById('dataPegawaiSubmenu');
@@ -572,30 +834,79 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// ==================== FUNGSI NAVIGASI ====================
+// ==================== FUNGSI HELPER ====================
 
 // Fungsi helper untuk format tanggal
 function formatTanggalIndonesia(dateStr) {
     if (!dateStr) return "";
     
-    const date = new Date(dateStr);
-    const bulan = [
-        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-    ];
-    
-    const hari = date.getDate();
-    const namaBulan = bulan[date.getMonth()];
-    const tahun = date.getFullYear();
-    
-    return `${hari} ${namaBulan} ${tahun}`;
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        
+        const bulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+        
+        const hari = date.getDate();
+        const namaBulan = bulan[date.getMonth()];
+        const tahun = date.getFullYear();
+        
+        return `${hari} ${namaBulan} ${tahun}`;
+    } catch (error) {
+        console.error("Error formatting date:", error);
+        return dateStr;
+    }
 }
 
 function formatTanggalUpperCase(dateStr) {
     const formatted = formatTanggalIndonesia(dateStr);
     return formatted.toUpperCase();
 }
+
+// Fungsi notifikasi
+function showNotif(message, type = "success") {
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  notif.textContent = message;
+  notif.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    background-color: ${type === 'success' ? '#16a34a' : type === 'error' ? '#dc2626' : '#f59e0b'};
+  `;
   
+  document.body.appendChild(notif);
+  
+  // Trigger animation
+  setTimeout(() => {
+    notif.style.opacity = '1';
+    notif.style.transform = 'translateY(0)';
+  }, 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notif.style.opacity = '0';
+    notif.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+      if (notif.parentNode) {
+        document.body.removeChild(notif);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// ==================== FUNGSI NAVIGASI ====================
 function toggleSubmenu(event) {
   event.preventDefault(); 
   
@@ -612,10 +923,14 @@ function toggleSubmenu(event) {
 }
 
 function showMainTab(tab) {
-  // Sembunyikan semua konten
+  // Sembunyikan semua konten dan form
   document.querySelectorAll('.main-content-section').forEach(section => {
     section.classList.add('hidden');
   });
+  
+  // Sembunyikan form jika sedang terbuka
+  document.getElementById('sk-form-container').classList.add('hidden');
+  document.getElementById('skl-form-container').classList.add('hidden');
 
   // Tampilkan konten yang dipilih
   if (tab === 'crud') {
@@ -625,12 +940,12 @@ function showMainTab(tab) {
   else if (tab === 'surat-keterangan') {
     document.getElementById('content-surat-keterangan').classList.remove('hidden');
     document.getElementById('mainTitle').textContent = "Surat Keterangan (SK) Pegawai";
-    loadDataSK(); // Fungsi untuk load data SK
+    loadDataSK();
   }
   else if (tab === 'surat-keterangan-lulus') {
     document.getElementById('content-surat-keterangan-lulus').classList.remove('hidden');
     document.getElementById('mainTitle').textContent = "Surat Keterangan Lulus (SKL) Pegawai";
-    loadDataSKL(); // Fungsi untuk load data SKL
+    loadDataSKL();
   }
 
   // Update tombol tab aktif
@@ -646,182 +961,1077 @@ function showMainTab(tab) {
   }
 }
 
-// ==================== FUNGSI SURAT KETERANGAN (SK) ====================
-function loadDataSK() {
+// ==================== FUNGSI PEGAWAI ====================
+
+// Helper function
+const toNullIfEmpty = (val) => {
+  if (typeof val === 'string') {
+    const trimmedVal = val.trim();
+    return trimmedVal === "" || trimmedVal === "Pilih Jabatan" || 
+           trimmedVal === "Pilih Unit Kerja" || trimmedVal === "Pilih Status" ? 
+           null : trimmedVal;
+  }
+  return val;
+};
+
+function closeModal(modalId = 'pegawaiModal') {
+  const modals = ['pegawaiModal', 'detailPegawaiModal', 'detailSKLModal', 'editSKLModal'];
+  
+  if (modalId === 'all') {
+    modals.forEach(id => {
+      const modal = document.getElementById(id);
+      if (modal) modal.style.display = "none";
+    });
+  } else {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = "none";
+  }
+}
+
+// Load data pegawai
+async function loadPegawaiData() {
+  const tbody = document.getElementById("pegawai-table-body");
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`;
+  
+  const { data, error } = await supabaseClient.from("pegawai").select("*").order("nama");
+  
+  if (error) {
+    console.error("Gagal memuat data pegawai:", error);
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
+    showNotif("Gagal memuat data pegawai", "error");
+    return;
+  }
+  
+  allPegawaiData = data || [];
+  renderTable(allPegawaiData);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById("pegawai-table-body");
+  if (!data || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Data pegawai tidak ditemukan.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = data.map((p, index) => `
+    <tr class="hover:bg-gray-100" data-id="${p.id}">
+      <td class="px-4 py-4 text-sm border text-center">${index + 1}</td>
+      <td class="px-4 py-4 text-sm border">${p.nip || '-'}</td>
+      <td class="px-4 py-4 text-sm border">${p.nama || '-'}</td>
+      <td class="px-4 py-4 text-sm border">${p.jabatan || '-'}</td>
+      <td class="px-4 py-4 text-sm border">${p.unit || '-'}</td>
+      <td class="px-4 py-4 text-center text-sm border">
+        <span class="px-2 py-1 rounded-full text-xs font-medium ${
+          p.status === 'Aktif' ? 'bg-green-100 text-green-800' :
+          p.status === 'Pensiun' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-gray-100 text-gray-800'
+        }">
+          ${p.status || '-'}
+        </span>
+      </td>
+      <td class="px-4 py-4 text-center text-sm border space-x-2">
+        <button class="text-blue-600 hover:text-blue-800" onclick="viewDetailPegawai('${p.id}')" title="Detail">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="text-yellow-600 hover:text-yellow-800" onclick="editPegawai('${p.id}')" title="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="text-red-600 hover:text-red-800" onclick="deletePegawai('${p.id}')" title="Hapus">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function applyFilter() {
+  const filterNip = document.getElementById('filterNip').value.toLowerCase();
+  const filterNama = document.getElementById('filterNama').value.toLowerCase();
+  const filterJabatan = document.getElementById('filterJabatan').value;
+  
+  let filteredData = allPegawaiData.filter(pegawai => {
+    const matchNip = (pegawai.nip || '').toLowerCase().includes(filterNip);
+    const matchNama = (pegawai.nama || '').toLowerCase().includes(filterNama);
+    const matchJabatan = !filterJabatan || pegawai.jabatan === filterJabatan;
+    
+    return matchNip && matchNama && matchJabatan;
+  });
+  
+  renderTable(filteredData);
+}
+
+function resetFilter() {
+  document.getElementById('filterNip').value = '';
+  document.getElementById('filterNama').value = '';
+  document.getElementById('filterJabatan').value = '';
+  renderTable(allPegawaiData);
+}
+
+// Modal tambah/edit pegawai
+function openModal(pegawai = null) {
+  document.getElementById("pegawaiForm").reset();
+  document.getElementById("pegawaiId").value = "";
+  document.getElementById("modalTitle").textContent = "Tambah Pegawai";
+  document.getElementById("jabatan").value = "";
+  document.getElementById("unit").value = "";
+  document.getElementById("status").value = "Aktif";
+  editMode = false;
+  
+  // Set tanggal masuk default hari ini
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById("tgl_masuk").value = today;
+  
+  if (pegawai) {
+    document.getElementById("pegawaiId").value = pegawai.id;
+    document.getElementById("modalTitle").textContent = "Edit Pegawai: " + (pegawai.nama || pegawai.nip);
+    
+    document.getElementById("nip").value = pegawai.nip || '';
+    document.getElementById("nama").value = pegawai.nama || '';
+    document.getElementById("tanggal_lahir").value = pegawai.tanggal_lahir || '';
+    document.getElementById("jabatan").value = pegawai.jabatan || '';
+    document.getElementById("unit").value = pegawai.unit || '';
+    document.getElementById("status").value = pegawai.status || 'Aktif';
+    document.getElementById("no_telp").value = pegawai.no_telp || '';
+    document.getElementById("email").value = pegawai.email || '';
+    document.getElementById("tgl_masuk").value = pegawai.tgl_masuk || today;
+    document.getElementById("alamat").value = pegawai.alamat || '';
+    
+    editMode = true;
+  }
+  
+  document.getElementById("pegawaiModal").style.display = "flex";
+}
+
+function editPegawai(id) {
+  const pegawai = allPegawaiData.find(p => p.id == id);
+  if (!pegawai) {
+    showNotif("Data pegawai tidak ditemukan.", "error");
+    return;
+  }
+  openModal(pegawai);
+}
+
+// Simpan data pegawai (DIPERBAIKI)
+async function savePegawai(e) {
+  e.preventDefault();
+  
+  const pegawaiData = {
+    nip: toNullIfEmpty(document.getElementById("nip").value),
+    nama: toNullIfEmpty(document.getElementById("nama").value),
+    tanggal_lahir: toNullIfEmpty(document.getElementById("tanggal_lahir").value),
+    jabatan: toNullIfEmpty(document.getElementById("jabatan").value),
+    unit: toNullIfEmpty(document.getElementById("unit").value),
+    status: toNullIfEmpty(document.getElementById("status").value),
+    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
+    email: toNullIfEmpty(document.getElementById("email").value),
+    tgl_masuk: toNullIfEmpty(document.getElementById("tgl_masuk").value),
+    alamat: toNullIfEmpty(document.getElementById("alamat").value),
+  };
+  
+  // Validasi
+  if (!pegawaiData.nip) {
+    showNotif("❌ Mohon isi NIP Pegawai.", "error");
+    return;
+  }
+  
+  if (!pegawaiData.nama) {
+    showNotif("❌ Mohon isi Nama Pegawai.", "error");
+    return;
+  }
+  
+  if (!pegawaiData.jabatan) {
+    showNotif("❌ Mohon pilih Jabatan.", "error");
+    return;
+  }
+  
+  if (!pegawaiData.unit) {
+    showNotif("❌ Mohon pilih Unit Kerja.", "error");
+    return;
+  }
+  
+  if (!pegawaiData.status) {
+    showNotif("❌ Mohon pilih Status.", "error");
+    return;
+  }
+
   try {
-    // Data contoh untuk SK
-    const skData = [
+    let result;
+    if (editMode) {
+      // UPDATE
+      result = await supabaseClient
+        .from("pegawai")
+        .update(pegawaiData)
+        .eq("id", document.getElementById("pegawaiId").value)
+        .select();
+    } else {
+      // INSERT
+      result = await supabaseClient.from("pegawai").insert([pegawaiData]).select();
+    }
+    
+    if (result.error) {
+      throw result.error;
+    }
+    
+    showNotif(editMode ? "✅ Data pegawai berhasil diperbarui!" : "✅ Pegawai baru berhasil ditambahkan!", "success");
+    closeModal('pegawaiModal');
+    loadPegawaiData();
+    
+  } catch (error) {
+    console.error("Error saving pegawai:", error);
+    showNotif("❌ Gagal menyimpan data: " + error.message, "error");
+  }
+}
+
+// Hapus data pegawai
+async function deletePegawai(id) {
+  const pegawai = allPegawaiData.find(p => p.id == id);
+  const nama = pegawai ? pegawai.nama || pegawai.nip : 'ini';
+
+  if (!confirm(`Yakin ingin menghapus data pegawai "${nama}"?`)) return;
+  
+  try {
+    const { error } = await supabaseClient
+      .from("pegawai")
+      .delete()
+      .eq("id", id);
+    
+    if (error) throw error;
+    
+    showNotif(`✅ Data pegawai "${nama}" berhasil dihapus!`, "success");
+    loadPegawaiData();
+    
+  } catch (error) {
+    console.error("Error deleting pegawai:", error);
+    showNotif("❌ Gagal menghapus data: " + error.message, "error");
+  }
+}
+
+// Detail pegawai
+async function viewDetailPegawai(id) {
+  try {
+    const { data, error } = await supabaseClient
+      .from("pegawai")
+      .select("*")
+      .eq("id", id)
+      .single();
+    
+    if (error) throw error;
+    
+    if (!data) {
+      showNotif("Data pegawai tidak ditemukan.", "error");
+      return;
+    }
+    
+    currentPegawaiDetail = data;
+    
+    const detailRow = (label, value) => {
+      return `<p class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+                <span class="detail-label text-gray-600">${label}</span>
+                <span class="col-span-2 break-words font-medium">${value}</span>
+              </p>`;
+    };
+
+    const detailContent = `
+      <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="text-xl font-bold text-blue-700 mb-2">${data.nama || 'Nama Pegawai'}</h3>
+        <p class="text-gray-500 text-sm">${data.nip || '-'}</p>
+      </div>
+      <div class="space-y-1">
+        ${detailRow('NIP', data.nip || '-')}
+        ${detailRow('Tanggal Lahir', formatTanggalIndonesia(data.tanggal_lahir))}
+        ${detailRow('Jabatan', data.jabatan || '-')}
+        ${detailRow('Unit Kerja', data.unit || '-')}
+        ${detailRow('Status', `<span class="px-2 py-1 rounded-full text-xs font-medium ${
+          data.status === 'Aktif' ? 'bg-green-100 text-green-800' :
+          data.status === 'Pensiun' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-gray-100 text-gray-800'
+        }">${data.status || '-'}</span>`)}
+        ${detailRow('No. Telepon', data.no_telp || '-')}
+        ${detailRow('Email', data.email || '-')}
+        ${detailRow('Tanggal Masuk', formatTanggalIndonesia(data.tgl_masuk))}
+        ${detailRow('Alamat', data.alamat || '-')}
+      </div>
+    `;
+
+    document.getElementById('detailContent').innerHTML = detailContent;
+    document.getElementById('detailPegawaiModal').style.display = 'flex';
+    
+  } catch (error) {
+    console.error("Error loading detail:", error);
+    showNotif("Terjadi kesalahan saat memuat detail pegawai.", "error");
+  }
+}
+
+// ==================== FUNGSI SK ====================
+
+// Tampilkan form SK
+function showSKForm() {
+  resetSKForm();
+  document.getElementById('sk-list-container').classList.add('hidden');
+  document.getElementById('sk-form-container').classList.remove('hidden');
+  document.getElementById('sk-form-container').scrollIntoView({ behavior: 'smooth' });
+  switchSKTab('dasar');
+  
+  // Load data pegawai untuk dropdown
+  loadPegawaiForSelect('skPegawai');
+}
+
+// Sembunyikan form SK
+function hideSKForm() {
+  document.getElementById('sk-list-container').classList.remove('hidden');
+  document.getElementById('sk-form-container').classList.add('hidden');
+  document.getElementById('sk-list-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Reset form SK
+function resetSKForm() {
+  document.getElementById('skForm').reset();
+  document.getElementById('skId').value = '';
+  document.getElementById('skFormTitle').textContent = 'Tambah Surat Keterangan (SK)';
+  document.getElementById('skSubmitBtn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan SK';
+  document.getElementById('skTanggal').value = new Date().toISOString().split('T')[0];
+}
+
+// Switch tab pada form SK
+function switchSKTab(tabName) {
+  // Sembunyikan semua tab content
+  document.querySelectorAll('#sk-form-container .tab-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  
+  // Tampilkan tab yang dipilih
+  document.getElementById(`content-sk-${tabName}`).classList.remove('hidden');
+  
+  // Update tombol tab aktif
+  document.querySelectorAll('#sk-form-container .tab-button').forEach(button => {
+    button.classList.remove('text-blue-600', 'border-blue-600');
+    button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+  });
+  
+  document.getElementById(`tab-sk-${tabName}`).classList.add('text-blue-600', 'border-blue-600');
+  document.getElementById(`tab-sk-${tabName}`).classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+}
+
+// Simpan SK
+async function saveSK() {
+  const nomorSK = document.getElementById('skNomor').value;
+  const pegawaiId = document.getElementById('skPegawai').value;
+  const jabatan = document.getElementById('skJabatan').value;
+  const tanggalTerbit = document.getElementById('skTanggal').value;
+  const statusSK = document.getElementById('skStatus').value;
+  const unitKerja = document.getElementById('skUnitKerja').value;
+  const masaBerlaku = document.getElementById('skMasaBerlaku').value;
+  const keterangan = document.getElementById('skKeterangan').value;
+  const skId = document.getElementById('skId').value;
+
+  // Validasi
+  if (!nomorSK || !pegawaiId || !jabatan || !tanggalTerbit || !statusSK) {
+    showNotif('❌ Mohon lengkapi semua field yang wajib diisi!', 'error');
+    return;
+  }
+
+  const skData = {
+    nomor_sk: nomorSK,
+    id_pegawai: pegawaiId,
+    jabatan: jabatan,
+    tanggal_terbit: tanggalTerbit,
+    status: statusSK,
+    unit_kerja: unitKerja || null,
+    masa_berlaku: masaBerlaku || null,
+    keterangan: keterangan || null
+  };
+
+  try {
+    if (skId) {
+      // Update existing SK
+      const { error } = await supabaseClient
+        .from('surat_keterangan')
+        .update(skData)
+        .eq('id', skId);
+
+      if (error) throw error;
+      showNotif('✅ Data SK berhasil diperbarui!', 'success');
+    } else {
+      // Insert new SK
+      const { error } = await supabaseClient
+        .from('surat_keterangan')
+        .insert([skData]);
+
+      if (error) throw error;
+      showNotif('✅ SK baru berhasil ditambahkan!', 'success');
+    }
+
+    // Reset form dan reload data
+    resetSKForm();
+    hideSKForm();
+    loadDataSK();
+    
+  } catch (error) {
+    console.error('Error saving SK:', error);
+    showNotif('❌ Gagal menyimpan data: ' + error.message, 'error');
+  }
+}
+
+// Load data SK
+async function loadDataSK() {
+  try {
+    // Ambil data dari database
+    const { data, error } = await supabaseClient
+      .from('surat_keterangan')
+      .select(`
+        *,
+        pegawai(nama, nip, unit)
+      `)
+      .order('tanggal_terbit', { ascending: false });
+    
+    if (error) throw error;
+    
+    // Simpan ke variabel global
+    allSKData = data || [];
+    
+    // Update statistik
+    const totalSK = allSKData.length;
+    const now = new Date();
+    const skBulanIni = allSKData.filter(sk => {
+      const skDate = new Date(sk.tanggal_terbit);
+      return skDate.getMonth() === now.getMonth() && skDate.getFullYear() === now.getFullYear();
+    }).length;
+    
+    document.getElementById('totalSK').textContent = totalSK;
+    document.getElementById('skBulanIni').textContent = skBulanIni;
+    document.getElementById('pegawaiDenganSK').textContent = totalSK;
+    
+    // Render tabel
+    const tbody = document.getElementById('sk-table-body');
+    if (allSKData.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-8 text-gray-500">
+            <i class="fas fa-info-circle mr-2"></i> Belum ada data Surat Keterangan
+          </td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = allSKData.map((sk, index) => `
+        <tr class="hover:bg-gray-100" data-sk-id="${sk.id}">
+          <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
+          <td class="px-6 py-3 text-sm border font-medium">${sk.nomor_sk}</td>
+          <td class="px-6 py-3 text-sm border">${sk.pegawai?.nama || 'N/A'}</td>
+          <td class="px-6 py-3 text-sm border">${sk.jabatan}</td>
+          <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(sk.tanggal_terbit)}</td>
+          <td class="px-6 py-3 text-center text-sm border">
+            <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(sk.status)}">${sk.status}</span>
+          </td>
+          <td class="px-6 py-3 text-center text-sm border space-x-1">
+            <button onclick="viewSKDetail('${sk.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Detail">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button onclick="editSK('${sk.id}')" class="text-yellow-600 hover:text-yellow-800 mx-1" title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="deleteSK('${sk.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Hapus">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+  } catch (error) {
+    console.error("Error loading SK data:", error);
+    showNotif("Gagal memuat data SK: " + error.message, "error");
+  }
+}
+
+// Fungsi helper untuk warna status
+function getStatusColor(status) {
+  if (!status) return 'bg-gray-100 text-gray-800';
+  
+  switch(status.toLowerCase()) {
+    case 'aktif': return 'bg-green-100 text-green-800';
+    case 'tidak aktif': return 'bg-red-100 text-red-800';
+    case 'kadaluarsa': return 'bg-yellow-100 text-yellow-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
+
+// View detail SK
+async function viewSKDetail(skId) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('surat_keterangan')
+      .select(`
+        *,
+        pegawai(nama, nip, jabatan, unit, email, no_telp)
+      `)
+      .eq('id', skId)
+      .single();
+    
+    if (error) throw error;
+    
+    currentSKDetail = data;
+    
+    const detailHTML = `
+      <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <h3 class="text-xl font-bold text-blue-700 mb-1">${data.pegawai?.nama || 'Nama Pegawai'}</h3>
+        <p class="text-gray-500">${data.nomor_sk}</p>
+      </div>
+      
+      <div class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Nomor SK</span>
+          <span class="col-span-2 text-gray-800">: ${data.nomor_sk}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Nama Pegawai</span>
+          <span class="col-span-2 text-gray-800">: ${data.pegawai?.nama || '-'}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">NIP</span>
+          <span class="col-span-2 text-gray-800">: ${data.pegawai?.nip || '-'}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Jabatan di SK</span>
+          <span class="col-span-2 text-gray-800">: ${data.jabatan}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Jabatan Aktual</span>
+          <span class="col-span-2 text-gray-800">: ${data.pegawai?.jabatan || '-'}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Unit Kerja</span>
+          <span class="col-span-2 text-gray-800">: ${data.unit_kerja || data.pegawai?.unit || '-'}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Tanggal Terbit</span>
+          <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(data.tanggal_terbit)}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Masa Berlaku</span>
+          <span class="col-span-2 text-gray-800">: ${data.masa_berlaku ? formatTanggalIndonesia(data.masa_berlaku) : 'Tidak ditentukan'}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Status</span>
+          <span class="col-span-2 text-gray-800">: <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(data.status)}">${data.status}</span></span>
+        </div>
+        ${data.keterangan ? `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <span class="font-semibold text-gray-600 col-span-1">Keterangan</span>
+          <span class="col-span-2 text-gray-800">: ${data.keterangan}</span>
+        </div>
+        ` : ''}
+      </div>
+    `;
+    
+    // Buat modal baru untuk detail SK
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'detailSKModal';
+    modal.innerHTML = `
+      <div class="modal-content max-w-2xl">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h2 class="text-2xl font-semibold text-gray-800">
+            <i class="fas fa-file-contract mr-2 text-blue-600"></i> Detail Surat Keterangan (SK)
+          </h2>
+          <button onclick="document.getElementById('detailSKModal').remove()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        <div class="space-y-4 text-gray-700">
+          ${detailHTML}
+        </div>
+        <div class="flex justify-end space-x-3 mt-6 border-t pt-4">
+          <button onclick="exportSingleSKToPDF('${data.id}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+            <i class="fas fa-file-pdf mr-2"></i>Export PDF
+          </button>
+          <button onclick="exportSingleSKToExcel('${data.id}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+            <i class="fas fa-file-excel mr-2"></i>Export Excel
+          </button>
+          <button onclick="editSK('${data.id}')" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm">
+            <i class="fas fa-edit mr-2"></i>Edit
+          </button>
+          <button onclick="document.getElementById('detailSKModal').remove()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm">
+            Tutup
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+    
+  } catch (error) {
+    console.error("Error loading SK detail:", error);
+    showNotif("Gagal memuat detail SK", "error");
+  }
+}
+
+// Edit SK
+async function editSK(skId) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('surat_keterangan')
+      .select('*')
+      .eq('id', skId)
+      .single();
+    
+    if (error) throw error;
+    
+    // Tampilkan form edit
+    showSKForm();
+    
+    // Isi form dengan data SK
+    document.getElementById('skId').value = data.id;
+    document.getElementById('skNomor').value = data.nomor_sk;
+    document.getElementById('skJabatan').value = data.jabatan;
+    document.getElementById('skTanggal').value = data.tanggal_terbit;
+    document.getElementById('skStatus').value = data.status;
+    document.getElementById('skUnitKerja').value = data.unit_kerja || '';
+    document.getElementById('skMasaBerlaku').value = data.masa_berlaku || '';
+    document.getElementById('skKeterangan').value = data.keterangan || '';
+    
+    // Load pegawai dan set nilai
+    await loadPegawaiForSelect('skPegawai');
+    setTimeout(() => {
+      document.getElementById('skPegawai').value = data.id_pegawai;
+    }, 100);
+    
+    document.getElementById('skFormTitle').textContent = 'Edit Surat Keterangan (SK)';
+    document.getElementById('skSubmitBtn').innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Update SK';
+    
+  } catch (error) {
+    console.error("Error loading SK for edit:", error);
+    showNotif("Gagal memuat data untuk edit", "error");
+  }
+}
+
+// Hapus SK
+async function deleteSK(skId) {
+  if (!confirm('Apakah Anda yakin ingin menghapus data SK ini?')) return;
+  
+  try {
+    const { error } = await supabaseClient
+      .from('surat_keterangan')
+      .delete()
+      .eq('id', skId);
+    
+    if (error) throw error;
+    
+    showNotif('SK berhasil dihapus!', 'success');
+    loadDataSK();
+    
+  } catch (error) {
+    console.error('Error deleting SK:', error);
+    showNotif('Gagal menghapus SK', 'error');
+  }
+}
+
+// ==================== FUNGSI SKL ====================
+
+// Tampilkan form SKL
+function showSKLForm() {
+  resetSKLForm();
+  document.getElementById('skl-list-container').classList.add('hidden');
+  document.getElementById('skl-form-container').classList.remove('hidden');
+  document.getElementById('skl-form-container').scrollIntoView({ behavior: 'smooth' });
+  switchSKLTab('dasar');
+  
+  // Load data pegawai untuk dropdown
+  loadPegawaiForSelect('sklPegawai');
+}
+
+// Sembunyikan form SKL
+function hideSKLForm() {
+  document.getElementById('skl-list-container').classList.remove('hidden');
+  document.getElementById('skl-form-container').classList.add('hidden');
+  document.getElementById('skl-list-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Reset form SKL
+function resetSKLForm() {
+  document.getElementById('sklForm').reset();
+  document.getElementById('sklId').value = '';
+  document.getElementById('sklFormTitle').textContent = 'Tambah Surat Keterangan Lulus (SKL)';
+  document.getElementById('sklSubmitBtn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan SKL';
+  
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sklTanggalLulus').value = today;
+  document.getElementById('sklTanggalSurat').value = today;
+}
+
+// Switch tab pada form SKL
+function switchSKLTab(tabName) {
+  // Sembunyikan semua tab content
+  document.querySelectorAll('#skl-form-container .tab-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  
+  // Tampilkan tab yang dipilih
+  document.getElementById(`content-skl-${tabName}`).classList.remove('hidden');
+  
+  // Update tombol tab aktif
+  document.querySelectorAll('#skl-form-container .tab-button').forEach(button => {
+    button.classList.remove('text-blue-600', 'border-blue-600');
+    button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+  });
+  
+  document.getElementById(`tab-skl-${tabName}`).classList.add('text-blue-600', 'border-blue-600');
+  document.getElementById(`tab-skl-${tabName}`).classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+}
+
+// Simpan SKL
+async function saveSKL() {
+  const nomorSKL = document.getElementById('sklNomor').value;
+  const pegawaiId = document.getElementById('sklPegawai').value;
+  const nipNpm = document.getElementById('sklNIP').value;
+  const jabatan = document.getElementById('sklJabatan').value;
+  const statusLulus = document.getElementById('sklStatus').value;
+  const tanggalLulus = document.getElementById('sklTanggalLulus').value;
+  const jurusan = document.getElementById('sklJurusan').value;
+  const tempatLahir = document.getElementById('sklTempatLahir').value;
+  const tanggalLahir = document.getElementById('sklTanggalLahir').value;
+  const tanggalSurat = document.getElementById('sklTanggalSurat').value;
+  const keterangan = document.getElementById('sklKeterangan').value;
+  const sklId = document.getElementById('sklId').value;
+
+  // Validasi
+  if (!nomorSKL || !pegawaiId || !nipNpm || !jabatan || !statusLulus || !tanggalLulus) {
+    showNotif('❌ Mohon lengkapi semua field yang wajib diisi!', 'error');
+    return;
+  }
+
+  const sklData = {
+    nomor_skl: nomorSKL,
+    id_pegawai: pegawaiId,
+    nip_npm: nipNpm,
+    jabatan: jabatan,
+    status: statusLulus,
+    tanggal_lulus: tanggalLulus,
+    jurusan: jurusan || null,
+    tempat_lahir: tempatLahir || null,
+    tanggal_lahir: tanggalLahir || null,
+    tanggal_surat: tanggalSurat || new Date().toISOString().split('T')[0],
+    keterangan: keterangan || null
+  };
+
+  try {
+    if (sklId) {
+      // Update existing SKL
+      const { error } = await supabaseClient
+        .from('surat_keterangan_lulus')
+        .update(sklData)
+        .eq('id', sklId);
+
+      if (error) throw error;
+      showNotif('✅ Data SKL berhasil diperbarui!', 'success');
+    } else {
+      // Insert new SKL
+      const { error } = await supabaseClient
+        .from('surat_keterangan_lulus')
+        .insert([sklData]);
+
+      if (error) throw error;
+      showNotif('✅ SKL baru berhasil ditambahkan!', 'success');
+    }
+
+    // Reset form dan reload data
+    resetSKLForm();
+    hideSKLForm();
+    loadDataSKL();
+    
+  } catch (error) {
+    console.error('Error saving SKL:', error);
+    showNotif('❌ Gagal menyimpan data: ' + error.message, 'error');
+  }
+}
+
+// Load data SKL
+async function loadDataSKL() {
+  try {
+    // Data contoh SKL sesuai dengan format yang Anda berikan
+    const sklData = [
       { 
         id: '1', 
-        nomor_sk: 'SK/2025/001', 
-        nama_pegawai: 'Budi Santoso',
-        nip: '198001012005011001',
-        jabatan: 'Staff Administrasi',
-        tanggal_terbit: '2025-03-01',
-        status: 'Aktif'
-      },
-      { 
-        id: '2', 
-        nomor_sk: 'SK/2025/002', 
-        nama_pegawai: 'Siti Rahayu',
-        nip: '198202152006021002',
-        jabatan: 'Koordinator',
-        tanggal_terbit: '2025-03-15',
-        status: 'Aktif'
-      },
-      { 
-        id: '3', 
-        nomor_sk: 'SK/2025/003', 
-        nama_pegawai: 'Ahmad Fauzi',
-        nip: '198303202007031003',
-        jabatan: 'Staff Teknis',
-        tanggal_terbit: '2025-04-01',
-        status: 'Aktif'
+        nomor_skl: '313/UNLA/FT/PP/XI/2025', 
+        nama_pegawai: 'RYAN RIZKI PRATAMA',
+        nip: '41155055220085',
+        tempat_lahir: 'BANDUNG',
+        tanggal_lahir: '1998-02-05',
+        jurusan: 'TEKNIK INFORMATIKA',
+        tanggal_lulus: '2025-10-27',
+        tanggal_surat: '2025-11-21',
+        status: 'LULUS'
       }
     ];
     
-    allSKData = skData;
+    // Simpan ke variabel global
+    allSKLData = sklData;
     
     // Update statistik
-    document.getElementById('totalSK').textContent = skData.length;
-    document.getElementById('skBulanIni').textContent = skData.filter(d => 
-      new Date(d.tanggal_terbit).getMonth() === new Date().getMonth() &&
-      new Date(d.tanggal_terbit).getFullYear() === new Date().getFullYear()
+    document.getElementById('totalSKL').textContent = sklData.length;
+    document.getElementById('sklTahunIni').textContent = sklData.filter(d => 
+      new Date(d.tanggal_lulus).getFullYear() === new Date().getFullYear()
     ).length;
-    document.getElementById('pegawaiDenganSK').textContent = skData.length;
+    document.getElementById('pegawaiLulus').textContent = sklData.length;
     
-    // Render tabel SK
-    const tbody = document.getElementById('sk-table-body');
-    tbody.innerHTML = skData.map((sk, index) => `
-      <tr class="hover:bg-gray-100" data-sk='${JSON.stringify(sk)}' data-sk-id="${sk.id}">
+    // Render tabel
+    const tbody = document.getElementById('skl-table-body');
+    tbody.innerHTML = sklData.map((skl, index) => `
+      <tr class="hover:bg-gray-100" data-skl='${JSON.stringify(skl)}'>
         <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
-        <td class="px-6 py-3 text-sm border font-medium">${sk.nomor_sk}</td>
-        <td class="px-6 py-3 text-sm border">${sk.nama_pegawai}</td>
-        <td class="px-6 py-3 text-sm border">${sk.jabatan}</td>
-        <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(sk.tanggal_terbit)}</td>
+        <td class="px-6 py-3 text-sm border font-medium">${skl.nomor_skl}</td>
+        <td class="px-6 py-3 text-sm border">${skl.nama_pegawai}</td>
+        <td class="px-6 py-3 text-sm border">MAHASISWA</td>
+        <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(skl.tanggal_lulus)}</td>
         <td class="px-6 py-3 text-center text-sm border">
-          <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">${sk.status}</span>
+          <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${skl.status}</span>
         </td>
-        <td class="px-6 py-3 text-center text-sm border space-x-1">
-          <button onclick="viewSKDetail('${sk.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Detail">
+        <td class="px-6 py-3 text-center text-sm border">
+          <button onclick="viewSKLDetail('${skl.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Lihat Detail">
             <i class="fas fa-eye"></i>
           </button>
-          <button onclick="exportSingleSKToPDF('${sk.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Export PDF">
+          <button onclick="exportSingleSKLToPDF('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Export PDF">
             <i class="fas fa-file-pdf"></i>
           </button>
-          <button onclick="exportSingleSKToExcel('${sk.id}')" class="text-green-600 hover:text-green-800 mx-1" title="Export Excel">
+          <button onclick="exportSingleSKLToExcel('${skl.id}')" class="text-green-600 hover:text-green-800 mx-1" title="Export Excel">
             <i class="fas fa-file-excel"></i>
-          </button>
-          <button onclick="editSK(${JSON.stringify(sk)})" class="text-yellow-600 hover:text-yellow-800 mx-1" title="Edit">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button onclick="deleteSK('${sk.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Hapus">
-            <i class="fas fa-trash"></i>
           </button>
         </td>
       </tr>
     `).join('');
     
   } catch (error) {
-    console.error("Error loading SK data:", error);
+    console.error("Error loading SKL data:", error);
+    showNotif("Gagal memuat data SKL: " + error.message, "error");
   }
 }
 
-// ==================== FUNGSI EXPORT PDF UNTUK SK ====================
-function createSKPdfDocument(skData) {
-    const doc = new jsPDF();
-    
-    // Atur margin dan posisi
-    const margin = 20;
-    let yPos = margin;
-    
-    // Header
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("FAKULTAS TEKNIK", 105, yPos, { align: "center" });
-    yPos += 10;
-    
-    doc.setFontSize(12);
-    doc.text("UNIVERSITAS LANGLANGBUANA", 105, yPos, { align: "center" });
-    yPos += 15;
-    
-    // Nomor SK
-    doc.setFontSize(11);
-    doc.text(`Nomor: ${skData.nomor_sk || '--/UNLA/FT/PP/--/----'}`, margin, yPos);
-    yPos += 10;
-    
-    // Judul
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("SURAT KETERANGAN", 105, yPos, { align: "center" });
-    yPos += 20;
-    
-    // Isi Surat
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
-    const semester = currentMonth >= 1 && currentMonth <= 6 ? 'Ganjil' : 'Genap';
-    const tahunAkademik = `${currentYear}-${currentYear + 1}`;
-    
-    doc.text(`Dekan Fakultas Teknik Universitas Langlangbuana dengan ini menerangkan`, margin, yPos);
-    yPos += 10;
-    doc.text(`bahwa :`, margin, yPos);
-    yPos += 15;
-    
-    doc.text(`Nama\t\t: ${skData.nama_pegawai || 'NAMA PEGAWAI'}`, margin, yPos);
-    yPos += 8;
-    doc.text(`NIP\t\t: ${skData.nip || 'NIP PEGAWAI'}`, margin, yPos);
-    yPos += 8;
-    doc.text(`Jabatan\t: ${skData.jabatan || 'JABATAN'}`, margin, yPos);
-    yPos += 8;
-    doc.text(`Unit Kerja\t: ${skData.unit_kerja || 'UNIT KERJA'}`, margin, yPos);
-    yPos += 15;
-    
-    doc.text(`Adalah benar pegawai Fakultas Teknik Universitas Langlangbuana Bandung,`, margin, yPos);
-    yPos += 8;
-    doc.text(`Terdaftar dan Aktif pada Tahun ${tahunAkademik} ${semester}, pegawai yang`, margin, yPos);
-    yPos += 8;
-    doc.text(`bersangkutan telah memenuhi semua kewajiban dan tugas sesuai dengan`, margin, yPos);
-    yPos += 8;
-    doc.text(`jabatannya.`, margin, yPos);
-    yPos += 15;
-    
-    doc.text(`Demikian keterangan ini kami beritahukan untuk dapat dipergunakan`, margin, yPos);
-    yPos += 8;
-    doc.text(`sebagaimana mestinya.`, margin, yPos);
-    
-    // Tanda tangan
-    yPos += 30;
-    doc.text("Bandung, " + formatTanggalIndonesia(new Date()), 130, yPos);
-    yPos += 15;
-    doc.text("An. Dekan,", 130, yPos);
-    yPos += 15;
-    doc.text("Wakil Dekan I", 130, yPos);
-    yPos += 15;
-    doc.setFont("helvetica", "bold");
-    doc.text("IRWIN SUPRIADI, S.KOM., MT", 130, yPos);
-    
-    // Save PDF
-    doc.save(`SK_${skData.nama_pegawai.replace(/\s+/g, '_')}.pdf`);
-}
+// ==================== FUNGSI BANTUAN ====================
 
-// Fungsi untuk export single SK ke PDF
-function exportSingleSKToPDF(skId) {
-    const skData = allSKData.find(sk => sk.id === skId);
-    if (!skData) {
-        alert("Data SK tidak ditemukan.");
-        return;
+// Load data pegawai untuk dropdown
+async function loadPegawaiForSelect(selectId) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('pegawai')
+      .select('id, nama, nip, jabatan')
+      .order('nama');
+    
+    if (error) throw error;
+    
+    const selectElement = document.getElementById(selectId);
+    if (!selectElement) return;
+    
+    selectElement.innerHTML = '<option value="">Pilih Pegawai</option>';
+    
+    if (data && data.length > 0) {
+      data.forEach(pegawai => {
+        const option = document.createElement('option');
+        option.value = pegawai.id;
+        option.textContent = `${pegawai.nama} - ${pegawai.nip || 'N/A'} (${pegawai.jabatan || 'Tidak ada jabatan'})`;
+        selectElement.appendChild(option);
+      });
     }
     
-    createSKPdfDocument(skData);
+  } catch (error) {
+    console.error('Error loading pegawai:', error);
+  }
 }
 
-// Fungsi untuk export semua SK ke PDF
+// Update fungsi tambahSK() dan tambahSKL() yang lama
+function tambahSK() {
+  showSKForm();
+}
+
+function tambahSKL() {
+  showSKLForm();
+}
+
+// ==================== FUNGSI EXPORT ====================
+
+// Export pegawai
+function getDetailDataForExport() {
+  if (!currentPegawaiDetail) return [];
+
+  const p = currentPegawaiDetail;
+  return [
+    ['Nama Pegawai', p.nama || '-'],
+    ['NIP', p.nip || '-'],
+    ['Tanggal Lahir', p.tanggal_lahir || '-'],
+    ['Jabatan', p.jabatan || '-'],
+    ['Unit Kerja', p.unit || '-'],
+    ['Status', p.status || '-'],
+    ['No. Telepon', p.no_telp || '-'],
+    ['Email', p.email || '-'],
+    ['Tanggal Masuk', p.tgl_masuk || '-'],
+    ['Alamat', p.alamat || '-'],
+  ];
+}
+
+function exportDetailToPdf() {
+  if (!currentPegawaiDetail) {
+    showNotif("Tidak ada data detail untuk diekspor.", "warning");
+    return;
+  }
+  
+  try {
+    const doc = new jsPDF();
+    const data = getDetailDataForExport();
+    const namaFile = `Detail Pegawai - ${currentPegawaiDetail.nama || currentPegawaiDetail.nip || 'Data'}.pdf`;
+
+    doc.setFontSize(16);
+    doc.text("Data Detail Pegawai", 14, 20);
+    
+    doc.autoTable({
+      startY: 30,
+      head: [['Field', 'Value']],
+      body: data,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 2 },
+      headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 50, fontStyle: 'bold' },
+        1: { cellWidth: 'auto' }
+      }
+    });
+
+    doc.save(namaFile);
+    showNotif("✅ PDF berhasil diunduh!", "success");
+  } catch (error) {
+    console.error("Error exporting to PDF:", error);
+    showNotif("❌ Gagal mengekspor ke PDF", "error");
+  }
+}
+
+function exportDetailToExcel() {
+  if (!currentPegawaiDetail) {
+    showNotif("Tidak ada data detail untuk diekspor.", "warning");
+    return;
+  }
+  
+  try {
+    const data = getDetailDataForExport();
+    const worksheetData = [['Data Detail Pegawai'], [''], ...data];
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    ws['!cols'] = [{ wch: 25 }, { wch: 50 }];
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+    
+    XLSX.utils.book_append_sheet(wb, ws, "Detail Pegawai");
+    XLSX.writeFile(wb, `Detail Pegawai - ${currentPegawaiDetail.nama || 'Data'}.xlsx`);
+    showNotif("✅ Excel berhasil diunduh!", "success");
+  } catch (error) {
+    console.error("Error exporting to Excel:", error);
+    showNotif("❌ Gagal mengekspor ke Excel", "error");
+  }
+}
+
+function exportAllToPdf() {
+  if (allPegawaiData.length === 0) {
+    showNotif("Tidak ada data pegawai untuk diekspor.", "warning");
+    return;
+  }
+  
+  try {
+    const doc = new jsPDF('l', 'mm', 'a4');
+    
+    const headers = ["No", "NIP", "Nama", "Tanggal Lahir", "Jabatan", "Unit", "Status", "No Telp", "Email", "Tgl Masuk", "Alamat"];
+    
+    const data = allPegawaiData.map((p, index) => [
+      index + 1,
+      p.nip || '-',
+      p.nama || '-',
+      p.tanggal_lahir || '-',
+      p.jabatan || '-',
+      p.unit || '-',
+      p.status || '-',
+      p.no_telp || '-',
+      p.email || '-',
+      p.tgl_masuk || '-',
+      p.alamat || '-',
+    ]);
+
+    doc.setFontSize(14);
+    doc.text("Data Seluruh Pegawai Fakultas Teknik", 14, 20);
+
+    doc.autoTable({
+      startY: 25,
+      head: [headers],
+      body: data,
+      theme: 'striped',
+      styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
+      headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 8 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 25 },
+        6: { cellWidth: 15 },
+        7: { cellWidth: 20 },
+        8: { cellWidth: 30 },
+        9: { cellWidth: 20 },
+        10: { cellWidth: 40 },
+      }
+    });
+
+    doc.save("data_pegawai_all.pdf");
+    showNotif("✅ PDF semua data berhasil diunduh!", "success");
+  } catch (error) {
+    console.error("Error exporting all to PDF:", error);
+    showNotif("❌ Gagal mengekspor semua data ke PDF", "error");
+  }
+}
+
+function exportAllToExcel() {
+  if (allPegawaiData.length === 0) {
+    showNotif("Tidak ada data pegawai untuk diekspor.", "warning");
+    return;
+  }
+  
+  try {
+    const headers = ["No", "NIP", "Nama", "Tanggal Lahir", "Jabatan", "Unit Kerja", "Status", "No Telp", "Email", "Tanggal Masuk", "Alamat"];
+    
+    const rows = allPegawaiData.map((p, index) => [
+      index + 1,
+      p.nip, p.nama, p.tanggal_lahir, p.jabatan, p.unit, p.status, 
+      p.no_telp, p.email, p.tgl_masuk, p.alamat
+    ]);
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, "Pegawai");
+    XLSX.writeFile(wb, "data_pegawai_all.xlsx");
+    showNotif("✅ Excel semua data berhasil diunduh!", "success");
+  } catch (error) {
+    console.error("Error exporting all to Excel:", error);
+    showNotif("❌ Gagal mengekspor semua data ke Excel", "error");
+  }
+}
+
+// Update nama user di navbar
+async function updateUserName() {
+  const { data: userData } = await supabaseClient.auth.getUser();
+  const user = userData.user;
+  const userNameElement = document.getElementById('userNameNav');
+  
+  if (userNameElement && user?.email) {
+    const namePart = user.email.split('@')[0];
+    const displayUsername = namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
+    userNameElement.textContent = `Halo, ${displayUsername}`;
+  }
+}
+
+// Panggil saat load
+updateUserName();
+
+// Tambahkan fungsi export untuk SK dan SKL yang sudah ada di kode sebelumnya
+// Fungsi export SK ke PDF
 function exportSKToPDF() {
     if (!allSKData || allSKData.length === 0) {
-        alert("Tidak ada data SK untuk diekspor.");
+        showNotif("Tidak ada data SK untuk diekspor.", "warning");
         return;
     }
     
@@ -833,907 +2043,141 @@ function exportSKToPDF() {
             }, index * 100);
         });
         
-        alert(`Berhasil mengekspor ${allSKData.length} SK ke PDF!`);
+        showNotif(`Berhasil mengekspor ${allSKData.length} SK ke PDF!`, "success");
     } catch (error) {
         console.error("Error exporting SK to PDF:", error);
-        alert("Terjadi kesalahan saat mengekspor SK ke PDF.");
+        showNotif("Terjadi kesalahan saat mengekspor SK ke PDF.", "error");
     }
 }
 
-// ==================== FUNGSI FORMAT EXCEL UNTUK SK ====================
-function createSKWorksheetData(skData) {
-    const formatTanggal = (dateStr) => {
-        if (!dateStr) return "";
-        const date = new Date(dateStr);
-        const bulan = [
-            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-        ];
-        
-        const hari = date.getDate();
-        const namaBulan = bulan[date.getMonth()];
-        const tahun = date.getFullYear();
-        
-        return `${hari} ${namaBulan} ${tahun}`;
-    };
-    
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
-    const semester = currentMonth >= 1 && currentMonth <= 6 ? 'Ganjil' : 'Genap';
-    const tahunAkademik = `${currentYear}-${currentYear + 1}`;
-    
-    return [
-        // Header
-        ["FAKULTAS TEKNIK"],
-        ["UNIVERSITAS LANGLANGBUANA"],
-        [""],
-        
-        // Nomor SK
-        [`Nomor: ${skData.nomor_sk || '--/UNLA/FT/PP/--/----'}`],
-        [""],
-        
-        // Judul
-        ["SURAT KETERANGAN"],
-        [""],
-        
-        // Isi Surat
-        ["Dekan Fakultas Teknik Universitas Langlangbuana dengan ini menerangkan"],
-        ["bahwa :"],
-        [""],
-        
-        // Data Pegawai
-        [`Nama\t: ${skData.nama_pegawai || 'NAMA PEGAWAI'}`],
-        [`NIP\t: ${skData.nip || 'NIP PEGAWAI'}`],
-        [`Jabatan\t: ${skData.jabatan || 'JABATAN'}`],
-        [`Unit Kerja\t: ${skData.unit_kerja || 'UNIT KERJA'}`],
-        [""],
-        
-        // Keterangan
-        [`Adalah benar pegawai Fakultas Teknik Universitas Langlangbuana Bandung,`],
-        [`Terdaftar dan Aktif pada Tahun ${tahunAkademik} ${semester}, pegawai yang`],
-        [`bersangkutan telah memenuhi semua kewajiban dan tugas sesuai dengan`],
-        [`jabatannya.`],
-        [""],
-        
-        // Penutup
-        [`Demikian keterangan ini kami beritahukan untuk dapat dipergunakan`],
-        [`sebagaimana mestinya.`],
-        [""],
-        [""],
-        [""],
-        
-        // Tanda Tangan
-        [`Bandung, ${formatTanggal(new Date())}`],
-        [""],
-        ["An. Dekan,"],
-        [""],
-        ["Wakil Dekan I"],
-        [""],
-        ["IRWIN SUPRIADI, S.KOM., MT"]
-    ];
-}
-
-// Fungsi untuk export single SK ke Excel
-function exportSingleSKToExcel(skId) {
-    const skData = allSKData.find(sk => sk.id === skId);
-    if (!skData) {
-        alert("Data SK tidak ditemukan.");
-        return;
-    }
-    
-    // Buat workbook Excel dengan format surat
-    const wb = XLSX.utils.book_new();
-    const worksheetData = createSKWorksheetData(skData);
-    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-    
-    // Atur lebar kolom
-    ws['!cols'] = [
-        { wch: 20 },
-        { wch: 60 },
-        { wch: 20 }
-    ];
-    
-    // Merge cells untuk format surat
-    const merges = [
-        // Header Fakultas
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
-        
-        // Nomor SK
-        { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
-        
-        // Judul Surat
-        { s: { r: 5, c: 0 }, e: { r: 5, c: 2 } },
-        
-        // Pembuka
-        { s: { r: 7, c: 0 }, e: { r: 7, c: 2 } },
-        { s: { r: 8, c: 0 }, e: { r: 8, c: 2 } },
-        
-        // Data pegawai
-        { s: { r: 10, c: 0 }, e: { r: 10, c: 2 } },
-        { s: { r: 11, c: 0 }, e: { r: 11, c: 2 } },
-        { s: { r: 12, c: 0 }, e: { r: 12, c: 2 } },
-        { s: { r: 13, c: 0 }, e: { r: 13, c: 2 } },
-        
-        // Isi surat
-        { s: { r: 15, c: 0 }, e: { r: 15, c: 2 } },
-        { s: { r: 16, c: 0 }, e: { r: 16, c: 2 } },
-        { s: { r: 17, c: 0 }, e: { r: 17, c: 2 } },
-        { s: { r: 18, c: 0 }, e: { r: 18, c: 2 } },
-        
-        // Penutup
-        { s: { r: 20, c: 0 }, e: { r: 20, c: 2 } },
-        { s: { r: 21, c: 0 }, e: { r: 21, c: 2 } },
-        
-        // Tanda tangan
-        { s: { r: 24, c: 0 }, e: { r: 24, c: 2 } },
-        { s: { r: 26, c: 0 }, e: { r: 26, c: 2 } },
-        { s: { r: 28, c: 0 }, e: { r: 28, c: 2 } },
-        { s: { r: 30, c: 0 }, e: { r: 30, c: 2 } }
-    ];
-    
-    ws['!merges'] = merges;
-    
-    // Tambahkan worksheet ke workbook
-    XLSX.utils.book_append_sheet(wb, ws, "Surat_Keterangan");
-    
-    // Simpan file
-    XLSX.writeFile(wb, `SK_${skData.nama_pegawai.replace(/\s+/g, '_')}.xlsx`);
-    alert("Berhasil mengekspor SK ke Excel dengan format surat!");
-}
-
-// Fungsi untuk export semua SK ke Excel
-function exportSKToExcel() {
-    if (!allSKData || allSKData.length === 0) {
-        alert("Tidak ada data SK untuk diekspor.");
-        return;
-    }
-
-    // Buat workbook Excel
-    const wb = XLSX.utils.book_new();
-    
-    // Sheet 1: Ringkasan data
-    const summaryData = [
-        ["RINGKASAN SURAT KETERANGAN (SK)"],
-        [""],
-        ["No", "Nomor SK", "Nama Pegawai", "NIP", "Jabatan", "Tanggal Terbit", "Status"]
-    ];
-    
-    allSKData.forEach((sk, index) => {
-        summaryData.push([
-            index + 1,
-            sk.nomor_sk || '-',
-            sk.nama_pegawai || '-',
-            sk.nip || '-',
-            sk.jabatan || '-',
-            formatTanggalIndonesia(sk.tanggal_terbit) || '-',
-            sk.status || '-'
-        ]);
-    });
-    
-    const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan SK");
-    
-    // Sheet 2-...: Format surat untuk setiap SK
-    allSKData.forEach((sk, index) => {
-        const worksheetData = createSKWorksheetData(sk);
-        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-        
-        // Atur lebar kolom
-        ws['!cols'] = [
-            { wch: 20 },
-            { wch: 60 },
-            { wch: 20 }
-        ];
-        
-        // Merge cells untuk format surat
-        const merges = [
-            // Header Fakultas
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
-            { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
-            
-            // Nomor SK
-            { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
-            
-            // Judul Surat
-            { s: { r: 5, c: 0 }, e: { r: 5, c: 2 } },
-            
-            // Pembuka
-            { s: { r: 7, c: 0 }, e: { r: 7, c: 2 } },
-            { s: { r: 8, c: 0 }, e: { r: 8, c: 2 } },
-            
-            // Data pegawai
-            { s: { r: 10, c: 0 }, e: { r: 10, c: 2 } },
-            { s: { r: 11, c: 0 }, e: { r: 11, c: 2 } },
-            { s: { r: 12, c: 0 }, e: { r: 12, c: 2 } },
-            { s: { r: 13, c: 0 }, e: { r: 13, c: 2 } },
-            
-            // Isi surat
-            { s: { r: 15, c: 0 }, e: { r: 15, c: 2 } },
-            { s: { r: 16, c: 0 }, e: { r: 16, c: 2 } },
-            { s: { r: 17, c: 0 }, e: { r: 17, c: 2 } },
-            { s: { r: 18, c: 0 }, e: { r: 18, c: 2 } },
-            
-            // Penutup
-            { s: { r: 20, c: 0 }, e: { r: 20, c: 2 } },
-            { s: { r: 21, c: 0 }, e: { r: 21, c: 2 } },
-            
-            // Tanda tangan
-            { s: { r: 24, c: 0 }, e: { r: 24, c: 2 } },
-            { s: { r: 26, c: 0 }, e: { r: 26, c: 2 } },
-            { s: { r: 28, c: 0 }, e: { r: 28, c: 2 } },
-            { s: { r: 30, c: 0 }, e: { r: 30, c: 2 } }
-        ];
-        
-        ws['!merges'] = merges;
-        
-        const sheetName = `SK_${index + 1}`.substring(0, 31);
-        XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    });
-    
-    // Simpan file
-    XLSX.writeFile(wb, `Surat_Keterangan_${new Date().toISOString().slice(0,10)}.xlsx`);
-    alert(`Berhasil mengekspor ${allSKData.length} SK ke Excel!`);
-}
-
-function viewSKDetail(skId) {
-  const skData = allSKData.find(sk => sk.id === skId);
-  if (!skData) {
-    alert("Data SK tidak ditemukan");
-    return;
-  }
-  
-  const detailHTML = `
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-      <h3 class="text-xl font-bold text-blue-700 mb-1">${skData.nama_pegawai}</h3>
-      <p class="text-gray-500">${skData.nomor_sk}</p>
-    </div>
-    
-    <div class="space-y-3">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <span class="font-semibold text-gray-600 col-span-1">Nomor SK</span>
-        <span class="col-span-2 text-gray-800">: ${skData.nomor_sk}</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <span class="font-semibold text-gray-600 col-span-1">Nama Pegawai</span>
-        <span class="col-span-2 text-gray-800">: ${skData.nama_pegawai}</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <span class="font-semibold text-gray-600 col-span-1">NIP</span>
-        <span class="col-span-2 text-gray-800">: ${skData.nip}</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <span class="font-semibold text-gray-600 col-span-1">Jabatan</span>
-        <span class="col-span-2 text-gray-800">: ${skData.jabatan}</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <span class="font-semibold text-gray-600 col-span-1">Tanggal Terbit</span>
-        <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(skData.tanggal_terbit)}</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <span class="font-semibold text-gray-600 col-span-1">Status</span>
-        <span class="col-span-2 text-gray-800">: <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">${skData.status}</span></span>
-      </div>
-    </div>
-  `;
-  
-  // Buat modal baru untuk detail SK
-  const modal = document.createElement('div');
-  modal.className = 'modal';
-  modal.id = 'detailSKModal';
-  modal.innerHTML = `
-    <div class="modal-content max-w-2xl">
-      <div class="flex justify-between items-center mb-4 border-b pb-2">
-        <h2 class="text-2xl font-semibold text-gray-800">
-          <i class="fas fa-file-contract mr-2 text-blue-600"></i> Detail Surat Keterangan (SK)
-        </h2>
-        <button onclick="document.getElementById('detailSKModal').remove()" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times text-xl"></i>
-        </button>
-      </div>
-      <div class="space-y-4 text-gray-700">
-        ${detailHTML}
-      </div>
-      <div class="flex justify-end space-x-3 mt-6 border-t pt-4">
-        <button onclick="exportSingleSKToPDF('${skData.id}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
-          <i class="fas fa-file-pdf mr-2"></i>Export PDF
-        </button>
-        <button onclick="exportSingleSKToExcel('${skData.id}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
-          <i class="fas fa-file-excel mr-2"></i>Export Excel
-        </button>
-        <button onclick="editSK(${JSON.stringify(skData)})" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm">
-          <i class="fas fa-edit mr-2"></i>Edit
-        </button>
-        <button onclick="document.getElementById('detailSKModal').remove()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md text-sm">
-          Tutup
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  modal.style.display = 'flex';
-}
-
-function editSK(skData) {
-  if (!skData) {
-    alert('Data SK tidak ditemukan');
-    return;
-  }
-  
-  // Isi form edit SK
-  document.getElementById('editSKLId').value = skData.id || '';
-  document.getElementById('editNomorSKL').value = skData.nomor_sk || '';
-  document.getElementById('editNamaPegawai').value = skData.nama_pegawai || '';
-  document.getElementById('editNIP').value = skData.nip || '';
-  document.getElementById('editJabatan').value = skData.jabatan || '';
-  document.getElementById('editTanggalLulus').value = skData.tanggal_terbit || '';
-  document.getElementById('editStatus').value = skData.status || 'Aktif';
-  
-  // Update judul modal
-  document.querySelector('#editSKLModal h2').innerHTML = '<i class="fas fa-edit mr-2 text-yellow-600"></i> Edit Surat Keterangan (SK)';
-  
-  // Tampilkan modal edit
-  document.getElementById('editSKLModal').style.display = 'flex';
-}
-
-function deleteSK(skId) {
-  if (confirm('Apakah Anda yakin ingin menghapus data SK ini?')) {
-    console.log('Menghapus SK dengan ID:', skId);
-    alert('SK berhasil dihapus!');
-    loadDataSK();
-  }
-}
-
-// ==================== FUNGSI SURAT KETERANGAN LULUS (SKL) ====================
-async function loadDataSKL() {
-    try {
-        // Data contoh SKL sesuai dengan format yang Anda berikan
-        const sklData = [
-            { 
-                id: '1', 
-                nomor_skl: '313/UNLA/FT/PP/XI/2025', 
-                nama_pegawai: 'RYAN RIZKI PRATAMA',
-                nip: '41155055220085',
-                tempat_lahir: 'BANDUNG',
-                tanggal_lahir: '1998-02-05',
-                jurusan: 'TEKNIK INFORMATIKA',
-                tanggal_lulus: '2025-10-27',
-                tanggal_surat: '2025-11-21',
-                status: 'LULUS'
-            }
-        ];
-        
-        // Simpan ke variabel global
-        allSKLData = sklData;
-        
-        // Update statistik
-        document.getElementById('totalSKL').textContent = sklData.length;
-        document.getElementById('sklTahunIni').textContent = sklData.filter(d => 
-            new Date(d.tanggal_lulus).getFullYear() === new Date().getFullYear()
-        ).length;
-        document.getElementById('pegawaiLulus').textContent = sklData.length;
-        
-        // Render tabel
-        const tbody = document.getElementById('skl-table-body');
-        tbody.innerHTML = sklData.map((skl, index) => `
-            <tr class="hover:bg-gray-100" data-skl='${JSON.stringify(skl)}'>
-                <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
-                <td class="px-6 py-3 text-sm border font-medium">${skl.nomor_skl}</td>
-                <td class="px-6 py-3 text-sm border">${skl.nama_pegawai}</td>
-                <td class="px-6 py-3 text-sm border">MAHASISWA</td>
-                <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(skl.tanggal_lulus)}</td>
-                <td class="px-6 py-3 text-center text-sm border">
-                    <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${skl.status}</span>
-                </td>
-                <td class="px-6 py-3 text-center text-sm border">
-                    <button onclick="viewSKLDetail('${skl.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Lihat Detail">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button onclick="exportSingleSKLToPDF('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Export PDF">
-                        <i class="fas fa-file-pdf"></i>
-                    </button>
-                    <button onclick="exportSingleSKLToExcel('${skl.id}')" class="text-green-600 hover:text-green-800 mx-1" title="Export Excel">
-                        <i class="fas fa-file-excel"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-        
-    } catch (error) {
-        console.error("Error loading SKL data:", error);
-    }
-}
-
-// ==================== FUNGSI DETAIL SKL ====================
-function viewSKLDetail(sklId) {
-  const sklData = allSKLData.find(skl => skl.id === sklId);
-  if (!sklData) {
-    alert("Data SKL tidak ditemukan");
-    return;
-  }
-  
-  currentSKLDetail = sklData;
-  
-  // Tampilkan detail dalam modal
-  const detailContent = document.getElementById('detailSKLContent');
-  
-  const detailRow = (label, value) => {
-    return `<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <span class="font-semibold text-gray-600 col-span-1">${label}</span>
-              <span class="col-span-2 text-gray-800">: ${value || '-'}</span>
-            </div>`;
-  };
-
-  const detailHTML = `
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-      <h3 class="text-xl font-bold text-purple-700 mb-1">${sklData.nama_pegawai || 'Nama Pegawai'}</h3>
-      <p class="text-gray-500">${sklData.nomor_skl || 'Nomor SKL'}</p>
-    </div>
-    
-    <div class="space-y-3">
-      ${detailRow('Nomor SKL', sklData.nomor_skl)}
-      ${detailRow('Nama Lengkap', sklData.nama_pegawai)}
-      ${detailRow('NIP/NPM', sklData.nip)}
-      ${detailRow('Tempat Lahir', sklData.tempat_lahir)}
-      ${detailRow('Tanggal Lahir', sklData.tanggal_lahir ? formatTanggalIndonesia(sklData.tanggal_lahir) : '-')}
-      ${detailRow('Jabatan', sklData.jabatan)}
-      ${detailRow('Jurusan/Prodi', sklData.jurusan)}
-      ${detailRow('Tanggal Lulus', sklData.tanggal_lulus ? formatTanggalIndonesia(sklData.tanggal_lulus) : '-')}
-      ${detailRow('Status', `<span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">${sklData.status}</span>`)}
-    </div>
-    
-    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-      <h4 class="font-bold text-blue-700 mb-2">Keterangan:</h4>
-      <p class="text-sm text-gray-600">
-        Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah asli masih dalam proses penerbitan.
-      </p>
-    </div>
-  `;
-
-  detailContent.innerHTML = detailHTML;
-  document.getElementById('detailSKLModal').style.display = 'flex';
-}
-
-// ==================== FUNGSI EDIT SKL ====================
-function editSKL(sklData) {
-  if (!sklData) {
-    alert('Data SKL tidak ditemukan');
-    return;
-  }
-  
-  // Isi form edit dengan data SKL
-  document.getElementById('editSKLId').value = sklData.id || '';
-  document.getElementById('editNomorSKL').value = sklData.nomor_skl || '';
-  document.getElementById('editNamaPegawai').value = sklData.nama_pegawai || '';
-  document.getElementById('editNIP').value = sklData.nip || '';
-  document.getElementById('editJabatan').value = sklData.jabatan || 'MAHASISWA';
-  document.getElementById('editJurusan').value = sklData.jurusan || '';
-  document.getElementById('editTempatLahir').value = sklData.tempat_lahir || '';
-  
-  // Format tanggal lahir untuk input date
-  if (sklData.tanggal_lahir) {
-    document.getElementById('editTanggalLahir').value = sklData.tanggal_lahir;
-  }
-  
-  // Format tanggal lulus untuk input date
-  if (sklData.tanggal_lulus) {
-    const tanggalLulus = new Date(sklData.tanggal_lulus);
-    const formattedDate = tanggalLulus.toISOString().split('T')[0];
-    document.getElementById('editTanggalLulus').value = formattedDate;
-  }
-  
-  document.getElementById('editStatus').value = sklData.status || 'LULUS';
-  
-  // Update judul modal
-  document.querySelector('#editSKLModal h2').innerHTML = '<i class="fas fa-edit mr-2 text-yellow-600"></i> Edit Surat Keterangan Lulus (SKL)';
-  
-  // Tampilkan modal edit
-  document.getElementById('editSKLModal').style.display = 'flex';
-}
-
-// ==================== SIMPAN EDIT SKL ====================
-async function saveEditSKL(e) {
-  e.preventDefault();
-  
-  const sklId = document.getElementById('editSKLId').value;
-  const updatedData = {
-    nomor_skl: document.getElementById('editNomorSKL').value,
-    nama_pegawai: document.getElementById('editNamaPegawai').value,
-    nip: document.getElementById('editNIP').value,
-    jabatan: document.getElementById('editJabatan').value,
-    jurusan: document.getElementById('editJurusan').value,
-    tempat_lahir: document.getElementById('editTempatLahir').value,
-    tanggal_lahir: document.getElementById('editTanggalLahir').value,
-    tanggal_lulus: document.getElementById('editTanggalLulus').value,
-    status: document.getElementById('editStatus').value
-  };
-  
-  try {
-    // Simpan perubahan
-    console.log('Menyimpan perubahan SKL:', updatedData);
-    
-    // Update data di array allSKLData
-    const index = allSKLData.findIndex(skl => skl.id === sklId);
-    if (index !== -1) {
-      allSKLData[index] = { ...allSKLData[index], ...updatedData };
-    }
-    
-    alert('✅ Data berhasil diperbarui!');
-    closeModal('editSKLModal');
-    
-    // Refresh data
-    loadDataSKL();
-    
-  } catch (error) {
-    console.error('Error updating data:', error);
-    alert('❌ Gagal memperbarui data');
-  }
-}
-
-// ==================== FUNGSI HAPUS SKL ====================
-function deleteSKL(sklId) {
-  if (confirm('Apakah Anda yakin ingin menghapus data SKL ini?')) {
-    // Logika hapus SKL
-    console.log('Menghapus SKL dengan ID:', sklId);
-    alert('SKL berhasil dihapus!');
-    loadDataSKL(); // Refresh data
-  }
-}
-
-// ==================== FUNGSI TAMBAH ====================
-function tambahSK() {
-  alert('Fitur "Tambah SK" akan dikembangkan lebih lanjut.');
-}
-
-function tambahSKL() {
-  alert('Fitur "Tambah SKL" akan dikembangkan lebih lanjut.');
-}
-
-// ==================== FUNGSI EXPORT SKL ====================
-function exportSKLDetailToPDF() {
-  if (!currentSKLDetail) {
-    alert('Tidak ada data SKL untuk diekspor');
-    return;
-  }
-  
-  createSKLPdfDocument(currentSKLDetail);
-}
-
-function exportSingleSKLToPDF(sklId) {
-  const sklData = allSKLData.find(skl => skl.id === sklId);
-  if (!sklData) {
-    alert("Data SKL tidak ditemukan.");
-    return;
-  }
-  
-  createSKLPdfDocument(sklData);
-}
-
-function createSKLPdfDocument(sklData) {
-  const doc = new jsPDF();
-  
-  // Atur margin dan posisi
-  const margin = 20;
-  let yPos = margin;
-  
-  // Header
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", 105, yPos, { align: "center" });
-  yPos += 10;
-  
-  doc.setFontSize(12);
-  doc.text("UNIVERSITAS LANGLANGBUANA", 105, yPos, { align: "center" });
-  yPos += 10;
-  
-  doc.text("FAKULTAS TEKNIK", 105, yPos, { align: "center" });
-  yPos += 10;
-  
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Jl. Karapitan No. 116 Telp. 022-4215717 Fax. 022-4237144 Bandung 40261", 105, yPos, { align: "center" });
-  yPos += 15;
-  
-  // Nomor SKL
-  doc.setFontSize(11);
-  doc.text(`Nomor: ${sklData.nomor_skl}`, margin, yPos);
-  yPos += 10;
-  
-  // Judul
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("SURAT KETERANGAN LULUS", 105, yPos, { align: "center" });
-  yPos += 20;
-  
-  // Isi Surat
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  
-  doc.text("Dekan Fakultas Teknik Universitas Langlangbuana Bandung menerangkan bahwa:", margin, yPos);
-  yPos += 15;
-  
-  doc.text(`Nama\t\t\t\t\t: ${sklData.nama_pegawai}`, margin, yPos);
-  yPos += 8;
-  doc.text(`Nomor Pokok Mahasiswa\t: ${sklData.nip}`, margin, yPos);
-  yPos += 8;
-  doc.text(`Tempat/Tanggal Lahir\t: ${sklData.tempat_lahir}, ${formatTanggalUpperCase(sklData.tanggal_lahir)}`, margin, yPos);
-  yPos += 8;
-  doc.text(`Jurusan/Program Studi\t: ${sklData.jurusan}`, margin, yPos);
-  yPos += 10;
-  
-  doc.setFontSize(10);
-  doc.text("(Terakreditasi 'BAIK SEKALI', SK LAM INFOKOM No. 016/SK/LAM-INFOKOM/Ak/S/III/2025,", margin, yPos);
-  yPos += 5;
-  doc.text("Tanggal 13 Maret 2025, Sampai Dengan 13 Maret 2030)", margin, yPos);
-  yPos += 10;
-  
-  doc.setFontSize(12);
-  doc.text(`Adalah mahasiswa Fakultas Teknik Universitas Langlangbuana yang telah LULUS sebagai`, margin, yPos);
-  yPos += 8;
-  doc.text(`SARJANA KOMPUTER pada tanggal ${formatTanggalIndonesia(sklData.tanggal_lulus)}.`, margin, yPos);
-  yPos += 15;
-  
-  doc.text("Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah", margin, yPos);
-  yPos += 8;
-  doc.text("asli masih dalam proses penerbitan.", margin, yPos);
-  yPos += 8;
-  doc.text("Surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya.", margin, yPos);
-  
-  // Tanda tangan
-  yPos += 30;
-  doc.text("Bandung, " + formatTanggalIndonesia(new Date()), 130, yPos);
-  yPos += 15;
-  doc.text("Dekan Fakultas Teknik", 130, yPos);
-  yPos += 15;
-  doc.setFont("helvetica", "bold");
-  doc.text("Dr. Sally Octaviana Sari ,ST., MT", 130, yPos);
-  
-  // Save PDF
-  doc.save(`SKL_${sklData.nama_pegawai.replace(/\s+/g, '_')}.pdf`);
-}
-
-// ==================== FUNGSI EXPORT SKL YANG HILANG ====================
-
-// Fungsi Export SKL ke PDF untuk tombol utama
+// Fungsi export SKL ke PDF
 function exportSKLToPDF() {
   if (!allSKLData || allSKLData.length === 0) {
-    alert("Tidak ada data SKL untuk diekspor.");
+    showNotif("Tidak ada data SKL untuk diekspor.", "warning");
     return;
   }
   
-  // Export semua data SKL
   try {
-    // Buat PDF untuk setiap SKL
     allSKLData.forEach((sklData, index) => {
       setTimeout(() => {
         createSKLPdfDocument(sklData);
-      }, index * 100); // Delay untuk menghindari conflict
+      }, index * 100);
     });
     
-    alert(`Berhasil mengekspor ${allSKLData.length} SKL ke PDF!`);
+    showNotif(`Berhasil mengekspor ${allSKLData.length} SKL ke PDF!`, "success");
   } catch (error) {
     console.error("Error exporting SKL to PDF:", error);
-    alert("Terjadi kesalahan saat mengekspor SKL ke PDF.");
+    showNotif("Terjadi kesalahan saat mengekspor SKL ke PDF.", "error");
   }
 }
 
-// Fungsi Export SKL ke Excel untuk tombol utama
-function exportSKLToExcel() {
-  if (!allSKLData || allSKLData.length === 0) {
-    alert("Tidak ada data SKL untuk diekspor.");
-    return;
-  }
-
-  // Buat workbook Excel
-  const wb = XLSX.utils.book_new();
-  
-  // Sheet 1: Ringkasan data
-  const summaryData = [
-    ["RINGKASAN SURAT KETERANGAN LULUS (SKL)"],
-    [""],
-    ["No", "Nomor SKL", "Nama Pegawai", "NIP/NPM", "Tanggal Lulus", "Status"]
-  ];
-  
-  allSKLData.forEach((skl, index) => {
-    summaryData.push([
-      index + 1,
-      skl.nomor_skl || '-',
-      skl.nama_pegawai || '-',
-      skl.nip || '-',
-      formatTanggalIndonesia(skl.tanggal_lulus) || '-',
-      skl.status || '-'
-    ]);
-  });
-  
-  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan SKL");
-  
-  // Sheet 2-...: Format surat untuk setiap SKL
-  allSKLData.forEach((skl, index) => {
-    const worksheetData = createSKLWorksheetData(skl);
-    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-    
-    // Atur lebar kolom
-    ws['!cols'] = [
-      { wch: 20 },
-      { wch: 60 },
-      { wch: 20 }
-    ];
-    
-    // Merge cells untuk format surat
-    const merges = [
-      // Header Yayasan
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } },
-      { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
-      
-      // Nomor SKL
-      { s: { r: 5, c: 0 }, e: { r: 5, c: 2 } },
-      
-      // Judul Surat
-      { s: { r: 7, c: 0 }, e: { r: 7, c: 2 } },
-      
-      // Data mahasiswa dan isi surat
-      { s: { r: 9, c: 0 }, e: { r: 9, c: 2 } },
-      { s: { r: 10, c: 0 }, e: { r: 10, c: 2 } },
-      { s: { r: 11, c: 0 }, e: { r: 11, c: 2 } },
-      { s: { r: 12, c: 0 }, e: { r: 12, c: 2 } },
-      { s: { r: 13, c: 0 }, e: { r: 13, c: 2 } },
-      { s: { r: 14, c: 0 }, e: { r: 14, c: 2 } },
-      { s: { r: 15, c: 0 }, e: { r: 15, c: 2 } },
-      { s: { r: 17, c: 0 }, e: { r: 17, c: 2 } },
-      { s: { r: 18, c: 0 }, e: { r: 18, c: 2 } },
-      { s: { r: 19, c: 0 }, e: { r: 19, c: 2 } },
-      { s: { r: 20, c: 0 }, e: { r: 20, c: 2 } },
-      { s: { r: 21, c: 0 }, e: { r: 21, c: 2 } },
-      
-      // Tanda tangan
-      { s: { r: 24, c: 0 }, e: { r: 24, c: 2 } },
-      { s: { r: 26, c: 0 }, e: { r: 26, c: 2 } },
-      { s: { r: 28, c: 0 }, e: { r: 28, c: 2 } }
-    ];
-    
-    ws['!merges'] = merges;
-    
-    const sheetName = `SKL_${index + 1}`.substring(0, 31);
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  });
-  
-  // Simpan file
-  XLSX.writeFile(wb, `Surat_Keterangan_Lulus_${new Date().toISOString().slice(0,10)}.xlsx`);
-  alert(`Berhasil mengekspor ${allSKLData.length} SKL ke Excel!`);
-}
-
-// Fungsi untuk melihat detail SKL
-function viewSKLDetail(sklId) {
-  // Pastikan allSKLData sudah terisi
-  if (!allSKLData || allSKLData.length === 0) {
-    alert("Data SKL belum dimuat.");
-    return;
-  }
-  
-  const sklData = allSKLData.find(skl => skl.id === sklId);
-  if (!sklData) {
-    alert("Data SKL tidak ditemukan");
-    return;
-  }
-  
-  currentSKLDetail = sklData;
-  
-  // Tampilkan detail dalam modal
-  const detailContent = document.getElementById('detailSKLContent');
-  
-  const detailRow = (label, value) => {
-    return `<div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
-              <span class="font-semibold text-gray-600 col-span-1">${label}</span>
-              <span class="col-span-2 text-gray-800">${value || '-'}</span>
-            </div>`;
-  };
-
-  const detailHTML = `
-    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-      <h3 class="text-xl font-bold text-purple-700 mb-1">${sklData.nama_pegawai || 'Nama Pegawai'}</h3>
-      <p class="text-gray-500">${sklData.nomor_skl || 'Nomor SKL'}</p>
-    </div>
-    
-    <div class="space-y-2">
-      ${detailRow('Nomor SKL:', sklData.nomor_skl)}
-      ${detailRow('Nama Lengkap:', sklData.nama_pegawai)}
-      ${detailRow('NIP/NPM:', sklData.nip)}
-      ${detailRow('Tempat Lahir:', sklData.tempat_lahir)}
-      ${detailRow('Tanggal Lahir:', sklData.tanggal_lahir ? formatTanggalIndonesia(sklData.tanggal_lahir) : '-')}
-      ${detailRow('Jabatan:', sklData.jabatan)}
-      ${detailRow('Jurusan/Prodi:', sklData.jurusan)}
-      ${detailRow('Tanggal Lulus:', sklData.tanggal_lulus ? formatTanggalIndonesia(sklData.tanggal_lulus) : '-')}
-      ${detailRow('Status:', `<span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">${sklData.status}</span>`)}
-    </div>
-    
-    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-      <h4 class="font-bold text-blue-700 mb-2">Keterangan:</h4>
-      <p class="text-sm text-gray-600">
-        Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah asli masih dalam proses penerbitan.
-      </p>
-    </div>
-  `;
-
-  detailContent.innerHTML = detailHTML;
-  document.getElementById('detailSKLModal').style.display = 'flex';
-}
-  
-// Fungsi Export Single SKL ke Excel
-function exportSingleSKLToExcel(sklId) {
-    // Cari data SKL berdasarkan ID
-    const allRows = document.querySelectorAll('#skl-table-body tr[data-skl]');
-    const targetRow = Array.from(allRows).find(row => {
-        const data = JSON.parse(row.getAttribute('data-skl'));
-        return data.id === sklId;
-    });
-    
-    if (!targetRow) {
-        alert("Data SKL tidak ditemukan.");
+// Fungsi export SK ke Excel
+function exportSKToExcel() {
+    if (!allSKData || allSKData.length === 0) {
+        showNotif("Tidak ada data SK untuk diekspor.", "warning");
         return;
     }
-    
-    const sklData = JSON.parse(targetRow.getAttribute('data-skl'));
-    
-    // Buat workbook Excel dengan format surat
-    const wb = XLSX.utils.book_new();
-    const worksheetData = createSKLWorksheetData(sklData);
-    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-    
-    // Atur lebar kolom
-    ws['!cols'] = [
-        { wch: 20 },  // Kolom 1
-        { wch: 60 },  // Kolom 2
-        { wch: 20 }   // Kolom 3
-    ];
-    
-    // Merge cells untuk format surat
-    const merges = [
-        // Header Yayasan
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
-        { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } },
-        { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
+
+    try {
+        // Buat workbook Excel
+        const wb = XLSX.utils.book_new();
         
-        // Nomor SKL
-        { s: { r: 5, c: 0 }, e: { r: 5, c: 2 } },
+        // Sheet 1: Ringkasan data
+        const summaryData = [
+            ["RINGKASAN SURAT KETERANGAN (SK)"],
+            [""],
+            ["No", "Nomor SK", "Nama Pegawai", "NIP", "Jabatan", "Tanggal Terbit", "Status"]
+        ];
         
-        // Judul Surat
-        { s: { r: 7, c: 0 }, e: { r: 7, c: 2 } },
+        allSKData.forEach((sk, index) => {
+            summaryData.push([
+                index + 1,
+                sk.nomor_sk || '-',
+                sk.pegawai?.nama || '-',
+                sk.pegawai?.nip || '-',
+                sk.jabatan || '-',
+                formatTanggalIndonesia(sk.tanggal_terbit) || '-',
+                sk.status || '-'
+            ]);
+        });
         
-        // Data mahasiswa
-        { s: { r: 9, c: 0 }, e: { r: 9, c: 2 } },
-        { s: { r: 10, c: 0 }, e: { r: 10, c: 2 } },
-        { s: { r: 11, c: 0 }, e: { r: 11, c: 2 } },
-        { s: { r: 12, c: 0 }, e: { r: 12, c: 2 } },
-        { s: { r: 13, c: 0 }, e: { r: 13, c: 2 } },
-        { s: { r: 14, c: 0 }, e: { r: 14, c: 2 } },
-        { s: { r: 15, c: 0 }, e: { r: 15, c: 2 } },
+        const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan SK");
         
-        // Isi surat
-        { s: { r: 17, c: 0 }, e: { r: 17, c: 2 } },
-        { s: { r: 18, c: 0 }, e: { r: 18, c: 2 } },
-        { s: { r: 19, c: 0 }, e: { r: 19, c: 2 } },
-        { s: { r: 20, c: 0 }, e: { r: 20, c: 2 } },
-        { s: { r: 21, c: 0 }, e: { r: 21, c: 2 } },
+        // Sheet 2-...: Format surat untuk setiap SK
+        allSKData.forEach((sk, index) => {
+            const worksheetData = createSKWorksheetData(sk);
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            
+            ws['!cols'] = [
+                { wch: 20 },
+                { wch: 60 },
+                { wch: 20 }
+            ];
+            
+            const sheetName = `SK_${index + 1}`.substring(0, 31);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
         
-        // Tanda tangan
-        { s: { r: 24, c: 0 }, e: { r: 24, c: 2 } },
-        { s: { r: 26, c: 0 }, e: { r: 26, c: 2 } },
-        { s: { r: 28, c: 0 }, e: { r: 28, c: 2 } }
-    ];
-    
-    ws['!merges'] = merges;
-    
-    // Tambahkan worksheet ke workbook
-    XLSX.utils.book_append_sheet(wb, ws, "Surat_Keterangan_Lulus");
-    
-    // Simpan file
-    XLSX.writeFile(wb, `SKL_${sklData.nama_pegawai.replace(/\s+/g, '_')}.xlsx`);
-    alert("Berhasil mengekspor SKL ke Excel dengan format surat!");
+        // Simpan file
+        XLSX.writeFile(wb, `Surat_Keterangan_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showNotif(`Berhasil mengekspor ${allSKData.length} SK ke Excel!`, "success");
+    } catch (error) {
+        console.error("Error exporting SK to Excel:", error);
+        showNotif("Terjadi kesalahan saat mengekspor SK ke Excel.", "error");
+    }
+}
+
+// Fungsi export SKL ke Excel
+function exportSKLToExcel() {
+    if (!allSKLData || allSKLData.length === 0) {
+        showNotif("Tidak ada data SKL untuk diekspor.", "warning");
+        return;
+    }
+
+    try {
+        const wb = XLSX.utils.book_new();
+        
+        const summaryData = [
+            ["RINGKASAN SURAT KETERANGAN LULUS (SKL)"],
+            [""],
+            ["No", "Nomor SKL", "Nama Pegawai", "NIP/NPM", "Tanggal Lulus", "Status"]
+        ];
+        
+        allSKLData.forEach((skl, index) => {
+            summaryData.push([
+                index + 1,
+                skl.nomor_skl || '-',
+                skl.nama_pegawai || '-',
+                skl.nip || '-',
+                formatTanggalIndonesia(skl.tanggal_lulus) || '-',
+                skl.status || '-'
+            ]);
+        });
+        
+        const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan SKL");
+        
+        allSKLData.forEach((skl, index) => {
+            const worksheetData = createSKLWorksheetData(skl);
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            
+            ws['!cols'] = [
+                { wch: 20 },
+                { wch: 60 },
+                { wch: 20 }
+            ];
+            
+            const sheetName = `SKL_${index + 1}`.substring(0, 31);
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+        
+        XLSX.writeFile(wb, `Surat_Keterangan_Lulus_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showNotif(`Berhasil mengekspor ${allSKLData.length} SKL ke Excel!`, "success");
+    } catch (error) {
+        console.error("Error exporting SKL to Excel:", error);
+        showNotif("Terjadi kesalahan saat mengekspor SKL ke Excel.", "error");
+    }
 }
 
 // Fungsi untuk membuat data worksheet dengan format surat SKL
@@ -1804,455 +2248,6 @@ function createSKLWorksheetData(sklData) {
         ["Dr. Sally Octaviana Sari ,ST., MT"]
     ];
 }
-
-// Fungsi untuk export single SKL dari tombol di tabel
-async function exportSingleSKLToPDF(sklId) {
-    // Cari data SKL berdasarkan ID
-    const row = document.querySelector(`tr[data-skl-id="${sklId}"]`);
-    if (!row) {
-        // Coba cari dengan atribut data-skl
-        const allRows = document.querySelectorAll('#skl-table-body tr[data-skl]');
-        const targetRow = Array.from(allRows).find(row => {
-            const data = JSON.parse(row.getAttribute('data-skl'));
-            return data.id === sklId;
-        });
-        
-        if (!targetRow) {
-            alert("Data SKL tidak ditemukan.");
-            return;
-        }
-        
-        const sklData = JSON.parse(targetRow.getAttribute('data-skl'));
-        createSKLPdfDocument(sklData);
-    }
-}
-
-// ==================== FUNGSI UTAMA PEGAWAI ====================
-
-// Helper function
-const toNullIfEmpty = (val) => {
-  if (typeof val === 'string') {
-    const trimmedVal = val.trim();
-    return trimmedVal === "" || trimmedVal === "Pilih Jabatan" || 
-           trimmedVal === "Pilih Unit Kerja" || trimmedVal === "Pilih Status" ? 
-           null : trimmedVal;
-  }
-  return val;
-};
-
-function closeModal(modalId = 'pegawaiModal') {
-  const modals = ['pegawaiModal', 'detailPegawaiModal', 'detailSKLModal', 'editSKLModal'];
-  
-  if (modalId === 'all') {
-    modals.forEach(id => {
-      const modal = document.getElementById(id);
-      if (modal) modal.style.display = "none";
-    });
-  } else {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.style.display = "none";
-  }
-}
-
-// ==================== LOAD DATA PEGAWAI ====================
-async function loadPegawaiData() {
-  const tbody = document.getElementById("pegawai-table-body");
-  tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>`;
-  
-  const { data, error } = await supabaseClient.from("pegawai").select("*").order("nama");
-  
-  if (error) {
-    console.error("Gagal memuat data pegawai:", error);
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
-    return;
-  }
-  
-  allPegawaiData = data;
-  renderTable(data);
-}
-
-function renderTable(data) {
-  const tbody = document.getElementById("pegawai-table-body");
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-gray-500">Data pegawai tidak ditemukan.</td></tr>`;
-    return;
-  }
-  
-  tbody.innerHTML = data.map((p, index) => `
-    <tr class="hover:bg-gray-100" data-id="${p.id}">
-      <td class="px-4 py-4 text-sm border text-center">${index + 1}</td>
-      <td class="px-4 py-4 text-sm border">${p.nip || '-'}</td>
-      <td class="px-4 py-4 text-sm border">${p.nama || '-'}</td>
-      <td class="px-4 py-4 text-sm border">${p.jabatan || '-'}</td>
-      <td class="px-4 py-4 text-sm border">${p.unit || '-'}</td>
-      <td class="px-4 py-4 text-center text-sm border">
-        <span class="px-2 py-1 rounded-full text-xs font-medium ${
-          p.status === 'Aktif' ? 'bg-green-100 text-green-800' :
-          p.status === 'Pensiun' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-gray-100 text-gray-800'
-        }">
-          ${p.status || '-'}
-        </span>
-      </td>
-      <td class="px-4 py-4 text-center text-sm border space-x-2">
-        <button class="text-blue-600 hover:text-blue-800" onclick="viewDetailPegawai('${p.id}')" title="Detail">
-          <i class="fas fa-eye"></i>
-        </button>
-        <button class="text-yellow-600 hover:text-yellow-800" onclick="editPegawai('${p.id}')" title="Edit">
-          <i class="fas fa-edit"></i>
-        </button>
-        <button class="text-red-600 hover:text-red-800" onclick="deletePegawai('${p.id}')" title="Hapus">
-          <i class="fas fa-trash"></i>
-        </button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function applyFilter() {
-  const filterNip = document.getElementById('filterNip').value.toLowerCase();
-  const filterNama = document.getElementById('filterNama').value.toLowerCase();
-  const filterJabatan = document.getElementById('filterJabatan').value;
-  
-  let filteredData = allPegawaiData.filter(pegawai => {
-    const matchNip = (pegawai.nip || '').toLowerCase().includes(filterNip);
-    const matchNama = (pegawai.nama || '').toLowerCase().includes(filterNama);
-    const matchJabatan = !filterJabatan || pegawai.jabatan === filterJabatan;
-    
-    return matchNip && matchNama && matchJabatan;
-  });
-  
-  renderTable(filteredData);
-}
-
-function resetFilter() {
-  document.getElementById('filterNip').value = '';
-  document.getElementById('filterNama').value = '';
-  document.getElementById('filterJabatan').value = '';
-  renderTable(allPegawaiData);
-}
-
-// ==================== MODAL TAMBAH/EDIT ====================
-function openModal(pegawai = null) {
-  document.getElementById("pegawaiForm").reset();
-  document.getElementById("pegawaiId").value = "";
-  document.getElementById("modalTitle").textContent = "Tambah Pegawai";
-  document.getElementById("jabatan").value = "";
-  document.getElementById("unit").value = "";
-  document.getElementById("status").value = "";
-  editMode = false;
-  
-  if (pegawai) {
-    document.getElementById("pegawaiId").value = pegawai.id;
-    document.getElementById("modalTitle").textContent = "Edit Pegawai: " + (pegawai.nama || pegawai.nip);
-    
-    document.getElementById("nip").value = pegawai.nip || '';
-    document.getElementById("nama").value = pegawai.nama || '';
-    document.getElementById("tanggal_lahir").value = pegawai.tanggal_lahir || '';
-    document.getElementById("jabatan").value = pegawai.jabatan || '';
-    document.getElementById("unit").value = pegawai.unit || '';
-    document.getElementById("status").value = pegawai.status || '';
-    document.getElementById("no_telp").value = pegawai.no_telp || '';
-    document.getElementById("email").value = pegawai.email || '';
-    document.getElementById("tgl_masuk").value = pegawai.tgl_masuk || '';
-    document.getElementById("alamat").value = pegawai.alamat || '';
-    
-    editMode = true;
-  }
-  
-  document.getElementById("pegawaiModal").style.display = "flex";
-}
-
-function editPegawai(id) {
-  const pegawai = allPegawaiData.find(p => p.id == id);
-  if (!pegawai) {
-    alert("Data pegawai tidak ditemukan.");
-    return;
-  }
-  openModal(pegawai);
-}
-
-// ==================== SIMPAN DATA PEGAWAI ====================
-async function savePegawai(e) {
-  e.preventDefault();
-  
-  const pegawaiData = {
-    nip: toNullIfEmpty(document.getElementById("nip").value),
-    nama: toNullIfEmpty(document.getElementById("nama").value),
-    tanggal_lahir: toNullIfEmpty(document.getElementById("tanggal_lahir").value),
-    jabatan: toNullIfEmpty(document.getElementById("jabatan").value),
-    unit: toNullIfEmpty(document.getElementById("unit").value),
-    status: toNullIfEmpty(document.getElementById("status").value),
-    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
-    email: toNullIfEmpty(document.getElementById("email").value),
-    tgl_masuk: toNullIfEmpty(document.getElementById("tgl_masuk").value),
-    alamat: toNullIfEmpty(document.getElementById("alamat").value),
-  };
-  
-  if (!pegawaiData.nip || !pegawaiData.nama) {
-    alert("❌ Mohon isi NIP dan Nama Pegawai.");
-    return;
-  }
-
-  let result;
-  if (editMode) {
-    result = await supabaseClient
-      .from("pegawai")
-      .update(pegawaiData)
-      .eq("id", document.getElementById("pegawaiId").value)
-      .select();
-  } else {
-    result = await supabaseClient.from("pegawai").insert([pegawaiData]).select();
-  }
-  
-  if (result.error) {
-    alert("❌ Operasi GAGAL. Pesan: " + result.error.message);
-    console.error("Supabase Error:", result.error);
-  } else {
-    alert(editMode ? "✅ Data pegawai berhasil diperbarui!" : "✅ Pegawai baru berhasil ditambahkan!");
-    closeModal('pegawaiModal');
-    loadPegawaiData();
-  }
-}
-
-// ==================== HAPUS DATA PEGAWAI ====================
-async function deletePegawai(id) {
-  const pegawai = allPegawaiData.find(p => p.id == id);
-  const nama = pegawai ? pegawai.nama || pegawai.nip : 'ini';
-
-  if (!confirm(`Yakin ingin menghapus data pegawai "${nama}"?`)) return;
-  
-  const { error } = await supabaseClient
-    .from("pegawai")
-    .delete()
-    .eq("id", id);
-  
-  if (error) {
-    alert("❌ Gagal menghapus: " + error.message);
-    console.error("Hapus Error:", error);
-  } else {
-    alert(`✅ Data pegawai "${nama}" berhasil dihapus!`);
-    loadPegawaiData();
-  }
-}
-
-// ==================== DETAIL PEGAWAI ====================
-async function viewDetailPegawai(id) {
-  try {
-    // Ambil data lengkap dari database
-    const { data, error } = await supabaseClient
-      .from("pegawai")
-      .select("*")
-      .eq("id", id)
-      .single();
-    
-    if (error) {
-      alert("Gagal memuat detail pegawai: " + error.message);
-      return;
-    }
-    
-    if (!data) {
-      alert("Data pegawai tidak ditemukan.");
-      return;
-    }
-    
-    // Simpan data detail untuk digunakan nanti
-    currentPegawaiDetail = data;
-    
-    // Format tanggal untuk tampilan
-    const formatDate = (dateStr) => {
-      if (!dateStr) return "-";
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    };
-    
-    // Buat konten detail
-    const detailRow = (label, value) => {
-      return `<p class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                <span class="detail-label text-gray-600">${label}</span>
-                <span class="col-span-2 break-words font-medium">${value}</span>
-              </p>`;
-    };
-
-    const detailContent = `
-      <div class="bg-gray-50 p-4 rounded-lg mb-4">
-        <h3 class="text-xl font-bold text-blue-700 mb-2">${data.nama || 'Nama Pegawai'}</h3>
-        <p class="text-gray-500 text-sm">${data.nip || '-'}</p>
-      </div>
-      <div class="space-y-1">
-        ${detailRow('NIP', data.nip || '-')}
-        ${detailRow('Tanggal Lahir', formatDate(data.tanggal_lahir))}
-        ${detailRow('Jabatan', data.jabatan || '-')}
-        ${detailRow('Unit Kerja', data.unit || '-')}
-        ${detailRow('Status', `<span class="px-2 py-1 rounded-full text-xs font-medium ${
-          data.status === 'Aktif' ? 'bg-green-100 text-green-800' :
-          data.status === 'Pensiun' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-gray-100 text-gray-800'
-        }">${data.status || '-'}</span>`)}
-        ${detailRow('No. Telepon', data.no_telp || '-')}
-        ${detailRow('Email', data.email || '-')}
-        ${detailRow('Tanggal Masuk', formatDate(data.tgl_masuk))}
-        ${detailRow('Alamat', data.alamat || '-')}
-      </div>
-    `;
-
-    document.getElementById('detailContent').innerHTML = detailContent;
-    document.getElementById('detailPegawaiModal').style.display = 'flex';
-    
-  } catch (error) {
-    console.error("Error loading detail:", error);
-    alert("Terjadi kesalahan saat memuat detail pegawai.");
-  }
-}
-
-// ==================== EXPORT FUNCTIONS ====================
-function getDetailDataForExport() {
-  if (!currentPegawaiDetail) return [];
-
-  const p = currentPegawaiDetail;
-  return [
-    ['Nama Pegawai', p.nama || '-'],
-    ['NIP', p.nip || '-'],
-    ['Tanggal Lahir', p.tanggal_lahir || '-'],
-    ['Jabatan', p.jabatan || '-'],
-    ['Unit Kerja', p.unit || '-'],
-    ['Status', p.status || '-'],
-    ['No. Telepon', p.no_telp || '-'],
-    ['Email', p.email || '-'],
-    ['Tanggal Masuk', p.tgl_masuk || '-'],
-    ['Alamat', p.alamat || '-'],
-  ];
-}
-
-function exportDetailToPdf() {
-  if (!currentPegawaiDetail) return alert("Tidak ada data detail untuk diekspor.");
-  if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat.");
-
-  const doc = new jsPDF();
-  const data = getDetailDataForExport();
-  const namaFile = `Detail Pegawai - ${currentPegawaiDetail.nama || currentPegawaiDetail.nip || 'Data'}.pdf`;
-
-  doc.setFontSize(16);
-  doc.text("Data Detail Pegawai", 14, 20);
-  
-  doc.autoTable({
-    startY: 30,
-    head: [['Field', 'Value']],
-    body: data,
-    theme: 'grid',
-    styles: { fontSize: 10, cellPadding: 2 },
-    headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      0: { cellWidth: 50, fontStyle: 'bold' },
-      1: { cellWidth: 'auto' }
-    }
-  });
-
-  doc.save(namaFile);
-}
-
-function exportDetailToExcel() {
-  if (!currentPegawaiDetail) return alert("Tidak ada data detail untuk diekspor.");
-  
-  const data = getDetailDataForExport();
-  const worksheetData = [['Data Detail Pegawai'], [''], ...data];
-  
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-  
-  ws['!cols'] = [{ wch: 25 }, { wch: 50 }];
-  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
-  
-  XLSX.utils.book_append_sheet(wb, ws, "Detail Pegawai");
-  XLSX.writeFile(wb, `Detail Pegawai - ${currentPegawaiDetail.nama || 'Data'}.xlsx`);
-}
-
-function exportAllToPdf() {
-  if (allPegawaiData.length === 0) return alert("Tidak ada data pegawai untuk diekspor.");
-  if (typeof jsPDF === 'undefined') return alert("Library jsPDF belum dimuat.");
-
-  const doc = new jsPDF('l', 'mm', 'a4');
-  
-  const headers = ["No", "NIP", "Nama", "Tanggal Lahir", "Jabatan", "Unit", "Status", "No Telp", "Email", "Tgl Masuk", "Alamat"];
-  
-  const data = allPegawaiData.map((p, index) => [
-    index + 1,
-    p.nip || '-',
-    p.nama || '-',
-    p.tanggal_lahir || '-',
-    p.jabatan || '-',
-    p.unit || '-',
-    p.status || '-',
-    p.no_telp || '-',
-    p.email || '-',
-    p.tgl_masuk || '-',
-    p.alamat || '-',
-  ]);
-
-  doc.setFontSize(14);
-  doc.text("Data Seluruh Pegawai Fakultas Teknik", 14, 20);
-
-  doc.autoTable({
-    startY: 25,
-    head: [headers],
-    body: data,
-    theme: 'striped',
-    styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
-    headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      0: { cellWidth: 8 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 30 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 25 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 15 },
-      7: { cellWidth: 20 },
-      8: { cellWidth: 30 },
-      9: { cellWidth: 20 },
-      10: { cellWidth: 40 },
-    }
-  });
-
-  doc.save("data_pegawai_all.pdf");
-}
-
-function exportAllToExcel() {
-  if (allPegawaiData.length === 0) return alert("Tidak ada data pegawai untuk diekspor.");
-  
-  const headers = ["No", "NIP", "Nama", "Tanggal Lahir", "Jabatan", "Unit Kerja", "Status", "No Telp", "Email", "Tanggal Masuk", "Alamat"];
-  
-  const rows = allPegawaiData.map((p, index) => [
-    index + 1,
-    p.nip, p.nama, p.tanggal_lahir, p.jabatan, p.unit, p.status, 
-    p.no_telp, p.email, p.tgl_masuk, p.alamat
-  ]);
-  
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  XLSX.utils.book_append_sheet(wb, ws, "Pegawai");
-  XLSX.writeFile(wb, "data_pegawai_all.xlsx");
-}
-
-// Update nama user di navbar
-async function updateUserName() {
-  const { data: userData } = await supabaseClient.auth.getUser();
-  const user = userData.user;
-  const userNameElement = document.getElementById('userNameNav');
-  
-  if (userNameElement && user?.email) {
-    const namePart = user.email.split('@')[0];
-    const displayUsername = namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
-    userNameElement.textContent = `Halo, ${displayUsername}`;
-  }
-}
-
-// Panggil saat load
-updateUserName();
 </script>
 </body>
 </html>
