@@ -847,76 +847,59 @@ function exportSKToExcel() {
 
 // ==================== FUNGSI SURAT KETERANGAN LULUS (SKL) ====================
 async function loadDataSKL() {
-  try {
-    // Data contoh untuk SKL
-    const sklData = [
-      { 
-        id: '1', 
-        nomor_skl: '313/UNLA/FT/PP/XI/2025', 
-        nama_pegawai: 'RYAN RIZKI PRATAMA',
-        nip: '41155055220085',
-        tempat_lahir: 'BANDUNG',
-        tanggal_lahir: '1998-02-05',
-        jabatan: 'MAHASISWA',
-        jurusan: 'TEKNIK INFORMATIKA',
-        tanggal_lulus: '2025-10-27',
-        status: 'LULUS'
-      },
-      { 
-        id: '2', 
-        nomor_skl: '314/UNLA/FT/PP/XI/2025', 
-        nama_pegawai: 'SITI NURHALIZA',
-        nip: '41155055220086',
-        tempat_lahir: 'JAKARTA',
-        tanggal_lahir: '1999-03-15',
-        jabatan: 'MAHASISWA',
-        jurusan: 'TEKNIK ELEKTRO',
-        tanggal_lulus: '2025-10-28',
-        status: 'LULUS'
-      }
-    ];
-    
-    allSKLData = sklData;
-    
-    // Update statistik
-    document.getElementById('totalSKL').textContent = sklData.length;
-    document.getElementById('sklTahunIni').textContent = sklData.filter(d => 
-      new Date(d.tanggal_lulus).getFullYear() === new Date().getFullYear()
-    ).length;
-    document.getElementById('pegawaiLulus').textContent = sklData.length;
-    
-    // Render tabel SKL dengan tombol aksi lengkap
-    const tbody = document.getElementById('skl-table-body');
-    tbody.innerHTML = sklData.map((skl, index) => `
-      <tr class="hover:bg-gray-100" data-skl='${JSON.stringify(skl)}' data-skl-id="${skl.id}">
-        <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
-        <td class="px-6 py-3 text-sm border font-medium">${skl.nomor_skl}</td>
-        <td class="px-6 py-3 text-sm border">${skl.nama_pegawai}</td>
-        <td class="px-6 py-3 text-sm border">${skl.jabatan}</td>
-        <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(skl.tanggal_lulus)}</td>
-        <td class="px-6 py-3 text-center text-sm border">
-          <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${skl.status}</span>
-        </td>
-        <td class="px-6 py-3 text-center text-sm border space-x-1">
-          <button onclick="viewSKLDetail('${skl.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Detail">
-            <i class="fas fa-eye"></i>
-          </button>
-          <button onclick="editSKL(${JSON.stringify(skl)})" class="text-yellow-600 hover:text-yellow-800 mx-1" title="Edit">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button onclick="exportSingleSKLToPDF('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="PDF">
-            <i class="fas fa-file-pdf"></i>
-          </button>
-          <button onclick="deleteSKL('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Hapus">
-            <i class="fas fa-trash"></i>
-          </button>
-        </td>
-      </tr>
-    `).join('');
-    
-  } catch (error) {
-    console.error("Error loading SKL data:", error);
-  }
+    try {
+        // Data contoh SKL sesuai dengan format yang Anda berikan
+        const sklData = [
+            { 
+                id: '1', 
+                nomor_skl: '313/UNLA/FT/PP/XI/2025', 
+                nama_pegawai: 'RYAN RIZKI PRATAMA',
+                nip: '41155055220085',
+                tempat_lahir: 'BANDUNG',
+                tanggal_lahir: '1998-02-05',
+                jurusan: 'TEKNIK INFORMATIKA',
+                tanggal_lulus: '2025-10-27',
+                tanggal_surat: '2025-11-21',
+                status: 'LULUS'
+            }
+        ];
+        
+        // Update statistik
+        document.getElementById('totalSKL').textContent = sklData.length;
+        document.getElementById('sklTahunIni').textContent = sklData.filter(d => 
+            new Date(d.tanggal_lulus).getFullYear() === new Date().getFullYear()
+        ).length;
+        document.getElementById('pegawaiLulus').textContent = sklData.length;
+        
+        // Render tabel
+        const tbody = document.getElementById('skl-table-body');
+        tbody.innerHTML = sklData.map((skl, index) => `
+            <tr class="hover:bg-gray-100" data-skl='${JSON.stringify(skl)}'>
+                <td class="px-6 py-3 text-center text-sm border">${index + 1}</td>
+                <td class="px-6 py-3 text-sm border font-medium">${skl.nomor_skl}</td>
+                <td class="px-6 py-3 text-sm border">${skl.nama_pegawai}</td>
+                <td class="px-6 py-3 text-sm border">MAHASISWA</td>
+                <td class="px-6 py-3 text-center text-sm border">${formatTanggalIndonesia(skl.tanggal_lulus)}</td>
+                <td class="px-6 py-3 text-center text-sm border">
+                    <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${skl.status}</span>
+                </td>
+                <td class="px-6 py-3 text-center text-sm border">
+                    <button onclick="viewSKLDetail('${skl.id}')" class="text-blue-600 hover:text-blue-800 mx-1" title="Lihat Detail">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="exportSingleSKLToPDF('${skl.id}')" class="text-red-600 hover:text-red-800 mx-1" title="Export PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button onclick="exportSingleSKLToExcel('${skl.id}')" class="text-green-600 hover:text-green-800 mx-1" title="Export Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error("Error loading SKL data:", error);
+    }
 }
 
 // ==================== FUNGSI DETAIL SKL ====================
@@ -1171,78 +1154,253 @@ function createSKLPdfDocument(sklData) {
   doc.save(`SKL_${sklData.nama_pegawai.replace(/\s+/g, '_')}.pdf`);
 }
 
-function exportSKLToExcel() {
-  if (!allSKLData || allSKLData.length === 0) {
-    alert("Tidak ada data SKL untuk diekspor.");
-    return;
-  }
-
-  const headers = ["No", "Nomor SKL", "Nama Pegawai", "NIP/NPM", "Jabatan", "Jurusan", "Tanggal Lulus", "Status"];
-  
-  const data = allSKLData.map((skl, index) => [
-    index + 1,
-    skl.nomor_skl,
-    skl.nama_pegawai,
-    skl.nip,
-    skl.jabatan,
-    skl.jurusan,
-    formatTanggalIndonesia(skl.tanggal_lulus),
-    skl.status
-  ]);
-
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
-  
-  XLSX.utils.book_append_sheet(wb, ws, "Surat Keterangan Lulus");
-  XLSX.writeFile(wb, `Data_SKL_${new Date().toISOString().slice(0,10)}.xlsx`);
+// Fungsi Export SKL ke Excel dengan Format Surat
+// Fungsi Export Single SKL ke Excel
+function exportSingleSKLToExcel(sklId) {
+    // Cari data SKL berdasarkan ID
+    const allRows = document.querySelectorAll('#skl-table-body tr[data-skl]');
+    const targetRow = Array.from(allRows).find(row => {
+        const data = JSON.parse(row.getAttribute('data-skl'));
+        return data.id === sklId;
+    });
+    
+    if (!targetRow) {
+        alert("Data SKL tidak ditemukan.");
+        return;
+    }
+    
+    const sklData = JSON.parse(targetRow.getAttribute('data-skl'));
+    
+    // Buat workbook Excel dengan format surat
+    const wb = XLSX.utils.book_new();
+    const worksheetData = createSKLWorksheetData(sklData);
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    // Atur lebar kolom
+    ws['!cols'] = [
+        { wch: 20 },  // Kolom 1
+        { wch: 60 },  // Kolom 2
+        { wch: 20 }   // Kolom 3
+    ];
+    
+    // Merge cells untuk format surat
+    const merges = [
+        // Header Yayasan
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } },
+        { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
+        
+        // Nomor SKL
+        { s: { r: 5, c: 0 }, e: { r: 5, c: 2 } },
+        
+        // Judul Surat
+        { s: { r: 7, c: 0 }, e: { r: 7, c: 2 } },
+        
+        // Data mahasiswa
+        { s: { r: 9, c: 0 }, e: { r: 9, c: 2 } },
+        { s: { r: 10, c: 0 }, e: { r: 10, c: 2 } },
+        { s: { r: 11, c: 0 }, e: { r: 11, c: 2 } },
+        { s: { r: 12, c: 0 }, e: { r: 12, c: 2 } },
+        { s: { r: 13, c: 0 }, e: { r: 13, c: 2 } },
+        { s: { r: 14, c: 0 }, e: { r: 14, c: 2 } },
+        { s: { r: 15, c: 0 }, e: { r: 15, c: 2 } },
+        
+        // Isi surat
+        { s: { r: 17, c: 0 }, e: { r: 17, c: 2 } },
+        { s: { r: 18, c: 0 }, e: { r: 18, c: 2 } },
+        { s: { r: 19, c: 0 }, e: { r: 19, c: 2 } },
+        { s: { r: 20, c: 0 }, e: { r: 20, c: 2 } },
+        { s: { r: 21, c: 0 }, e: { r: 21, c: 2 } },
+        
+        // Tanda tangan
+        { s: { r: 24, c: 0 }, e: { r: 24, c: 2 } },
+        { s: { r: 26, c: 0 }, e: { r: 26, c: 2 } },
+        { s: { r: 28, c: 0 }, e: { r: 28, c: 2 } }
+    ];
+    
+    ws['!merges'] = merges;
+    
+    // Tambahkan worksheet ke workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Surat_Keterangan_Lulus");
+    
+    // Simpan file
+    XLSX.writeFile(wb, `SKL_${sklData.nama_pegawai.replace(/\s+/g, '_')}.xlsx`);
+    alert("Berhasil mengekspor SKL ke Excel dengan format surat!");
 }
 
-function exportSKLToPDF() {
-  if (!allSKLData || allSKLData.length === 0) {
-    alert("Tidak ada data SKL untuk diekspor.");
-    return;
-  }
+// Fungsi untuk membuat data worksheet dengan format surat SKL
+function createSKLWorksheetData(sklData) {
+    const formatTanggal = (dateStr) => {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        const bulan = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+        
+        const hari = date.getDate();
+        const namaBulan = bulan[date.getMonth()];
+        const tahun = date.getFullYear();
+        
+        return `${hari} ${namaBulan} ${tahun}`.toUpperCase();
+    };
+    
+    const tanggalLulusFormatted = formatTanggal(sklData.tanggal_lulus || '2025-10-27');
+    const tanggalLahirFormatted = formatTanggal(sklData.tanggal_lahir || '1998-02-05');
+    const tanggalSuratFormatted = formatTanggal(sklData.tanggal_surat || new Date());
+    
+    return [
+        // Header Yayasan dan Universitas
+        ["YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA"],
+        ["UNIVERSITAS LANGLANGBUANA"],
+        ["FAKULTAS TEKNIK"],
+        ["Jl. Karapitan No. 116 Telp. 022-4215717 Fax. 022-4237144 Bandung 40261"],
+        [""],
+        
+        // Nomor SKL
+        [`Nomor: ${sklData.nomor_skl || '313/UNLA/FT/PP/XI/2025'}`],
+        [""],
+        
+        // Judul Surat
+        ["SURAT KETERANGAN LULUS"],
+        [""],
+        
+        // Pembuka
+        ["Dekan Fakultas Teknik Universitas Langlangbuana Bandung menerangkan bahwa:"],
+        [""],
+        
+        // Data Mahasiswa
+        [`Nama : ${sklData.nama_pegawai || 'RYAN RIZKI PRATAMA'}`],
+        [`Nomor Pokok Mahasiswa : ${sklData.nip || '41155055220085'}`],
+        [`Tempat/Tanggal Lahir : ${sklData.tempat_lahir || 'BANDUNG'}, ${tanggalLahirFormatted}`],
+        [`Jurusan/Program Studi : ${sklData.jurusan || 'TEKNIK INFORMATIKA'}`],
+        ["(Terakreditasi 'BAIK SEKALI', SK LAM INFOKOM No. 016/SK/LAM-INFOKOM/Ak/S/III/2025, Tanggal 13 Maret 2025, Sampai Dengan 13 Maret 2030)"],
+        [""],
+        
+        // Isi Surat
+        [`Adalah mahasiswa Fakultas Teknik Universitas Langlangbuana yang telah LULUS sebagai`],
+        [`SARJANA KOMPUTER pada tanggal ${tanggalLulusFormatted}.`],
+        [""],
+        ["Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah"],
+        ["asli masih dalam proses penerbitan."],
+        ["Surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya."],
+        [""],
+        [""],
+        [""],
+        
+        // Tanda Tangan
+        [`Bandung, ${tanggalSuratFormatted}`],
+        [""],
+        ["Dekan Fakultas Teknik"],
+        [""],
+        ["Dr. Sally Octaviana Sari ,ST., MT"]
+    ];
+}
 
-  const doc = new jsPDF('landscape');
-  
-  const headers = ["No", "Nomor SKL", "Nama Pegawai", "NIP/NPM", "Jabatan", "Jurusan", "Tanggal Lulus", "Status"];
-  
-  const data = allSKLData.map((skl, index) => [
-    index + 1,
-    skl.nomor_skl,
-    skl.nama_pegawai,
-    skl.nip,
-    skl.jabatan,
-    skl.jurusan,
-    formatTanggalIndonesia(skl.tanggal_lulus),
-    skl.status
-  ]);
-
-  doc.setFontSize(14);
-  doc.text("Data Surat Keterangan Lulus (SKL)", 14, 15);
-  doc.setFontSize(10);
-  doc.text(`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`, 14, 20);
-
-  doc.autoTable({
-    head: [headers],
-    body: data,
-    startY: 25,
-    theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 1, halign: 'center' },
-    headStyles: { fillColor: [128, 0, 128], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      0: { cellWidth: 10 },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 40 },
-      3: { cellWidth: 25 },
-      4: { cellWidth: 20 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 25 },
-      7: { cellWidth: 20 }
+// Fungsi untuk export single SKL dari tombol di tabel
+async function exportSingleSKLToPDF(sklId) {
+    // Cari data SKL berdasarkan ID
+    const row = document.querySelector(`tr[data-skl-id="${sklId}"]`);
+    if (!row) {
+        // Coba cari dengan atribut data-skl
+        const allRows = document.querySelectorAll('#skl-table-body tr[data-skl]');
+        const targetRow = Array.from(allRows).find(row => {
+            const data = JSON.parse(row.getAttribute('data-skl'));
+            return data.id === sklId;
+        });
+        
+        if (!targetRow) {
+            alert("Data SKL tidak ditemukan.");
+            return;
+        }
+        
+        const sklData = JSON.parse(targetRow.getAttribute('data-skl'));
+        createSKLPdfDocument(sklData);
     }
-  });
+}
 
-  doc.save('data_skl_all.pdf');
+function createSKLPdfDocument(sklData) {
+    const doc = new jsPDF();
+    
+    // Atur margin dan posisi
+    const margin = 20;
+    let yPos = margin;
+    
+    // Header
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", 105, yPos, { align: "center" });
+    yPos += 10;
+    
+    doc.setFontSize(12);
+    doc.text("UNIVERSITAS LANGLANGBUANA", 105, yPos, { align: "center" });
+    yPos += 10;
+    
+    doc.text("FAKULTAS TEKNIK", 105, yPos, { align: "center" });
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Jl. Karapitan No. 116 Telp. 022-4215717 Fax. 022-4237144 Bandung 40261", 105, yPos, { align: "center" });
+    yPos += 15;
+    
+    // Nomor SKL
+    doc.setFontSize(11);
+    doc.text(`Nomor: ${sklData.nomor_skl}`, margin, yPos);
+    yPos += 10;
+    
+    // Judul
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("SURAT KETERANGAN LULUS", 105, yPos, { align: "center" });
+    yPos += 20;
+    
+    // Isi Surat
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    doc.text("Dekan Fakultas Teknik Universitas Langlangbuana Bandung menerangkan bahwa:", margin, yPos);
+    yPos += 15;
+    
+    doc.text(`Nama\t\t\t\t\t: ${sklData.nama_pegawai}`, margin, yPos);
+    yPos += 8;
+    doc.text(`Nomor Pokok Mahasiswa\t: ${sklData.nip}`, margin, yPos);
+    yPos += 8;
+    doc.text(`Tempat/Tanggal Lahir\t: ${sklData.tempat_lahir}, ${formatTanggalUpperCase(sklData.tanggal_lahir)}`, margin, yPos);
+    yPos += 8;
+    doc.text(`Jurusan/Program Studi\t: ${sklData.jurusan}`, margin, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    doc.text("(Terakreditasi 'BAIK SEKALI', SK LAM INFOKOM No. 016/SK/LAM-INFOKOM/Ak/S/III/2025,", margin, yPos);
+    yPos += 5;
+    doc.text("Tanggal 13 Maret 2025, Sampai Dengan 13 Maret 2030)", margin, yPos);
+    yPos += 10;
+    
+    doc.setFontSize(12);
+    doc.text(`Adalah mahasiswa Fakultas Teknik Universitas Langlangbuana yang telah LULUS sebagai`, margin, yPos);
+    yPos += 8;
+    doc.text(`SARJANA KOMPUTER pada tanggal ${formatTanggalIndonesia(sklData.tanggal_lulus)}.`, margin, yPos);
+    yPos += 15;
+    
+    doc.text("Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah", margin, yPos);
+    yPos += 8;
+    doc.text("asli masih dalam proses penerbitan.", margin, yPos);
+    yPos += 8;
+    doc.text("Surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya.", margin, yPos);
+    
+    // Tanda tangan
+    yPos += 30;
+    doc.text("Bandung, " + formatTanggalIndonesia(new Date()), 130, yPos);
+    yPos += 15;
+    doc.text("Dekan Fakultas Teknik", 130, yPos);
+    yPos += 15;
+    doc.setFont("helvetica", "bold");
+    doc.text("Dr. Sally Octaviana Sari ,ST., MT", 130, yPos);
+    
+    // Save PDF
+    doc.save(`SKL_${sklData.nama_pegawai.replace(/\s+/g, '_')}.pdf`);
 }
 
 // ==================== FUNGSI UTAMA PEGAWAI ====================
