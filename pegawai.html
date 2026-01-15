@@ -554,6 +554,7 @@ let currentSKLDetail = null;
 let allSKLData = [];
 let allSKData = [];
 
+// Di DOMContentLoaded, tambahkan:
 document.addEventListener("DOMContentLoaded", function() {
   loadPegawaiData();
   document.getElementById("pegawaiForm").addEventListener("submit", savePegawai);
@@ -864,6 +865,9 @@ async function loadDataSKL() {
             }
         ];
         
+        // Simpan ke variabel global
+        allSKLData = sklData;
+        
         // Update statistik
         document.getElementById('totalSKL').textContent = sklData.length;
         document.getElementById('sklTahunIni').textContent = sklData.filter(d => 
@@ -1007,24 +1011,20 @@ async function saveEditSKL(e) {
   };
   
   try {
-    // Simpan ke database atau update state
-    // NOTE: Ini contoh, sesuaikan dengan struktur database Anda
+    // Simpan perubahan
     console.log('Menyimpan perubahan SKL:', updatedData);
+    
+    // Update data di array allSKLData
+    const index = allSKLData.findIndex(skl => skl.id === sklId);
+    if (index !== -1) {
+      allSKLData[index] = { ...allSKLData[index], ...updatedData };
+    }
     
     alert('✅ Data berhasil diperbarui!');
     closeModal('editSKLModal');
     
-    // Refresh data berdasarkan tab yang aktif
-    const activeTab = document.querySelector('.main-tab-button.active').id;
-    if (activeTab === 'tab-surat-keterangan') {
-      loadDataSK();
-    } else if (activeTab === 'tab-surat-keterangan-lulus') {
-      loadDataSKL();
-      // Tampilkan detail yang sudah diupdate
-      if (sklId) {
-        setTimeout(() => viewSKLDetail(sklId), 500);
-      }
-    }
+    // Refresh data
+    loadDataSKL();
     
   } catch (error) {
     console.error('Error updating data:', error);
@@ -1154,7 +1154,175 @@ function createSKLPdfDocument(sklData) {
   doc.save(`SKL_${sklData.nama_pegawai.replace(/\s+/g, '_')}.pdf`);
 }
 
-// Fungsi Export SKL ke Excel dengan Format Surat
+// ==================== FUNGSI EXPORT SKL YANG HILANG ====================
+
+// Fungsi Export SKL ke PDF untuk tombol utama
+function exportSKLToPDF() {
+  if (!allSKLData || allSKLData.length === 0) {
+    alert("Tidak ada data SKL untuk diekspor.");
+    return;
+  }
+  
+  // Export semua data SKL
+  try {
+    // Buat PDF untuk setiap SKL
+    allSKLData.forEach((sklData, index) => {
+      setTimeout(() => {
+        createSKLPdfDocument(sklData);
+      }, index * 100); // Delay untuk menghindari conflict
+    });
+    
+    alert(`Berhasil mengekspor ${allSKLData.length} SKL ke PDF!`);
+  } catch (error) {
+    console.error("Error exporting SKL to PDF:", error);
+    alert("Terjadi kesalahan saat mengekspor SKL ke PDF.");
+  }
+}
+
+// Fungsi Export SKL ke Excel untuk tombol utama
+function exportSKLToExcel() {
+  if (!allSKLData || allSKLData.length === 0) {
+    alert("Tidak ada data SKL untuk diekspor.");
+    return;
+  }
+
+  // Buat workbook Excel
+  const wb = XLSX.utils.book_new();
+  
+  // Sheet 1: Ringkasan data
+  const summaryData = [
+    ["RINGKASAN SURAT KETERANGAN LULUS (SKL)"],
+    [""],
+    ["No", "Nomor SKL", "Nama Pegawai", "NIP/NPM", "Tanggal Lulus", "Status"]
+  ];
+  
+  allSKLData.forEach((skl, index) => {
+    summaryData.push([
+      index + 1,
+      skl.nomor_skl || '-',
+      skl.nama_pegawai || '-',
+      skl.nip || '-',
+      formatTanggalIndonesia(skl.tanggal_lulus) || '-',
+      skl.status || '-'
+    ]);
+  });
+  
+  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan SKL");
+  
+  // Sheet 2-...: Format surat untuk setiap SKL
+  allSKLData.forEach((skl, index) => {
+    const worksheetData = createSKLWorksheetData(skl);
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    // Atur lebar kolom
+    ws['!cols'] = [
+      { wch: 20 },
+      { wch: 60 },
+      { wch: 20 }
+    ];
+    
+    // Merge cells untuk format surat
+    const merges = [
+      // Header Yayasan
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 2 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
+      
+      // Nomor SKL
+      { s: { r: 5, c: 0 }, e: { r: 5, c: 2 } },
+      
+      // Judul Surat
+      { s: { r: 7, c: 0 }, e: { r: 7, c: 2 } },
+      
+      // Data mahasiswa dan isi surat
+      { s: { r: 9, c: 0 }, e: { r: 9, c: 2 } },
+      { s: { r: 10, c: 0 }, e: { r: 10, c: 2 } },
+      { s: { r: 11, c: 0 }, e: { r: 11, c: 2 } },
+      { s: { r: 12, c: 0 }, e: { r: 12, c: 2 } },
+      { s: { r: 13, c: 0 }, e: { r: 13, c: 2 } },
+      { s: { r: 14, c: 0 }, e: { r: 14, c: 2 } },
+      { s: { r: 15, c: 0 }, e: { r: 15, c: 2 } },
+      { s: { r: 17, c: 0 }, e: { r: 17, c: 2 } },
+      { s: { r: 18, c: 0 }, e: { r: 18, c: 2 } },
+      { s: { r: 19, c: 0 }, e: { r: 19, c: 2 } },
+      { s: { r: 20, c: 0 }, e: { r: 20, c: 2 } },
+      { s: { r: 21, c: 0 }, e: { r: 21, c: 2 } },
+      
+      // Tanda tangan
+      { s: { r: 24, c: 0 }, e: { r: 24, c: 2 } },
+      { s: { r: 26, c: 0 }, e: { r: 26, c: 2 } },
+      { s: { r: 28, c: 0 }, e: { r: 28, c: 2 } }
+    ];
+    
+    ws['!merges'] = merges;
+    
+    const sheetName = `SKL_${index + 1}`.substring(0, 31);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+  
+  // Simpan file
+  XLSX.writeFile(wb, `Surat_Keterangan_Lulus_${new Date().toISOString().slice(0,10)}.xlsx`);
+  alert(`Berhasil mengekspor ${allSKLData.length} SKL ke Excel!`);
+}
+
+// Fungsi untuk melihat detail SKL
+function viewSKLDetail(sklId) {
+  // Pastikan allSKLData sudah terisi
+  if (!allSKLData || allSKLData.length === 0) {
+    alert("Data SKL belum dimuat.");
+    return;
+  }
+  
+  const sklData = allSKLData.find(skl => skl.id === sklId);
+  if (!sklData) {
+    alert("Data SKL tidak ditemukan");
+    return;
+  }
+  
+  currentSKLDetail = sklData;
+  
+  // Tampilkan detail dalam modal
+  const detailContent = document.getElementById('detailSKLContent');
+  
+  const detailRow = (label, value) => {
+    return `<div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+              <span class="font-semibold text-gray-600 col-span-1">${label}</span>
+              <span class="col-span-2 text-gray-800">${value || '-'}</span>
+            </div>`;
+  };
+
+  const detailHTML = `
+    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+      <h3 class="text-xl font-bold text-purple-700 mb-1">${sklData.nama_pegawai || 'Nama Pegawai'}</h3>
+      <p class="text-gray-500">${sklData.nomor_skl || 'Nomor SKL'}</p>
+    </div>
+    
+    <div class="space-y-2">
+      ${detailRow('Nomor SKL:', sklData.nomor_skl)}
+      ${detailRow('Nama Lengkap:', sklData.nama_pegawai)}
+      ${detailRow('NIP/NPM:', sklData.nip)}
+      ${detailRow('Tempat Lahir:', sklData.tempat_lahir)}
+      ${detailRow('Tanggal Lahir:', sklData.tanggal_lahir ? formatTanggalIndonesia(sklData.tanggal_lahir) : '-')}
+      ${detailRow('Jabatan:', sklData.jabatan)}
+      ${detailRow('Jurusan/Prodi:', sklData.jurusan)}
+      ${detailRow('Tanggal Lulus:', sklData.tanggal_lulus ? formatTanggalIndonesia(sklData.tanggal_lulus) : '-')}
+      ${detailRow('Status:', `<span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">${sklData.status}</span>`)}
+    </div>
+    
+    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+      <h4 class="font-bold text-blue-700 mb-2">Keterangan:</h4>
+      <p class="text-sm text-gray-600">
+        Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah asli masih dalam proses penerbitan.
+      </p>
+    </div>
+  `;
+
+  detailContent.innerHTML = detailHTML;
+  document.getElementById('detailSKLModal').style.display = 'flex';
+}
+  
 // Fungsi Export Single SKL ke Excel
 function exportSingleSKLToExcel(sklId) {
     // Cari data SKL berdasarkan ID
