@@ -612,32 +612,32 @@
         <input id="tanggal_lahir" type="date" class="border p-2 rounded">
         
         <select id="jabatan" class="border p-2 rounded" required>
-          <option value="" disabled selected>Pilih Jabatan</option>
-          <option value="Staff Administrasi">Staff Administrasi</option>
-          <option value="Staff Teknis">Staff Teknis</option>
-          <option value="Koordinator">Koordinator</option>
-          <option value="Kepala Bagian">Kepala Bagian</option>
-          <option value="Sekretaris">Sekretaris</option>
-          <option value="Bendahara">Bendahara</option>
-        </select>
-        
-        <select id="unit" class="border p-2 rounded" required>
-          <option value="" disabled selected>Pilih Unit Kerja</option>
-          <option value="Akademik">Akademik</option>
-          <option value="Keuangan">Keuangan</option>
-          <option value="Laboratorium">Laboratorium</option>
-          <option value="Perpustakaan">Perpustakaan</option>
-          <option value="Kemahasiswaan">Kemahasiswaan</option>
-          <option value="TU Fakultas">TU Fakultas</option>
-        </select>
-        
-        <select id="status" class="border p-2 rounded" required>
-          <option value="" disabled selected>Pilih Status</option>
-          <option value="Aktif">Aktif</option>
-          <option value="Pensiun">Pensiun</option>
-          <option value="Pindah">Pindah</option>
-          <option value="Keluar">Keluar</option>
-        </select>
+  <option value="">Pilih Jabatan</option>
+  <option value="Staff Administrasi">Staff Administrasi</option>
+  <option value="Staff Teknis">Staff Teknis</option>
+  <option value="Koordinator">Koordinator</option>
+  <option value="Kepala Bagian">Kepala Bagian</option>
+  <option value="Sekretaris">Sekretaris</option>
+  <option value="Bendahara">Bendahara</option>
+</select>
+
+<select id="unit" class="border p-2 rounded" required>
+  <option value="">Pilih Unit Kerja</option>
+  <option value="Akademik">Akademik</option>
+  <option value="Keuangan">Keuangan</option>
+  <option value="Laboratorium">Laboratorium</option>
+  <option value="Perpustakaan">Perpustakaan</option>
+  <option value="Kemahasiswaan">Kemahasiswaan</option>
+  <option value="TU Fakultas">TU Fakultas</option>
+</select>
+
+<select id="status" class="border p-2 rounded" required>
+  <option value="">Pilih Status</option>
+  <option value="Aktif">Aktif</option>
+  <option value="Pensiun">Pensiun</option>
+  <option value="Pindah">Pindah</option>
+  <option value="Keluar">Keluar</option>
+</select>
         
         <input id="no_telp" class="border p-2 rounded" placeholder="No. Telepon">
         <input id="email" type="email" class="border p-2 rounded" placeholder="Email">
@@ -1072,10 +1072,11 @@ function openModal(pegawai = null) {
   document.getElementById("pegawaiForm").reset();
   document.getElementById("pegawaiId").value = "";
   document.getElementById("modalTitle").textContent = "Tambah Pegawai";
+  
+  // SET DEFAULT VALUES untuk select
   document.getElementById("jabatan").value = "";
   document.getElementById("unit").value = "";
-  document.getElementById("status").value = "Aktif";
-  editMode = false;
+  document.getElementById("status").value = "Aktif"; // Default ke Aktif
   
   // Set tanggal masuk default hari ini
   const today = new Date().toISOString().split('T')[0];
@@ -1097,11 +1098,12 @@ function openModal(pegawai = null) {
     document.getElementById("alamat").value = pegawai.alamat || '';
     
     editMode = true;
+  } else {
+    editMode = false;
   }
   
   document.getElementById("pegawaiModal").style.display = "flex";
 }
-
 function editPegawai(id) {
   const pegawai = allPegawaiData.find(p => p.id == id);
   if (!pegawai) {
@@ -1128,23 +1130,25 @@ async function savePegawai(e) {
     alamat: document.getElementById("alamat").value.trim() || null,
   };
   
-  // Validasi
-  if (!pegawaiData.nama) {
+  console.log("Data yang akan disimpan:", pegawaiData);
+  
+  // Validasi lebih ketat
+  if (!pegawaiData.nama || pegawaiData.nama.trim() === '') {
     showNotif("❌ Mohon isi Nama Pegawai.", "error");
     return;
   }
   
-  if (!pegawaiData.jabatan) {
+  if (!pegawaiData.jabatan || pegawaiData.jabatan === '' || pegawaiData.jabatan === "Pilih Jabatan") {
     showNotif("❌ Mohon pilih Jabatan.", "error");
     return;
   }
   
-  if (!pegawaiData.unit) {
+  if (!pegawaiData.unit || pegawaiData.unit === '' || pegawaiData.unit === "Pilih Unit Kerja") {
     showNotif("❌ Mohon pilih Unit Kerja.", "error");
     return;
   }
   
-  if (!pegawaiData.status) {
+  if (!pegawaiData.status || pegawaiData.status === '' || pegawaiData.status === "Pilih Status") {
     showNotif("❌ Mohon pilih Status.", "error");
     return;
   }
@@ -1152,6 +1156,8 @@ async function savePegawai(e) {
   try {
     let result;
     const pegawaiId = document.getElementById("pegawaiId").value;
+    
+    console.log("Mengirim ke Supabase... Pegawai ID:", pegawaiId || "Baru");
     
     if (pegawaiId) {
       // UPDATE
@@ -1166,26 +1172,30 @@ async function savePegawai(e) {
         .insert([pegawaiData]);
     }
     
+    console.log("Response dari Supabase:", result);
+    
     if (result.error) {
+      console.error("Error dari Supabase:", result.error);
       throw result.error;
     }
     
-    showNotif(
-      pegawaiId 
-        ? "✅ Data pegawai berhasil diperbarui!" 
-        : "✅ Pegawai baru berhasil ditambahkan!", 
-      "success"
-    );
+    const message = pegawaiId 
+      ? "✅ Data pegawai berhasil diperbarui!" 
+      : "✅ Pegawai baru berhasil ditambahkan!";
     
+    showNotif(message, "success");
     closeModal('pegawaiModal');
-    loadPegawaiData(); // Reload data
+    
+    // Tunggu sebentar lalu refresh data
+    setTimeout(() => {
+      loadPegawaiData();
+    }, 500);
     
   } catch (error) {
-    console.error("Error saving pegawai:", error);
+    console.error("❌ Error dalam savePegawai:", error);
     showNotif("❌ Gagal menyimpan data: " + error.message, "error");
   }
 }
-
 // Hapus data pegawai
 async function deletePegawai(id) {
   const pegawai = allPegawaiData.find(p => p.id == id);
