@@ -2243,6 +2243,253 @@ function createSKLWorksheetData(sklData) {
         ["Dr. Sally Octaviana Sari ,ST., MT"]
     ];
 }
+
+// ==================== FUNGSI PDF SKL YANG HILANG ====================
+
+// Fungsi untuk membuat PDF SKL (sesuai format gambar Anda)
+function createSKLPdfDocument(sklData) {
+    try {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        
+        // Format tanggal
+        const formatTanggalUpperCase = (dateStr) => {
+            if (!dateStr) return "";
+            const date = new Date(dateStr);
+            const bulan = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+            
+            const hari = date.getDate();
+            const namaBulan = bulan[date.getMonth()];
+            const tahun = date.getFullYear();
+            
+            return `${hari} ${namaBulan} ${tahun}`.toUpperCase();
+        };
+
+        const tanggalLulus = formatTanggalUpperCase(sklData.tanggal_lulus || '2025-10-27');
+        const tanggalLahir = formatTanggalUpperCase(sklData.tanggal_lahir || '1998-02-05');
+        const tanggalSurat = formatTanggalUpperCase(sklData.tanggal_surat || '2025-11-21');
+        
+        // Margin dan posisi
+        const marginLeft = 20;
+        let currentY = 30;
+        
+        // HEADER YAYASAN DAN UNIVERSITAS
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 7;
+        doc.setFontSize(14);
+        doc.text("UNIVERSITAS LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 7;
+        doc.text("FAKULTAS TEKNIK", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 5;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text("Jl. Karapitan No. 116 Telp. 022-4215717 Fax. 022-4237144 Bandung 40261", 
+                pageWidth / 2, currentY, { align: "center" });
+        
+        // GARIS PEMISAH
+        currentY += 10;
+        doc.setLineWidth(0.5);
+        doc.line(marginLeft, currentY, pageWidth - marginLeft, currentY);
+        
+        // NOMOR SKL
+        currentY += 12;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Nomor: ${sklData.nomor_skl || '313/UNLA/FT/PP/XI/2025'}`, marginLeft, currentY);
+        
+        // JUDUL SURAT
+        currentY += 12;
+        doc.setFontSize(14);
+        doc.text("SURAT KETERANGAN LULUS", pageWidth / 2, currentY, { align: "center" });
+        
+        // PEMBUKA
+        currentY += 15;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.text("Dekan Fakultas Teknik Universitas Langlangbuana Bandung menerangkan bahwa:", 
+                marginLeft, currentY);
+        
+        // DATA MAHASISWA
+        currentY += 10;
+        doc.text(`Nama                          : ${sklData.nama_pegawai || 'RYAN RIZKI PRATAMA'}`, 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text(`Nomor Pokok Mahasiswa : ${sklData.nip || '41155055220085'}`, 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text(`Tempat/Tanggal Lahir  : ${sklData.tempat_lahir || 'BANDUNG'}, ${tanggalLahir}`, 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text(`Jurusan/Program Studi : ${sklData.jurusan || 'TEKNIK INFORMATIKA'}`, 
+                marginLeft, currentY);
+        
+        currentY += 5;
+        doc.setFontSize(9);
+        doc.text("(Terakreditasi 'BAIK SEKALI', SK LAM INFOKOM No. 016/SK/LAM-INFOKOM/Ak/S/III/2025,", 
+                marginLeft + 5, currentY);
+        
+        currentY += 5;
+        doc.text("Tanggal 13 Maret 2025, Sampai Dengan 13 Maret 2030)", 
+                marginLeft + 5, currentY);
+        
+        // ISI SURAT
+        currentY += 12;
+        doc.setFontSize(11);
+        doc.text(`Adalah mahasiswa Fakultas Teknik Universitas Langlangbuana yang telah LULUS sebagai`, 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text(`SARJANA KOMPUTER pada tanggal ${tanggalLulus}.`, 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text("Surat Keterangan Lulus ini diberikan kepada yang bersangkutan sehubungan Ijazah", 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text("asli masih dalam proses penerbitan.", 
+                marginLeft, currentY);
+        
+        currentY += 7;
+        doc.text("Surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya.", 
+                marginLeft, currentY);
+        
+        // TANDA TANGAN
+        currentY += 25;
+        doc.text(`Bandung, ${tanggalSurat}`, pageWidth - marginLeft, currentY, { align: "right" });
+        
+        currentY += 20;
+        doc.text("Dekan Fakultas Teknik", pageWidth - marginLeft, currentY, { align: "right" });
+        
+        currentY += 20;
+        doc.setFont("helvetica", "bold");
+        doc.text("Dr. Sally Octaviana Sari ,ST., MT", pageWidth - marginLeft, currentY, { align: "right" });
+        
+        // FOOTER/NOMOR HALAMAN
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Dokumen ini dicetak dari Sistem Akademik FT - ${new Date().toLocaleDateString('id-ID')}`, 
+                pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
+        
+        // Simpan file
+        const fileName = `SKL_${sklData.nomor_skl || sklData.id}_${sklData.nama_pegawai || 'Document'}.pdf`;
+        doc.save(fileName);
+        
+    } catch (error) {
+        console.error("Error creating SKL PDF:", error);
+        showNotif("❌ Gagal membuat PDF SKL: " + error.message, "error");
+    }
+}
+
+// Fungsi untuk export single SKL to PDF (dipanggil dari tombol detail)
+function exportSingleSKLToPDF(sklId) {
+    const sklData = allSKLData.find(skl => skl.id === sklId);
+    if (!sklData) {
+        showNotif("Data SKL tidak ditemukan", "error");
+        return;
+    }
+    createSKLPdfDocument(sklData);
+}
+
+// Fungsi untuk export single SKL to Excel (dipanggil dari tombol detail)
+function exportSingleSKLToExcel(sklId) {
+    const sklData = allSKLData.find(skl => skl.id === sklId);
+    if (!sklData) {
+        showNotif("Data SKL tidak ditemukan", "error");
+        return;
+    }
+    
+    try {
+        const worksheetData = createSKLWorksheetData(sklData);
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+        
+        ws['!cols'] = [
+            { wch: 20 },
+            { wch: 60 },
+            { wch: 20 }
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, ws, "SKL");
+        XLSX.writeFile(wb, `SKL_${sklData.nomor_skl || sklData.id}.xlsx`);
+        showNotif("✅ Excel SKL berhasil diunduh!", "success");
+    } catch (error) {
+        console.error("Error exporting single SKL to Excel:", error);
+        showNotif("❌ Gagal mengekspor SKL ke Excel", "error");
+    }
+}
+
+// Tambahkan juga fungsi view detail SKL yang hilang
+function viewSKLDetail(sklId) {
+    const sklData = allSKLData.find(skl => skl.id === sklId);
+    if (!sklData) {
+        showNotif("Data SKL tidak ditemukan", "error");
+        return;
+    }
+    
+    currentSKLDetail = sklData;
+    
+    const detailHTML = `
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <h3 class="text-xl font-bold text-blue-700 mb-1">${sklData.nama_pegawai}</h3>
+            <p class="text-gray-500">${sklData.nomor_skl}</p>
+        </div>
+        
+        <div class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Nomor SKL</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.nomor_skl}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Nama Pegawai/Mahasiswa</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.nama_pegawai}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">NIP/NPM</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.nip}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Tempat Lahir</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.tempat_lahir}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Tanggal Lahir</span>
+                <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(sklData.tanggal_lahir)}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Jurusan/Program Studi</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.jurusan}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Tanggal Lulus</span>
+                <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(sklData.tanggal_lulus)}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Tanggal Surat</span>
+                <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(sklData.tanggal_surat)}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <span class="font-semibold text-gray-600 col-span-1">Status</span>
+                <span class="col-span-2 text-gray-800">: <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${sklData.status}</span></span>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('detailSKLContent').innerHTML = detailHTML;
+    document.getElementById('detailSKLModal').style.display = 'flex';
+}
+  
 </script>
 </body>
 </html>
