@@ -1117,47 +1117,35 @@ function editPegawai(id) {
 async function savePegawai(e) {
   e.preventDefault();
   
+  // Validasi basic
+  const nama = document.getElementById("nama").value.trim();
+  const jabatan = document.getElementById("jabatan").value;
+  const unit = document.getElementById("unit").value;
+  const status = document.getElementById("status").value;
+  
+  if (!nama || !jabatan || !unit || !status) {
+    showNotif("❌ Mohon lengkapi semua field wajib!", "error");
+    return;
+  }
+  
   const pegawaiData = {
     nip: document.getElementById("nip").value.trim() || null,
-    nama: document.getElementById("nama").value.trim(),
+    nama: nama,
     tanggal_lahir: document.getElementById("tanggal_lahir").value || null,
-    jabatan: document.getElementById("jabatan").value,
-    unit: document.getElementById("unit").value,
-    status: document.getElementById("status").value,
+    jabatan: jabatan,
+    unit: unit,
+    status: status,
     no_telp: document.getElementById("no_telp").value.trim() || null,
     email: document.getElementById("email").value.trim() || null,
     tgl_masuk: document.getElementById("tgl_masuk").value || new Date().toISOString().split('T')[0],
-    alamat: document.getElementById("alamat").value.trim() || null,
+    alamat: document.getElementById("alamat").value.trim() || null
   };
   
   console.log("Data yang akan disimpan:", pegawaiData);
   
-  // Validasi lebih ketat
-  if (!pegawaiData.nama || pegawaiData.nama.trim() === '') {
-    showNotif("❌ Mohon isi Nama Pegawai.", "error");
-    return;
-  }
-  
-  if (!pegawaiData.jabatan || pegawaiData.jabatan === '' || pegawaiData.jabatan === "Pilih Jabatan") {
-    showNotif("❌ Mohon pilih Jabatan.", "error");
-    return;
-  }
-  
-  if (!pegawaiData.unit || pegawaiData.unit === '' || pegawaiData.unit === "Pilih Unit Kerja") {
-    showNotif("❌ Mohon pilih Unit Kerja.", "error");
-    return;
-  }
-  
-  if (!pegawaiData.status || pegawaiData.status === '' || pegawaiData.status === "Pilih Status") {
-    showNotif("❌ Mohon pilih Status.", "error");
-    return;
-  }
-
   try {
-    let result;
     const pegawaiId = document.getElementById("pegawaiId").value;
-    
-    console.log("Mengirim ke Supabase... Pegawai ID:", pegawaiId || "Baru");
+    let result;
     
     if (pegawaiId) {
       // UPDATE
@@ -1172,30 +1160,23 @@ async function savePegawai(e) {
         .insert([pegawaiData]);
     }
     
-    console.log("Response dari Supabase:", result);
-    
     if (result.error) {
       console.error("Error dari Supabase:", result.error);
       throw result.error;
     }
     
-    const message = pegawaiId 
-      ? "✅ Data pegawai berhasil diperbarui!" 
-      : "✅ Pegawai baru berhasil ditambahkan!";
-    
-    showNotif(message, "success");
+    showNotif(pegawaiId ? "✅ Data berhasil diperbarui!" : "✅ Data berhasil ditambahkan!", "success");
     closeModal('pegawaiModal');
     
-    // Tunggu sebentar lalu refresh data
-    setTimeout(() => {
-      loadPegawaiData();
-    }, 500);
+    // Refresh data setelah 500ms
+    setTimeout(loadPegawaiData, 500);
     
   } catch (error) {
-    console.error("❌ Error dalam savePegawai:", error);
-    showNotif("❌ Gagal menyimpan data: " + error.message, "error");
+    console.error("❌ Error:", error);
+    showNotif(`❌ Gagal menyimpan: ${error.message}`, "error");
   }
 }
+  
 // Hapus data pegawai
 async function deletePegawai(id) {
   const pegawai = allPegawaiData.find(p => p.id == id);
