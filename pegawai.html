@@ -1116,24 +1116,19 @@ async function savePegawai(e) {
   e.preventDefault();
   
   const pegawaiData = {
-    nip: toNullIfEmpty(document.getElementById("nip").value),
-    nama: toNullIfEmpty(document.getElementById("nama").value),
-    tanggal_lahir: toNullIfEmpty(document.getElementById("tanggal_lahir").value),
-    jabatan: toNullIfEmpty(document.getElementById("jabatan").value),
-    unit: toNullIfEmpty(document.getElementById("unit").value),
-    status: toNullIfEmpty(document.getElementById("status").value),
-    no_telp: toNullIfEmpty(document.getElementById("no_telp").value),
-    email: toNullIfEmpty(document.getElementById("email").value),
-    tgl_masuk: toNullIfEmpty(document.getElementById("tgl_masuk").value),
-    alamat: toNullIfEmpty(document.getElementById("alamat").value),
+    nip: document.getElementById("nip").value.trim() || null,
+    nama: document.getElementById("nama").value.trim(),
+    tanggal_lahir: document.getElementById("tanggal_lahir").value || null,
+    jabatan: document.getElementById("jabatan").value,
+    unit: document.getElementById("unit").value,
+    status: document.getElementById("status").value,
+    no_telp: document.getElementById("no_telp").value.trim() || null,
+    email: document.getElementById("email").value.trim() || null,
+    tgl_masuk: document.getElementById("tgl_masuk").value || new Date().toISOString().split('T')[0],
+    alamat: document.getElementById("alamat").value.trim() || null,
   };
   
   // Validasi
-  if (!pegawaiData.nip) {
-    showNotif("❌ Mohon isi NIP Pegawai.", "error");
-    return;
-  }
-  
   if (!pegawaiData.nama) {
     showNotif("❌ Mohon isi Nama Pegawai.", "error");
     return;
@@ -1156,25 +1151,34 @@ async function savePegawai(e) {
 
   try {
     let result;
-    if (editMode) {
+    const pegawaiId = document.getElementById("pegawaiId").value;
+    
+    if (pegawaiId) {
       // UPDATE
       result = await supabaseClient
         .from("pegawai")
         .update(pegawaiData)
-        .eq("id", document.getElementById("pegawaiId").value)
-        .select();
+        .eq("id", pegawaiId);
     } else {
       // INSERT
-      result = await supabaseClient.from("pegawai").insert([pegawaiData]).select();
+      result = await supabaseClient
+        .from("pegawai")
+        .insert([pegawaiData]);
     }
     
     if (result.error) {
       throw result.error;
     }
     
-    showNotif(editMode ? "✅ Data pegawai berhasil diperbarui!" : "✅ Pegawai baru berhasil ditambahkan!", "success");
+    showNotif(
+      pegawaiId 
+        ? "✅ Data pegawai berhasil diperbarui!" 
+        : "✅ Pegawai baru berhasil ditambahkan!", 
+      "success"
+    );
+    
     closeModal('pegawaiModal');
-    loadPegawaiData();
+    loadPegawaiData(); // Reload data
     
   } catch (error) {
     console.error("Error saving pegawai:", error);
