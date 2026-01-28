@@ -2920,68 +2920,35 @@ function viewSKLDetail(sklId) {
     document.getElementById('detailSKLModal').style.display = 'flex';
 }
 
-// ==================== FUNGSI PDF SURAT KETERANGAN NOL SKS (SAMA PERSIS DENGAN TEMPLATE) ====================
+// ==================== FUNGSI PDF SURAT KETERANGAN NOL SKS (SAMA PERSIS) ====================
 
-// Fungsi untuk membuat PDF Surat Keterangan NOL SKS SAMA PERSIS dengan template
-function createSKPdfDocumentExact(skData) {
+// Fungsi untuk membuat PDF Surat Keterangan NOL SKS
+function createSKPdfDocument(skData) {
     try {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         const marginLeft = 20;
-        let currentY = 20; // Mulai lebih atas untuk header
+        let currentY = 30;
         
-        // =========== HEADER UNIVERSITAS (SAMA PERSIS DENGAN GAMBAR) ===========
-        
-        // "YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA" - ukuran kecil, bold
-        doc.setFontSize(10);
+        // =========== HEADER SEDERHANA ===========
+        doc.setFontSize(16);
         doc.setFont("helvetica", "bold");
-        doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
+        doc.text("AKADEMIK FT", pageWidth / 2, currentY, { align: "center" });
         
-        currentY += 6;
-        
-        // "UNIVERSITAS LANGLANGBUANA" - lebih besar, bold
-        doc.setFontSize(12);
-        doc.text("UNIVERSITAS LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 6;
-        
-        // "TERAKREDITASI 'B'" - ukuran sedang, normal dengan tanda kutip ganda
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        doc.text("TERAKREDITASI \"B\"", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 7;
-        
-        // "FAKULTAS TEKNIK" - ukuran besar, bold
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("FAKULTAS TEKNIK", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 6;
-        
-        // Alamat - ukuran kecil, normal (format sama persis dengan gambar)
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        doc.text("Jalan Karapitan No. 116 Telp. 022 - 4218086 Fax. 022 - 4237144 Bandung 40261", 
-                pageWidth / 2, currentY, { align: "center" });
-        
-        // GARIS PEMISAH PANJANG (seperti di gambar)
-        currentY += 8;
+        currentY += 10;
         doc.setLineWidth(0.5);
         doc.line(marginLeft, currentY, pageWidth - marginLeft, currentY);
         
-        currentY += 12;
+        currentY += 15;
         
         // =========== JUDUL SURAT KETERANGAN ===========
-        
-        // "SURAT KETERANGAN" - besar, bold, dengan bracket seperti template
         doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
         doc.text("[SURAT KETERANGAN]", pageWidth / 2, currentY, { align: "center" });
         
-        // Garis bawah manual untuk efek underline (tebal seperti di template)
+        // Garis bawah
         doc.setLineWidth(1);
-        doc.line(pageWidth / 2 - 60, currentY + 3, pageWidth / 2 + 60, currentY + 3);
+        const titleWidth = doc.getStringUnitWidth("[SURAT KETERANGAN]") * 14 / doc.internal.scaleFactor;
+        doc.line(pageWidth / 2 - titleWidth/2, currentY + 3, pageWidth / 2 + titleWidth/2, currentY + 3);
         
         currentY += 15;
         
@@ -3001,7 +2968,6 @@ function createSKPdfDocumentExact(skData) {
         currentY += 10;
         
         // =========== DATA MAHASISWA ===========
-        // Format sesuai template: N a m a : (dengan spasi di antara huruf)
         doc.text("N a m a :", marginLeft, currentY);
         const nama = skData.pegawai?.nama || skData.data_nolsks?.nama_mahasiswa || '';
         doc.text(`# ${nama.toUpperCase()}`, marginLeft + 35, currentY);
@@ -3026,10 +2992,8 @@ function createSKPdfDocumentExact(skData) {
         const semester = dataNolSKS.semester || 'GANJIL';
         const tahunAkademikNol = dataNolSKS.tahun_akademik_nol || '2025-2026';
         
-        // Format teks sama persis dengan template
         const isiSurat = `Adalah benar mahasiswa Fakultas Teknik Prodi ${jurusan} Universitas Langlangbuana Bandung, Terdaftar dan Aktif pada Tahun ${tahunAkademik} ${semester}, mahasiswa yang bersangkutan Pada Semester ${semester} Tahun Akademik ${tahunAkademikNol} telah habis mata kuliah (Tidak ada mata kuliah yang dikontrak 0 SKS).`;
         
-        // Split teks agar sesuai dengan lebar halaman
         const isiLines = doc.splitTextToSize(isiSurat, pageWidth - (marginLeft * 2));
         doc.text(isiLines, marginLeft, currentY);
         currentY += (isiLines.length * 7);
@@ -3042,7 +3006,6 @@ function createSKPdfDocumentExact(skData) {
         currentY += 20;
         
         // =========== TANDA TANGAN ===========
-        // Format tanggal Indonesia
         const formatTanggal = (dateStr) => {
             if (!dateStr) return "";
             try {
@@ -3068,7 +3031,6 @@ function createSKPdfDocumentExact(skData) {
         const tanggalSurat = skData.tanggal_terbit || skData.data_nolsks?.tanggal_surat || new Date().toISOString().split('T')[0];
         const tanggalFormatted = formatTanggal(tanggalSurat);
         
-        // Tanda tangan rata kanan
         doc.text(`Bandung, ${tanggalFormatted}`, pageWidth - marginLeft, currentY, { align: "right" });
         
         currentY += 15;
@@ -3085,7 +3047,6 @@ function createSKPdfDocumentExact(skData) {
         doc.addPage();
         currentY = 30;
         
-        // "KETERANGAN:"
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
         doc.text("KETERANGAN:", marginLeft, currentY);
@@ -3112,7 +3073,7 @@ function createSKPdfDocumentExact(skData) {
         doc.text(lines3, marginLeft, currentY);
         currentY += (lines3.length * 7) + 15;
         
-        // "PERHATIKAN:"
+        // PERHATIKAN
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
         doc.text("PERHATIKAN:", marginLeft, currentY);
@@ -3121,121 +3082,144 @@ function createSKPdfDocumentExact(skData) {
         doc.setFontSize(11);
         doc.setFont("helvetica", "normal");
         
-        // Teks perhatian
         const perhatian = "Seluruh proses di atas dilakukan di bag. Tata Usaha Fakultas Teknik UNLA pada hari dan jam kerja dengan estimasi waktu 1-2 hari dari ajuan masuk.";
         const perhatianLines = doc.splitTextToSize(perhatian, pageWidth - (marginLeft * 2));
         doc.text(perhatianLines, marginLeft, currentY);
         
+        // FOOTER
+        doc.setFontSize(8);
+        doc.text(`Dokumen ini dicetak dari Sistem Akademik FT - ${new Date().toLocaleDateString('id-ID')}`, 
+                pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
+        
         // Simpan file
-        const fileName = `SURAT KETERANGAN NOL SKS_${npm}_${nama.replace(/\s+/g, ' ')}.pdf`;
+        const fileName = `SK_${npm || 'NODATA'}_${nama.replace(/\s+/g, '_') || 'NONAME'}.pdf`;
         doc.save(fileName);
         
-        showNotif('✅ Surat Keterangan Nol SKS berhasil di-generate!', 'success');
         return true;
         
     } catch (error) {
-        console.error("Error creating exact SK PDF:", error);
+        console.error("Error creating SK PDF:", error);
         showNotif("❌ Gagal membuat PDF: " + error.message, "error");
         return false;
     }
 }
+
+// Fungsi untuk export single SK to PDF (untuk tombol export per SK)
+function exportSingleSKToPDF(skId) {
+    const skData = allSKData.find(sk => sk.id === skId);
+    if (!skData) {
+        showNotif("Data SK tidak ditemukan", "error");
+        return;
+    }
+    createSKPdfDocument(skData);
+    showNotif(`✅ Berhasil mengekspor SK ${skData.nomor_sk} ke PDF!`, "success");
+}
+
+// Fungsi untuk export semua SK ke PDF (untuk tombol Export PDF di bagian SK)
+function exportSKToPDF() {
+    if (!allSKData || allSKData.length === 0) {
+        showNotif("Tidak ada data SK untuk diekspor.", "warning");
+        return;
+    }
+    
+    try {
+        // Export semua SK satu per satu
+        let exportedCount = 0;
         
-        // "Bandung, [tanggal]" rata kanan
-        doc.text(`Bandung, ${tanggalFormatted}`, pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 15;
-        doc.text("An.Dekan,", pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 10;
-        doc.text("Wakil Dekan I", pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 20;
-        doc.setFont("helvetica", "bold");
-        doc.text("IRWIN SUPRIADI, S.KOM., MT", pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 30;
-        
-        // =========== HALAMAN 2: KETERANGAN DAN PERHATIAN (SAMA PERSIS) ===========
-        doc.addPage();
-        currentY = 30;
-        
-        // "KETERANGAN:" bold - ukuran lebih besar
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("KETERANGAN:", marginLeft, currentY);
-        
-        currentY += 15;
-        
-        // Keterangan 1 - SAMA PERSIS (dengan indentasi 2 spasi setelah angka)
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        
-        const keterangan1 = "1.  Silahkan download, kemudian sesuaikan dengan data pribadi anda dan data pembuatan surat terbaru (tanggal, tahun dan semester ketika surat diajukan) pada tulisan yang ditandai warna kuning, kemudian hilangkan tanda kuning tersebut.";
-        
-        const lines1 = doc.splitTextToSize(keterangan1, pageWidth - (marginLeft * 2));
-        doc.text(lines1, marginLeft, currentY);
-        currentY += (lines1.length * 7);
-        
-        currentY += 10;
-        
-        // Keterangan 2 - SAMA PERSIS
-        const keterangan2 = "2.  Silahkan cetak surat (hanya halaman pertama) dan serahkan ke bagian Tata Usaha Fakultas Teknik UNLA untuk diproses (verifikasi administrasi dan tanda tangan pengesahan oleh pejabat Fakultas) dan diambil jika telah selesai.";
-        
-        const lines2 = doc.splitTextToSize(keterangan2, pageWidth - (marginLeft * 2));
-        doc.text(lines2, marginLeft, currentY);
-        currentY += (lines2.length * 7);
-        
-        currentY += 10;
-        
-        // Keterangan 3 - SAMA PERSIS dengan link
-        const keterangan3 = "3.  Jika Anda tidak dapat hadir, Anda dapat mengajukan secara online melalui link: https://bit.ly/FT_Daftar_LayananSuratMahasiswa dan diambil jika telah selesai.";
-        
-        const lines3 = doc.splitTextToSize(keterangan3, pageWidth - (marginLeft * 2));
-        doc.text(lines3, marginLeft, currentY);
-        currentY += (lines3.length * 7);
-        
-        currentY += 15;
-        
-        // "PERHATIKAN:" bold - ukuran sama dengan KETERANGAN
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("PERHATIKAN:", marginLeft, currentY);
-        
-        currentY += 15;
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        
-        // Teks perhatian - SAMA PERSIS
-        const perhatian = "Seluruh proses di atas dilakukan di bag. Tata Usaha Fakultas Teknik UNLA pada hari dan jam kerja dengan estimasi waktu 1-2 hari dari ajuan masuk.";
-        
-        const perhatianLines = doc.splitTextToSize(perhatian, pageWidth - (marginLeft * 2));
-        doc.text(perhatianLines, marginLeft, currentY);
-        
-        // FOOTER kecil di setiap halaman
-        const addFooter = (pageNum) => {
-            const pageHeight = doc.internal.pageSize.getHeight();
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "italic");
-            doc.text(`Halaman ${pageNum} - Sistem Akademik FT UNLA - ${new Date().toLocaleDateString('id-ID')}`, 
-                    pageWidth / 2, pageHeight - 10, { align: "center" });
-        };
-        
-        // Tambahkan footer ke halaman 1 dan 2
-        doc.setPage(1);
-        addFooter(1);
-        doc.setPage(2);
-        addFooter(2);
-        
-        // Simpan file dengan nama format mirip
-        const fileName = `SURAT KETERANGAN NOL SKS_${npm}_${nama.replace(/\s+/g, ' ')}.pdf`;
-        doc.save(fileName);
-        
-        return true;
+        allSKData.forEach((skData, index) => {
+            setTimeout(() => {
+                const success = createSKPdfDocument(skData);
+                if (success) exportedCount++;
+                
+                // Jika semua sudah diexport, tampilkan notifikasi
+                if (index === allSKData.length - 1) {
+                    setTimeout(() => {
+                        showNotif(`✅ Berhasil mengekspor ${exportedCount} SK ke PDF!`, "success");
+                    }, 500);
+                }
+            }, index * 500); // Delay untuk menghindari konflik
+        });
         
     } catch (error) {
-        console.error("Error creating exact SK PDF:", error);
-        showNotif("❌ Gagal membuat PDF: " + error.message, "error");
-        return false;
+        console.error("Error exporting SK to PDF:", error);
+        showNotif("Terjadi kesalahan saat mengekspor SK ke PDF.", "error");
+    }
+}
+
+// Fungsi untuk generate Surat Nol SKS (dari form)
+function generateSuratNolSKS() {
+    try {
+        // Ambil data dari form
+        const nomorSurat = document.getElementById('skNomorSurat').value || '--/UNLA/FT/PP/-/----';
+        const mahasiswa = document.getElementById('skMahasiswa').value || '';
+        const npm = document.getElementById('skNPM').value || '';
+        const jurusan = document.getElementById('skJurusan').value || 'TEKNIK SIPIL';
+        const tahunAkademik = document.getElementById('skTahunAkademik').value || '2022-2023';
+        const semester = document.getElementById('skSemester').value || 'GANJIL';
+        const tahunAkademik2 = document.getElementById('skTahunAkademik2').value || '2025-2026';
+        const tanggalSurat = document.getElementById('skTanggalSurat').value || new Date().toISOString().split('T')[0];
+        
+        // Validasi
+        if (!mahasiswa || !npm || !jurusan || !tahunAkademik || !semester || !tahunAkademik2) {
+            showNotif('❌ Mohon lengkapi semua data untuk Surat Keterangan Nol SKS!', 'error');
+            return;
+        }
+        
+        // Buat objek data untuk PDF
+        const nolSKSData = {
+            nomor_sk: nomorSurat,
+            data_nolsks: {
+                nomor_surat: nomorSurat,
+                nama_mahasiswa: mahasiswa,
+                npm: npm,
+                jurusan: jurusan,
+                tahun_akademik: tahunAkademik,
+                semester: semester,
+                tahun_akademik_nol: tahunAkademik2,
+                tanggal_surat: tanggalSurat
+            },
+            tanggal_terbit: tanggalSurat
+        };
+        
+        // Buat PDF
+        const success = createSKPdfDocument(nolSKSData);
+        
+        if (success) {
+            // Simpan ke database jika berhasil
+            saveNolSKSToDatabase(nolSKSData);
+        }
+        
+    } catch (error) {
+        console.error("Error generating Surat Nol SKS:", error);
+        showNotif('❌ Gagal membuat surat: ' + error.message, 'error');
+    }
+}
+
+// Fungsi untuk menyimpan Nol SKS ke database
+async function saveNolSKSToDatabase(nolSKSData) {
+    try {
+        const { error } = await supabaseClient
+            .from('surat_keterangan')
+            .insert([{
+                nomor_sk: nolSKSData.nomor_sk,
+                id_pegawai: null,
+                jabatan: 'MAHASISWA',
+                tanggal_terbit: nolSKSData.tanggal_terbit,
+                status: 'AKTIF',
+                unit_kerja: `Prodi ${nolSKSData.data_nolsks.jurusan}`,
+                keterangan: `Surat Keterangan Nol SKS untuk ${nolSKSData.data_nolsks.nama_mahasiswa} (NPM: ${nolSKSData.data_nolsks.npm})`,
+                jenis_sk: 'NOL_SKS',
+                data_nolsks: nolSKSData.data_nolsks
+            }]);
+
+        if (error) throw error;
+        
+        // Refresh data SK
+        loadDataSK();
+        
+    } catch (error) {
+        console.error('Error saving Nol SKS to database:', error);
+        showNotif('❌ Gagal menyimpan ke database: ' + error.message, 'error');
     }
 }
 
