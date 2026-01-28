@@ -315,12 +315,6 @@
                                         <option value="Drop Out">Drop Out</option>
                                     </select>
                                 </div>
-                                
-                                <div>
-                                    <label for="nomorIjazah" class="block text-sm font-medium text-gray-700">Nomor Ijazah (Opsional)</label>
-                                    <input type="text" id="nomorIjazah" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                </div>
-                            </div>
                             
                           <div class="mt-4">
                               <label for="tanggalLulus" class="block text-sm font-medium text-gray-700">Tanggal Lulus (Opsional)</label>
@@ -1106,7 +1100,6 @@ function maintainOrderAfterEdit(updatedData) {
     const kelas = document.getElementById('kelas').value || null;
     const nik = document.getElementById('nik').value || null;
     const nohp = document.getElementById('nohp').value || null;
-    const nomorIjazah = document.getElementById('nomorIjazah').value || null;
     const tanggalLulusInput = document.getElementById('tanggalLulus').value;
     let tanggalLulus = null;
     
@@ -1169,8 +1162,7 @@ function maintainOrderAfterEdit(updatedData) {
         tahun_masuk: tahunmasuk, 
         kelas: kelas, 
         nik_mahasiswa: nik, 
-        no_hp: nohp,
-        nomor_ijazah: nomorIjazah, 
+        no_hp: nohp, 
         judul_skripsi: tanggalLulus,
         status: statusMhs,
         nama_ayah: namaAyah, 
@@ -1299,7 +1291,6 @@ function maintainOrderAfterEdit(updatedData) {
 
     document.getElementById('nik').value = mhs.nik_mahasiswa || '';
     document.getElementById('nohp').value = mhs.no_hp || '';
-    document.getElementById('nomorIjazah').value = mhs.nomor_ijazah || '';
 const tanggalLulusDB = mhs.judul_skripsi; 
 if (tanggalLulusDB && tanggalLulusDB.includes('/')) {
     const [day, month, year] = tanggalLulusDB.split('/');
@@ -1356,7 +1347,6 @@ async function showDetail(npm) {
         <p><strong>Tempat, Tanggal Lahir:</strong> ${mhs.ttl || '-'}</p>  <!-- Diubah -->
         <p><strong>No. HP:</strong> ${mhs.no_hp || '-'}</p>
         <p><strong>NIK:</strong> ${mhs.nik_mahasiswa || '-'}</p>
-        <p><strong>Nomor Ijazah:</strong> ${mhs.nomor_ijazah || '-'}</p>
         <p><strong>Tanggal Lulus:</strong> ${mhs.judul_skripsi || '-'}</p>
         <p><strong>Alamat:</strong> ${mhs.alamat || '-'}</p>
     `;
@@ -1486,8 +1476,8 @@ async function loadRekapitulasi() {
         const headers = [
     "NPM", "NAMA", "NIK", "TTL", "NO_HP", "ALAMAT", 
     "KELURAHAN", "KECAMATAN", "NAMA_IBU", "NAMA_AYAH", 
-    "KELAS", "TANGGAL_LULUS",  // Diubah dari JUDUL_SKRIPSI
-    "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS", "NOMOR_IJAZAH"
+    "KELAS", "TANGGAL_LULUS",
+    "PRODI", "JENIS_KELAMIN", "TAHUN_MASUK", "STATUS"
 ];
         
         const wsData = [
@@ -1522,24 +1512,23 @@ async function loadRekapitulasi() {
 ];
         
         const dataForExport = currentMahasiswaData.map(mhs => ({
-            "NPM": mhs.npm,
-            "NAMA": mhs.nama,
-            "NIK": mhs.nik_mahasiswa || '-',
-            "TTL": mhs.ttl || '-',
-            "NO_HP": mhs.no_hp || '-',
-            "ALAMAT": mhs.alamat || '-',
-            "KELURAHAN": mhs.kelurahan || '-',
-            "KECAMATAN": mhs.kecamatan || '-',
-            "NAMA_IBU": mhs.nama_ibu || '-',
-            "NAMA_AYAH": mhs.nama_ayah || '-',
-            "KELAS": mhs.kelas || '-',
-            "TANGGAL_LULUS": mhs.judul_skripsi || '-',
-            "PRODI": mhs.prodi,
-            "JENIS_KELAMIN": mhs.jenis_kelamin || '-',
-            "TAHUN_MASUK": mhs.tahun_masuk,
-            "STATUS": mhs.status,
-            "NOMOR_IJAZAH": mhs.nomor_ijazah || '-'
-        }));
+    "NPM": mhs.npm,
+    "NAMA": mhs.nama,
+    "NIK": mhs.nik_mahasiswa || '-',
+    "TTL": mhs.ttl || '-',
+    "NO_HP": mhs.no_hp || '-',
+    "ALAMAT": mhs.alamat || '-',
+    "KELURAHAN": mhs.kelurahan || '-',
+    "KECAMATAN": mhs.kecamatan || '-',
+    "NAMA_IBU": mhs.nama_ibu || '-',
+    "NAMA_AYAH": mhs.nama_ayah || '-',
+    "KELAS": mhs.kelas || '-',
+    "TANGGAL_LULUS": mhs.judul_skripsi || '-',
+    "PRODI": mhs.prodi,
+    "JENIS_KELAMIN": mhs.jenis_kelamin || '-',
+    "TAHUN_MASUK": mhs.tahun_masuk,
+    "STATUS": mhs.status
+}));
 
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(dataForExport, { header: headers });
@@ -1713,7 +1702,7 @@ async function loadRekapitulasi() {
             const headers = excelData[0].map(h => String(h).trim().toUpperCase().replace(/[\s\W]+/g, '_').replace(/^_|_$/g, ''));
             const rawData = excelData.slice(1);
             
-            const columnMapping = {
+const columnMapping = {
     'NPM': 'npm', 
     'NAMA': 'nama', 
     'PRODI': 'prodi', 
@@ -1723,13 +1712,11 @@ async function loadRekapitulasi() {
     'KELAS': 'kelas',
     'NIK': 'nik_mahasiswa', 
     'NO_HP': 'no_hp', 
-    'NOMOR_IJAZAH': 'nomor_ijazah', 
-    'TANGGAL_LULUS': 'judul_skripsi', 
-    'JUDUL_SKRIPSI': 'judul_skripsi', 
+    'TANGGAL_LULUS': 'judul_skripsi',
+    'JUDUL_SKRIPSI': 'judul_skripsi',
     'NAMA_AYAH': 'nama_ayah', 
     'NAMA_IBU': 'nama_ibu',
-    'TTL': 'ttl',  // Sekarang sudah termasuk tempat dan tanggal
-    'TEMPAT_LAHIR': 'tempat_lahir', // Opsional jika ingin terpisah
+    'TTL': 'ttl',
     'ALAMAT': 'alamat', 
     'KELURAHAN': 'kelurahan', 
     'KECAMATAN': 'kecamatan',
