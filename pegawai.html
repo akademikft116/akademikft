@@ -123,14 +123,45 @@
     .notification.success { background-color: #16a34a; }
     .notification.error { background-color: #dc2626; }
     .notification.warning { background-color: #f59e0b; }
+
+    /* Logo styling */
+    .logo-container {
+        background: white;
+        border-radius: 8px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo-img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    /* Navbar text styling */
+    .navbar-title {
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .navbar-subtitle {
+        opacity: 0.9;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
 
 <nav class="bg-blue-800 shadow-md h-16 fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-6">
   <div class="flex items-center space-x-3">
-    <img src="logo.jpeg" alt="Logo" class="h-10 w-auto">
-    <span class="text-white text-xl font-semibold">AKADEMIK FT</span>
+    <div class="logo-container h-10 w-10">
+      <img src="./images/logo.jpeg" alt="Logo UNLA" class="logo-img" 
+           onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40/1e40af/ffffff?text=UNLA';">
+    </div>
+    <div>
+      <span class="navbar-title text-white text-xl font-semibold block">AKADEMIK FT</span>
+      <span class="navbar-subtitle text-white text-xs block">Universitas Langlangbuana</span>
+    </div>
   </div>
   <div class="flex items-center space-x-4">
     <span id="userNameNav" class="text-white text-sm">Halo, AkademikFT</span>
@@ -965,6 +996,11 @@ document.addEventListener("DOMContentLoaded", function() {
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById('sklTanggalSurat')) {
     document.getElementById('sklTanggalSurat').value = today;
+  }
+  
+  // Set tanggal default untuk form SK Nol SKS
+  if (document.getElementById('skTanggalSurat')) {
+    document.getElementById('skTanggalSurat').value = today;
   }
   
   // Pastikan submenu Data Pegawai terbuka
@@ -2385,26 +2421,6 @@ function generateSuratNolSKS() {
             return;
         }
         
-        // Format tanggal Indonesia
-        const formatTanggal = (dateStr) => {
-            if (!dateStr) return "";
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) return dateStr;
-            
-            const bulan = [
-                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-            ];
-            
-            const hari = date.getDate();
-            const namaBulan = bulan[date.getMonth()];
-            const tahun = date.getFullYear();
-            
-            return `${hari} ${namaBulan} ${tahun}`;
-        };
-        
-        const tanggalFormatted = formatTanggal(tanggalSurat);
-        
         // Buat objek data untuk PDF
         const nolSKSData = {
             nomor_sk: nomorSurat,
@@ -2433,7 +2449,334 @@ function generateSuratNolSKS() {
     }
 }
 
-// Fungsi untuk preview surat di modal
+// ==================== FUNGSI PDF SURAT KETERANGAN DENGAN LOGO UNLA ====================
+
+// Fungsi untuk membuat PDF Surat Keterangan dengan logo UNLA di header
+function createSKPdfDocument(skData) {
+    try {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const marginLeft = 20;
+        let currentY = 15;
+        
+        // =========== KOP SURAT DENGAN LOGO UNLA ===========
+        
+        // Tambahkan logo UNLA di sebelah kiri
+        try {
+            // Coba load logo dari berbagai path
+            const logoPaths = [
+                './images/logo_unla.png',
+                './images/logo.jpeg',
+                './logo.jpeg',
+                'logo.jpeg',
+                'https://via.placeholder.com/40x50/1e40af/ffffff?text=UNLA'
+            ];
+            
+            let logoAdded = false;
+            for (const path of logoPaths) {
+                try {
+                    // Logo UNLA biasanya berbentuk persegi/rectangular
+                    doc.addImage(path, 'JPEG', marginLeft, currentY - 5, 40, 50);
+                    logoAdded = true;
+                    break;
+                } catch (e) {
+                    continue;
+                }
+            }
+            
+            if (!logoAdded) {
+                // Fallback: buat placeholder logo
+                doc.setFillColor(30, 64, 175); // Warna biru UNLA
+                doc.rect(marginLeft, currentY - 5, 40, 50, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(8);
+                doc.text('UNLA', marginLeft + 20, currentY + 15, { align: 'center' });
+            }
+        } catch (logoError) {
+            console.warn("Logo tidak dapat dimuat:", logoError);
+        }
+        
+        // Teks header di tengah (disesuaikan dengan logo di kiri)
+        const textStartX = marginLeft + 45; // Mulai setelah logo
+        
+        // Baris 1: "YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA"
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 5;
+        
+        // Baris 2: "UNIVERSITAS LANGLANGBUANA"
+        doc.setFontSize(12);
+        doc.text("UNIVERSITAS LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 5;
+        
+        // Baris 3: "TERAKREDITASI 'B'"
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.text("TERAKREDITASI \"B\"", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 6;
+        
+        // Baris 4: "FAKULTAS TEKNIK"
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("FAKULTAS TEKNIK", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 5;
+        
+        // Baris 5: Alamat
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text("Jalan Karapitan No. 116 Telp. 022 - 4218086 Fax. 022 - 4237144 Bandung 40261", 
+                pageWidth / 2, currentY, { align: "center" });
+        
+        // GARIS PEMISAH - tipis seperti di gambar
+        currentY += 8;
+        doc.setLineWidth(0.5);
+        doc.line(marginLeft, currentY, pageWidth - marginLeft, currentY);
+        
+        currentY += 12;
+        
+        // =========== JUDUL "SURAT KETERANGAN" ===========
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("SURAT KETERANGAN", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 10;
+        
+        // =========== NOMOR SURAT ===========
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        
+        // Format nomor surat sesuai contoh
+        let nomorSurat = skData.nomor_sk || '--/UNLA/FT/PP/-/----';
+        
+        // Jika dari data nol SKS
+        if (skData.data_nolsks?.nomor_surat) {
+            nomorSurat = skData.data_nolsks.nomor_surat;
+        }
+        
+        // Format sesuai contoh: "--/UNLA/FT/PP/-/----"
+        nomorSurat = nomorSurat.replace(/\s+/g, '').replace(/UNLA\/\s*FT\/\s*PP/g, 'UNLA/FT/PP');
+        
+        doc.text(`Nomor : ${nomorSurat}`, pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 15;
+        
+        // =========== PARAGRAF PEMBUKA ===========
+        doc.setFontSize(11);
+        doc.text("Dekan Fakultas Teknik Universitas Langlangbuana dengan ini menerangkan bahwa :", 
+                marginLeft, currentY);
+        
+        currentY += 10;
+        
+        // =========== DATA MAHASISWA ===========
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        
+        // Ambil data dari skData
+        const nama = skData.pegawai?.nama || skData.data_nolsks?.nama_mahasiswa || 'NAMA MAHASISWA';
+        const npm = skData.pegawai?.nip || skData.data_nolsks?.npm || 'NPM';
+        const jurusan = skData.data_nolsks?.jurusan || skData.unit_kerja || 'TEKNIK SIPIL';
+        
+        // Format data seperti di contoh dokumen
+        // Nama
+        doc.text("N a m a :", marginLeft, currentY);
+        doc.setFont("helvetica", "bold");
+        doc.text(`# ${nama.toUpperCase()}`, marginLeft + 30, currentY);
+        
+        currentY += 7;
+        
+        // NPM
+        doc.setFont("helvetica", "normal");
+        doc.text("NPM :", marginLeft, currentY);
+        doc.setFont("helvetica", "bold");
+        doc.text(`# ${npm}`, marginLeft + 30, currentY);
+        
+        currentY += 7;
+        
+        // Jurusan
+        doc.setFont("helvetica", "normal");
+        doc.text("Jurusan :", marginLeft, currentY);
+        doc.setFont("helvetica", "bold");
+        doc.text(`# ${jurusan}`, marginLeft + 30, currentY);
+        
+        currentY += 15;
+        
+        // =========== ISI SURAT ===========
+        doc.setFont("helvetica", "normal");
+        
+        // Ambil data tambahan untuk nol SKS
+        const tahunAkademik = skData.data_nolsks?.tahun_akademik || '2022-2023';
+        const semester = skData.data_nolsks?.semester || 'GANJIL';
+        const tahunAkademikNol = skData.data_nolsks?.tahun_akademik_nol || '2025-2026';
+        
+        // Baris 1
+        doc.text(`Adalah benar mahasiswa Fakultas Teknik Prodi ${jurusan} Universitas`, 
+                marginLeft, currentY);
+        
+        currentY += 6;
+        doc.text("Langlangbuana Bandung, Terdaftar dan Aktif pada Tahun", 
+                marginLeft, currentY);
+        
+        currentY += 6;
+        doc.text(`${tahunAkademik} ${semester}, mahasiswa yang bersangkutan Pada Semester`, 
+                marginLeft, currentY);
+        
+        currentY += 6;
+        doc.text(`${semester} Tahun Akademik ${tahunAkademikNol} telah habis mata kuliah`, 
+                marginLeft, currentY);
+        
+        currentY += 6;
+        doc.text("(Tidak ada mata kuliah yang dikontrak 0 SKS).", 
+                marginLeft, currentY);
+        
+        currentY += 20;
+        
+        // =========== PENUTUP ===========
+        doc.text("Demikian keterangan ini kami beritahukan untuk dapat dipergunakan", 
+                marginLeft, currentY);
+        
+        currentY += 6;
+        doc.text("sebagaimana mestinya.", 
+                marginLeft, currentY);
+        
+        currentY += 20;
+        
+        // =========== TANDA TANGAN ===========
+        // Format tanggal
+        const formatTanggal = (dateStr) => {
+            if (!dateStr) return "-- Januari 2026"; // Default sesuai contoh
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                
+                const bulan = [
+                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                ];
+                
+                const hari = date.getDate();
+                const namaBulan = bulan[date.getMonth()];
+                const tahun = date.getFullYear();
+                
+                return `${hari} ${namaBulan} ${tahun}`;
+            } catch (error) {
+                console.error("Error formatting date:", error);
+                return "-- Januari 2026";
+            }
+        };
+        
+        const tanggalSurat = skData.tanggal_terbit || skData.data_nolsks?.tanggal_surat || new Date().toISOString().split('T')[0];
+        const tanggalFormatted = formatTanggal(tanggalSurat);
+        
+        // Tanda tangan di kanan
+        const rightAlignX = pageWidth - marginLeft;
+        
+        doc.text(`Bandung, ${tanggalFormatted}`, rightAlignX, currentY, { align: "right" });
+        
+        currentY += 10;
+        doc.text("An.Dekan,", rightAlignX, currentY, { align: "right" });
+        
+        currentY += 7;
+        doc.text("Wakil Dekan I", rightAlignX, currentY, { align: "right" });
+        
+        currentY += 15;
+        doc.setFont("helvetica", "bold");
+        doc.text("IRWIN SUPRIADI, S.KOM., MT", rightAlignX, currentY, { align: "right" });
+        
+        // =========== HALAMAN 2: KETERANGAN ===========
+        doc.addPage();
+        currentY = 30;
+        
+        // Logo juga di halaman 2
+        try {
+            doc.addImage('./images/logo_unla.png', 'JPEG', marginLeft, currentY - 15, 40, 50);
+        } catch (e) {
+            // Jika logo gagal, lanjut tanpa logo
+        }
+        
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("KETERANGAN:", marginLeft, currentY);
+        
+        currentY += 15;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        
+        // Keterangan 1
+        doc.text("1. Silahkan download, kemudian sesuaikan dengan data pribadi anda dan data", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   pembuatan surat terbaru (tanggal, tahun dan semester ketika surat diajukan)", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   pada tulisan yang ditandai warna kuning, kemudian hilangkan tanda kuning tersebut.", 
+                marginLeft, currentY);
+        
+        currentY += 10;
+        
+        // Keterangan 2
+        doc.text("2. Silahkan cetak surat (hanya halaman pertama) dan serahkan ke bagian", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   Tata Usaha Fakultas Teknik UNLA untuk diproses (verifikasi administrasi", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   dan tanda tangan pengesahan oleh pejabat Fakultas) dan diambil jika", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   telah selesai.", marginLeft, currentY);
+        
+        currentY += 10;
+        
+        // Keterangan 3
+        doc.text("3. Jika Anda tidak dapat hadir, Anda dapat mengajukan secara online", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   melalui link: https://bit.ly/FT_Daftar_LayananSuratMahasiswa dan", 
+                marginLeft, currentY);
+        currentY += 6;
+        doc.text("   diambil jika telah selesai.", marginLeft, currentY);
+        
+        currentY += 20;
+        
+        // PERHATIKAN
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("PERHATIKAN:", marginLeft, currentY);
+        
+        currentY += 15;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        
+        const perhatian = "Seluruh proses di atas dilakukan di bag. Tata Usaha Fakultas Teknik UNLA pada hari dan jam kerja dengan estimasi waktu 1-2 hari dari ajuan masuk.";
+        const perhatianLines = doc.splitTextToSize(perhatian, pageWidth - (marginLeft * 2));
+        doc.text(perhatianLines, marginLeft, currentY);
+        
+        // FOOTER
+        doc.setFontSize(8);
+        doc.text(`Dokumen ini dicetak dari Sistem Akademik FT - ${new Date().toLocaleDateString('id-ID')}`, 
+                pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
+        
+        // Simpan file
+        const safeNama = nama.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_');
+        const fileName = `SURAT_KETERANGAN_NOL_SKS_${npm || 'NODATA'}_${safeNama || 'NONAME'}.pdf`;
+        doc.save(fileName);
+        
+        showNotif(`✅ Surat Keterangan Nol SKS untuk ${nama} berhasil di-generate!`, "success");
+        return true;
+        
+    } catch (error) {
+        console.error("Error creating SK PDF:", error);
+        showNotif("❌ Gagal membuat PDF: " + error.message, "error");
+        return false;
+    }
+}
+
+// Fungsi untuk preview Surat Nol SKS dengan logo UNLA
 function previewSuratNolSKS() {
     try {
         // Ambil data dari form
@@ -2446,15 +2789,9 @@ function previewSuratNolSKS() {
         const tahunAkademik2 = document.getElementById('skTahunAkademik2').value || '2025-2026';
         const tanggalSurat = document.getElementById('skTanggalSurat').value || new Date().toISOString().split('T')[0];
         
-        // Validasi
-        if (!mahasiswa || !npm || !jurusan || !tahunAkademik || !semester || !tahunAkademik2) {
-            showNotif('❌ Mohon lengkapi semua data untuk preview surat!', 'error');
-            return;
-        }
-        
-        // Format tanggal Indonesia
+        // Format tanggal
         const formatTanggal = (dateStr) => {
-            if (!dateStr) return "";
+            if (!dateStr) return "-- Januari 2026";
             const date = new Date(dateStr);
             const bulan = [
                 "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -2470,62 +2807,78 @@ function previewSuratNolSKS() {
         
         const tanggalFormatted = formatTanggal(tanggalSurat);
         
-        // Buat konten preview
+        // Buat konten preview dengan logo UNLA
         const previewHTML = `
-            <div class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-                <div class="text-center border-b pb-4 mb-6">
-                    <h3 class="text-xl font-bold text-blue-700 underline">SURAT KETERANGAN</h3>
-                    <p class="text-gray-600 mt-2">Nomor : ${nomorSurat}</p>
-                </div>
-                
-                <div class="space-y-4">
-                    <p>Dekan Fakultas Teknik Universitas Langlangbuana dengan ini menerangkan bahwa :</p>
-                    
-                    <div class="space-y-2 ml-4">
-                        <div class="flex items-start">
-                            <span class="font-semibold w-24">N a m a :</span>
-                            <span class="font-bold text-blue-700"># ${mahasiswa.toUpperCase()}</span>
-                        </div>
-                        <div class="flex items-start">
-                            <span class="font-semibold w-24">NPM :</span>
-                            <span class="font-bold text-blue-700"># ${npm}</span>
-                        </div>
-                        <div class="flex items-start">
-                            <span class="font-semibold w-24">Jurusan :</span>
-                            <span class="font-bold text-blue-700"># ${jurusan}</span>
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+                <!-- HEADER/KOP SURAT DENGAN LOGO -->
+                <div class="flex items-start mb-8 border-b-2 border-gray-300 pb-4">
+                    <!-- Logo UNLA -->
+                    <div class="w-24 mr-4">
+                        <div class="bg-blue-800 p-2 rounded flex items-center justify-center h-20">
+                            <img src="./images/logo_unla.png" alt="Logo UNLA" class="h-16 w-auto object-contain" 
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80/1e40af/ffffff?text=UNLA'; this.className='h-16 w-auto';">
                         </div>
                     </div>
                     
-                    <p class="mt-6 text-justify">
-                        Adalah benar mahasiswa Fakultas Teknik Prodi <strong>${jurusan}</strong> Universitas Langlangbuana Bandung, 
-                        Terdaftar dan Aktif pada Tahun <strong>${tahunAkademik} ${semester}</strong>, 
-                        mahasiswa yang bersangkutan Pada Semester <strong>${semester}</strong> Tahun Akademik 
-                        <strong>${tahunAkademik2}</strong> telah habis mata kuliah (Tidak ada mata kuliah yang dikontrak 0 SKS).
+                    <!-- Teks Header -->
+                    <div class="flex-1 text-center">
+                        <div class="text-sm font-bold text-gray-700">YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA</div>
+                        <div class="text-lg font-bold text-gray-900 mt-1">UNIVERSITAS LANGLANGBUANA</div>
+                        <div class="text-sm text-gray-600 mt-1">TERAKREDITASI "B"</div>
+                        <div class="text-lg font-bold text-gray-900 mt-2">FAKULTAS TEKNIK</div>
+                        <div class="text-xs text-gray-500 mt-1">Jalan Karapitan No. 116 Telp. 022 - 4218086 Fax. 022 - 4237144 Bandung 40261</div>
+                    </div>
+                </div>
+                
+                <!-- JUDUL SURAT -->
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">SURAT KETERANGAN</h3>
+                    <div class="border-b-2 border-gray-800 w-48 mx-auto mt-2"></div>
+                </div>
+                
+                <!-- NOMOR SURAT -->
+                <div class="text-center mb-8">
+                    <p class="text-gray-700">Nomor : ${nomorSurat}</p>
+                </div>
+                
+                <!-- KONTEN SURAT -->
+                <div class="space-y-4 text-gray-700 text-sm">
+                    <p>Dekan Fakultas Teknik Universitas Langlangbuana dengan ini menerangkan bahwa :</p>
+                    
+                    <div class="space-y-2 ml-8">
+                        <div class="flex items-start">
+                            <span class="font-semibold w-24">N a m a :</span>
+                            <span class="font-bold text-yellow-600 bg-yellow-50 px-2"># ${mahasiswa.toUpperCase()}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="font-semibold w-24">NPM :</span>
+                            <span class="font-bold text-yellow-600 bg-yellow-50 px-2"># ${npm}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="font-semibold w-24">Jurusan :</span>
+                            <span class="font-bold text-yellow-600 bg-yellow-50 px-2"># ${jurusan}</span>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-6">
+                        Adalah benar mahasiswa Fakultas Teknik Prodi ${jurusan} Universitas Langlangbuana Bandung, 
+                        Terdaftar dan Aktif pada Tahun ${tahunAkademik} ${semester}, mahasiswa yang bersangkutan 
+                        Pada Semester ${semester} Tahun Akademik ${tahunAkademik2} telah habis mata kuliah 
+                        (Tidak ada mata kuliah yang dikontrak 0 SKS).
                     </p>
                     
                     <p class="mt-8">Demikian keterangan ini kami beritahukan untuk dapat dipergunakan sebagaimana mestinya.</p>
                     
-                    <div class="text-right mt-12">
+                    <div class="text-right mt-16">
                         <p>Bandung, ${tanggalFormatted}</p>
                         <p class="mt-6">An.Dekan,</p>
-                        <p class="mt-2">Wakil Dekan I</p>
+                        <p>Wakil Dekan I</p>
                         <p class="mt-8 font-bold">IRWIN SUPRIADI, S.KOM., MT</p>
                     </div>
                 </div>
                 
-                <div class="mt-8 pt-6 border-t">
-                    <h4 class="font-bold text-lg mb-3">KETERANGAN:</h4>
-                    <ol class="list-decimal ml-5 space-y-2">
-                        <li>Silahkan download, kemudian sesuaikan dengan data pribadi anda dan data pembuatan surat terbaru (tanggal, tahun dan semester ketika surat diajukan) pada tulisan yang ditandai warna kuning, kemudian hilangkan tanda kuning tersebut.</li>
-                        <li>Silahkan cetak surat (hanya halaman pertama) dan serahkan ke bagian Tata Usaha Fakultas Teknik UNLA untuk diproses (verifikasi administrasi dan tanda tangan pengesahan oleh pejabat Fakultas) dan diambil jika telah selesai.</li>
-                        <li>Jika Anda tidak dapat hadir, Anda dapat mengajukan secara online melalui link: https://bit.ly/FT_Daftar_LayananSuratMahasiswa dan diambil jika telah selesai.</li>
-                    </ol>
-                    
-                    <h4 class="font-bold text-lg mt-6 mb-3">PERHATIKAN:</h4>
-                    <p>Seluruh proses di atas dilakukan di bag. Tata Usaha Fakultas Teknik UNLA pada hari dan jam kerja dengan estimasi waktu 1-2 hari dari ajuan masuk.</p>
-                </div>
-                
-                <div class="flex justify-center space-x-4 mt-8">
+                <!-- TOMBOL AKSI -->
+                <div class="flex justify-center space-x-4 mt-8 pt-6 border-t">
                     <button onclick="generateSuratNolSKS()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
                         <i class="fas fa-download mr-2"></i>Download PDF
                     </button>
@@ -2563,259 +2916,6 @@ function previewSuratNolSKS() {
     }
 }
 
-// ==================== FUNGSI PDF SURAT KETERANGAN NOL SKS (FORMAT SAMA PERSIS) ====================
-
-// Fungsi untuk membuat PDF Surat Keterangan (format persis dengan contoh)
-function createSKPdfDocument(skData) {
-    try {
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const marginLeft = 20;
-        let currentY = 25;
-        
-        // =========== KOP SURAT DENGAN LOGO ===========
-        
-        // Baris 1: "YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA"
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 6;
-        
-        // Baris 2: "UNIVERSITAS LANGLANGBUANA"
-        doc.setFontSize(12);
-        doc.text("UNIVERSITAS LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 6;
-        
-        // Baris 3: "TERAKREDITASI 'B'"
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        doc.text("TERAKREDITASI \"B\"", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 7;
-        
-        // Baris 4: "FAKULTAS TEKNIK"
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("FAKULTAS TEKNIK", pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 6;
-        
-        // Baris 5: Alamat
-        doc.setFontSize(9);
-        doc.text("Jalan Karapitan No. 116 Telp. 022 - 4218086 Fax. 022 - 4237144 Bandung 40261", 
-                pageWidth / 2, currentY, { align: "center" });
-        
-        // GARIS PEMISAH
-        currentY += 10;
-        doc.setLineWidth(0.3);
-        doc.line(marginLeft, currentY, pageWidth - marginLeft, currentY);
-        
-        currentY += 12;
-        
-        // =========== JUDUL "SURAT KETERANGAN" ===========
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("SURAT KETERANGAN", pageWidth / 2, currentY, { align: "center" });
-        
-        // Garis bawah untuk judul
-        doc.setLineWidth(0.5);
-        const titleWidth = doc.getStringUnitWidth("SURAT KETERANGAN") * 14 / doc.internal.scaleFactor;
-        doc.line(pageWidth / 2 - titleWidth/2, currentY + 3, pageWidth / 2 + titleWidth/2, currentY + 3);
-        
-        currentY += 15;
-        
-        // =========== NOMOR SURAT ===========
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        
-        // Format nomor surat yang benar
-        let nomorSurat = skData.nomor_sk || '--/UNLA/FT/PP/-/----';
-        
-        // Jika dari data nol SKS
-        if (skData.data_nolsks?.nomor_surat) {
-            nomorSurat = skData.data_nolsks.nomor_surat;
-        }
-        
-        // Perbaiki format: hapus spasi yang tidak perlu
-        nomorSurat = nomorSurat.replace(/UNLA\/\s*FT\/\s*PP/g, 'UNLA/FT/PP');
-        
-        doc.text(`Nomor : ${nomorSurat}`, pageWidth / 2, currentY, { align: "center" });
-        
-        currentY += 20;
-        
-        // =========== PARAGRAF PEMBUKA ===========
-        doc.text("Dekan Fakultas Teknik Universitas Langlangbuana dengan ini menerangkan bahwa :", 
-                marginLeft, currentY);
-        
-        currentY += 15;
-        
-        // =========== DATA MAHASISWA ===========
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        
-        // Ambil data dari skData
-        const nama = skData.pegawai?.nama || skData.data_nolsks?.nama_mahasiswa || 'NAMA MAHASISWA';
-        const npm = skData.pegawai?.nip || skData.data_nolsks?.npm || 'NPM';
-        const jurusan = skData.data_nolsks?.jurusan || skData.unit_kerja || 'TEKNIK SIPIL';
-        
-        // Nama
-        doc.text("Nama :", marginLeft, currentY);
-        doc.setFont("helvetica", "bold");
-        doc.text(`# ${nama.toUpperCase()}`, marginLeft + 25, currentY);
-        
-        currentY += 8;
-        
-        // NPM
-        doc.setFont("helvetica", "normal");
-        doc.text("NPM :", marginLeft, currentY);
-        doc.setFont("helvetica", "bold");
-        doc.text(`# ${npm}`, marginLeft + 25, currentY);
-        
-        currentY += 8;
-        
-        // Jurusan
-        doc.setFont("helvetica", "normal");
-        doc.text("Jurusan :", marginLeft, currentY);
-        doc.setFont("helvetica", "bold");
-        doc.text(`# ${jurusan}`, marginLeft + 25, currentY);
-        
-        currentY += 20;
-        
-        // =========== ISI SURAT ===========
-        doc.setFont("helvetica", "normal");
-        
-        // Baris pertama (selalu ada)
-        doc.text(`Adalah benar mahasiswa Fakultas Teknik Prodi ${jurusan} Universitas Langlangbuana.`, 
-                marginLeft, currentY);
-        
-        // Jika ini surat nol SKS, tambahkan baris tambahan
-        if (skData.jenis_sk === 'NOL_SKS' || skData.data_nolsks) {
-            const tahunAkademik = skData.data_nolsks?.tahun_akademik || '2022-2023';
-            const semester = skData.data_nolsks?.semester || 'GANJIL';
-            const tahunAkademikNol = skData.data_nolsks?.tahun_akademik_nol || '2025-2026';
-            
-            currentY += 8;
-            doc.text(`Terdaftar dan Aktif pada Tahun ${tahunAkademik} ${semester},`, 
-                    marginLeft, currentY);
-            
-            currentY += 8;
-            doc.text(`mahasiswa yang bersangkutan Pada Semester ${semester} Tahun Akademik ${tahunAkademikNol}`, 
-                    marginLeft, currentY);
-            
-            currentY += 8;
-            doc.text("telah habis mata kuliah (Tidak ada mata kuliah yang dikontrak 0 SKS).", 
-                    marginLeft, currentY);
-        }
-        
-        currentY += 25;
-        
-        // =========== PENUTUP ===========
-        doc.text("Demikian keterangan ini kami beritahukan untuk dapat dipergunakan sebagaimana mestinya.", 
-                marginLeft, currentY);
-        
-        currentY += 25;
-        
-        // =========== TANDA TANGAN ===========
-        // Format tanggal
-        const formatTanggal = (dateStr) => {
-            if (!dateStr) return "";
-            try {
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) return dateStr;
-                
-                const bulan = [
-                    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-                    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-                ];
-                
-                const hari = date.getDate();
-                const namaBulan = bulan[date.getMonth()];
-                const tahun = date.getFullYear();
-                
-                return `${hari} ${namaBulan} ${tahun}`;
-            } catch (error) {
-                console.error("Error formatting date:", error);
-                return dateStr;
-            }
-        };
-        
-        const tanggalSurat = skData.tanggal_terbit || skData.data_nolsks?.tanggal_surat || new Date().toISOString().split('T')[0];
-        const tanggalFormatted = formatTanggal(tanggalSurat);
-        
-        // Tanda tangan di kanan
-        doc.text(`Bandung, ${tanggalFormatted}`, pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 15;
-        doc.text("An.Dekan,", pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 10;
-        doc.text("Wakil Dekan I", pageWidth - marginLeft, currentY, { align: "right" });
-        
-        currentY += 20;
-        doc.setFont("helvetica", "bold");
-        doc.text("IRWIN SUPRIADI, S.KOM., MT", pageWidth - marginLeft, currentY, { align: "right" });
-        
-        // =========== HALAMAN 2: KETERANGAN ===========
-        doc.addPage();
-        currentY = 30;
-        
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("KETERANGAN:", marginLeft, currentY);
-        
-        currentY += 15;
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        
-        // Keterangan 1-3
-        const keterangan = [
-            "1. Silahkan download, kemudian sesuaikan dengan data pribadi anda dan data pembuatan surat terbaru (tanggal, tahun dan semester ketika surat diajukan) pada tulisan yang ditandai warna kuning, kemudian hilangkan tanda kuning tersebut.",
-            "2. Silahkan cetak surat (hanya halaman pertama) dan serahkan ke bagian Tata Usaha Fakultas Teknik UNLA untuk diproses (verifikasi administrasi dan tanda tangan pengesahan oleh pejabat Fakultas) dan diambil jika telah selesai.",
-            "3. Jika Anda tidak dapat hadir, Anda dapat mengajukan secara online melalui link: https://bit.ly/FT_Daftar_LayananSuratMahasiswa dan diambil jika telah selesai."
-        ];
-        
-        keterangan.forEach(item => {
-            const lines = doc.splitTextToSize(item, pageWidth - (marginLeft * 2));
-            doc.text(lines, marginLeft, currentY);
-            currentY += (lines.length * 7) + 10;
-        });
-        
-        currentY += 10;
-        
-        // PERHATIKAN
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("PERHATIKAN:", marginLeft, currentY);
-        
-        currentY += 15;
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        
-        const perhatian = "Seluruh proses di atas dilakukan di bag. Tata Usaha Fakultas Teknik UNLA pada hari dan jam kerja dengan estimasi waktu 1-2 hari dari ajuan masuk.";
-        const perhatianLines = doc.splitTextToSize(perhatian, pageWidth - (marginLeft * 2));
-        doc.text(perhatianLines, marginLeft, currentY);
-        
-        // FOOTER
-        doc.setFontSize(8);
-        doc.text(`Dokumen ini dicetak dari Sistem Akademik FT - ${new Date().toLocaleDateString('id-ID')}`, 
-                pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
-        
-        // Simpan file
-        const safeNama = nama.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_');
-        const fileName = `SURAT_KETERANGAN_${npm || 'NODATA'}_${safeNama || 'NONAME'}.pdf`;
-        doc.save(fileName);
-        
-        return true;
-        
-    } catch (error) {
-        console.error("Error creating SK PDF:", error);
-        showNotif("❌ Gagal membuat PDF: " + error.message, "error");
-        return false;
-    }
-}
-
 // Fungsi untuk export SK ke PDF
 function exportSKToPDF() {
     if (!allSKData || allSKData.length === 0) {
@@ -2838,82 +2938,164 @@ function exportSKToPDF() {
     }
 }
 
-// Fungsi export SKL ke PDF
-function exportSKLToPDF() {
-  if (!allSKLData || allSKLData.length === 0) {
-    showNotif("Tidak ada data SKL untuk diekspor.", "warning");
-    return;
-  }
-  
-  try {
-    allSKLData.forEach((sklData, index) => {
-      setTimeout(() => {
-        createSKLPdfDocument(sklData);
-      }, index * 100);
-    });
-    
-    showNotif(`Berhasil mengekspor ${allSKLData.length} SKL ke PDF!`, "success");
-  } catch (error) {
-    console.error("Error exporting SKL to PDF:", error);
-    showNotif("Terjadi kesalahan saat mengekspor SKL ke PDF.", "error");
-  }
+// Fungsi untuk export single SK ke PDF
+function exportSingleSKToPDF(skId) {
+    try {
+        const skData = allSKData.find(sk => sk.id === skId);
+        if (!skData) {
+            showNotif("Data SK tidak ditemukan", "error");
+            return;
+        }
+        
+        // Format nomor surat khusus untuk SK reguler (bukan Nol SKS)
+        if (!skData.jenis_sk || skData.jenis_sk === 'REGULER') {
+            // Format untuk SK reguler: --/UNLA/FT/PP/-/----
+            skData.nomor_sk = skData.nomor_sk || '--/UNLA/FT/PP/-/----';
+        }
+        
+        createSKPdfDocument(skData);
+    } catch (error) {
+        console.error("Error exporting single SK to PDF:", error);
+        showNotif("Gagal mengekspor SK ke PDF", "error");
+    }
 }
 
-// Fungsi untuk membuat PDF SKL
+// Fungsi untuk export single SK ke Excel
+function exportSingleSKToExcel(skId) {
+    try {
+        const skData = allSKData.find(sk => sk.id === skId);
+        if (!skData) {
+            showNotif("Data SK tidak ditemukan", "error");
+            return;
+        }
+        
+        const data = [
+            ['Nomor SK', skData.nomor_sk],
+            ['Nama Pegawai', skData.pegawai?.nama || 'N/A'],
+            ['NIP', skData.pegawai?.nip || 'N/A'],
+            ['Jabatan di SK', skData.jabatan],
+            ['Jabatan Aktual', skData.pegawai?.jabatan || 'N/A'],
+            ['Unit Kerja', skData.unit_kerja || skData.pegawai?.unit || 'N/A'],
+            ['Tanggal Terbit', formatTanggalIndonesia(skData.tanggal_terbit)],
+            ['Masa Berlaku', skData.masa_berlaku ? formatTanggalIndonesia(skData.masa_berlaku) : 'Tidak ditentukan'],
+            ['Status', skData.status],
+            ['Keterangan', skData.keterangan || '-']
+        ];
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([['Detail Surat Keterangan (SK)'], [''], ...data]);
+        
+        ws['!cols'] = [{ wch: 25 }, { wch: 50 }];
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+        
+        XLSX.utils.book_append_sheet(wb, ws, "Detail SK");
+        
+        const fileName = `Detail_SK_${skData.nomor_sk.replace(/\//g, '_')}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        
+        showNotif("✅ Detail SK berhasil diekspor ke Excel!", "success");
+    } catch (error) {
+        console.error("Error exporting SK to Excel:", error);
+        showNotif("Gagal mengekspor SK ke Excel", "error");
+    }
+}
+
+// Fungsi untuk export SK ke Excel
+function exportSKToExcel() {
+    if (!allSKData || allSKData.length === 0) {
+        showNotif("Tidak ada data SK untuk diekspor.", "warning");
+        return;
+    }
+    
+    try {
+        const headers = ["No", "Nomor SK", "Nama Pegawai", "NIP", "Jabatan", "Unit Kerja", "Tanggal Terbit", "Masa Berlaku", "Status"];
+        
+        const rows = allSKData.map((sk, index) => [
+            index + 1,
+            sk.nomor_sk,
+            sk.pegawai?.nama || 'N/A',
+            sk.pegawai?.nip || 'N/A',
+            sk.jabatan,
+            sk.unit_kerja || sk.pegawai?.unit || 'N/A',
+            formatTanggalIndonesia(sk.tanggal_terbit),
+            sk.masa_berlaku ? formatTanggalIndonesia(sk.masa_berlaku) : '-',
+            sk.status
+        ]);
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        XLSX.utils.book_append_sheet(wb, ws, "Surat Keterangan");
+        XLSX.writeFile(wb, "data_surat_keterangan.xlsx");
+        
+        showNotif("✅ Data SK berhasil diekspor ke Excel!", "success");
+    } catch (error) {
+        console.error("Error exporting SK to Excel:", error);
+        showNotif("Gagal mengekspor SK ke Excel", "error");
+    }
+}
+
+// Fungsi untuk membuat PDF SKL dengan logo UNLA
 function createSKLPdfDocument(sklData) {
     try {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
-        
-        // Format tanggal
-        const formatTanggalUpperCase = (dateStr) => {
-            if (!dateStr) return "";
-            const date = new Date(dateStr);
-            const bulan = [
-                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-            ];
-            
-            const hari = date.getDate();
-            const namaBulan = bulan[date.getMonth()];
-            const tahun = date.getFullYear();
-            
-            return `${hari} ${namaBulan} ${tahun}`.toUpperCase();
-        };
-
-        const tanggalLulus = formatTanggalUpperCase(sklData.tanggal_lulus || '2025-10-27');
-        const tanggalLahir = formatTanggalUpperCase(sklData.tanggal_lahir || '1998-02-05');
-        const tanggalSurat = formatTanggalUpperCase(sklData.tanggal_surat || '2025-11-21');
-        
-        // Margin dan posisi
         const marginLeft = 20;
-        let currentY = 30;
+        let currentY = 15;
         
-        // HEADER YAYASAN DAN UNIVERSITAS
-        doc.setFontSize(12);
+        // =========== KOP SURAT DENGAN LOGO UNLA ===========
+        
+        // Tambahkan logo UNLA di sebelah kiri
+        try {
+            doc.addImage('./images/logo_unla.png', 'JPEG', marginLeft, currentY - 5, 40, 50);
+        } catch (e) {
+            // Fallback jika logo tidak ditemukan
+            doc.setFillColor(30, 64, 175);
+            doc.rect(marginLeft, currentY - 5, 40, 50, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.text('UNLA', marginLeft + 20, currentY + 15, { align: 'center' });
+        }
+        
+        // Baris 1: "YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA"
+        doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
         doc.text("YAYASAN PENDIDIKAN TRI BHAKTI LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
         
-        currentY += 7;
-        doc.setFontSize(14);
+        currentY += 5;
+        
+        // Baris 2: "UNIVERSITAS LANGLANGBUANA"
+        doc.setFontSize(12);
         doc.text("UNIVERSITAS LANGLANGBUANA", pageWidth / 2, currentY, { align: "center" });
         
-        currentY += 7;
+        currentY += 5;
+        
+        // Baris 3: "TERAKREDITASI 'B'"
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.text("TERAKREDITASI \"B\"", pageWidth / 2, currentY, { align: "center" });
+        
+        currentY += 6;
+        
+        // Baris 4: "FAKULTAS TEKNIK"
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
         doc.text("FAKULTAS TEKNIK", pageWidth / 2, currentY, { align: "center" });
         
         currentY += 5;
+        
+        // Baris 5: Alamat
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        doc.text("Jl. Karapitan No. 116 Telp. 022-4215717 Fax. 022-4237144 Bandung 40261", 
+        doc.text("Jalan Karapitan No. 116 Telp. 022 - 4218086 Fax. 022 - 4237144 Bandung 40261", 
                 pageWidth / 2, currentY, { align: "center" });
         
         // GARIS PEMISAH
-        currentY += 10;
+        currentY += 8;
         doc.setLineWidth(0.5);
         doc.line(marginLeft, currentY, pageWidth - marginLeft, currentY);
         
         // NOMOR SKL
-        currentY += 12;
+        currentY += 10;
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`Nomor: ${sklData.nomor_skl || '313/UNLA/FT/PP/XI/2025'}`, marginLeft, currentY);
@@ -2940,6 +3122,7 @@ function createSKLPdfDocument(sklData) {
                 marginLeft, currentY);
         
         currentY += 7;
+        const tanggalLahir = sklData.tanggal_lahir ? formatTanggalUpperCase(sklData.tanggal_lahir) : '--';
         doc.text(`Tempat/Tanggal Lahir  : ${sklData.tempat_lahir || 'BANDUNG'}, ${tanggalLahir}`, 
                 marginLeft, currentY);
         
@@ -2959,6 +3142,7 @@ function createSKLPdfDocument(sklData) {
         // ISI SURAT
         currentY += 12;
         doc.setFontSize(11);
+        const tanggalLulus = sklData.tanggal_lulus ? formatTanggalUpperCase(sklData.tanggal_lulus) : '--';
         doc.text(`Adalah mahasiswa Fakultas Teknik Universitas Langlangbuana yang telah LULUS sebagai`, 
                 marginLeft, currentY);
         
@@ -2980,6 +3164,7 @@ function createSKLPdfDocument(sklData) {
         
         // TANDA TANGAN
         currentY += 25;
+        const tanggalSurat = sklData.tanggal_surat ? formatTanggalUpperCase(sklData.tanggal_surat) : formatTanggalUpperCase(new Date().toISOString().split('T')[0]);
         doc.text(`Bandung, ${tanggalSurat}`, pageWidth - marginLeft, currentY, { align: "right" });
         
         currentY += 20;
@@ -3003,6 +3188,27 @@ function createSKLPdfDocument(sklData) {
         console.error("Error creating SKL PDF:", error);
         showNotif("❌ Gagal membuat PDF SKL: " + error.message, "error");
     }
+}
+
+// Fungsi untuk export SKL ke PDF
+function exportSKLToPDF() {
+  if (!allSKLData || allSKLData.length === 0) {
+    showNotif("Tidak ada data SKL untuk diekspor.", "warning");
+    return;
+  }
+  
+  try {
+    allSKLData.forEach((sklData, index) => {
+      setTimeout(() => {
+        createSKLPdfDocument(sklData);
+      }, index * 100);
+    });
+    
+    showNotif(`Berhasil mengekspor ${allSKLData.length} SKL ke PDF!`, "success");
+  } catch (error) {
+    console.error("Error exporting SKL to PDF:", error);
+    showNotif("Terjadi kesalahan saat mengekspor SKL ke PDF.", "error");
+  }
 }
 
 // Fungsi untuk export single SKL to PDF
@@ -3046,15 +3252,15 @@ function viewSKLDetail(sklId) {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <span class="font-semibold text-gray-600 col-span-1">Tempat Lahir</span>
-                <span class="col-span-2 text-gray-800">: ${sklData.tempat_lahir}</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.tempat_lahir || '-'}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <span class="font-semibold text-gray-600 col-span-1">Tanggal Lahir</span>
-                <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(sklData.tanggal_lahir)}</span>
+                <span class="col-span-2 text-gray-800">: ${formatTanggalIndonesia(sklData.tanggal_lahir) || '-'}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <span class="font-semibold text-gray-600 col-span-1">Jurusan/Program Studi</span>
-                <span class="col-span-2 text-gray-800">: ${sklData.jurusan}</span>
+                <span class="col-span-2 text-gray-800">: ${sklData.jurusan || '-'}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <span class="font-semibold text-gray-600 col-span-1">Tanggal Lulus</span>
@@ -3075,26 +3281,49 @@ function viewSKLDetail(sklId) {
     document.getElementById('detailSKLModal').style.display = 'flex';
 }
 
-// Fungsi untuk export single SK ke PDF
-function exportSingleSKToPDF(skId) {
-    try {
-        const skData = allSKData.find(sk => sk.id === skId);
-        if (!skData) {
-            showNotif("Data SK tidak ditemukan", "error");
-            return;
-        }
-        
-        // Format nomor surat khusus untuk SK reguler (bukan Nol SKS)
-        if (!skData.jenis_sk || skData.jenis_sk === 'REGULER') {
-            // Format untuk SK reguler: --/UNLA/FT/PP/-/----
-            skData.nomor_sk = skData.nomor_sk || '--/UNLA/FT/PP/-/----';
-        }
-        
-        createSKPdfDocument(skData);
-    } catch (error) {
-        console.error("Error exporting single SK to PDF:", error);
-        showNotif("Gagal mengekspor SK ke PDF", "error");
+// Fungsi untuk export SKL ke Excel
+function exportSKLToExcel() {
+    if (!allSKLData || allSKLData.length === 0) {
+        showNotif("Tidak ada data SKL untuk diekspor.", "warning");
+        return;
     }
+    
+    try {
+        const headers = ["No", "Nomor SKL", "Nama Pegawai", "NIP/NPM", "Jabatan", "Jurusan", "Tempat Lahir", "Tanggal Lahir", "Tanggal Lulus", "Tanggal Surat", "Status"];
+        
+        const rows = allSKLData.map((skl, index) => [
+            index + 1,
+            skl.nomor_skl,
+            skl.nama_pegawai,
+            skl.nip_npm,
+            skl.jabatan,
+            skl.jurusan || '-',
+            skl.tempat_lahir || '-',
+            skl.tanggal_lahir ? formatTanggalIndonesia(skl.tanggal_lahir) : '-',
+            formatTanggalIndonesia(skl.tanggal_lulus),
+            formatTanggalIndonesia(skl.tanggal_surat),
+            skl.status
+        ]);
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        XLSX.utils.book_append_sheet(wb, ws, "Surat Keterangan Lulus");
+        XLSX.writeFile(wb, "data_surat_keterangan_lulus.xlsx");
+        
+        showNotif("✅ Data SKL berhasil diekspor ke Excel!", "success");
+    } catch (error) {
+        console.error("Error exporting SKL to Excel:", error);
+        showNotif("Gagal mengekspor SKL ke Excel", "error");
+    }
+}
+
+// Fungsi untuk export SKL detail to PDF
+function exportSKLDetailToPDF() {
+    if (!currentSKLDetail) {
+        showNotif("Tidak ada data SKL detail untuk diekspor.", "warning");
+        return;
+    }
+    createSKLPdfDocument(currentSKLDetail);
 }
 
 // ==================== FUNGSI TAMBAHAN ====================
@@ -3104,8 +3333,9 @@ async function addLogoToPDF(doc, x, y, width, height) {
     try {
         // Coba beberapa path logo
         const logoPaths = [
-            './logo.jpeg',
+            './images/logo_unla.png',
             './images/logo.jpeg',
+            './logo.jpeg',
             'logo.jpeg',
             'https://via.placeholder.com/100x100/1e40af/ffffff?text=LOGO'
         ];
@@ -3125,7 +3355,7 @@ async function addLogoToPDF(doc, x, y, width, height) {
         doc.rect(x, y, width, height, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(8);
-        doc.text('LOGO', x + width/2, y + height/2, { align: 'center' });
+        doc.text('UNLA', x + width/2, y + height/2, { align: 'center' });
         return true;
         
     } catch (error) {
