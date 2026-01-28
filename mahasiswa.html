@@ -332,6 +332,12 @@
                         <div id="content-tanggal" class="tab-content hidden">
     <p class="text-sm text-gray-600 mb-4">Masukkan tanggal lahir mahasiswa.</p>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- TAMBAHKAN INI: Field Tempat Lahir -->
+        <div>
+            <label for="tempatLahir" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
+            <input type="text" id="tempatLahir" placeholder="Contoh: Jakarta" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+        </div>
+        
         <div>
             <label for="ttl" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
             <input type="date" id="ttl" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -806,23 +812,26 @@ function populateFilterYearSelect(selectInstance, includeAllOption = false) {
     }
 
     function resetForm() {
-        document.getElementById('mahasiswaForm').reset();
-        prodiSelect.clear();
-        tahunMasukSelect.clear();
-        statusSelect.setValue('Aktif');
-        
-        // Reset variabel edit mode
-        isEditMode = false;
-        currentMahasiswaId = null;
-        
-        // Reset UI
-        document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
-        document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
-        document.getElementById('mahasiswaId').value = '';
-        
-        // Kembali ke tampilan list
-        hideFormAndShowList();
-    }
+    document.getElementById('mahasiswaForm').reset();
+    prodiSelect.clear();
+    tahunMasukSelect.clear();
+    statusSelect.setValue('Aktif');
+    
+    // Reset field tempat lahir
+    document.getElementById('tempatLahir').value = '';
+    
+    // Reset variabel edit mode
+    isEditMode = false;
+    currentMahasiswaId = null;
+    
+    // Reset UI
+    document.getElementById('formTitle').textContent = 'Tambah Data Mahasiswa Baru';
+    document.getElementById('submit-btn').innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Data';
+    document.getElementById('mahasiswaId').value = '';
+    
+    // Kembali ke tampilan list
+    hideFormAndShowList();
+}
 
     function switchFormTab(tabName) {
         // Sembunyikan semua tab content
@@ -1099,6 +1108,10 @@ function maintainOrderAfterEdit(updatedData) {
     
     const namaAyah = document.getElementById('namaayah').value || null;
     const namaIbu = document.getElementById('namaibu').value || null;
+    
+    // AMBIL TEMPAT LAHIR DARI INPUT BARU
+    const tempatLahir = document.getElementById('tempatLahir').value || null;
+    
     // Ambil nilai dari input date
     const ttlInput = document.getElementById('ttl').value;
     let ttl = null;
@@ -1109,8 +1122,19 @@ function maintainOrderAfterEdit(updatedData) {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        ttl = `${day}/${month}/${year}`; // Hanya tanggal saja
+        
+        // GABUNGKAN TEMPAT LAHIR DENGAN TANGGAL LAHIR
+        // Format: "JAKARTA, 15/06/2000"
+        if (tempatLahir) {
+            ttl = `${tempatLahir.toUpperCase()}, ${day}/${month}/${year}`;
+        } else {
+            ttl = `${day}/${month}/${year}`; // Hanya tanggal jika tempat lahir kosong
+        }
+    } else if (tempatLahir) {
+        // Jika hanya ada tempat lahir tanpa tanggal
+        ttl = tempatLahir.toUpperCase();
     }
+    
     const alamat = document.getElementById('alamat').value || null;
     const kelurahan = document.getElementById('kelurahan').value || null;
     const kecamatan = document.getElementById('kecamatan').value || null;
@@ -1139,12 +1163,13 @@ function maintainOrderAfterEdit(updatedData) {
         status: statusMhs,
         nama_ayah: namaAyah, 
         nama_ibu: namaIbu, 
-        ttl: ttl, 
+        ttl: ttl,  // Sekarang berisi "TEMPAT, DD/MM/YYYY"
         alamat: alamat,
         kelurahan: kelurahan, 
         kecamatan: kecamatan,
     };
 
+    // ... (sisa kode tetap sama)
     try {
         if (isEditMode && currentMahasiswaId) {
             // UPDATE data existing
@@ -1184,7 +1209,7 @@ function maintainOrderAfterEdit(updatedData) {
     }
 }
 
-    async function editMahasiswa(npm) {
+   async function editMahasiswa(npm) {
     const { data: mhs, error } = await supabaseClient
         .from('mahasiswa')
         .select('*')
@@ -1205,23 +1230,26 @@ function maintainOrderAfterEdit(updatedData) {
     document.getElementById('npm').value = mhs.npm;
     document.getElementById('nama').value = mhs.nama;
 
-    // ============ PERBAIKAN BAGIAN TANGGAL LAHIR ============
-    // Tangani format tanggal lahir untuk input type="date"
+    // ============ PERBAIKAN BAGIAN TEMPAT & TANGGAL LAHIR ============
+    // Tangani format tempat dan tanggal lahir untuk input type="date" dan tempat lahir
+    let tempatLahir = '';
+    let tanggalLahir = '';
+    
     if (mhs.ttl) {
         console.log('TTL dari database:', mhs.ttl); // Untuk debugging
         
-        let dateValue = '';
         const ttlString = String(mhs.ttl).trim();
         
         // Format 1: "BANDUNG, 15/06/2000" (dengan kota)
         if (ttlString.includes(',') && ttlString.includes('/')) {
             const parts = ttlString.split(', ');
             if (parts.length > 1) {
+                tempatLahir = parts[0]; // "BANDUNG"
                 const datePart = parts[1]; // "15/06/2000"
                 const [day, month, year] = datePart.split('/');
                 if (day && month && year) {
                     // Format ke YYYY-MM-DD untuk input date
-                    dateValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    tanggalLahir = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
                 }
             }
         } 
@@ -1229,19 +1257,25 @@ function maintainOrderAfterEdit(updatedData) {
         else if (ttlString.includes('/')) {
             const [day, month, year] = ttlString.split('/');
             if (day && month && year) {
-                dateValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                tanggalLahir = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
             }
         }
         // Format 3: Sudah format YYYY-MM-DD
         else if (ttlString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            dateValue = ttlString;
+            tanggalLahir = ttlString;
         }
-        
-        console.log('Nilai untuk input date:', dateValue); // Untuk debugging
-        document.getElementById('ttl').value = dateValue;
-    } else {
-        document.getElementById('ttl').value = ''; // Kosongkan jika tidak ada data
+        // Format 4: Hanya nama kota (tanpa tanggal)
+        else {
+            tempatLahir = ttlString;
+        }
     }
+    
+    console.log('Tempat Lahir:', tempatLahir); // Untuk debugging
+    console.log('Tanggal Lahir:', tanggalLahir); // Untuk debugging
+    
+    // Isi nilai ke input
+    document.getElementById('tempatLahir').value = tempatLahir;
+    document.getElementById('ttl').value = tanggalLahir;
     // ============ END PERBAIKAN ============
     
     // Isi data lainnya...
@@ -1269,11 +1303,10 @@ function maintainOrderAfterEdit(updatedData) {
     // Tampilkan form dan scroll ke atas
     document.getElementById('mahasiswa-container').classList.remove('hidden');
     document.getElementById('mahasiswa-list-container').classList.add('hidden');
-    switchFormTab('akademik'); // Tetap buka tab akademik dulu
+    switchFormTab('tanggal'); // Buka tab tanggal lahir untuk editing
     
     document.getElementById('mahasiswa-container').scrollIntoView({ behavior: 'smooth' });
 }
-
     // ==================== MODAL FUNCTIONS ====================
 async function showDetail(npm) {
     const { data: mhs, error } = await supabaseClient
@@ -1292,7 +1325,6 @@ async function showDetail(npm) {
         mhs.status === 'Lulus' ? 'text-blue-600' :
         'text-red-600';
 
-    // TAMBAHKAN NOMOR IJAZAH DAN JUDUL SKRIPSI
     document.getElementById("detailContent").innerHTML = `
         <p><strong>NPM:</strong> ${mhs.npm}</p>
         <p><strong>Nama:</strong> ${mhs.nama}</p>
@@ -1300,7 +1332,7 @@ async function showDetail(npm) {
         <p><strong>Kelas:</strong> ${mhs.kelas || '-'}</p>
         <p><strong>Tahun Masuk:</strong> ${mhs.tahun_masuk}</p>
         <p><strong>Status:</strong> <span class="${statusColor} font-bold">${mhs.status}</span></p>
-        <p><strong>Tanggal Lahir:</strong> ${mhs.ttl ? mhs.ttl.split(', ')[1] || mhs.ttl : '-'}</p>
+        <p><strong>Tempat, Tanggal Lahir:</strong> ${mhs.ttl || '-'}</p>  <!-- Diubah -->
         <p><strong>No. HP:</strong> ${mhs.no_hp || '-'}</p>
         <p><strong>NIK:</strong> ${mhs.nik_mahasiswa || '-'}</p>
         <p><strong>Nomor Ijazah:</strong> ${mhs.nomor_ijazah || '-'}</p>
@@ -1661,12 +1693,25 @@ async function loadRekapitulasi() {
             const rawData = excelData.slice(1);
             
             const columnMapping = {
-                'NPM': 'npm', 'NAMA': 'nama', 'PRODI': 'prodi', 'JENIS_KELAMIN': 'jenis_kelamin', 
-                'TAHUN_MASUK': 'tahun_masuk', 'STATUS': 'status', 'KELAS': 'kelas',
-                'NIK': 'nik_mahasiswa', 'NO_HP': 'no_hp', 'NOMOR_IJAZAH': 'nomor_ijazah', 
-                'JUDUL_SKRIPSI': 'judul_skripsi', 'NAMA_AYAH': 'nama_ayah', 'NAMA_IBU': 'nama_ibu',
-                'TTL': 'ttl', 'ALAMAT': 'alamat', 'KELURAHAN': 'kelurahan', 'KECAMATAN': 'kecamatan',
-            };
+    'NPM': 'npm', 
+    'NAMA': 'nama', 
+    'PRODI': 'prodi', 
+    'JENIS_KELAMIN': 'jenis_kelamin', 
+    'TAHUN_MASUK': 'tahun_masuk', 
+    'STATUS': 'status', 
+    'KELAS': 'kelas',
+    'NIK': 'nik_mahasiswa', 
+    'NO_HP': 'no_hp', 
+    'NOMOR_IJAZAH': 'nomor_ijazah', 
+    'JUDUL_SKRIPSI': 'judul_skripsi', 
+    'NAMA_AYAH': 'nama_ayah', 
+    'NAMA_IBU': 'nama_ibu',
+    'TTL': 'ttl',  // Sekarang sudah termasuk tempat dan tanggal
+    'TEMPAT_LAHIR': 'tempat_lahir', // Opsional jika ingin terpisah
+    'ALAMAT': 'alamat', 
+    'KELURAHAN': 'kelurahan', 
+    'KECAMATAN': 'kecamatan',
+};
 
             const studentsToInsert = [];
             
