@@ -250,14 +250,13 @@
             <div>
               <label class="block text-sm text-gray-600 mb-1">Filter Jabatan</label>
               <select id="filterJabatan" onchange="applyFilter()" class="w-full border border-gray-300 rounded-md p-2">
-                <option value="">Semua Jabatan</option>
-                <option value="Staff Administrasi">Staff Administrasi</option>
-                <option value="Staff Teknis">Staff Teknis</option>
-                <option value="Koordinator">Koordinator</option>
-                <option value="Kepala Bagian">Kepala Bagian</option>
-                <option value="Sekretaris">Sekretaris</option>
-                <option value="Bendahara">Bendahara</option>
-              </select>
+              <option value="">Semua Jabatan</option>
+              <option value="Staff">Staff</option>
+              <option value="Kabag Akademik">Kabag Akademik</option>
+              <option value="Kabag Perpustakaan">Kabag Perpustakaan</option>
+              <option value="Kabag Laboratorium">Kabag Laboratorium</option>
+              <option value="Kabag Kemahasiswaan">Kabag Kemahasiswaan</option>
+            </select>
             </div>
           </div>
           <div class="mt-4">
@@ -706,14 +705,13 @@
         <input id="tanggal_lahir" type="date" class="border p-2 rounded">
         
         <select id="jabatan" class="border p-2 rounded" required>
-          <option value="">Pilih Jabatan</option>
-          <option value="Staff Administrasi">Staff Administrasi</option>
-          <option value="Staff Teknis">Staff Teknis</option>
-          <option value="Koordinator">Koordinator</option>
-          <option value="Kepala Bagian">Kepala Bagian</option>
-          <option value="Sekretaris">Sekretaris</option>
-          <option value="Bendahara">Bendahara</option>
-        </select>
+        <option value="">Pilih Jabatan</option>
+        <option value="Staff">Staff</option>
+        <option value="Kabag Akademik">Kabag Akademik</option>
+        <option value="Kabag Perpustakaan">Kabag Perpustakaan</option>
+        <option value="Kabag Laboratorium">Kabag Laboratorium</option>
+        <option value="Kabag Kemahasiswaan">Kabag Kemahasiswaan</option>
+      </select>
 
         <select id="unit" class="border p-2 rounded" required>
           <option value="">Pilih Unit Kerja</option>
@@ -722,7 +720,6 @@
           <option value="Laboratorium">Laboratorium</option>
           <option value="Perpustakaan">Perpustakaan</option>
           <option value="Kemahasiswaan">Kemahasiswaan</option>
-          <option value="TU Fakultas">TU Fakultas</option>
         </select>
 
         <select id="status" class="border p-2 rounded" required>
@@ -1292,27 +1289,28 @@ async function savePegawai(e) {
   
   // Validasi basic
   const nama = document.getElementById("nama").value.trim();
-  const jabatan = document.getElementById("jabatan").value;
-  const unit = document.getElementById("unit").value;
-  const status = document.getElementById("status").value;
-  
-  if (!nama || !jabatan || !unit || !status) {
-    showNotif("❌ Mohon lengkapi semua field wajib!", "error");
-    return;
-  }
+const jabatan = document.getElementById("jabatan").value;
+const unit = document.getElementById("unit").value;
+const status = document.getElementById("status").value;
+
+if (!nama || !jabatan || !unit || !status) {
+  showNotif("❌ Mohon lengkapi semua field wajib!", "error");
+  return;
+}
+
   
   const pegawaiData = {
-    nip: document.getElementById("nip").value.trim() || null,
-    nama: nama,
-    tanggal_lahir: document.getElementById("tanggal_lahir").value || null,
-    jabatan: jabatan,
-    unit: unit,
-    status: status,
-    no_telp: document.getElementById("no_telp").value.trim() || null,
-    email: document.getElementById("email").value.trim() || null,
-    tgl_masuk: document.getElementById("tgl_masuk").value || new Date().toISOString().split('T')[0],
-    alamat: document.getElementById("alamat").value.trim() || null
-  };
+  nip: document.getElementById("nip").value.trim() || null,
+  nama: nama,
+  tanggal_lahir: document.getElementById("tanggal_lahir").value || null,
+  jabatan: jabatan,
+  unit: unit, // Unit Kerja (tanpa TU Fakultas)
+  status: status,
+  no_telp: document.getElementById("no_telp").value.trim() || null,
+  email: document.getElementById("email").value.trim() || null,
+  tgl_masuk: document.getElementById("tgl_masuk").value || new Date().toISOString().split('T')[0],
+  alamat: document.getElementById("alamat").value.trim() || null
+};
   
   try {
     const pegawaiId = document.getElementById("pegawaiId").value;
