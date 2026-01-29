@@ -13,58 +13,66 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   
   <style>
-     html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .fixed-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-  }
-  
-  .sidebar-fixed {
-    position: fixed;
-    top: 64px; /* tinggi navbar */
-    left: 0;
-    bottom: 0;
-    width: 16rem;
-    overflow-y: auto;
-  }
-  
-  .content-area {
-    margin-left: 16rem;
-    margin-top: 64px;
-    flex: 1;
-  }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     
-    .active-link { background-color: #1d4ed8; color: white; border-left: 4px solid #f97316; }
-    .active-dropdown { background-color: #1f2937; border-left: 4px solid #f97316; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 50; }
-    .modal-content { background: white; padding: 1.5rem; border-radius: 0.75rem; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-    .detail-label { font-weight: 600; width: 140px; display: inline-block; }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .active-link { 
+      background-color: #1d4ed8; 
+      color: white; 
+      border-left: 4px solid #f97316; 
+    }
+    
+    .active-dropdown { 
+      background-color: #1f2937; 
+      border-left: 4px solid #f97316; 
+    }
+    
+    .modal { 
+      display: none; 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.5); 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 50; 
+    }
+    
+    .modal-content { 
+      background: white; 
+      padding: 1.5rem; 
+      border-radius: 0.75rem; 
+      width: 90%; 
+      max-width: 600px; 
+      max-height: 90vh; 
+      overflow-y: auto; 
+    }
+    
+    .detail-label { 
+      font-weight: 600; 
+      width: 140px; 
+      display: inline-block; 
+    }
     
     /* Tab Navigation */
     .main-tab-button.active {
-        background-color: #ffffff;
-        border-color: #e5e7eb;
-        border-bottom-color: #ffffff;
-        color: #1d4ed8;
+      background-color: #ffffff;
+      border-color: #e5e7eb;
+      border-bottom-color: #ffffff;
+      color: #1d4ed8;
     }
     
     /* Submenu styling */
     .rotate-180 {
-        transform: rotate(180deg);
-        transition: transform 0.3s ease;
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
     }
     
     /* Style untuk form SK dan SKL */
@@ -104,23 +112,23 @@
     
     /* NOTIFICATION */
     .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 14px 18px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-        z-index: 9999;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 9999;
     }
 
     .notification.show {
-        opacity: 1;
-        transform: translateY(0);
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .notification.success { background-color: #16a34a; }
@@ -129,42 +137,42 @@
 
     /* Logo styling */
     .logo-container {
-        background: white;
-        border-radius: 8px;
-        padding: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      background: white;
+      border-radius: 8px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .logo-img {
-        max-height: 100%;
-        max-width: 100%;
-        object-fit: contain;
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
     }
 
     /* Navbar text styling */
     .navbar-title {
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
 
     .navbar-subtitle {
-        opacity: 0.9;
+      opacity: 0.9;
     }
 
     /* Tabel styling */
     table {
-        font-size: 12px !important;
-        width: 100%;
-        table-layout: fixed;
+      font-size: 12px !important;
+      width: 100%;
+      table-layout: fixed;
     }
 
     th, td {
-        font-size: 12px !important;
-        padding: 8px 12px !important;
-        vertical-align: middle;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
+      font-size: 12px !important;
+      padding: 8px 12px !important;
+      vertical-align: middle;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     /* Atur lebar kolom untuk tabel */
@@ -178,13 +186,44 @@
 
     /* Tombol aksi dalam tabel */
     td:last-child button {
-        padding: 4px 8px !important;
-        font-size: 12px !important;
-        margin: 0 2px;
+      padding: 4px 8px !important;
+      font-size: 12px !important;
+      margin: 0 2px;
     }
+    
+    /* Layout utama */
+    .main-container {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 64px; /* Tinggi navbar */
+    }
+    
+    .sidebar {
+      width: 16rem;
+      position: fixed;
+      left: 0;
+      top: 64px;
+      bottom: 0;
+      overflow-y: auto;
+    }
+    
     .main-content {
-  margin-left: 16rem; /* 64 * 0.25rem = 16rem untuk w-64 */
-}
+      flex: 1;
+      margin-left: 16rem;
+      padding: 1.5rem;
+      min-height: calc(100vh - 64px);
+      background-color: #f3f4f6;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -199,31 +238,31 @@
     </div>
 </nav>
 
-<div class="flex pt-16 main-content">
-  <aside class="w-64 bg-gray-900 text-white flex flex-col fixed inset-y-0 left-0 pt-16 shadow-xl">
+<div class="main-container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar bg-gray-900 text-white shadow-xl">
     <nav class="flex-grow p-4 space-y-2 overflow-y-auto">
-      <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-chart-bar w-5"></i><span>Dashboard</span>
       </a>
-      <a href="main.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      
+      <a href="main.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-calendar-alt w-5"></i><span>Penjadwalan</span>
       </a>
-      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      
+      <a href="mahasiswa.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-address-card w-5"></i><span>Data Mahasiswa</span>
       </a>
-      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      
+      <a href="dosen.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-user-tie w-5"></i><span>Data Dosen</span>
       </a>
-      <a href="pegawai.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      
+      <a href="pegawai.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-users w-5"></i><span>Data Pegawai</span>
       </a>
-<a href="surat.html" class="active-link flex items-center space-x-3 p-3 rounded-lg">
-  <i class="fas fa-file-alt w-5"></i>
-  <span>Surat</span>
-</a>
-
       
-      <!-- SURAT -->
+      <!-- MENU SURAT DENGAN SUBMENU -->
       <div class="space-y-1">
         <button 
           type="button" 
@@ -237,40 +276,47 @@
           <i class="fas fa-chevron-down text-xs transform transition-transform duration-200" id="suratIcon"></i>
         </button>
         
-        <div id="suratSubmenu" class="pl-8 space-y-1">
-          <a href="#" onclick="showMainTab('surat-keterangan'); return false;" class="w-full text-left block p-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition duration-150">
+        <div id="suratSubmenu" class="pl-8 space-y-1 mt-1">
+          <a href="#" onclick="showMainTab('surat-keterangan'); return false;" 
+             class="w-full text-left block p-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition duration-150">
             <i class="fas fa-file-contract mr-2"></i> Surat Keterangan (SK)
           </a>
-          <a href="#" onclick="showMainTab('surat-keterangan-lulus'); return false;" class="w-full text-left block p-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition duration-150">
+          <a href="#" onclick="showMainTab('surat-keterangan-lulus'); return false;" 
+             class="w-full text-left block p-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition duration-150">
             <i class="fas fa-file-certificate mr-2"></i> Surat Keterangan Lulus (SKL)
           </a>
         </div>
       </div>
       
-      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      <a href="dashboard.html#matkul" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-book w-5"></i><span>Mata Kuliah</span>
       </a>
-      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+      
+      <a href="dashboard.html#pengaturan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300 transition-colors">
         <i class="fas fa-cog w-5"></i><span>Pengaturan</span>
       </a>  
     </nav>
+    
     <div class="p-4 text-xs text-gray-400 border-t border-gray-700 mt-auto">
       <p>&copy; 2025 Akademik FT</p>
       <p>Designed by Shidqi</p>
     </div>
   </aside>
 
-  <main class="flex-grow p-8 ml-64 overflow-y-auto bg-gray-100">
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
     <div class="container mx-auto">
       <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2" id="mainTitle">Manajemen Surat</h1>
 
       <!-- Tab Navigation -->
       <div class="border-b border-gray-200 mb-6">
         <nav class="-mb-px flex space-x-8">
-          <button type="button" id="tab-surat-keterangan" onclick="showMainTab('surat-keterangan')" class="main-tab-button active whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg text-blue-600 border-blue-600">
+          <button type="button" id="tab-surat-keterangan" onclick="showMainTab('surat-keterangan')" 
+                  class="main-tab-button active whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg text-blue-600 border-blue-600">
             <i class="fas fa-file-contract mr-2"></i> Surat Keterangan (SK)
           </button>
-          <button type="button" id="tab-surat-keterangan-lulus" onclick="showMainTab('surat-keterangan-lulus')" class="main-tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg text-gray-500 hover:text-gray-700 hover:border-gray-300">
+          <button type="button" id="tab-surat-keterangan-lulus" onclick="showMainTab('surat-keterangan-lulus')" 
+                  class="main-tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg text-gray-500 hover:text-gray-700 hover:border-gray-300">
             <i class="fas fa-file-certificate mr-2"></i> Surat Keterangan Lulus (SKL)
           </button>
         </nav>
