@@ -150,7 +150,8 @@ td:nth-child(6) span {
         <input id="nidu" class="border p-2 rounded" placeholder="NIDU"> 
         <input id="nik" class="border p-2 rounded" placeholder="NIK">
         <input id="nama_lengkap" class="border p-2 rounded" placeholder="Nama Lengkap">
-        <input id="tgl_lahir" type="date" class="border p-2 rounded"> 
+        <input id="tempat_lahir" class="border p-2 rounded" placeholder="Tempat Lahir">
+        <input id="tgl_lahir" type="date" class="border p-2 rounded">
         
         <select id="prodi" class="border p-2 rounded">
             <option value="" disabled selected>Pilih Program Studi</option>
@@ -322,7 +323,8 @@ function openModal(dosen = null) {
     document.getElementById("nidn").value = dosen.nidn || '';
     document.getElementById("nidu").value = dosen.nidu || '';
     document.getElementById("nik").value = dosen.nik || '';
-    document.getElementById("nama_lengkap").value = dosen.nama || ''; 
+    document.getElementById("nama_lengkap").value = dosen.nama || '';
+    document.getElementById("tempat_lahir").value = dosen.tempat_lahir || '';
     document.getElementById("tgl_lahir").value = dosen.tanggal_lahir || ''; 
     
     // Select/Dropdown
@@ -362,6 +364,7 @@ async function saveDosen(e) {
     nidu: toNullIfEmpty(document.getElementById("nidu").value), 
     nik: toNullIfEmpty(document.getElementById("nik").value),
     nama: toNullIfEmpty(document.getElementById("nama_lengkap").value), 
+    tempat_lahir: toNullIfEmpty(document.getElementById("tempat_lahir").value),
     tanggal_lahir: toNullIfEmpty(document.getElementById("tgl_lahir").value), 
     prodi: toNullIfEmpty(document.getElementById("prodi").value),
     pangkat_golongan: toNullIfEmpty(document.getElementById("pangkat").value),
@@ -478,6 +481,7 @@ function showDetail(id) {
         <div class="space-y-2">
             ${detailRow('NIDN', dosen.nidn)}
             ${detailRow('NIDU', dosen.nidu)} ${detailRow('NIK', dosen.nik)}
+            ${detailRow('Tempat Lahir', dosen.tempat_lahir)}
             ${detailRow('Tanggal Lahir', dosen.tanggal_lahir)}
             ${detailRow('Prodi', dosen.prodi)}
             ${detailRow('Pangkat/Golongan', dosen.pangkat_golongan)}
@@ -502,6 +506,7 @@ function getDetailDataForExport() {
         ['Nama Dosen', d.nama || '-'],
         ['NIDN', d.nidn || '-'],
         ['NIDU', d.nidu || '-'], ['NIK', d.nik || '-'],
+        ['Tempat Lahir', d.tempat_lahir || '-'],
         ['Tanggal Lahir', d.tanggal_lahir || '-'],
         ['Prodi', d.prodi || '-'],
         ['Pangkat/Golongan', d.pangkat_golongan || '-'],
@@ -563,13 +568,14 @@ function exportAllToPdf() {
 
     const doc = new jsPDF('l', 'mm', 'a4'); 
     
-    const headers = ["NIDN","NIDU","NIK","Nama","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"]; 
+    const headers = ["NIDN","NIDU","NIK","Nama","Tempat Lahir","Tgl Lahir","Prodi","Pangkat/Gol","Jabatan Fungsional","Pendidikan","Status","No Telp","Alamat"]; 
     
     const data = allDosenData.map(d => [
         d.nidn || '-', 
         d.nidu || '-', 
         d.nik || '-', 
         d.nama || '-', 
+        d.tempat_lahir || '-',
         d.tanggal_lahir || '-', 
         d.prodi || '-', 
         d.pangkat_golongan || '-', 
@@ -612,10 +618,10 @@ function exportAllToPdf() {
 function exportAllToExcel() {
   if (allDosenData.length === 0) return alert("Tidak ada data dosen untuk diekspor.");
   
-  const headers = ["NIDN","NIDU","NIK","Nama","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
+  const headers = ["NIDN","NIDU","NIK","Nama","Tempat Lahir","Tanggal Lahir","Prodi","Pangkat/Golongan","Jabatan Fungsional","Alamat","No Telp","Pendidikan Terakhir","Status"];
   
   const rows = allDosenData.map(d=>[
-    d.nidn, d.nidu, d.nik, d.nama, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status
+    d.nidn, d.nidu, d.nik, d.nama, d.tempat_lahir, d.tanggal_lahir, d.prodi, d.pangkat_golongan, d.jabatan_fungsional, d.alamat, d.no_telp, d.pendidikan_terakhir, d.status
   ]);
   
   const wb = XLSX.utils.book_new();
